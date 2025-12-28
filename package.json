@@ -1,0 +1,14 @@
+{
+    "name": "ajr-la-yanqati",
+    "version": "1.0.0",
+    "description": "أجر لا ينقطع - Endless Reward",
+    "private": true,
+    "scripts": {
+        "dev": "netlify dev",
+        "build": "echo 'No build required'",
+        "start": "netlify dev"
+    },
+    "devDependencies": {
+        "netlify-cli": "^17.0.0"
+    }
+}
