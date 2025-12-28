@@ -409,17 +409,18 @@
         const count = content.value.length;
 
         // Update the counter span directly
-        if (charCount) {
-            charCount.textContent = count;
-        }
+        const counterEl = document.getElementById('char-count');
+        if (counterEl) {
+            counterEl.textContent = count;
 
-        // Visual feedback when approaching limit
-        if (count > MAX_CONTENT_LENGTH * 0.9) {
-            charCount.style.color = 'var(--color-error)';
-        } else if (count > MAX_CONTENT_LENGTH * 0.75) {
-            charCount.style.color = 'var(--color-warning, orange)';
-        } else {
-            charCount.style.color = '';
+            // Visual feedback when approaching limit
+            if (count > MAX_CONTENT_LENGTH * 0.9) {
+                counterEl.style.color = 'var(--color-error)';
+            } else if (count > MAX_CONTENT_LENGTH * 0.75) {
+                counterEl.style.color = 'var(--color-warning, orange)';
+            } else {
+                counterEl.style.color = '';
+            }
         }
     }
 
