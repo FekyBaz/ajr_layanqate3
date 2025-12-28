@@ -402,27 +402,22 @@
     }
 
     // ═══════════════════════════════════════════════════════════════════════
-    // Character Counter
-    // ═══════════════════════════════════════════════════════════════════════
-
     /**
      * Updates the character count display
      */
     function updateCharCount() {
         const count = content.value.length;
-        charCount.textContent = count;
 
-        // Update max display to match backend
-        const maxDisplay = charCount.parentElement;
-        if (maxDisplay) {
-            maxDisplay.innerHTML = `<span id="char-count">${count}</span> / ${MAX_CONTENT_LENGTH} حرف`;
+        // Update the counter span directly
+        if (charCount) {
+            charCount.textContent = count;
         }
 
         // Visual feedback when approaching limit
         if (count > MAX_CONTENT_LENGTH * 0.9) {
             charCount.style.color = 'var(--color-error)';
         } else if (count > MAX_CONTENT_LENGTH * 0.75) {
-            charCount.style.color = 'var(--color-text-muted)';
+            charCount.style.color = 'var(--color-warning, orange)';
         } else {
             charCount.style.color = '';
         }
