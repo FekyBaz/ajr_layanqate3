@@ -1,15 +1,58 @@
 # Netlify Configuration for أجر لا ينقطع
-# Static site deployment - no build step required
+# Full-stack serverless deployment
 
 [build]
-  # No build command needed - pure static files
+  # No build command needed - pure static files + serverless functions
   command = ""
-  # Publish from root directory
   publish = "/"
+  functions = "netlify/functions"
 
 # ═══════════════════════════════════════════════════════════════════════════
-# Redirects - Handle SPA-like behavior and clean URLs
+# Functions Configuration
 # ═══════════════════════════════════════════════════════════════════════════
+[functions]
+  # Use ES modules
+  node_bundler = "esbuild"
+  # Include shared utilities
+  included_files = ["netlify/functions/utils/**"]
+
+# ═══════════════════════════════════════════════════════════════════════════
+# Redirects - API routes to functions
+# ═══════════════════════════════════════════════════════════════════════════
+
+# Public API
+[[redirects]]
+  from = "/api/submit"
+  to = "/.netlify/functions/submit"
+  status = 200
+
+[[redirects]]
+  from = "/api/health"
+  to = "/.netlify/functions/health"
+  status = 200
+
+# Admin API
+[[redirects]]
+  from = "/api/admin/pending"
+  to = "/.netlify/functions/admin-pending"
+  status = 200
+
+[[redirects]]
+  from = "/api/admin/approve"
+  to = "/.netlify/functions/admin-approve"
+  status = 200
+
+[[redirects]]
+  from = "/api/admin/reject"
+  to = "/.netlify/functions/admin-reject"
+  status = 200
+
+[[redirects]]
+  from = "/api/admin/stats"
+  to = "/.netlify/functions/admin-stats"
+  status = 200
+
+# Clean URLs for pages
 [[redirects]]
   from = "/admin"
   to = "/admin.html"
@@ -21,22 +64,15 @@
 [[headers]]
   for = "/*"
   [headers.values]
-    # Prevent clickjacking
     X-Frame-Options = "DENY"
-    # Prevent MIME type sniffing
     X-Content-Type-Options = "nosniff"
-    # XSS Protection
     X-XSS-Protection = "1; mode=block"
-    # Referrer Policy
     Referrer-Policy = "strict-origin-when-cross-origin"
-    # Permissions Policy (disable unnecessary features)
     Permissions-Policy = "geolocation=(), microphone=(), camera=()"
-    # Content Security Policy
-    # Allows: self, Google Fonts, inline styles (for RTL), data: for favicon
-    Content-Security-Policy = "default-src 'self'; script-src 'self'; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src 'self' https://fonts.gstatic.com; img-src 'self' data:; connect-src 'self' https://*.supabase.co https://*.vercel.app https://*.netlify.app https://*.railway.app;"
+    Content-Security-Policy = "default-src 'self'; script-src 'self'; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src 'self' https://fonts.gstatic.com; img-src 'self' data:; connect-src 'self' https://*.supabase.co;"
 
 # ═══════════════════════════════════════════════════════════════════════════
-# Cache Control for static assets
+# Cache Control
 # ═══════════════════════════════════════════════════════════════════════════
 [[headers]]
   for = "/*.css"
@@ -48,7 +84,6 @@
   [headers.values]
     Cache-Control = "public, max-age=31536000, immutable"
 
-# HTML files should revalidate
 [[headers]]
   for = "/*.html"
   [headers.values]

@@ -40,7 +40,7 @@
         !window.location.hostname.includes('127.0.0.1');
 
     const CONFIG = {
-        API_BASE_URL: isProduction ? PRODUCTION_API_URL : 'http://localhost:3001',
+        API_BASE_URL: isProduction ? PRODUCTION_API_URL : 'http://localhost:8888',
         API_ENDPOINT: '/api/submit',
     };
 
