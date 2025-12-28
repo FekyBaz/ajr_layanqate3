@@ -1,0 +1,611 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="robots" content="noindex, nofollow">
+    <title>لوحة المراجعة | أجر لا ينقطع</title>
+
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Naskh+Arabic:wght@400;500;600;700&display=swap"
+        rel="stylesheet">
+
+    <style>
+        :root {
+            --color-bg: #faf8f5;
+            --color-card: #ffffff;
+            --color-border: #e8e4dc;
+            --color-text: #2d3436;
+            --color-muted: #636e72;
+            --color-success: #27ae60;
+            --color-danger: #c0392b;
+            --color-warning: #f39c12;
+            --font-primary: 'Noto Naskh Arabic', serif;
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        body {
+            font-family: var(--font-primary);
+            background: var(--color-bg);
+            color: var(--color-text);
+            line-height: 1.7;
+            direction: rtl;
+            padding: 1rem;
+        }
+
+        .container {
+            max-width: 900px;
+            margin: 0 auto;
+        }
+
+        header {
+            text-align: center;
+            padding: 1.5rem 0;
+            border-bottom: 2px solid var(--color-border);
+            margin-bottom: 2rem;
+        }
+
+        header h1 {
+            font-size: 1.75rem;
+            margin-bottom: 0.5rem;
+        }
+
+        .stats {
+            display: flex;
+            justify-content: center;
+            gap: 2rem;
+            margin-top: 1rem;
+        }
+
+        .stat {
+            text-align: center;
+        }
+
+        .stat-value {
+            font-size: 1.5rem;
+            font-weight: 700;
+        }
+
+        .stat-label {
+            font-size: 0.875rem;
+            color: var(--color-muted);
+        }
+
+        /* Login Section */
+        .login-section {
+            max-width: 400px;
+            margin: 2rem auto;
+            padding: 2rem;
+            background: var(--color-card);
+            border-radius: 12px;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+        }
+
+        .login-section h2 {
+            margin-bottom: 1rem;
+            text-align: center;
+        }
+
+        .form-group {
+            margin-bottom: 1rem;
+        }
+
+        .form-group label {
+            display: block;
+            margin-bottom: 0.5rem;
+            font-weight: 500;
+        }
+
+        .form-group input {
+            width: 100%;
+            padding: 0.75rem;
+            font-family: var(--font-primary);
+            font-size: 1rem;
+            border: 2px solid var(--color-border);
+            border-radius: 8px;
+        }
+
+        .btn {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            padding: 0.75rem 1.5rem;
+            font-family: var(--font-primary);
+            font-size: 1rem;
+            font-weight: 500;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        .btn-primary {
+            background: var(--color-success);
+            color: white;
+            width: 100%;
+        }
+
+        .btn-primary:hover {
+            background: #219a52;
+        }
+
+        .btn-success {
+            background: var(--color-success);
+            color: white;
+        }
+
+        .btn-danger {
+            background: var(--color-danger);
+            color: white;
+        }
+
+        .btn-sm {
+            padding: 0.5rem 1rem;
+            font-size: 0.875rem;
+        }
+
+        /* Submissions List */
+        .submissions-list {
+            display: flex;
+            flex-direction: column;
+            gap: 1.5rem;
+        }
+
+        .submission-card {
+            background: var(--color-card);
+            border-radius: 12px;
+            padding: 1.5rem;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+        }
+
+        .submission-meta {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 1rem;
+            font-size: 0.875rem;
+            color: var(--color-muted);
+        }
+
+        .content-type-badge {
+            background: var(--color-bg);
+            padding: 0.25rem 0.75rem;
+            border-radius: 20px;
+            font-size: 0.8rem;
+        }
+
+        .original-message {
+            padding: 1rem;
+            background: #f5f5f5;
+            border-radius: 8px;
+            margin-bottom: 1rem;
+            border-right: 4px solid var(--color-muted);
+        }
+
+        .original-message-label {
+            font-size: 0.75rem;
+            color: var(--color-muted);
+            margin-bottom: 0.5rem;
+        }
+
+        .correction-textarea {
+            width: 100%;
+            min-height: 100px;
+            padding: 1rem;
+            font-family: var(--font-primary);
+            font-size: 1rem;
+            border: 2px solid var(--color-border);
+            border-radius: 8px;
+            resize: vertical;
+            direction: rtl;
+        }
+
+        .correction-textarea:focus {
+            outline: none;
+            border-color: var(--color-success);
+        }
+
+        .correction-label {
+            font-size: 0.875rem;
+            color: var(--color-muted);
+            margin-bottom: 0.5rem;
+        }
+
+        .actions {
+            display: flex;
+            gap: 0.75rem;
+            margin-top: 1rem;
+        }
+
+        .empty-state {
+            text-align: center;
+            padding: 3rem;
+            color: var(--color-muted);
+        }
+
+        .error-message {
+            background: #fce4ec;
+            color: var(--color-danger);
+            padding: 1rem;
+            border-radius: 8px;
+            margin-bottom: 1rem;
+            text-align: center;
+        }
+
+        .success-message {
+            background: #e8f5e9;
+            color: var(--color-success);
+            padding: 1rem;
+            border-radius: 8px;
+            margin-bottom: 1rem;
+            text-align: center;
+        }
+
+        .hidden {
+            display: none !important;
+        }
+
+        .loading {
+            text-align: center;
+            padding: 2rem;
+            color: var(--color-muted);
+        }
+
+        .refresh-btn {
+            background: var(--color-bg);
+            border: 2px solid var(--color-border);
+            color: var(--color-text);
+            margin-bottom: 1rem;
+        }
+
+        .logout-btn {
+            background: transparent;
+            border: none;
+            color: var(--color-danger);
+            cursor: pointer;
+            font-family: var(--font-primary);
+            font-size: 0.875rem;
+        }
+    </style>
+</head>
+
+<body>
+    <div class="container">
+        <!-- Login Section -->
+        <section id="login-section" class="login-section">
+            <h2>🔐 تسجيل الدخول</h2>
+            <div id="login-error" class="error-message hidden"></div>
+            <form id="login-form">
+                <div class="form-group">
+                    <label for="api-key">مفتاح API</label>
+                    <input type="password" id="api-key" placeholder="أدخل مفتاح المسؤول" required>
+                </div>
+                <button type="submit" class="btn btn-primary">دخول</button>
+            </form>
+        </section>
+
+        <!-- Admin Panel Section -->
+        <section id="admin-section" class="hidden">
+            <header>
+                <h1>🤍 لوحة مراجعة المشاركات</h1>
+                <p style="color: var(--color-muted);">أجر لا ينقطع</p>
+                <div class="stats">
+                    <div class="stat">
+                        <div class="stat-value" id="pending-count">-</div>
+                        <div class="stat-label">في الانتظار</div>
+                    </div>
+                    <div class="stat">
+                        <div class="stat-value" id="approved-count">-</div>
+                        <div class="stat-label">مقبولة</div>
+                    </div>
+                    <div class="stat">
+                        <div class="stat-value" id="rejected-count">-</div>
+                        <div class="stat-label">مرفوضة</div>
+                    </div>
+                </div>
+                <div style="margin-top: 1rem;">
+                    <button class="logout-btn" onclick="logout()">تسجيل الخروج</button>
+                </div>
+            </header>
+
+            <button class="btn refresh-btn" onclick="loadPending()">🔄 تحديث القائمة</button>
+
+            <div id="notification" class="hidden"></div>
+
+            <div id="loading" class="loading">جاري التحميل...</div>
+
+            <div id="submissions-list" class="submissions-list hidden"></div>
+
+            <div id="empty-state" class="empty-state hidden">
+                <p>✅ لا توجد مشاركات في الانتظار</p>
+            </div>
+        </section>
+    </div>
+
+    <script>
+        // ═══════════════════════════════════════════════════════════════════
+        // Configuration
+        // ═══════════════════════════════════════════════════════════════════
+        /**
+         * ⚠️ PRODUCTION API URL
+         * Change this to your production backend URL (e.g., Railway, Render, Vercel)
+         * Leave empty if frontend and backend are on the same domain.
+         */
+        const PRODUCTION_API_URL = ''; // ← Change this to your production backend URL
+
+        const isProduction = !window.location.hostname.includes('localhost') &&
+            !window.location.hostname.includes('127.0.0.1');
+        const API_BASE = isProduction ? PRODUCTION_API_URL : 'http://localhost:3001';
+
+        let adminKey = localStorage.getItem('adminKey') || '';
+
+        // ═══════════════════════════════════════════════════════════════════
+        // DOM Elements
+        // ═══════════════════════════════════════════════════════════════════
+        const loginSection = document.getElementById('login-section');
+        const adminSection = document.getElementById('admin-section');
+        const loginForm = document.getElementById('login-form');
+        const loginError = document.getElementById('login-error');
+        const apiKeyInput = document.getElementById('api-key');
+        const submissionsList = document.getElementById('submissions-list');
+        const loadingEl = document.getElementById('loading');
+        const emptyState = document.getElementById('empty-state');
+        const notification = document.getElementById('notification');
+
+        // ═══════════════════════════════════════════════════════════════════
+        // API Helpers
+        // ═══════════════════════════════════════════════════════════════════
+        async function apiRequest(endpoint, method = 'GET', body = null) {
+            const options = {
+                method,
+                headers: {
+                    'Content-Type': 'application/json',
+                    'X-Admin-Key': adminKey
+                }
+            };
+
+            if (body) {
+                options.body = JSON.stringify(body);
+            }
+
+            const response = await fetch(`${API_BASE}${endpoint}`, options);
+            return response.json();
+        }
+
+        // ═══════════════════════════════════════════════════════════════════
+        // Authentication
+        // ═══════════════════════════════════════════════════════════════════
+        loginForm.addEventListener('submit', async (e) => {
+            e.preventDefault();
+
+            adminKey = apiKeyInput.value.trim();
+
+            if (!adminKey) {
+                showLoginError('يرجى إدخال مفتاح API');
+                return;
+            }
+
+            try {
+                const result = await apiRequest('/api/admin/stats');
+
+                if (result.success) {
+                    localStorage.setItem('adminKey', adminKey);
+                    showAdminPanel();
+                } else {
+                    showLoginError('مفتاح API غير صحيح');
+                }
+            } catch (error) {
+                showLoginError('فشل الاتصال بالخادم');
+            }
+        });
+
+        function showLoginError(message) {
+            loginError.textContent = message;
+            loginError.classList.remove('hidden');
+        }
+
+        function logout() {
+            adminKey = '';
+            localStorage.removeItem('adminKey');
+            loginSection.classList.remove('hidden');
+            adminSection.classList.add('hidden');
+            apiKeyInput.value = '';
+        }
+
+        function showAdminPanel() {
+            loginSection.classList.add('hidden');
+            adminSection.classList.remove('hidden');
+            loadStats();
+            loadPending();
+        }
+
+        // ═══════════════════════════════════════════════════════════════════
+        // Load Data
+        // ═══════════════════════════════════════════════════════════════════
+        async function loadStats() {
+            try {
+                const result = await apiRequest('/api/admin/stats');
+                if (result.success) {
+                    document.getElementById('pending-count').textContent = result.stats.pending;
+                    document.getElementById('approved-count').textContent = result.stats.approved;
+                    document.getElementById('rejected-count').textContent = result.stats.rejected;
+                }
+            } catch (error) {
+                console.error('Error loading stats:', error);
+            }
+        }
+
+        async function loadPending() {
+            loadingEl.classList.remove('hidden');
+            submissionsList.classList.add('hidden');
+            emptyState.classList.add('hidden');
+
+            try {
+                const result = await apiRequest('/api/admin/pending');
+
+                loadingEl.classList.add('hidden');
+
+                if (result.success && result.data.length > 0) {
+                    renderSubmissions(result.data);
+                    submissionsList.classList.remove('hidden');
+                } else {
+                    emptyState.classList.remove('hidden');
+                }
+            } catch (error) {
+                loadingEl.classList.add('hidden');
+                showNotification('فشل تحميل البيانات', 'error');
+            }
+        }
+
+        // ═══════════════════════════════════════════════════════════════════
+        // Render Submissions
+        // ═══════════════════════════════════════════════════════════════════
+        const CONTENT_TYPE_LABELS = {
+            dhikr: 'ذكر',
+            dua: 'دعاء',
+            ayah: 'آية قرآنية',
+            hadith: 'حديث نبوي'
+        };
+
+        function formatDate(dateString) {
+            const date = new Date(dateString);
+            return date.toLocaleDateString('ar-EG', {
+                year: 'numeric',
+                month: 'short',
+                day: 'numeric',
+                hour: '2-digit',
+                minute: '2-digit'
+            });
+        }
+
+        function renderSubmissions(submissions) {
+            submissionsList.innerHTML = submissions.map(sub => `
+                <div class="submission-card" data-id="${sub.id}">
+                    <div class="submission-meta">
+                        <span class="content-type-badge">${CONTENT_TYPE_LABELS[sub.content_type] || sub.content_type}</span>
+                        <span>${formatDate(sub.created_at)}</span>
+                    </div>
+                    
+                    <div class="original-message-label">المحتوى الأصلي (للقراءة فقط):</div>
+                    <div class="original-message">${escapeHtml(sub.message)}</div>
+                    
+                    <div class="correction-label">التصحيح (اختياري - للأخطاء الإملائية فقط):</div>
+                    <textarea 
+                        class="correction-textarea" 
+                        id="correction-${sub.id}"
+                        placeholder="اترك فارغًا للموافقة على النص الأصلي..."
+                    >${sub.corrected_message || ''}</textarea>
+                    
+                    <div class="actions">
+                        <button class="btn btn-success btn-sm" onclick="approve('${sub.id}')">
+                            ✓ موافقة
+                        </button>
+                        <button class="btn btn-danger btn-sm" onclick="reject('${sub.id}')">
+                            ✗ رفض
+                        </button>
+                    </div>
+                </div>
+            `).join('');
+        }
+
+        function escapeHtml(text) {
+            const div = document.createElement('div');
+            div.textContent = text;
+            return div.innerHTML;
+        }
+
+        // ═══════════════════════════════════════════════════════════════════
+        // Actions
+        // ═══════════════════════════════════════════════════════════════════
+        async function approve(id) {
+            const correction = document.getElementById(`correction-${id}`).value.trim();
+
+            const body = { id };
+            if (correction) {
+                body.corrected_message = correction;
+            }
+
+            try {
+                const result = await apiRequest('/api/admin/approve', 'POST', body);
+
+                if (result.success) {
+                    showNotification('تمت الموافقة على المشاركة', 'success');
+                    removeCard(id);
+                    loadStats();
+                } else {
+                    showNotification(result.message || 'حدث خطأ', 'error');
+                }
+            } catch (error) {
+                showNotification('فشل الاتصال بالخادم', 'error');
+            }
+        }
+
+        async function reject(id) {
+            if (!confirm('هل أنت متأكد من رفض هذه المشاركة؟')) {
+                return;
+            }
+
+            try {
+                const result = await apiRequest('/api/admin/reject', 'POST', { id });
+
+                if (result.success) {
+                    showNotification('تم رفض المشاركة', 'success');
+                    removeCard(id);
+                    loadStats();
+                } else {
+                    showNotification(result.message || 'حدث خطأ', 'error');
+                }
+            } catch (error) {
+                showNotification('فشل الاتصال بالخادم', 'error');
+            }
+        }
+
+        function removeCard(id) {
+            const card = document.querySelector(`.submission-card[data-id="${id}"]`);
+            if (card) {
+                card.remove();
+            }
+
+            // Check if list is empty
+            if (submissionsList.children.length === 0) {
+                submissionsList.classList.add('hidden');
+                emptyState.classList.remove('hidden');
+            }
+        }
+
+        function showNotification(message, type) {
+            notification.textContent = message;
+            notification.className = type === 'error' ? 'error-message' : 'success-message';
+            notification.classList.remove('hidden');
+
+            setTimeout(() => {
+                notification.classList.add('hidden');
+            }, 3000);
+        }
+
+        // ═══════════════════════════════════════════════════════════════════
+        // Initialize
+        // ═══════════════════════════════════════════════════════════════════
+        if (adminKey) {
+            // Verify key is still valid
+            apiRequest('/api/admin/stats')
+                .then(result => {
+                    if (result.success) {
+                        showAdminPanel();
+                    } else {
+                        logout();
+                    }
+                })
+                .catch(() => logout());
+        }
+    </script>
+</body>
+
+</html>

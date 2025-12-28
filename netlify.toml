@@ -1,0 +1,55 @@
+# Netlify Configuration for أجر لا ينقطع
+# Static site deployment - no build step required
+
+[build]
+  # No build command needed - pure static files
+  command = ""
+  # Publish from root directory
+  publish = "/"
+
+# ═══════════════════════════════════════════════════════════════════════════
+# Redirects - Handle SPA-like behavior and clean URLs
+# ═══════════════════════════════════════════════════════════════════════════
+[[redirects]]
+  from = "/admin"
+  to = "/admin.html"
+  status = 200
+
+# ═══════════════════════════════════════════════════════════════════════════
+# Security Headers - Applied to all pages
+# ═══════════════════════════════════════════════════════════════════════════
+[[headers]]
+  for = "/*"
+  [headers.values]
+    # Prevent clickjacking
+    X-Frame-Options = "DENY"
+    # Prevent MIME type sniffing
+    X-Content-Type-Options = "nosniff"
+    # XSS Protection
+    X-XSS-Protection = "1; mode=block"
+    # Referrer Policy
+    Referrer-Policy = "strict-origin-when-cross-origin"
+    # Permissions Policy (disable unnecessary features)
+    Permissions-Policy = "geolocation=(), microphone=(), camera=()"
+    # Content Security Policy
+    # Allows: self, Google Fonts, inline styles (for RTL), data: for favicon
+    Content-Security-Policy = "default-src 'self'; script-src 'self'; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src 'self' https://fonts.gstatic.com; img-src 'self' data:; connect-src 'self' https://*.supabase.co https://*.vercel.app https://*.netlify.app https://*.railway.app;"
+
+# ═══════════════════════════════════════════════════════════════════════════
+# Cache Control for static assets
+# ═══════════════════════════════════════════════════════════════════════════
+[[headers]]
+  for = "/*.css"
+  [headers.values]
+    Cache-Control = "public, max-age=31536000, immutable"
+
+[[headers]]
+  for = "/*.js"
+  [headers.values]
+    Cache-Control = "public, max-age=31536000, immutable"
+
+# HTML files should revalidate
+[[headers]]
+  for = "/*.html"
+  [headers.values]
+    Cache-Control = "public, max-age=0, must-revalidate"
