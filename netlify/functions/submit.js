@@ -81,15 +81,19 @@ export async function handler(event, context) {
             return success({ message: 'تم استلام مشاركتك. جزاك الله خيرًا.' }, origin);
         }
 
+        // Build insert data - omit author_name if empty to use DB default
+        const insertData = {
+            message: messageResult.sanitized,
+            content_type: content_type,
+            message_hash: messageHash,
+            // Only include author_name if sanitizedName is truthy (not null/undefined/empty)
+            ...(sanitizedName && { author_name: sanitizedName }),
+        };
+
         // Insert submission
         const { error: insertError } = await supabase
             .from('submissions')
-            .insert({
-                message: messageResult.sanitized,
-                content_type: content_type,
-                author_name: sanitizedName,
-                message_hash: messageHash,
-            });
+            .insert(insertData);
 
         if (insertError) {
             console.error('Database insert error:', insertError.message);
