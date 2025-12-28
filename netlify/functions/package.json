@@ -1,0 +1,9 @@
+{
+    "name": "ajr-la-yanqati-functions",
+    "version": "1.0.0",
+    "description": "Netlify Functions for أجر لا ينقطع",
+    "type": "module",
+    "dependencies": {
+        "@supabase/supabase-js": "^2.39.0"
+    }
+}
