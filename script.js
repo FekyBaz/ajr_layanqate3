@@ -434,8 +434,25 @@
     // Reset form button
     resetFormBtn.addEventListener('click', resetForm);
 
-    // Character counting
-    content.addEventListener('input', updateCharCount);
+    // Character counting - attach with explicit function
+    if (content) {
+        content.addEventListener('input', function () {
+            const count = this.value.length;
+            const counterEl = document.getElementById('char-count');
+            if (counterEl) {
+                counterEl.textContent = count;
+                // Visual feedback when approaching limit
+                if (count > MAX_CONTENT_LENGTH * 0.9) {
+                    counterEl.style.color = 'var(--color-error)';
+                } else if (count > MAX_CONTENT_LENGTH * 0.75) {
+                    counterEl.style.color = 'orange';
+                } else {
+                    counterEl.style.color = '';
+                }
+            }
+        });
+        console.log('Character counter initialized for textarea');
+    }
 
     // Real-time validation on blur
     contentType.addEventListener('blur', validateContentType);
