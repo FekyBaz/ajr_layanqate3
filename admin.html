@@ -285,7 +285,13 @@
             <form id="login-form">
                 <div class="form-group">
                     <label for="api-key">مفتاح API</label>
-                    <input type="password" id="api-key" placeholder="أدخل مفتاح المسؤول" required>
+                    <div style="position: relative;">
+                        <input type="password" id="api-key" placeholder="أدخل مفتاح المسؤول" required
+                            style="padding-left: 40px;">
+                        <button type="button" id="toggle-password"
+                            style="position: absolute; left: 10px; top: 50%; transform: translateY(-50%); background: none; border: none; cursor: pointer; font-size: 1.2rem;"
+                            aria-label="إظهار/إخفاء كلمة المرور">👁️</button>
+                    </div>
                 </div>
                 <button type="submit" class="btn btn-primary">دخول</button>
             </form>
@@ -410,6 +416,14 @@
             loginError.textContent = message;
             loginError.classList.remove('hidden');
         }
+
+        // Toggle password visibility
+        const togglePassword = document.getElementById('toggle-password');
+        togglePassword.addEventListener('click', () => {
+            const type = apiKeyInput.type === 'password' ? 'text' : 'password';
+            apiKeyInput.type = type;
+            togglePassword.textContent = type === 'password' ? '👁️' : '🙈';
+        });
 
         function logout() {
             adminKey = '';
