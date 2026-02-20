@@ -14,29 +14,32 @@
    ═══════════════════════════════════════════════════════════════════════════ */
 :root {
     /* Color Palette - Soft, spiritual, calming */
-    --color-bg-primary: #faf8f5;
-    /* Warm off-white */
-    --color-bg-secondary: #f5f2ec;
-    /* Slightly darker beige */
-    --color-bg-accent: #e8e4dc;
-    /* Soft beige for cards */
-    --color-bg-hero: linear-gradient(135deg, #f5f2ec 0%, #e8f5e9 50%, #faf8f5 100%);
+    --color-bg-primary: #f6f4ef;
+    /* Warm ivory */
+    --color-bg-secondary: #f0ece2;
+    /* Soft parchment */
+    --color-bg-accent: #e2dccd;
+    /* Beige accent for footer/cards */
+    --color-bg-hero: radial-gradient(circle at 20% 10%, rgba(201, 170, 113, 0.25), transparent 40%),
+        radial-gradient(circle at 80% 80%, rgba(15, 76, 58, 0.2), transparent 45%),
+        linear-gradient(140deg, #0f4c3a 0%, #1f6f55 40%, #f5eddc 100%);
 
-    --color-text-primary: #2d3436;
+    --color-text-primary: #1f2a22;
     /* Deep charcoal for readability */
-    --color-text-secondary: #636e72;
+    --color-text-secondary: #4c5d53;
     /* Muted gray for secondary text */
     --color-text-muted: #95a5a6;
     /* Light gray for hints */
 
-    --color-accent-primary: #27ae60;
-    /* Soft green - spiritual, growth */
-    --color-accent-hover: #219a52;
+    --color-accent-primary: #146c43;
+    /* Islamic green */
+    --color-accent-hover: #0f5a37;
     /* Darker green for hover */
-    --color-accent-light: rgba(39, 174, 96, 0.1);
+    --color-accent-light: rgba(20, 108, 67, 0.12);
     /* Light green tint */
+    --color-gold: #c9aa71;
 
-    --color-border: #ddd9d0;
+    --color-border: #d5cdbd;
     /* Soft border color */
     --color-border-focus: #27ae60;
     /* Focus border color */
@@ -48,6 +51,7 @@
 
     /* Typography */
     --font-primary: 'Noto Naskh Arabic', 'Amiri', 'Traditional Arabic', serif;
+    --font-display: 'Cairo', 'Noto Naskh Arabic', serif;
     --font-size-base: 18px;
     --font-size-sm: 0.875rem;
     --font-size-md: 1rem;
@@ -121,6 +125,9 @@ body {
     flex-direction: column;
     -webkit-font-smoothing: antialiased;
     -moz-osx-font-smoothing: grayscale;
+    background-image: linear-gradient(rgba(255, 255, 255, 0.3), rgba(255, 255, 255, 0.3)),
+        radial-gradient(circle at 1px 1px, rgba(20, 108, 67, 0.06) 1px, transparent 0);
+    background-size: auto, 20px 20px;
 }
 
 /* Focus visible styles for accessibility */
@@ -163,7 +170,8 @@ body {
 h1,
 h2,
 h3 {
-    font-weight: 600;
+    font-family: var(--font-display);
+    font-weight: 700;
     line-height: var(--line-height-tight);
     color: var(--color-text-primary);
 }
@@ -215,7 +223,7 @@ p {
 }
 
 .btn--primary {
-    background: var(--color-accent-primary);
+    background: linear-gradient(135deg, var(--color-accent-primary), #208b5b);
     color: white;
     box-shadow: var(--shadow-md);
 }
@@ -286,6 +294,42 @@ p {
     display: flex;
     align-items: center;
     justify-content: center;
+    position: relative;
+    overflow: hidden;
+}
+
+.hero::before {
+    content: '۞';
+    position: absolute;
+    top: 24px;
+    right: 8%;
+    font-size: clamp(2rem, 8vw, 4rem);
+    color: rgba(201, 170, 113, 0.45);
+}
+
+.hero::after {
+    content: '۞';
+    position: absolute;
+    bottom: 32px;
+    left: 7%;
+    font-size: clamp(2.2rem, 8vw, 4.5rem);
+    color: rgba(201, 170, 113, 0.28);
+}
+
+.hero .container {
+    position: relative;
+    z-index: 1;
+}
+
+.hero__badge {
+    width: fit-content;
+    margin: 0 auto var(--space-lg);
+    padding: 0.35rem 1rem;
+    border-radius: 999px;
+    background: rgba(201, 170, 113, 0.18);
+    color: #f9f2df;
+    border: 1px solid rgba(201, 170, 113, 0.5);
+    font-size: var(--font-size-md);
 }
 
 .hero__title {
@@ -296,13 +340,38 @@ p {
     max-width: 90%;
     margin-left: auto;
     margin-right: auto;
+    color: #fff8eb;
+    text-shadow: 0 2px 12px rgba(0, 0, 0, 0.25);
 }
 
 .hero__subtitle {
     font-size: var(--font-size-lg);
-    color: var(--color-text-secondary);
+    color: #f7f4ec;
     margin-bottom: var(--space-2xl);
     line-height: var(--line-height-relaxed);
+}
+
+.hero__ayah {
+    max-width: 640px;
+    margin: 0 auto var(--space-2xl);
+    padding: var(--space-md) var(--space-lg);
+    border: 1px solid rgba(201, 170, 113, 0.45);
+    border-right: 4px solid var(--color-gold);
+    border-radius: var(--radius-lg);
+    background: rgba(255, 252, 243, 0.14);
+    backdrop-filter: blur(2px);
+}
+
+.hero__ayah p {
+    margin-bottom: 0.3rem;
+    color: #fff8eb;
+    font-size: var(--font-size-lg);
+}
+
+.hero__ayah cite {
+    color: #f2dfb8;
+    font-style: normal;
+    font-size: var(--font-size-sm);
 }
 
 .hero__cta {
@@ -340,8 +409,9 @@ p {
     align-items: center;
     gap: var(--space-lg);
     padding: var(--space-lg);
-    background: var(--color-bg-secondary);
+    background: linear-gradient(160deg, #f7f3e9, #f0ead8);
     border-radius: var(--radius-lg);
+    border: 1px solid rgba(201, 170, 113, 0.3);
     transition: transform var(--transition-normal), box-shadow var(--transition-normal);
 }
 
@@ -356,8 +426,8 @@ p {
     justify-content: center;
     width: 48px;
     height: 48px;
-    background: var(--color-accent-light);
-    color: var(--color-accent-primary);
+    background: linear-gradient(140deg, rgba(20, 108, 67, 0.16), rgba(201, 170, 113, 0.26));
+    color: #0f5a37;
     font-size: var(--font-size-xl);
     font-weight: 700;
     border-radius: 50%;
@@ -398,6 +468,7 @@ p {
     padding: var(--space-xl);
     border-radius: var(--radius-xl);
     box-shadow: var(--shadow-md);
+    border: 1px solid rgba(201, 170, 113, 0.28);
 }
 
 /* Form Group */
