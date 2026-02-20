@@ -300,6 +300,28 @@ p {
     overflow: hidden;
 }
 
+.hero__ornament {
+    position: absolute;
+    color: rgba(242, 221, 181, 0.36);
+    font-family: 'Amiri', serif;
+    letter-spacing: 0.15rem;
+    pointer-events: none;
+}
+
+.hero__ornament--top {
+    top: 16px;
+    right: 50%;
+    transform: translateX(50%);
+    font-size: clamp(1.2rem, 2vw, 1.7rem);
+}
+
+.hero__ornament--bottom {
+    bottom: 18px;
+    right: 50%;
+    transform: translateX(50%);
+    font-size: clamp(0.95rem, 1.7vw, 1.15rem);
+}
+
 .hero::before {
     content: '☾';
     position: absolute;
@@ -360,6 +382,42 @@ p {
     color: #f6efe0;
     margin-bottom: var(--space-2xl);
     line-height: var(--line-height-relaxed);
+}
+
+.hero__bismillah {
+    margin-bottom: var(--space-md);
+    color: #f6e5bf;
+    font-size: 1.15rem;
+    letter-spacing: 0.06rem;
+}
+
+.hero__stats {
+    display: grid;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: 0.7rem;
+    margin-bottom: var(--space-xl);
+}
+
+.hero__stat-card {
+    display: flex;
+    flex-direction: column;
+    gap: 0.2rem;
+    padding: 0.65rem 0.7rem;
+    border-radius: var(--radius-md);
+    border: 1px solid rgba(242, 221, 181, 0.38);
+    background: rgba(8, 45, 36, 0.24);
+}
+
+.hero__stat-number {
+    color: #ffe8b5;
+    font-family: var(--font-display);
+    font-weight: 700;
+}
+
+.hero__stat-label {
+    color: #fff8e8;
+    font-size: 0.82rem;
+    line-height: 1.6;
 }
 
 .hero__meta {
@@ -492,6 +550,30 @@ p {
 .form-section {
     padding: var(--space-3xl) 0;
     background: linear-gradient(180deg, var(--color-bg-secondary), #e8dfca);
+}
+
+.trust-strip {
+    background: linear-gradient(135deg, #0f5f49, #0b4f3d);
+    padding: 1rem 0;
+    border-top: 1px solid rgba(207, 169, 104, 0.45);
+    border-bottom: 1px solid rgba(207, 169, 104, 0.45);
+}
+
+.trust-strip__content {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+    gap: 0.9rem;
+}
+
+.trust-strip__item {
+    color: #fef8eb;
+    background: rgba(255, 255, 255, 0.08);
+    border: 1px solid rgba(242, 221, 181, 0.5);
+    padding: 0.4rem 0.85rem;
+    border-radius: 999px;
+    font-size: 0.92rem;
+    line-height: 1.5;
 }
 
 .form-section__intro {
@@ -913,6 +995,10 @@ p {
 
     .hero__subtitle {
         font-size: var(--font-size-md);
+    }
+
+    .hero__stats {
+        grid-template-columns: 1fr;
     }
 
     .hero__meta {
