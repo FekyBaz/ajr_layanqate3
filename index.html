@@ -81,7 +81,7 @@
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link
-        href="https://fonts.googleapis.com/css2?family=Noto+Naskh+Arabic:wght@400;500;600;700&family=Amiri:wght@400;700&display=swap"
+        href="https://fonts.googleapis.com/css2?family=Cairo:wght@500;600;700;800&family=Noto+Naskh+Arabic:wght@400;500;600;700&family=Amiri:wght@400;700&display=swap"
         rel="stylesheet">
 
     <!-- ═══════════════════════════════════════════════════════════════════
@@ -102,26 +102,44 @@
          ═══════════════════════════════════════════════════════════════════ -->
     <a href="#main" class="skip-link">تخطي إلى المحتوى الرئيسي</a>
 
+    <header class="topbar" role="banner">
+        <div class="container topbar__inner">
+            <p class="topbar__brand">☪ أجر لا ينقطع</p>
+            <nav class="topbar__nav" aria-label="روابط سريعة">
+                <a href="#how-it-works">كيف يعمل؟</a>
+                <a href="#form">المشاركة</a>
+                <a href="#about">عن المشروع</a>
+            </nav>
+        </div>
+    </header>
+
     <!-- ═══════════════════════════════════════════════════════════════════
          SECTION 1: Hero
          ═══════════════════════════════════════════════════════════════════ -->
     <header class="hero" role="banner">
         <div class="container">
+            <p class="hero__bismillah">﷽</p>
+            <p class="hero__badge">هوية بصرية إسلامية • منصة دعوية بنية الأجر</p>
             <h1 class="hero__title">
-                اكتب ذكرًا… لعلّ الله يكتب لك به أجرًا لا ينقطع 🤍
+                اكتب ذكرًا... وازرع أثرًا طيبًا يبقى لك بعد العمر
             </h1>
             <p class="hero__subtitle">
-                يمكنك هنا مشاركة ذكر أو دعاء أو آية أو حديث،
-                <br>
-                ليُنشر لاحقًا فيكون لك أجره،
-                <br>
-                ولمن نشره أجره،
-                <br>
-                ولكل من قرأه أو عمل به أجره.
+                مساحة هادئة لمشاركة الذكر والدعاء والآيات والأحاديث الصحيحة،
+                لتُنشر لاحقًا فينتفع بها الناس ويجري أجرها بإذن الله.
             </p>
-            <a href="#form" class="btn btn--primary hero__cta">
-                ✍️ شارك بذكر
-            </a>
+            <blockquote class="hero__ayah" aria-label="آية تحفيزية">
+                <p>﴿ مَّن ذَا الَّذِي يُقْرِضُ اللَّهَ قَرْضًا حَسَنًا فَيُضَاعِفَهُ لَهُ ﴾</p>
+                <cite>— سورة البقرة: 245</cite>
+            </blockquote>
+            <div class="hero__actions">
+                <a href="#form" class="btn btn--primary hero__cta">✍️ شارك بذكر الآن</a>
+                <a href="#guidelines-title" class="btn btn--secondary hero__cta-secondary">📜 اطّلع على الضوابط</a>
+            </div>
+            <ul class="hero__stats" aria-label="مزايا المنصة">
+                <li><strong>مراجعة يدوية</strong><span>لكل المحتوى قبل النشر</span></li>
+                <li><strong>خصوصية عالية</strong><span>لا جمع للبيانات الشخصية</span></li>
+                <li><strong>نشر مستمر</strong><span>لزيادة الانتفاع والأجر</span></li>
+            </ul>
         </div>
     </header>
 
@@ -133,7 +151,7 @@
         <!-- ═══════════════════════════════════════════════════════════════
              SECTION 2: How It Works
              ═══════════════════════════════════════════════════════════════ -->
-        <section class="how-it-works" aria-labelledby="how-it-works-title">
+        <section id="how-it-works" class="how-it-works" aria-labelledby="how-it-works-title">
             <div class="container">
                 <h2 id="how-it-works-title" class="section-title">كيف يعمل؟</h2>
                 <div class="steps">
