@@ -150,7 +150,7 @@ const VALID_CONTENT_TYPES = ['dhikr', 'dua', 'ayah', 'hadith'];
  * Arabic Unicode ranges (includes Arabic letters, diacritics, numbers)
  * Plus common punctuation and whitespace
  */
-const ARABIC_PATTERN = /^[\u0600-\u06FF\u0750-\u077F\uFB50-\uFDFF\uFE70-\uFEFF\u0660-\u0669\s\d.,،؛:؟!()«»\-\n\r]+$/;
+const ARABIC_PATTERN = /^[\u0600-\u06FF\u0750-\u077F\uFB50-\uFDFF\uFE70-\uFEFF\u0660-\u0669\s\d.,،؛:؟!()«»/\-\n\r]+$/;
 
 /**
  * Sanitizes and validates the message content
