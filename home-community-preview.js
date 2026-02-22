@@ -113,6 +113,13 @@
             const submissions = result.submissions || [];
             const avgPostCount = Number(result.stats?.averagePostCount) || 0;
             const newToday = Number(result.stats?.newApprovedToday) || 0;
+            const total = Number(result.pagination?.total) || 0;
+
+            console.debug('[home-preview] payload shape', {
+                submissions: submissions.length,
+                total,
+                page: result.pagination?.page,
+            });
 
             elements.skeleton.hidden = true;
 
@@ -121,8 +128,14 @@
                 elements.newTodayBadge.textContent = `+${newToday} جديد اليوم`;
             }
 
+            if (!submissions.length && total === 0) {
+                elements.empty.hidden = false;
+                return;
+            }
+
             if (!submissions.length) {
                 elements.empty.hidden = false;
+                elements.empty.textContent = 'لا تتوفر عناصر في هذه الصفحة حاليًا.';
                 return;
             }
 
