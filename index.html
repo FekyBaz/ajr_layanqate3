@@ -96,7 +96,7 @@
     <link rel="stylesheet" href="styles.css">
 </head>
 
-<body>
+<body class="home-page">
     <!-- ═══════════════════════════════════════════════════════════════════
          Skip to Main Content (Accessibility)
          ═══════════════════════════════════════════════════════════════════ -->
@@ -104,7 +104,7 @@
 
 
     <header class="site-header" role="navigation" aria-label="التنقل الرئيسي">
-        <div class="container site-header__content">
+        <div class="site-container site-header__content">
             <a href="/index.html" class="site-logo" aria-label="العودة للصفحة الرئيسية">أجر لا ينقطع 🤍</a>
             <button class="menu-toggle" id="menuToggle" type="button" aria-expanded="false" aria-controls="mainMenu">☰</button>
             <nav class="site-nav" id="mainMenu">
@@ -120,7 +120,7 @@
     <header class="hero" role="banner">
         <div class="hero__ornament hero__ornament--top" aria-hidden="true">﷽</div>
         <div class="hero__ornament hero__ornament--bottom" aria-hidden="true">۞ ۞ ۞</div>
-        <div class="container">
+        <div class="site-container">
             <p class="hero__badge">☪️ منصة دعوية بنية الأجر</p>
             <h1 class="hero__title">
                 اكتب ذكرًا… لعلّ الله يكتب لك به أجرًا لا ينقطع 🤍
@@ -159,10 +159,10 @@
                 <cite>— سورة البقرة: 110</cite>
             </blockquote>
             <div class="hero__actions">
-                <a href="#project-share" class="btn btn--primary hero__cta">
+                <a href="#project-share" class="btn btn-primary hero__cta">
                     ✍️ شارك بذكر
                 </a>
-                <a href="/community.html" class="btn btn--secondary hero__cta">
+                <a href="/community.html" class="btn btn-secondary hero__cta">
                     شاهد أذكار الناس اليوم 🤍
                 </a>
             </div>
@@ -175,7 +175,7 @@
     <main id="main" role="main">
 
         <section class="community-preview" aria-labelledby="community-preview-title">
-            <div class="container">
+            <div class="site-container">
                 <div class="community-preview__head">
                     <h2 id="community-preview-title" class="community-preview__title">🤍 أحدث مشاركات المجتمع</h2>
                     <span id="newTodayBadge" class="new-today-badge" hidden></span>
@@ -191,15 +191,15 @@
             </div>
         </section>
 
-        <section id="project-share" class="project-share" aria-labelledby="project-share-title">
-            <div class="container">
+        <section id="project-share" class="project-share card card-soft" aria-labelledby="project-share-title">
+            <div class="site-container">
                 <h2 id="project-share-title" class="project-share__title">🤍 ساهم في نشر المشروع</h2>
                 <p class="project-share__text">انشر الرابط مع من تحب ليصل الذكر إلى قلوب أكثر.</p>
                 <div class="project-share__actions">
-                    <a class="project-share__btn project-share__btn--whatsapp" data-share-platform="whatsapp" href="#" target="_blank" rel="noopener noreferrer">WhatsApp</a>
-                    <a class="project-share__btn project-share__btn--telegram" data-share-platform="telegram" href="#" target="_blank" rel="noopener noreferrer">Telegram</a>
-                    <a class="project-share__btn project-share__btn--x" data-share-platform="x" href="#" target="_blank" rel="noopener noreferrer">X</a>
-                    <button type="button" class="project-share__btn project-share__btn--native" data-share-platform="native" hidden>مشاركة الجهاز</button>
+                    <a class="btn btn-share project-share__btn project-share__btn--whatsapp" data-share-platform="whatsapp" href="#" target="_blank" rel="noopener noreferrer">WhatsApp</a>
+                    <a class="btn btn-share project-share__btn project-share__btn--telegram" data-share-platform="telegram" href="#" target="_blank" rel="noopener noreferrer">Telegram</a>
+                    <a class="btn btn-share project-share__btn project-share__btn--x" data-share-platform="x" href="#" target="_blank" rel="noopener noreferrer">X</a>
+                    <button type="button" class="btn btn-share project-share__btn project-share__btn--native" data-share-platform="native" hidden>مشاركة الجهاز</button>
                 </div>
             </div>
         </section>
@@ -210,7 +210,7 @@
          SECTION 5: Footer
          ═══════════════════════════════════════════════════════════════════ -->
     <footer class="footer" role="contentinfo">
-        <div class="container">
+        <div class="site-container">
             <p class="footer__text">تابع الذكر اليومي من هنا 🤍</p>
             <nav class="footer__social" aria-label="روابط التواصل الاجتماعي">
                 <a href="https://www.facebook.com/profile.php?id=61585386947319" target="_blank"

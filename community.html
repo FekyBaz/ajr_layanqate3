@@ -9,8 +9,8 @@
     <link rel="stylesheet" href="styles.css">
 </head>
 
-<body class="community-body">
-    <main class="community-page container" aria-live="polite">
+<body class="community-body community-page-root">
+    <main class="community-page site-container" aria-live="polite">
         <header class="community-header">
             <h1>مساهمات المجتمع</h1>
             <p>مساحة هادئة للمشاركات المعتمدة، بنية نشر الخير والأجر.</p>
@@ -22,7 +22,7 @@
 
         <hr class="community-divider community-divider--header" aria-hidden="true">
 
-        <section id="goalSection" class="community-goal" hidden>
+        <section id="goalSection" class="community-goal card card-elevated" hidden>
             <p id="goalTarget">🎯 هدف اليوم: ... ذكر</p>
             <p id="goalProgress">🤍 تم تحقيق: ...</p>
             <p class="community-goal__hint">كن سببًا في رفع هذا الهدف اليوم 🤍</p>
@@ -49,7 +49,7 @@
             </label>
         </section>
 
-        <section id="stateMessage" class="state-message">جارٍ تحميل المشاركات...</section>
+        <section id="stateMessage" class="state-message card card-outline">جارٍ تحميل المشاركات...</section>
         <section id="submissionsContainer" class="submissions-grid"></section>
 
         <nav class="pagination" id="pagination" hidden>
@@ -60,27 +60,27 @@
 
         <aside class="mobile-stats-bar" id="mobileStatsBar" hidden>
             <span id="mobileApprovedCount">🤍 ... مشاركة</span>
-            <a href="/index.html#form" class="btn btn--primary mobile-stats-bar__cta">أضف ذكرك</a>
+            <a href="/index.html#form" class="btn btn-primary mobile-stats-bar__cta">أضف ذكرك</a>
         </aside>
 
         <div class="toast" id="shareToast" role="status" aria-live="polite" hidden>تم النسخ 🤍</div>
 
         <aside id="joinPopup" class="join-popup" hidden>
             <p>🤍 هل ترغب في إضافة ذكرك أنت أيضًا؟</p>
-            <a href="/index.html#form" class="btn btn--primary">أضف ذكرك</a>
+            <a href="/index.html#form" class="btn btn-primary">أضف ذكرك</a>
             <button type="button" id="joinPopupClose" class="join-popup__close" aria-label="إغلاق">✕</button>
         </aside>
 
         <hr class="community-divider" aria-hidden="true">
 
-        <section class="project-share" aria-labelledby="project-share-title">
+        <section class="project-share card card-soft" aria-labelledby="project-share-title">
             <h2 id="project-share-title" class="project-share__title">انشر المشروع بلطف 🤍</h2>
             <p class="project-share__text">مشاركة واحدة قد تُلهم قلبًا جديدًا للذكر.</p>
             <div class="project-share__actions">
-                <a class="project-share__btn project-share__btn--whatsapp" data-share-platform="whatsapp" href="#" target="_blank" rel="noopener noreferrer"><span aria-hidden="true">🟢</span><span>WhatsApp</span></a>
-                <a class="project-share__btn project-share__btn--telegram" data-share-platform="telegram" href="#" target="_blank" rel="noopener noreferrer"><span aria-hidden="true">🔵</span><span>Telegram</span></a>
-                <a class="project-share__btn project-share__btn--x" data-share-platform="x" href="#" target="_blank" rel="noopener noreferrer"><span aria-hidden="true">⚫</span><span>X</span></a>
-                <button type="button" class="project-share__btn project-share__btn--native" data-share-platform="native" hidden><span aria-hidden="true">📱</span><span>مشاركة الجهاز</span></button>
+                <a class="btn btn-share project-share__btn project-share__btn--whatsapp" data-share-platform="whatsapp" href="#" target="_blank" rel="noopener noreferrer"><span aria-hidden="true">🟢</span><span>WhatsApp</span></a>
+                <a class="btn btn-share project-share__btn project-share__btn--telegram" data-share-platform="telegram" href="#" target="_blank" rel="noopener noreferrer"><span aria-hidden="true">🔵</span><span>Telegram</span></a>
+                <a class="btn btn-share project-share__btn project-share__btn--x" data-share-platform="x" href="#" target="_blank" rel="noopener noreferrer"><span aria-hidden="true">⚫</span><span>X</span></a>
+                <button type="button" class="btn btn-share project-share__btn project-share__btn--native" data-share-platform="native" hidden><span aria-hidden="true">📱</span><span>مشاركة الجهاز</span></button>
             </div>
         </section>
 
