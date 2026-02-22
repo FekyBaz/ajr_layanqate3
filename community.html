@@ -65,9 +65,22 @@
             <button type="button" id="joinPopupClose" class="join-popup__close" aria-label="إغلاق">✕</button>
         </aside>
 
+        <section class="project-share" aria-labelledby="project-share-title">
+            <h2 id="project-share-title" class="project-share__title">🤍 ساهم في نشر المشروع</h2>
+            <p class="project-share__text">انشر المشروع عبر منصاتك ليصل الخير لعدد أكبر.</p>
+            <div class="project-share__actions">
+                <a class="project-share__btn project-share__btn--whatsapp" data-share-platform="whatsapp" href="#" target="_blank" rel="noopener noreferrer">WhatsApp</a>
+                <a class="project-share__btn project-share__btn--telegram" data-share-platform="telegram" href="#" target="_blank" rel="noopener noreferrer">Telegram</a>
+                <a class="project-share__btn project-share__btn--x" data-share-platform="x" href="#" target="_blank" rel="noopener noreferrer">X</a>
+                <button type="button" class="project-share__btn project-share__btn--native" data-share-platform="native" hidden>مشاركة الجهاز</button>
+            </div>
+        </section>
+
+
     </main>
 
     <script src="community.js"></script>
+    <script src="share-project.js"></script>
 </body>
 
 </html>
