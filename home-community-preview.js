@@ -65,7 +65,8 @@
     }
 
     function renderCards(submissions, avgPostCount) {
-        elements.list.innerHTML = submissions.map((item) => {
+        const previewItems = submissions.slice(0, 3);
+        elements.list.innerHTML = previewItems.map((item) => {
             const badge = item.content_type === 'dhikr' ? 'ذكر' : item.content_type === 'dua' ? 'دعاء' : item.content_type === 'ayah' ? 'آية' : 'حديث';
             const isTrending = (Number(item.post_count) || 0) > avgPostCount && Number(item.post_count) > 0;
 
@@ -86,7 +87,7 @@
 
         elements.list.querySelectorAll('[data-share-id]').forEach((button) => {
             button.addEventListener('click', () => {
-                const found = submissions.find((row) => String(row.id) === String(button.dataset.shareId));
+                const found = previewItems.find((row) => String(row.id) === String(button.dataset.shareId));
                 if (found) {
                     shareSubmission(found);
                 }

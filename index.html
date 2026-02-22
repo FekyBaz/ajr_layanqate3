@@ -70,7 +70,7 @@
         "potentialAction": {
             "@type": "Action",
             "name": "مشاركة ذكر أو دعاء",
-            "target": "https://ajr-la-yanqati.com/#form"
+            "target": "https://ajr-la-yanqati.com/#project-share"
         }
     }
     </script>
@@ -108,7 +108,7 @@
             <a href="/index.html" class="site-logo" aria-label="العودة للصفحة الرئيسية">أجر لا ينقطع 🤍</a>
             <button class="menu-toggle" id="menuToggle" type="button" aria-expanded="false" aria-controls="mainMenu">☰</button>
             <nav class="site-nav" id="mainMenu">
-                <a href="/index.html#form">شارك بذكر</a>
+                <a href="/index.html#project-share">شارك بذكر</a>
                 <a href="/community.html">المجتمع 🤍</a>
             </nav>
         </div>
@@ -159,7 +159,7 @@
                 <cite>— سورة البقرة: 110</cite>
             </blockquote>
             <div class="hero__actions">
-                <a href="#form" class="btn btn--primary hero__cta">
+                <a href="#project-share" class="btn btn--primary hero__cta">
                     ✍️ شارك بذكر
                 </a>
                 <a href="/community.html" class="btn btn--secondary hero__cta">
@@ -173,31 +173,6 @@
          Main Content
          ═══════════════════════════════════════════════════════════════════ -->
     <main id="main" role="main">
-
-        <!-- ═══════════════════════════════════════════════════════════════
-             SECTION 2: How It Works
-             ═══════════════════════════════════════════════════════════════ -->
-        <section class="how-it-works" aria-labelledby="how-it-works-title">
-            <div class="container">
-                <h2 id="how-it-works-title" class="section-title">كيف يعمل؟</h2>
-                <div class="steps">
-                    <div class="step">
-                        <span class="step__icon" aria-hidden="true">١</span>
-                        <p class="step__text">اكتب الذكر بنية الأجر</p>
-                    </div>
-                    <div class="step">
-                        <span class="step__icon" aria-hidden="true">٢</span>
-                        <p class="step__text">تتم مراجعته قبل النشر</p>
-                    </div>
-                    <div class="step">
-                        <span class="step__icon" aria-hidden="true">٣</span>
-                        <p class="step__text">يُنشر بشكل عادل ومتكرر</p>
-                    </div>
-                </div>
-            </div>
-        </section>
-
-
 
         <section class="community-preview" aria-labelledby="community-preview-title">
             <div class="container">
@@ -216,153 +191,7 @@
             </div>
         </section>
 
-        <section class="trust-strip" aria-label="رسائل الثقة">
-            <div class="container trust-strip__content">
-                <p class="trust-strip__item">🔒 لا تسجيل إلزامي</p>
-                <p class="trust-strip__item">📚 مراجعة شرعية ولغوية</p>
-                <p class="trust-strip__item">🤍 أجر متجدد بالمشاركة والنشر</p>
-            </div>
-        </section>
-
-        <!-- ═══════════════════════════════════════════════════════════════
-             SECTION 3: Submission Form
-             ═══════════════════════════════════════════════════════════════ -->
-        <section id="form" class="form-section" aria-labelledby="form-title">
-            <div class="container">
-                <h2 id="form-title" class="section-title">شارك محتواك</h2>
-                <p class="form-section__intro">اكتب مشاركتك بأسلوب واضح وجميل، وسنتولى مراجعتها ونشرها بما يليق بكلام الخير.</p>
-
-                <form id="submission-form" class="submission-form" novalidate>
-                    <!-- CSRF Token placeholder - to be populated by backend -->
-                    <input type="hidden" name="_csrf" id="csrf-token" value="">
-
-                    <!-- Content Type Dropdown -->
-                    <div class="form-group">
-                        <label for="content-type" class="form-label">
-                            نوع المحتوى <span class="required" aria-label="مطلوب">*</span>
-                        </label>
-                        <select id="content-type" name="contentType" class="form-select" required aria-required="true">
-                            <option value="" disabled selected>اختر نوع المحتوى</option>
-                            <option value="dhikr">ذكر</option>
-                            <option value="dua">دعاء</option>
-                            <option value="ayah">آية قرآنية</option>
-                            <option value="hadith">حديث نبوي</option>
-                        </select>
-                        <span class="form-error" id="content-type-error" aria-live="polite"></span>
-                    </div>
-
-                    <!-- Content Textarea -->
-                    <div class="form-group">
-                        <label for="content" class="form-label">
-                            المحتوى <span class="required" aria-label="مطلوب">*</span>
-                        </label>
-                        <textarea id="content" name="content" class="form-textarea" rows="6" maxlength="1000"
-                            placeholder="اكتب الذكر أو الدعاء أو الآية أو الحديث هنا..." required aria-required="true"
-                            aria-describedby="content-hint content-error"></textarea>
-                        <div class="form-hint" id="content-hint">
-                            <span id="char-count">0</span> / <span id="char-max">1000</span> حرف
-                        </div>
-                        <span class="form-error" id="content-error" aria-live="polite"></span>
-                    </div>
-
-                    <!-- Optional Name Field -->
-                    <div class="form-group">
-                        <label for="name" class="form-label">
-                            الاسم <span class="optional">(اختياري)</span>
-                        </label>
-                        <input type="text" id="name" name="name" class="form-input" maxlength="100"
-                            placeholder="اسمك (لن يُنشر)" aria-describedby="name-hint">
-                        <div class="form-hint" id="name-hint">
-                            هذا الحقل اختياري ولن يظهر عند النشر
-                        </div>
-                    </div>
-
-                    <!-- Consent Checkbox -->
-                    <div class="form-group form-group--checkbox">
-                        <label class="checkbox-label">
-                            <input type="checkbox" id="consent" name="consent" required aria-required="true">
-                            <span class="checkbox-custom" aria-hidden="true"></span>
-                            <span class="checkbox-text">
-                                أشارك بهذا المحتوى بنية الأجر، دون انتظار ذكر اسمي
-                            </span>
-                        </label>
-                        <span class="form-error" id="consent-error" aria-live="polite"></span>
-                    </div>
-
-                    <!-- Submit Button -->
-                    <button type="submit" class="btn btn--submit" id="submit-btn">
-                        <span class="btn__text">🤍 إرسال بنية الأجر</span>
-                        <span class="btn__loading" aria-hidden="true">جاري الإرسال...</span>
-                    </button>
-                </form>
-
-                <!-- Success Message (hidden by default) -->
-                <div id="success-message" class="success-message" role="alert" aria-live="polite" hidden>
-                    <span class="success-icon" aria-hidden="true">✓</span>
-                    <h3>تم الإرسال بنجاح</h3>
-                    <p>جزاك الله خيرًا. سيتم مراجعة مشاركتك قريبًا إن شاء الله.</p>
-                    <button type="button" class="btn btn--secondary" id="reset-form">
-                        إرسال مشاركة أخرى
-                    </button>
-                </div>
-            </div>
-        </section>
-
-        <!-- ═══════════════════════════════════════════════════════════════
-             SECTION 4: About the Project (SEO Section)
-             ═══════════════════════════════════════════════════════════════ -->
-        <section id="about" class="about" aria-labelledby="about-title">
-            <div class="container">
-                <h2 id="about-title" class="section-title">عن المشروع</h2>
-                <div class="about__content">
-                    <p>
-                        <strong>أجر لا ينقطع</strong> هو مشروع خيري غير ربحي،
-                        يهدف إلى نشر الذكر والدعاء والآيات والأحاديث الصحيحة
-                        عبر منصات التواصل الاجتماعي،
-                        ليكون صدقة جارية لكل من يشارك فيه.
-                    </p>
-                    <p>
-                        قال رسول الله ﷺ:
-                        <em>«إذا مات ابن آدم انقطع عمله إلا من ثلاث:
-                            صدقة جارية، أو علم يُنتفع به، أو ولد صالح يدعو له»</em>
-                        <span class="hadith-source">(رواه مسلم)</span>
-                    </p>
-                    <h3>كيف يعمل المشروع؟</h3>
-                    <ul>
-                        <li>يمكنك مشاركة أي ذكر أو دعاء أو آية قرآنية أو حديث نبوي صحيح</li>
-                        <li>يتم مراجعة جميع المشاركات يدويًا قبل النشر</li>
-                        <li>لا يُضمن نشر كل مشاركة، والقبول يعتمد على صحة المحتوى ومناسبته</li>
-                        <li>النشر يتم بشكل عادل ودوري على منصات التواصل</li>
-                        <li>الأجر من الله وحده، ونحن مجرد وسيلة</li>
-                    </ul>
-                    <h3>الخصوصية والأمانة</h3>
-                    <p>
-                        لا نجمع بيانات شخصية، ولا نتتبع المستخدمين،
-                        ولا نبيع أي معلومات. هذا المشروع لوجه الله تعالى.
-                    </p>
-                </div>
-            </div>
-        </section>
-
-        <!-- ═══════════════════════════════════════════════════════════════
-             SECTION 5: Guidelines / Trust Section
-             ═══════════════════════════════════════════════════════════════ -->
-        <section class="guidelines" aria-labelledby="guidelines-title">
-            <div class="container">
-                <h2 id="guidelines-title" class="section-title">الضوابط والأمانة</h2>
-                <ul class="guidelines__list">
-                    <li>لا يتم النشر فورًا</li>
-                    <li>يتم مراجعة المحتوى يدويًا</li>
-                    <li>لا يُقبل أي محتوى يخالف القرآن والسنة</li>
-                    <li>قد يتم تصحيح الأخطاء الإملائية أو اللفظية البسيطة دون تغيير المعنى، حرصًا على صحة النشر</li>
-                    <li>لا يتم جمع أو بيع أي بيانات</li>
-                    <li>المشاركة خالصة لوجه الله</li>
-                </ul>
-            </div>
-        </section>
-
-
-        <section class="project-share" aria-labelledby="project-share-title">
+        <section id="project-share" class="project-share" aria-labelledby="project-share-title">
             <div class="container">
                 <h2 id="project-share-title" class="project-share__title">🤍 ساهم في نشر المشروع</h2>
                 <p class="project-share__text">انشر الرابط مع من تحب ليصل الذكر إلى قلوب أكثر.</p>
@@ -415,7 +244,6 @@
     <!-- ═══════════════════════════════════════════════════════════════════
          JavaScript - Form Handling & Validation
          ═══════════════════════════════════════════════════════════════════ -->
-    <script src="script.js"></script>
     <script src="home-community-preview.js"></script>
     <script src="share-project.js"></script>
 </body>
