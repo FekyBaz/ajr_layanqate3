@@ -59,7 +59,7 @@
         const platform = node.dataset.sharePlatform;
 
         if (platform === 'native') {
-            node.hidden = false;
+            node.hidden = typeof navigator.share !== 'function';
             node.addEventListener('click', async (event) => {
                 event.preventDefault();
                 await smartShare('whatsapp');
