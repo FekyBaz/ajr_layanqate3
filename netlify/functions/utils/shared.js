@@ -32,17 +32,27 @@ const ALLOWED_ORIGINS = [
     'http://localhost:3000',
 ];
 
+const SECURITY_HEADERS = {
+    'Content-Type': 'application/json; charset=utf-8',
+    'X-Content-Type-Options': 'nosniff',
+    'X-Frame-Options': 'DENY',
+    'Referrer-Policy': 'strict-origin-when-cross-origin',
+};
+
 export function getCorsHeaders(origin) {
     // Check if origin is allowed or is a Netlify preview
     const isAllowed = ALLOWED_ORIGINS.includes(origin) ||
         (origin && origin.includes('.netlify.app')) ||
         (origin && origin.includes('--') && origin.includes('.netlify.app'));
 
+    const allowOrigin = isAllowed ? origin : ALLOWED_ORIGINS[0];
+
     return {
-        'Access-Control-Allow-Origin': isAllowed ? origin : ALLOWED_ORIGINS[0],
+        ...SECURITY_HEADERS,
+        'Access-Control-Allow-Origin': allowOrigin,
         'Access-Control-Allow-Headers': 'Content-Type, Authorization, X-Ref-Source',
         'Access-Control-Allow-Methods': 'GET, POST, OPTIONS',
-        'Content-Type': 'application/json',
+        Vary: 'Origin',
     };
 }
 
