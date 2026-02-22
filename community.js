@@ -127,7 +127,7 @@ function renderCtaCard() {
 
     const link = document.createElement('a');
     link.href = '/index.html#form';
-    link.className = 'btn btn--primary';
+    link.className = 'btn btn-primary';
     link.textContent = 'أضف الآن';
     cta.appendChild(link);
 
@@ -136,7 +136,7 @@ function renderCtaCard() {
 
 function createCard(item, avgPostCount = 0) {
     const card = document.createElement('article');
-    card.className = 'submission-card card-enter';
+    card.className = 'submission-card card card-soft card-enter';
     card.dataset.submissionId = String(item.id);
     card.tabIndex = 0;
 
@@ -165,7 +165,7 @@ function createCard(item, avgPostCount = 0) {
     card.appendChild(meta);
 
     const shareButton = document.createElement('button');
-    shareButton.className = 'share-btn';
+    shareButton.className = 'share-btn btn btn-ghost';
     shareButton.type = 'button';
     shareButton.dataset.shareId = String(item.id);
     shareButton.textContent = '📤 شارك هذا الذكر';
