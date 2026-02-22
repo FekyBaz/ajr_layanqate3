@@ -102,6 +102,18 @@
          ═══════════════════════════════════════════════════════════════════ -->
     <a href="#main" class="skip-link">تخطي إلى المحتوى الرئيسي</a>
 
+
+    <header class="site-header" role="navigation" aria-label="التنقل الرئيسي">
+        <div class="container site-header__content">
+            <a href="/index.html" class="site-logo" aria-label="العودة للصفحة الرئيسية">أجر لا ينقطع 🤍</a>
+            <button class="menu-toggle" id="menuToggle" type="button" aria-expanded="false" aria-controls="mainMenu">☰</button>
+            <nav class="site-nav" id="mainMenu">
+                <a href="/index.html#form">شارك بذكر</a>
+                <a href="/community.html">المجتمع 🤍</a>
+            </nav>
+        </div>
+    </header>
+
     <!-- ═══════════════════════════════════════════════════════════════════
          SECTION 1: Hero
          ═══════════════════════════════════════════════════════════════════ -->
@@ -146,9 +158,14 @@
                 <p>﴿ وَمَا تُقَدِّمُوا لِأَنفُسِكُم مِّنْ خَيْرٍ تَجِدُوهُ عِندَ اللَّهِ ﴾</p>
                 <cite>— سورة البقرة: 110</cite>
             </blockquote>
-            <a href="#form" class="btn btn--primary hero__cta">
-                ✍️ شارك بذكر
-            </a>
+            <div class="hero__actions">
+                <a href="#form" class="btn btn--primary hero__cta">
+                    ✍️ شارك بذكر
+                </a>
+                <a href="/community.html" class="btn btn--secondary hero__cta">
+                    شاهد أذكار الناس اليوم 🤍
+                </a>
+            </div>
         </div>
     </header>
 
@@ -177,6 +194,25 @@
                         <p class="step__text">يُنشر بشكل عادل ومتكرر</p>
                     </div>
                 </div>
+            </div>
+        </section>
+
+
+
+        <section class="community-preview" aria-labelledby="community-preview-title">
+            <div class="container">
+                <div class="community-preview__head">
+                    <h2 id="community-preview-title" class="section-title">🤍 أحدث مشاركات المجتمع</h2>
+                    <span id="newTodayBadge" class="new-today-badge" hidden></span>
+                </div>
+                <div id="communityPreviewSkeleton" class="community-preview__skeleton" aria-hidden="true">
+                    <div class="skeleton-card"></div>
+                    <div class="skeleton-card"></div>
+                    <div class="skeleton-card"></div>
+                </div>
+                <div id="communityPreviewList" class="community-preview__list" hidden></div>
+                <p id="communityPreviewEmpty" class="state-message" hidden>لا توجد مشاركات معتمدة بعد.</p>
+                <a href="/community.html" class="community-preview__more">عرض جميع المشاركات →</a>
             </div>
         </section>
 
@@ -366,6 +402,7 @@
          JavaScript - Form Handling & Validation
          ═══════════════════════════════════════════════════════════════════ -->
     <script src="script.js"></script>
+    <script src="home-community-preview.js"></script>
 </body>
 
 </html>
