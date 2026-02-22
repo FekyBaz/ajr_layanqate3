@@ -1,9 +1,16 @@
 import { supabase } from './shared.js';
 
 const DEFAULT_DAILY_TARGET = 200;
+const TARGET_VARIANCE = 20;
 
 function getTodayDateKey() {
     return new Date().toISOString().slice(0, 10);
+}
+
+function getDailyTargetForDate(dateKey) {
+    const seed = Number(dateKey.replaceAll('-', '')) || 0;
+    const variance = (seed % ((TARGET_VARIANCE * 2) + 1)) - TARGET_VARIANCE;
+    return DEFAULT_DAILY_TARGET + variance;
 }
 
 export async function getOrCreateGoal(today = getTodayDateKey()) {
@@ -23,7 +30,7 @@ export async function getOrCreateGoal(today = getTodayDateKey()) {
         .from('community_goal')
         .insert({
             date: today,
-            daily_target: DEFAULT_DAILY_TARGET,
+            daily_target: getDailyTargetForDate(today),
             current_progress: 0,
         })
         .select('id,daily_target,current_progress,date,updated_at')
