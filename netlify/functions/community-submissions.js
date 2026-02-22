@@ -1,9 +1,13 @@
 import { supabase, error, success, handleOptions } from './utils/shared.js';
+import { getOrCreateGoal } from './utils/community-goal.js';
 
 const VALID_TYPES = ['all', 'dhikr', 'dua', 'ayah', 'hadith'];
 const VALID_SORT = ['latest', 'most_shared'];
-const VALID_REF_SOURCES = ['instagram', 'facebook', 'direct', 'telegram'];
+const VALID_REF_SOURCES = ['instagram', 'facebook', 'direct', 'telegram', 'whatsapp_share', 'telegram_share', 'x_share'];
 const DEFAULT_PAGE_SIZE = 10;
+const HOMEPAGE_PREVIEW_SIZE = 3;
+const MAX_PAGE_SIZE = 20;
+const VALID_SURFACES = ['community', 'homepage_preview'];
 const RESPONSE_CACHE_CONTROL = 'public, max-age=45, s-maxage=45, stale-while-revalidate=60';
 
 function parsePositiveInt(value, fallback) {
@@ -112,10 +116,13 @@ export async function handler(event) {
 
     try {
         const params = new URLSearchParams(event.queryStringParameters || {});
-        const page = parsePositiveInt(params.get('page'), 1);
+        const requestedPage = parsePositiveInt(params.get('page'), 1);
         const contentType = (params.get('type') || 'all').toLowerCase();
         const sortBy = (params.get('sort') || 'latest').toLowerCase();
-        const limit = Math.min(parsePositiveInt(params.get('limit'), DEFAULT_PAGE_SIZE), DEFAULT_PAGE_SIZE);
+        const surface = (params.get('surface') || 'community').toLowerCase();
+        const requestedLimit = parsePositiveInt(params.get('limit'), DEFAULT_PAGE_SIZE);
+        const cappedLimit = Math.min(requestedLimit, MAX_PAGE_SIZE);
+        const limit = surface === 'homepage_preview' ? Math.min(cappedLimit, HOMEPAGE_PREVIEW_SIZE) : DEFAULT_PAGE_SIZE;
         const refSource = sanitizeRefSource(event.headers['x-ref-source'] || event.headers['X-Ref-Source'] || 'direct');
 
         if (!VALID_TYPES.includes(contentType)) {
@@ -126,17 +133,53 @@ export async function handler(event) {
             return error(400, 'Invalid sorting option', origin);
         }
 
-        console.log('[community-submissions] ref source:', refSource);
+        if (!VALID_SURFACES.includes(surface)) {
+            return error(400, 'Invalid surface', origin);
+        }
 
+        console.log('[community-submissions] request meta', {
+            refSource,
+            surface,
+            requestedPage,
+            requestedLimit,
+            enforcedLimit: limit,
+            contentType,
+            sortBy,
+        });
+
+        let countQuery = supabase
+            .from('submissions')
+            .select('id', { count: 'exact', head: true })
+            .eq('status', 'Approved');
+
+        if (contentType !== 'all') {
+            countQuery = countQuery.eq('content_type', contentType);
+        }
+
+        const { count, error: countError } = await countQuery;
+
+        if (countError) {
+            console.error('Community submissions count error:', countError.message);
+            return error(500, 'تعذر تحميل المشاركات المعتمدة', origin);
+        }
+
+        const total = count || 0;
+        const totalPages = total === 0 ? 1 : Math.ceil(total / limit);
+        const page = Math.min(requestedPage, totalPages);
         const from = (page - 1) * limit;
         const to = from + limit - 1;
 
+        if (requestedPage > totalPages) {
+            console.warn('[community-submissions] overflow page corrected', {
+                requestedPage,
+                correctedPage: page,
+                totalPages,
+            });
+        }
+
         let baseQuery = supabase
             .from('submissions')
-            .select(
-                'id,message,corrected_message,author_name,content_type,created_at,post_count',
-                { count: 'exact' }
-            )
+            .select('id,message,corrected_message,author_name,content_type,created_at,post_count')
             .eq('status', 'Approved');
 
         if (contentType !== 'all') {
@@ -149,7 +192,7 @@ export async function handler(event) {
             baseQuery = baseQuery.order('created_at', { ascending: false });
         }
 
-        const { data, error: fetchError, count } = await baseQuery.range(from, to);
+        const { data, error: fetchError } = await baseQuery.range(from, to);
 
         if (fetchError) {
             console.error('Community submissions fetch error:', fetchError.message);
@@ -170,9 +213,10 @@ export async function handler(event) {
             console.error('Featured submission fetch error:', featuredError.message);
         }
 
-        const [statsResult, newApprovedTodayResult] = await Promise.allSettled([
+        const [statsResult, newApprovedTodayResult, goalResult] = await Promise.allSettled([
             getStatsSnapshot(),
             getNewApprovedTodayCount(),
+            getOrCreateGoal(),
         ]);
 
         if (statsResult.status === 'rejected') {
@@ -183,11 +227,15 @@ export async function handler(event) {
             console.error('Community today count failed:', newApprovedTodayResult.reason?.message || 'unknown');
         }
 
+        if (goalResult.status === 'rejected') {
+            console.error('Community goal fetch failed:', goalResult.reason?.message || 'unknown');
+        }
+
         const statsPayload = statsResult.status === 'fulfilled'
             ? statsResult.value
             : {
                 stats: {
-                    totalApproved: count || 0,
+                    totalApproved: total,
                     totalPostCount: (data || []).reduce((sum, row) => sum + (Number(row.post_count) || 0), 0),
                     averagePostCount: 0,
                     updatedAt: new Date().toISOString(),
@@ -196,6 +244,9 @@ export async function handler(event) {
             };
 
         const newApprovedToday = newApprovedTodayResult.status === 'fulfilled' ? newApprovedTodayResult.value : 0;
+        const goal = goalResult.status === 'fulfilled'
+            ? goalResult.value
+            : { daily_target: 200, current_progress: 0, date: new Date().toISOString().slice(0, 10) };
 
         const payload = {
             submissions: data || [],
@@ -204,12 +255,17 @@ export async function handler(event) {
                 ...statsPayload.stats,
                 newApprovedToday,
                 source: statsPayload.source,
+                goal: {
+                    dailyTarget: Number(goal.daily_target) || 200,
+                    currentProgress: Number(goal.current_progress) || 0,
+                    date: goal.date,
+                },
             },
             pagination: {
                 page,
                 pageSize: limit,
-                total: count || 0,
-                totalPages: Math.max(Math.ceil((count || 0) / limit), 1),
+                total,
+                totalPages,
             },
         };
 
