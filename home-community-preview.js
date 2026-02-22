@@ -71,7 +71,7 @@
             const isTrending = (Number(item.post_count) || 0) > avgPostCount && Number(item.post_count) > 0;
 
             return `
-                <article class="community-preview-card">
+                <article class="community-preview-card card card-outline">
                     <div class="community-preview-card__top">
                         <span class="content-badge badge-${item.content_type}">${badge}</span>
                         ${isTrending ? '<span class="trending-badge">🔥 رائج الآن</span>' : ''}
@@ -79,7 +79,7 @@
                     <p>${truncateText(resolveMessage(item), 120)}</p>
                     <div class="community-preview-card__meta">
                         <small>${formatDate(item.created_at)}</small>
-                        <button type="button" data-share-id="${item.id}" class="share-btn share-btn--small">📤 مشاركة</button>
+                        <button type="button" data-share-id="${item.id}" class="share-btn share-btn--small btn btn-ghost">📤 مشاركة</button>
                     </div>
                 </article>
             `;
