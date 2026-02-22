@@ -202,7 +202,7 @@
         <section class="community-preview" aria-labelledby="community-preview-title">
             <div class="container">
                 <div class="community-preview__head">
-                    <h2 id="community-preview-title" class="section-title">🤍 أحدث مشاركات المجتمع</h2>
+                    <h2 id="community-preview-title" class="community-preview__title">🤍 أحدث مشاركات المجتمع</h2>
                     <span id="newTodayBadge" class="new-today-badge" hidden></span>
                 </div>
                 <div id="communityPreviewSkeleton" class="community-preview__skeleton" aria-hidden="true">
@@ -361,6 +361,20 @@
             </div>
         </section>
 
+
+        <section class="project-share" aria-labelledby="project-share-title">
+            <div class="container">
+                <h2 id="project-share-title" class="project-share__title">🤍 ساهم في نشر المشروع</h2>
+                <p class="project-share__text">انشر الرابط مع من تحب ليصل الذكر إلى قلوب أكثر.</p>
+                <div class="project-share__actions">
+                    <a class="project-share__btn project-share__btn--whatsapp" data-share-platform="whatsapp" href="#" target="_blank" rel="noopener noreferrer">WhatsApp</a>
+                    <a class="project-share__btn project-share__btn--telegram" data-share-platform="telegram" href="#" target="_blank" rel="noopener noreferrer">Telegram</a>
+                    <a class="project-share__btn project-share__btn--x" data-share-platform="x" href="#" target="_blank" rel="noopener noreferrer">X</a>
+                    <button type="button" class="project-share__btn project-share__btn--native" data-share-platform="native" hidden>مشاركة الجهاز</button>
+                </div>
+            </div>
+        </section>
+
     </main>
 
     <!-- ═══════════════════════════════════════════════════════════════════
@@ -403,6 +417,7 @@
          ═══════════════════════════════════════════════════════════════════ -->
     <script src="script.js"></script>
     <script src="home-community-preview.js"></script>
+    <script src="share-project.js"></script>
 </body>
 
 </html>

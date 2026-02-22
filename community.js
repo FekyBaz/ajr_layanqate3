@@ -17,6 +17,9 @@ const state = {
     type: 'all',
     sort: 'latest',
     page: 1,
+    limit: 10,
+    totalPages: 1,
+    total: 0,
     refSource: 'direct',
     viewedIds: new Map(),
     submissionsById: new Map(),
@@ -239,6 +242,7 @@ async function fetchSubmissions() {
 
     const query = new URLSearchParams({
         page: String(state.page),
+        limit: String(state.limit),
         type: state.type,
         sort: state.sort,
     });
@@ -259,6 +263,16 @@ async function fetchSubmissions() {
         if (!result.success) {
             throw new Error(result.message || 'Unexpected API response');
         }
+
+
+        console.debug('[community] response payload', {
+            submissions: Array.isArray(result.submissions) ? result.submissions.length : 0,
+            total: result.pagination?.total,
+            totalPages: result.pagination?.totalPages,
+            page: result.pagination?.page,
+            type: state.type,
+            sort: state.sort,
+        });
 
         renderResponse(result);
     } catch (err) {
@@ -295,13 +309,26 @@ function cacheSubmissions(submissions = []) {
 function renderResponse(result) {
     const { submissions, pagination, featured, stats } = result;
     const avgPostCount = Number(stats?.averagePostCount) || 0;
+    state.totalPages = Math.max(Number(pagination?.totalPages) || 1, 1);
+    state.total = Number(pagination?.total) || 0;
 
     cacheSubmissions(submissions);
     renderStats(stats, pagination);
     renderFeatured(featured, avgPostCount);
 
     if (!submissions.length) {
-        elements.stateMessage.textContent = 'لا توجد مشاركات معتمدة ضمن هذا التصنيف حتى الآن.';
+        if (state.total > 0 && state.page > state.totalPages) {
+            state.page = state.totalPages;
+            fetchSubmissions();
+            return;
+        }
+
+        if (state.total === 0) {
+            elements.stateMessage.textContent = 'لا توجد مشاركات معتمدة ضمن هذا التصنيف حتى الآن.';
+        } else {
+            elements.stateMessage.textContent = 'لا توجد عناصر في هذه الصفحة، تم ضبط التصفح تلقائيًا.';
+        }
+
         elements.pagination.hidden = true;
         return;
     }
@@ -310,9 +337,9 @@ function renderResponse(result) {
     elements.submissionsContainer.innerHTML = buildCards(submissions, avgPostCount);
 
     elements.pagination.hidden = false;
-    elements.pageInfo.textContent = `صفحة ${pagination.page} من ${pagination.totalPages}`;
-    elements.prevPage.disabled = pagination.page <= 1;
-    elements.nextPage.disabled = pagination.page >= pagination.totalPages;
+    elements.pageInfo.textContent = `صفحة ${pagination.page} من ${state.totalPages}`;
+    elements.prevPage.disabled = state.page <= 1;
+    elements.nextPage.disabled = state.page >= state.totalPages;
 }
 
 function setActiveTab(type) {
@@ -345,8 +372,10 @@ elements.prevPage.addEventListener('click', () => {
 });
 
 elements.nextPage.addEventListener('click', () => {
-    state.page += 1;
-    fetchSubmissions();
+    if (state.page < state.totalPages) {
+        state.page += 1;
+        fetchSubmissions();
+    }
 });
 
 elements.submissionsContainer.addEventListener('click', async (event) => {
