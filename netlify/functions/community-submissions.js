@@ -3,7 +3,7 @@ import { supabase, error, success, handleOptions } from './utils/shared.js';
 const VALID_TYPES = ['all', 'dhikr', 'dua', 'ayah', 'hadith'];
 const VALID_SORT = ['latest', 'most_shared'];
 const VALID_REF_SOURCES = ['instagram', 'facebook', 'direct', 'telegram'];
-const PAGE_SIZE = 10;
+const DEFAULT_PAGE_SIZE = 10;
 const RESPONSE_CACHE_CONTROL = 'public, max-age=45, s-maxage=45, stale-while-revalidate=60';
 
 function parsePositiveInt(value, fallback) {
@@ -115,7 +115,7 @@ export async function handler(event) {
         const page = parsePositiveInt(params.get('page'), 1);
         const contentType = (params.get('type') || 'all').toLowerCase();
         const sortBy = (params.get('sort') || 'latest').toLowerCase();
-        const limit = Math.min(parsePositiveInt(params.get('limit'), PAGE_SIZE), PAGE_SIZE);
+        const limit = Math.min(parsePositiveInt(params.get('limit'), DEFAULT_PAGE_SIZE), DEFAULT_PAGE_SIZE);
         const refSource = sanitizeRefSource(event.headers['x-ref-source'] || event.headers['X-Ref-Source'] || 'direct');
 
         if (!VALID_TYPES.includes(contentType)) {
@@ -197,7 +197,7 @@ export async function handler(event) {
 
         const newApprovedToday = newApprovedTodayResult.status === 'fulfilled' ? newApprovedTodayResult.value : 0;
 
-        return success({
+        const payload = {
             submissions: data || [],
             featured: featured || null,
             stats: {
@@ -211,7 +211,21 @@ export async function handler(event) {
                 total: count || 0,
                 totalPages: Math.max(Math.ceil((count || 0) / limit), 1),
             },
-        }, origin, {
+        };
+
+        console.log('[community-submissions] payload shape', {
+            submissionsCount: payload.submissions.length,
+            hasFeatured: Boolean(payload.featured),
+            statsSource: payload.stats.source,
+            total: payload.pagination.total,
+            totalPages: payload.pagination.totalPages,
+            page: payload.pagination.page,
+            pageSize: payload.pagination.pageSize,
+            type: contentType,
+            sort: sortBy,
+        });
+
+        return success(payload, origin, {
             'Cache-Control': RESPONSE_CACHE_CONTROL,
         });
     } catch (err) {
