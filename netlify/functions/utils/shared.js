@@ -40,7 +40,7 @@ export function getCorsHeaders(origin) {
 
     return {
         'Access-Control-Allow-Origin': isAllowed ? origin : ALLOWED_ORIGINS[0],
-        'Access-Control-Allow-Headers': 'Content-Type, Authorization',
+        'Access-Control-Allow-Headers': 'Content-Type, Authorization, X-Ref-Source',
         'Access-Control-Allow-Methods': 'GET, POST, OPTIONS',
         'Content-Type': 'application/json',
     };
