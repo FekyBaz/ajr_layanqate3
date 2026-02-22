@@ -1048,3 +1048,176 @@ p {
         color: black;
     }
 }
+
+/* ═══════════════════════════════════════════════════════════════════════════
+   Community Contributions Page
+   ═══════════════════════════════════════════════════════════════════════════ */
+
+.community-body {
+    background: linear-gradient(180deg, #f9fcfb 0%, #f3f7f5 100%);
+    color: #1f2937;
+}
+
+.community-page {
+    max-width: 860px;
+    margin: 0 auto;
+    padding: 3rem 1rem 4rem;
+}
+
+.community-header h1 {
+    margin: 0;
+    color: #0f766e;
+}
+
+.community-stats {
+    margin-top: 0.8rem;
+    font-weight: 600;
+}
+
+.community-controls {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 1rem;
+    flex-wrap: wrap;
+    margin: 2rem 0 1.25rem;
+}
+
+.tabs {
+    display: flex;
+    gap: 0.5rem;
+    flex-wrap: wrap;
+}
+
+.tab {
+    border: none;
+    background: #e5efe9;
+    border-radius: 999px;
+    padding: 0.5rem 0.9rem;
+    cursor: pointer;
+    transition: all 0.25s ease;
+}
+
+.tab.is-active {
+    background: #0f766e;
+    color: #fff;
+    transform: translateY(-1px);
+}
+
+.sort-wrap select {
+    margin-inline-start: 0.5rem;
+    border-radius: 10px;
+    border: 1px solid #cbd5e1;
+    padding: 0.4rem 0.6rem;
+}
+
+.submissions-grid {
+    display: grid;
+    gap: 1rem;
+}
+
+.submission-card {
+    background: #fff;
+    border-radius: 16px;
+    padding: 1rem;
+    box-shadow: 0 10px 30px rgba(15, 23, 42, 0.05);
+    border: 1px solid #edf2f7;
+}
+
+.submission-card--featured {
+    border: 1px solid #bbf7d0;
+    background: #f0fdf4;
+}
+
+.content-badge {
+    display: inline-block;
+    border-radius: 999px;
+    padding: 0.25rem 0.65rem;
+    font-size: 0.85rem;
+    margin-bottom: 0.75rem;
+}
+
+.badge-dhikr { background: #dcfce7; color: #166534; }
+.badge-dua { background: #dbeafe; color: #1e40af; }
+.badge-ayah { background: #fef3c7; color: #92400e; }
+.badge-hadith { background: #f3e8ff; color: #6b21a8; }
+
+.submission-message {
+    line-height: 1.9;
+    font-size: 1.05rem;
+}
+
+.submission-author {
+    margin: 0.6rem 0;
+    color: #475569;
+}
+
+.submission-meta {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 0.75rem;
+    font-size: 0.9rem;
+    color: #64748b;
+}
+
+.shares {
+    margin: 0;
+    color: #0f766e;
+    font-weight: 600;
+}
+
+.state-message {
+    background: #ffffffaa;
+    border-radius: 12px;
+    padding: 1rem;
+    border: 1px dashed #cbd5e1;
+    text-align: center;
+}
+
+.pagination {
+    margin-top: 1.25rem;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    gap: 1rem;
+}
+
+.pagination button {
+    border: none;
+    border-radius: 10px;
+    padding: 0.45rem 0.9rem;
+    background: #e2e8f0;
+    cursor: pointer;
+}
+
+.pagination button:disabled {
+    opacity: 0.4;
+    cursor: not-allowed;
+}
+
+.card-enter {
+    animation: fadeInUp 0.3s ease;
+}
+
+@keyframes fadeInUp {
+    from {
+        opacity: 0;
+        transform: translateY(6px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+@media (max-width: 640px) {
+    .community-controls {
+        align-items: stretch;
+    }
+
+    .submission-meta {
+        flex-direction: column;
+        align-items: flex-start;
+    }
+}
