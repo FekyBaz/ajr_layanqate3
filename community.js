@@ -95,42 +95,85 @@ function getShareTargetUrl(platform = 'whatsapp') {
 
 function getShareMessage(item, platform = 'whatsapp') {
     const siteUrl = getShareTargetUrl(platform);
-    return `"${resolveMessage(item)}"\n\n— ${item.author_name || 'عبدٌ يرجو الأجر'}\nمن مجتمع أجر لا ينقطع 🤍\n${siteUrl}`;
+    return `"${resolveMessage(item)}"\n\nمن مشروع أجر لا ينقطع 🤍\n${siteUrl}`;
+}
+
+function createCardTop(item, avgPostCount) {
+    const top = document.createElement('div');
+    top.className = 'submission-card__top';
+
+    const badge = document.createElement('span');
+    badge.className = `content-badge badge-${item.content_type}`;
+    badge.textContent = badgeLabels[item.content_type] || item.content_type;
+    top.appendChild(badge);
+
+    const isTrending = item.post_count > avgPostCount && item.post_count > 0;
+    if (isTrending) {
+        const trendingBadge = document.createElement('span');
+        trendingBadge.className = 'trending-badge';
+        trendingBadge.textContent = '🔥 رائج الآن';
+        top.appendChild(trendingBadge);
+    }
+
+    return top;
 }
 
 function renderCtaCard() {
-    return `
-        <aside class="community-cta card-enter" aria-label="دعوة للمشاركة">
-            <p>🤍 أضف ذكرك أنت أيضًا</p>
-            <a href="/index.html#form" class="btn btn--primary">أضف الآن</a>
-        </aside>
-    `;
+    const cta = document.createElement('aside');
+    cta.className = 'community-cta card-enter';
+    cta.setAttribute('aria-label', 'دعوة للمشاركة');
+
+    const label = document.createElement('p');
+    label.textContent = '🤍 أضف ذكرك أنت أيضًا';
+    cta.appendChild(label);
+
+    const link = document.createElement('a');
+    link.href = '/index.html#form';
+    link.className = 'btn btn--primary';
+    link.textContent = 'أضف الآن';
+    cta.appendChild(link);
+
+    return cta;
 }
 
 function createCard(item, avgPostCount = 0) {
-    const badge = badgeLabels[item.content_type] || item.content_type;
-    const sharesMarkup = item.post_count > 0
-        ? `<p class="shares">🕊 تمت المشاركة ${formatNumber(item.post_count)} مرة</p>`
-        : '';
-    const trendingBadge = item.post_count > avgPostCount && item.post_count > 0
-        ? '<span class="trending-badge">🔥 رائج الآن</span>'
-        : '';
+    const card = document.createElement('article');
+    card.className = 'submission-card card-enter';
+    card.dataset.submissionId = String(item.id);
+    card.tabIndex = 0;
 
-    return `
-        <article class="submission-card card-enter" data-submission-id="${item.id}" tabindex="0">
-            <div class="submission-card__top">
-                <span class="content-badge badge-${item.content_type}">${badge}</span>
-                ${trendingBadge}
-            </div>
-            <p class="submission-message">"${resolveMessage(item)}"</p>
-            <p class="submission-author">— ${item.author_name || 'عبدٌ يرجو الأجر'}</p>
-            <div class="submission-meta">
-                <time datetime="${item.created_at}">${formatDate(item.created_at)}</time>
-                ${sharesMarkup}
-            </div>
-            <button class="share-btn" type="button" data-share-id="${item.id}">📤 شارك هذا الذكر</button>
-        </article>
-    `;
+    card.appendChild(createCardTop(item, avgPostCount));
+
+    const message = document.createElement('p');
+    message.className = 'submission-message';
+    message.textContent = `"${resolveMessage(item)}"`;
+    card.appendChild(message);
+
+    const meta = document.createElement('div');
+    meta.className = 'submission-meta';
+
+    const timestamp = document.createElement('time');
+    timestamp.dateTime = item.created_at;
+    timestamp.textContent = formatDate(item.created_at);
+    meta.appendChild(timestamp);
+
+    if (item.post_count > 0) {
+        const shares = document.createElement('p');
+        shares.className = 'shares';
+        shares.textContent = `🕊 تمت المشاركة ${formatNumber(item.post_count)} مرة`;
+        meta.appendChild(shares);
+    }
+
+    card.appendChild(meta);
+
+    const shareButton = document.createElement('button');
+    shareButton.className = 'share-btn';
+    shareButton.type = 'button';
+    shareButton.dataset.shareId = String(item.id);
+    shareButton.textContent = '📤 شارك هذا الذكر';
+    card.appendChild(shareButton);
+
+    return card;
 }
 
 function showToast() {
@@ -220,9 +263,13 @@ async function shareSubmission(item) {
         showToast();
     } catch (err) {
         if (err?.name !== 'AbortError') {
-            await copyToClipboard(shareText);
-            await trackShare(preferredPlatform, item.id);
-            showToast();
+            try {
+                await copyToClipboard(shareText);
+                await trackShare(preferredPlatform, item.id);
+                showToast();
+            } catch (copyErr) {
+                console.error('[community] Share failed after fallback', { err, copyErr, submissionId: item?.id });
+            }
         }
     }
 }
@@ -252,17 +299,17 @@ async function incrementView(submissionId) {
 }
 
 function buildCards(submissions, avgPostCount) {
-    const chunks = [];
+    const fragment = document.createDocumentFragment();
 
     submissions.forEach((item, index) => {
-        chunks.push(createCard(item, avgPostCount));
+        fragment.appendChild(createCard(item, avgPostCount));
 
         if ((index + 1) % CTA_INTERVAL === 0 && index !== submissions.length - 1) {
-            chunks.push(renderCtaCard());
+            fragment.appendChild(renderCtaCard());
         }
     });
 
-    return chunks.join('');
+    return fragment;
 }
 
 async function fetchSubmissions() {
@@ -319,7 +366,8 @@ function renderFeatured(featured, avgPostCount) {
     }
 
     elements.featuredSection.hidden = false;
-    elements.featuredCard.innerHTML = createCard(featured, avgPostCount);
+    elements.featuredCard.innerHTML = '';
+    elements.featuredCard.appendChild(createCard(featured, avgPostCount));
 }
 
 function renderGoal(goal = {}) {
@@ -346,9 +394,13 @@ function renderStats(stats = {}, pagination = {}) {
     elements.mobileStatsBar.hidden = false;
 }
 
-function cacheSubmissions(submissions = []) {
+function cacheSubmissions(submissions = [], featured = null) {
     state.submissionsById.clear();
     submissions.forEach((item) => state.submissionsById.set(Number(item.id), item));
+
+    if (featured?.id) {
+        state.submissionsById.set(Number(featured.id), featured);
+    }
 }
 
 function renderResponse(result) {
@@ -358,7 +410,7 @@ function renderResponse(result) {
     state.total = Number(pagination?.total) || 0;
     state.page = Math.min(Math.max(Number(pagination?.page) || state.page, 1), state.totalPages);
 
-    cacheSubmissions(submissions);
+    cacheSubmissions(submissions, featured);
     renderStats(stats, pagination);
     renderGoal(stats?.goal || {});
     renderFeatured(featured, avgPostCount);
@@ -376,7 +428,8 @@ function renderResponse(result) {
     }
 
     elements.stateMessage.hidden = true;
-    elements.submissionsContainer.innerHTML = buildCards(submissions, avgPostCount);
+    elements.submissionsContainer.innerHTML = '';
+    elements.submissionsContainer.appendChild(buildCards(submissions, avgPostCount));
 
     elements.pagination.hidden = false;
     elements.pageInfo.textContent = `صفحة ${state.page} من ${state.totalPages}`;
@@ -406,10 +459,15 @@ elements.sortSelect.addEventListener('change', (event) => {
     fetchSubmissions();
 });
 
+function scrollToSubmissions() {
+    elements.submissionsContainer.scrollIntoView({ behavior: 'smooth', block: 'start' });
+}
+
 elements.prevPage.addEventListener('click', () => {
     if (state.page > 1) {
         state.page -= 1;
         fetchSubmissions();
+        scrollToSubmissions();
     }
 });
 
@@ -417,12 +475,17 @@ elements.nextPage.addEventListener('click', () => {
     if (state.page < state.totalPages) {
         state.page += 1;
         fetchSubmissions();
+        scrollToSubmissions();
     }
 });
 
-elements.submissionsContainer.addEventListener('click', async (event) => {
+elements.communityPage = document.querySelector('.community-page');
+
+elements.communityPage.addEventListener('click', async (event) => {
     const shareButton = event.target.closest('[data-share-id]');
     if (shareButton) {
+        event.preventDefault();
+        event.stopPropagation();
         const submissionId = Number(shareButton.dataset.shareId);
         const selected = state.submissionsById.get(submissionId);
         if (!selected) return;
@@ -431,8 +494,8 @@ elements.submissionsContainer.addEventListener('click', async (event) => {
         return;
     }
 
-    const clickedCard = event.target.closest('[data-submission-id]');
-    if (clickedCard) {
+    const clickedCard = event.target.closest('.submission-card[data-submission-id]');
+    if (clickedCard && !event.target.closest('a, button, select, option')) {
         await incrementView(Number(clickedCard.dataset.submissionId));
     }
 });
