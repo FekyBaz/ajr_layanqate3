@@ -1064,19 +1064,19 @@ p {
     padding: 3rem 1rem 4rem;
 }
 
-.community-header h1 {
+.community-page .community-header h1 {
     margin: 0;
     color: #0f766e;
 }
 
-.community-stats {
+.community-page .community-stats {
     margin-top: 0.8rem;
     font-weight: 600;
     display: grid;
     gap: 0.2rem;
 }
 
-.community-controls {
+.community-page .community-controls {
     display: flex;
     justify-content: space-between;
     align-items: center;
@@ -1085,13 +1085,13 @@ p {
     margin: 2rem 0 1.25rem;
 }
 
-.tabs {
+.community-page .tabs {
     display: flex;
     gap: 0.5rem;
     flex-wrap: wrap;
 }
 
-.tab {
+.community-page .tab {
     border: none;
     background: #e5efe9;
     border-radius: 999px;
@@ -1100,25 +1100,25 @@ p {
     transition: all 0.25s ease;
 }
 
-.tab.is-active {
+.community-page .tab.is-active {
     background: #0f766e;
     color: #fff;
     transform: translateY(-1px);
 }
 
-.sort-wrap select {
+.community-page .sort-wrap select {
     margin-inline-start: 0.5rem;
     border-radius: 10px;
     border: 1px solid #cbd5e1;
     padding: 0.4rem 0.6rem;
 }
 
-.submissions-grid {
+.community-page .submissions-grid {
     display: grid;
     gap: 1rem;
 }
 
-.submission-card {
+.community-page .submission-card {
     background: #fff;
     border-radius: 16px;
     padding: 1rem;
@@ -1126,14 +1126,14 @@ p {
     border: 1px solid #edf2f7;
 }
 
-.submission-card__top {
+.community-page .submission-card__top {
     display: flex;
     justify-content: space-between;
     align-items: center;
     gap: 0.5rem;
 }
 
-.trending-badge {
+.community-page .trending-badge {
     background: #fff7ed;
     color: #c2410c;
     border-radius: 999px;
@@ -1142,12 +1142,12 @@ p {
     font-weight: 700;
 }
 
-.submission-card--featured {
+.community-page .submission-card--featured {
     border: 1px solid #bbf7d0;
     background: #f0fdf4;
 }
 
-.content-badge {
+.community-page .content-badge {
     display: inline-block;
     border-radius: 999px;
     padding: 0.25rem 0.65rem;
@@ -1155,22 +1155,22 @@ p {
     margin-bottom: 0.75rem;
 }
 
-.badge-dhikr { background: #dcfce7; color: #166534; }
-.badge-dua { background: #dbeafe; color: #1e40af; }
-.badge-ayah { background: #fef3c7; color: #92400e; }
-.badge-hadith { background: #f3e8ff; color: #6b21a8; }
+.community-page .badge-dhikr { background: #dcfce7; color: #166534; }
+.community-page .badge-dua { background: #dbeafe; color: #1e40af; }
+.community-page .badge-ayah { background: #fef3c7; color: #92400e; }
+.community-page .badge-hadith { background: #f3e8ff; color: #6b21a8; }
 
-.submission-message {
+.community-page .submission-message {
     line-height: 1.9;
     font-size: 1.05rem;
 }
 
-.submission-author {
+.community-page .submission-author {
     margin: 0.6rem 0;
     color: #475569;
 }
 
-.submission-meta {
+.community-page .submission-meta {
     display: flex;
     justify-content: space-between;
     align-items: center;
@@ -1179,13 +1179,13 @@ p {
     color: #64748b;
 }
 
-.shares {
+.community-page .shares {
     margin: 0;
     color: #0f766e;
     font-weight: 600;
 }
 
-.share-btn {
+.community-page .share-btn {
     margin-top: 0.85rem;
     border: 1px solid #99f6e4;
     background: #ecfeff;
@@ -1196,11 +1196,11 @@ p {
     cursor: pointer;
 }
 
-.share-btn:hover {
+.community-page .share-btn:hover {
     background: #cffafe;
 }
 
-.community-cta {
+.community-page .community-cta {
     border: 1px dashed #94a3b8;
     background: #f8fafc;
     text-align: center;
@@ -1209,7 +1209,7 @@ p {
     gap: 0.8rem;
 }
 
-.toast {
+.community-page .toast {
     position: fixed;
     left: 50%;
     bottom: 1.2rem;
@@ -1223,20 +1223,20 @@ p {
     z-index: 1200;
 }
 
-.toast.is-visible {
+.community-page .toast.is-visible {
     opacity: 1;
 }
 
-.mobile-stats-bar {
+.community-page .mobile-stats-bar {
     display: none;
 }
 
-.mobile-stats-bar__cta {
+.community-page .mobile-stats-bar__cta {
     padding: 0.4rem 0.9rem;
     font-size: 0.9rem;
 }
 
-.state-message {
+.community-page .state-message {
     background: #ffffffaa;
     border-radius: 12px;
     padding: 1rem;
@@ -1244,7 +1244,7 @@ p {
     text-align: center;
 }
 
-.pagination {
+.community-page .pagination {
     margin-top: 1.25rem;
     display: flex;
     justify-content: center;
@@ -1252,7 +1252,7 @@ p {
     gap: 1rem;
 }
 
-.pagination button {
+.community-page .pagination button {
     border: none;
     border-radius: 10px;
     padding: 0.45rem 0.9rem;
@@ -1260,12 +1260,12 @@ p {
     cursor: pointer;
 }
 
-.pagination button:disabled {
+.community-page .pagination button:disabled {
     opacity: 0.4;
     cursor: not-allowed;
 }
 
-.card-enter {
+.community-page .card-enter {
     animation: fadeInUp 0.3s ease;
 }
 
@@ -1281,11 +1281,11 @@ p {
 }
 
 @media (max-width: 640px) {
-    .community-controls {
+    .community-page .community-controls {
         align-items: stretch;
     }
 
-    .submission-meta {
+    .community-page .submission-meta {
         flex-direction: column;
         align-items: flex-start;
     }
@@ -1294,7 +1294,7 @@ p {
         padding-bottom: 6rem;
     }
 
-    .mobile-stats-bar {
+    .community-page .mobile-stats-bar {
         position: fixed;
         display: flex;
         left: 0.8rem;
