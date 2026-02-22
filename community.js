@@ -1,8 +1,9 @@
 const API_ENDPOINT = '/.netlify/functions/community-submissions';
 const VIEW_ENDPOINT = '/.netlify/functions/community-submission-view';
 const CTA_INTERVAL = 5;
-const REF_ALLOWLIST = ['instagram', 'facebook', 'direct', 'telegram'];
+const REF_ALLOWLIST = ['instagram', 'facebook', 'direct', 'telegram', 'whatsapp_share', 'telegram_share', 'x_share'];
 const VIEW_DEBOUNCE_MS = 60_000;
+const SHARE_TRACK_ENDPOINT = '/.netlify/functions/community-share-track';
 const SESSION_VIEW_KEY = 'ajr_community_view_count';
 const SESSION_POPUP_KEY = 'ajr_community_cta_shown';
 
@@ -40,6 +41,10 @@ const elements = {
     sortSelect: document.getElementById('sortSelect'),
     featuredSection: document.getElementById('featuredSection'),
     featuredCard: document.getElementById('featuredCard'),
+    goalSection: document.getElementById('goalSection'),
+    goalTarget: document.getElementById('goalTarget'),
+    goalProgress: document.getElementById('goalProgress'),
+    goalBarFill: document.getElementById('goalBarFill'),
     shareToast: document.getElementById('shareToast'),
     joinPopup: document.getElementById('joinPopup'),
     joinPopupClose: document.getElementById('joinPopupClose'),
@@ -82,8 +87,14 @@ function resolveMessage(item) {
     return item.corrected_message || item.message;
 }
 
-function getShareMessage(item) {
-    const siteUrl = window.location.origin;
+function getShareTargetUrl(platform = 'whatsapp') {
+    const url = new URL(window.location.origin);
+    url.searchParams.set('ref', `${platform}_share`);
+    return url.toString();
+}
+
+function getShareMessage(item, platform = 'whatsapp') {
+    const siteUrl = getShareTargetUrl(platform);
     return `"${resolveMessage(item)}"\n\n— ${item.author_name || 'عبدٌ يرجو الأجر'}\nمن مجتمع أجر لا ينقطع 🤍\n${siteUrl}`;
 }
 
@@ -179,19 +190,38 @@ async function copyToClipboard(text) {
     document.body.removeChild(textarea);
 }
 
+async function trackShare(platform, submissionId) {
+    try {
+        await fetch(SHARE_TRACK_ENDPOINT, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({ platform, submissionId }),
+        });
+    } catch {
+        // lightweight tracking only
+    }
+}
+
 async function shareSubmission(item) {
-    const shareText = getShareMessage(item);
+    const preferredPlatform = 'whatsapp';
+    const shareText = getShareMessage(item, preferredPlatform);
 
     try {
         if (navigator.share) {
-            await navigator.share({ text: shareText });
-        } else {
-            await copyToClipboard(shareText);
-            showToast();
+            await navigator.share({ text: shareText, url: getShareTargetUrl(preferredPlatform) });
+            await trackShare('native', item.id);
+            return;
         }
+
+        await copyToClipboard(shareText);
+        await trackShare(preferredPlatform, item.id);
+        showToast();
     } catch (err) {
         if (err?.name !== 'AbortError') {
             await copyToClipboard(shareText);
+            await trackShare(preferredPlatform, item.id);
             showToast();
         }
     }
@@ -245,6 +275,7 @@ async function fetchSubmissions() {
         limit: String(state.limit),
         type: state.type,
         sort: state.sort,
+        surface: 'community',
     });
 
     try {
@@ -291,6 +322,20 @@ function renderFeatured(featured, avgPostCount) {
     elements.featuredCard.innerHTML = createCard(featured, avgPostCount);
 }
 
+function renderGoal(goal = {}) {
+    if (!elements.goalSection || !elements.goalTarget || !elements.goalProgress || !elements.goalBarFill) return;
+
+    const dailyTarget = Math.max(Number(goal.dailyTarget) || 0, 1);
+    const currentProgress = Math.max(Number(goal.currentProgress) || 0, 0);
+    const percent = Math.min(Math.round((currentProgress / dailyTarget) * 100), 100);
+
+    elements.goalTarget.textContent = `🎯 هدف اليوم: ${formatNumber(dailyTarget)} ذكر`;
+    elements.goalProgress.textContent = `🤍 تم تحقيق: ${formatNumber(currentProgress)}`;
+    elements.goalBarFill.style.width = `${percent}%`;
+    elements.goalSection.querySelector('.community-goal__bar')?.setAttribute('aria-valuenow', String(percent));
+    elements.goalSection.hidden = false;
+}
+
 function renderStats(stats = {}, pagination = {}) {
     const totalApproved = stats.totalApproved || pagination.total || 0;
     const totalShares = stats.totalPostCount || 0;
@@ -311,24 +356,21 @@ function renderResponse(result) {
     const avgPostCount = Number(stats?.averagePostCount) || 0;
     state.totalPages = Math.max(Number(pagination?.totalPages) || 1, 1);
     state.total = Number(pagination?.total) || 0;
+    state.page = Math.min(Math.max(Number(pagination?.page) || state.page, 1), state.totalPages);
 
     cacheSubmissions(submissions);
     renderStats(stats, pagination);
+    renderGoal(stats?.goal || {});
     renderFeatured(featured, avgPostCount);
 
     if (!submissions.length) {
-        if (state.total > 0 && state.page > state.totalPages) {
-            state.page = state.totalPages;
-            fetchSubmissions();
+        if (state.total === 0) {
+            elements.stateMessage.textContent = 'لا توجد مشاركات معتمدة ضمن هذا التصنيف حتى الآن.';
+            elements.pagination.hidden = true;
             return;
         }
 
-        if (state.total === 0) {
-            elements.stateMessage.textContent = 'لا توجد مشاركات معتمدة ضمن هذا التصنيف حتى الآن.';
-        } else {
-            elements.stateMessage.textContent = 'لا توجد عناصر في هذه الصفحة، تم ضبط التصفح تلقائيًا.';
-        }
-
+        elements.stateMessage.textContent = 'جارٍ إعادة ضبط الصفحة تلقائيًا...';
         elements.pagination.hidden = true;
         return;
     }
@@ -337,7 +379,7 @@ function renderResponse(result) {
     elements.submissionsContainer.innerHTML = buildCards(submissions, avgPostCount);
 
     elements.pagination.hidden = false;
-    elements.pageInfo.textContent = `صفحة ${pagination.page} من ${state.totalPages}`;
+    elements.pageInfo.textContent = `صفحة ${state.page} من ${state.totalPages}`;
     elements.prevPage.disabled = state.page <= 1;
     elements.nextPage.disabled = state.page >= state.totalPages;
 }
