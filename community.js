@@ -39,8 +39,6 @@ const elements = {
     nextPage: document.getElementById('nextPage'),
     filterTabs: document.getElementById('filterTabs'),
     sortSelect: document.getElementById('sortSelect'),
-    featuredSection: document.getElementById('featuredSection'),
-    featuredCard: document.getElementById('featuredCard'),
     goalSection: document.getElementById('goalSection'),
     goalTarget: document.getElementById('goalTarget'),
     goalProgress: document.getElementById('goalProgress'),
@@ -359,17 +357,6 @@ async function fetchSubmissions() {
     }
 }
 
-function renderFeatured(featured, avgPostCount) {
-    if (!featured) {
-        elements.featuredSection.hidden = true;
-        return;
-    }
-
-    elements.featuredSection.hidden = false;
-    elements.featuredCard.innerHTML = '';
-    elements.featuredCard.appendChild(createCard(featured, avgPostCount));
-}
-
 function renderGoal(goal = {}) {
     if (!elements.goalSection || !elements.goalTarget || !elements.goalProgress || !elements.goalBarFill) return;
 
@@ -394,26 +381,21 @@ function renderStats(stats = {}, pagination = {}) {
     elements.mobileStatsBar.hidden = false;
 }
 
-function cacheSubmissions(submissions = [], featured = null) {
+function cacheSubmissions(submissions = []) {
     state.submissionsById.clear();
     submissions.forEach((item) => state.submissionsById.set(Number(item.id), item));
-
-    if (featured?.id) {
-        state.submissionsById.set(Number(featured.id), featured);
-    }
 }
 
 function renderResponse(result) {
-    const { submissions, pagination, featured, stats } = result;
+    const { submissions, pagination, stats } = result;
     const avgPostCount = Number(stats?.averagePostCount) || 0;
     state.totalPages = Math.max(Number(pagination?.totalPages) || 1, 1);
     state.total = Number(pagination?.total) || 0;
     state.page = Math.min(Math.max(Number(pagination?.page) || state.page, 1), state.totalPages);
 
-    cacheSubmissions(submissions, featured);
+    cacheSubmissions(submissions);
     renderStats(stats, pagination);
     renderGoal(stats?.goal || {});
-    renderFeatured(featured, avgPostCount);
 
     if (!submissions.length) {
         if (state.total === 0) {
@@ -460,7 +442,7 @@ elements.sortSelect.addEventListener('change', (event) => {
 });
 
 function scrollToSubmissions() {
-    elements.submissionsContainer.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    window.scrollTo({ top: 0, behavior: 'smooth' });
 }
 
 elements.prevPage.addEventListener('click', () => {

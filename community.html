@@ -13,24 +13,22 @@
     <main class="community-page container" aria-live="polite">
         <header class="community-header">
             <h1>مساهمات المجتمع</h1>
-            <p>هنا تُعرض المشاركات التي تم اعتمادها فقط، بنية نشر الخير والأجر.</p>
-            <div class="community-stats">
+            <p>مساحة هادئة للمشاركات المعتمدة، بنية نشر الخير والأجر.</p>
+            <div class="community-stats" aria-label="إحصاءات المجتمع">
                 <p id="approvedCount">🤍 ... مشاركة معتمدة</p>
                 <p id="totalSharesCount">📿 ... مرة تم نشر الأذكار</p>
             </div>
         </header>
 
+        <hr class="community-divider community-divider--header" aria-hidden="true">
+
         <section id="goalSection" class="community-goal" hidden>
             <p id="goalTarget">🎯 هدف اليوم: ... ذكر</p>
             <p id="goalProgress">🤍 تم تحقيق: ...</p>
+            <p class="community-goal__hint">كن سببًا في رفع هذا الهدف اليوم 🤍</p>
             <div class="community-goal__bar" role="progressbar" aria-label="تقدم هدف اليوم" aria-valuemin="0" aria-valuemax="100">
                 <span id="goalBarFill" class="community-goal__fill"></span>
             </div>
-        </section>
-
-        <section class="featured" id="featuredSection" hidden>
-            <h2>الأكثر مشاركة 🕊</h2>
-            <article class="submission-card submission-card--featured" id="featuredCard"></article>
         </section>
 
         <section class="community-controls" aria-label="خيارات الفلترة والترتيب">
@@ -76,8 +74,8 @@
         <hr class="community-divider" aria-hidden="true">
 
         <section class="project-share" aria-labelledby="project-share-title">
-            <h2 id="project-share-title" class="project-share__title">🤍 ساهم في نشر المشروع</h2>
-            <p class="project-share__text">ساعد في نشر الخير ليصل لعدد أكبر من الناس.</p>
+            <h2 id="project-share-title" class="project-share__title">انشر المشروع بلطف 🤍</h2>
+            <p class="project-share__text">مشاركة واحدة قد تُلهم قلبًا جديدًا للذكر.</p>
             <div class="project-share__actions">
                 <a class="project-share__btn project-share__btn--whatsapp" data-share-platform="whatsapp" href="#" target="_blank" rel="noopener noreferrer"><span aria-hidden="true">🟢</span><span>WhatsApp</span></a>
                 <a class="project-share__btn project-share__btn--telegram" data-share-platform="telegram" href="#" target="_blank" rel="noopener noreferrer"><span aria-hidden="true">🔵</span><span>Telegram</span></a>
@@ -85,7 +83,6 @@
                 <button type="button" class="project-share__btn project-share__btn--native" data-share-platform="native" hidden><span aria-hidden="true">📱</span><span>مشاركة الجهاز</span></button>
             </div>
         </section>
-
 
     </main>
 
