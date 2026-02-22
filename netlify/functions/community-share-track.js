@@ -2,6 +2,7 @@ import { supabase, error, success, handleOptions } from './utils/shared.js';
 import { incrementGoalProgress } from './utils/community-goal.js';
 
 const VALID_PLATFORMS = ['whatsapp', 'telegram', 'x', 'native'];
+const VISIBLE_STATUSES = ['Approved', 'Posted'];
 
 function sanitizePlatform(value) {
     if (typeof value !== 'string') return 'unknown';
@@ -45,7 +46,7 @@ export async function handler(event) {
             .from('submissions')
             .select('id,post_count,status')
             .eq('id', submissionId)
-            .eq('status', 'Approved')
+            .in('status', VISIBLE_STATUSES)
             .maybeSingle();
 
         if (fetchError) {
@@ -65,7 +66,7 @@ export async function handler(event) {
                 last_posted_at: new Date().toISOString(),
             })
             .eq('id', submissionId)
-            .eq('status', 'Approved');
+            .in('status', VISIBLE_STATUSES);
 
         if (updateError) {
             console.error('Share track update error:', updateError.message);

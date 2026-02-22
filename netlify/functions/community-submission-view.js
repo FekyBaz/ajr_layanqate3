@@ -1,6 +1,7 @@
 import { supabase, error, success, handleOptions, getClientIP, getCorsHeaders } from './utils/shared.js';
 
 const VIEW_DEBOUNCE_WINDOW_MS = 60_000;
+const VISIBLE_STATUSES = ['Approved', 'Posted'];
 const viewTracker = new Map();
 
 function getThrottleKey(clientIP, submissionId) {
@@ -74,7 +75,7 @@ export async function handler(event) {
             .from('submissions')
             .select('id,views,status')
             .eq('id', submissionId)
-            .eq('status', 'Approved')
+            .in('status', VISIBLE_STATUSES)
             .maybeSingle();
 
         if (existingError) {
@@ -92,7 +93,7 @@ export async function handler(event) {
             .from('submissions')
             .update({ views: nextViews })
             .eq('id', submissionId)
-            .eq('status', 'Approved');
+            .in('status', VISIBLE_STATUSES);
 
         if (updateError) {
             console.error('View counter update error:', updateError.message);
