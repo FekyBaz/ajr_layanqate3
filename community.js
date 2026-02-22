@@ -3,6 +3,8 @@ const VIEW_ENDPOINT = '/.netlify/functions/community-submission-view';
 const CTA_INTERVAL = 5;
 const REF_ALLOWLIST = ['instagram', 'facebook', 'direct', 'telegram'];
 const VIEW_DEBOUNCE_MS = 60_000;
+const SESSION_VIEW_KEY = 'ajr_community_view_count';
+const SESSION_POPUP_KEY = 'ajr_community_cta_shown';
 
 const badgeLabels = {
     dhikr: 'ذكر',
@@ -36,6 +38,8 @@ const elements = {
     featuredSection: document.getElementById('featuredSection'),
     featuredCard: document.getElementById('featuredCard'),
     shareToast: document.getElementById('shareToast'),
+    joinPopup: document.getElementById('joinPopup'),
+    joinPopupClose: document.getElementById('joinPopupClose'),
 };
 
 let toastTimeoutId;
@@ -125,6 +129,36 @@ function showToast() {
     }, 1800);
 }
 
+function showSubmissionReviewToastIfNeeded() {
+    const params = new URLSearchParams(window.location.search);
+    const hasSubmissionFlag = params.get('submitted') === '1' || sessionStorage.getItem('ajr_submission_pending_review') === '1';
+
+    if (!hasSubmissionFlag) return;
+
+    elements.shareToast.textContent = 'تم إضافة ذكرك للمراجعة 🤍';
+    showToast();
+    sessionStorage.removeItem('ajr_submission_pending_review');
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+}
+
+function maybeShowJoinPopup() {
+    const viewedCount = Number(sessionStorage.getItem(SESSION_VIEW_KEY) || '0');
+    const alreadyShown = sessionStorage.getItem(SESSION_POPUP_KEY) === '1';
+
+    if (viewedCount < 3 || alreadyShown || !elements.joinPopup) {
+        return;
+    }
+
+    elements.joinPopup.hidden = false;
+    sessionStorage.setItem(SESSION_POPUP_KEY, '1');
+}
+
+function incrementSessionViewCount() {
+    const nextCount = Number(sessionStorage.getItem(SESSION_VIEW_KEY) || '0') + 1;
+    sessionStorage.setItem(SESSION_VIEW_KEY, String(nextCount));
+    maybeShowJoinPopup();
+}
+
 async function copyToClipboard(text) {
     if (navigator.clipboard?.writeText) {
         await navigator.clipboard.writeText(text);
@@ -169,6 +203,7 @@ async function incrementView(submissionId) {
     }
 
     state.viewedIds.set(submissionId, now);
+    incrementSessionViewCount();
 
     try {
         await fetch(VIEW_ENDPOINT, {
@@ -243,7 +278,7 @@ function renderFeatured(featured, avgPostCount) {
 }
 
 function renderStats(stats = {}, pagination = {}) {
-    const totalApproved = pagination.total || 0;
+    const totalApproved = stats.totalApproved || pagination.total || 0;
     const totalShares = stats.totalPostCount || 0;
 
     elements.approvedCount.textContent = `🤍 ${formatNumber(totalApproved)} مشاركة معتمدة`;
@@ -341,5 +376,12 @@ elements.submissionsContainer.addEventListener('keydown', async (event) => {
     await incrementView(Number(card.dataset.submissionId));
 });
 
+if (elements.joinPopupClose) {
+    elements.joinPopupClose.addEventListener('click', () => {
+        elements.joinPopup.hidden = true;
+    });
+}
+
 state.refSource = initializeRefSource();
+showSubmissionReviewToastIfNeeded();
 fetchSubmissions();
