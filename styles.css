@@ -1075,6 +1075,37 @@ p {
     display: grid;
     gap: 0.2rem;
 }
+.community-page .community-goal {
+    margin-top: 1rem;
+    background: rgba(255, 255, 255, 0.75);
+    border: 1px solid #d1e7df;
+    border-radius: 14px;
+    padding: 0.8rem 1rem;
+}
+
+.community-page .community-goal p {
+    margin: 0.2rem 0;
+    color: #0f4f49;
+    font-weight: 600;
+}
+
+.community-page .community-goal__bar {
+    margin-top: 0.5rem;
+    width: 100%;
+    height: 10px;
+    background: #e7f1ed;
+    border-radius: 999px;
+    overflow: hidden;
+}
+
+.community-page .community-goal__fill {
+    display: block;
+    width: 0;
+    height: 100%;
+    background: linear-gradient(90deg, #0f766e, #34d399);
+    transition: width 0.25s ease;
+}
+
 
 .community-page .community-controls {
     display: flex;
@@ -1464,7 +1495,7 @@ p {
 
 
 .project-share {
-    padding: var(--space-2xl) 0;
+    padding: var(--space-xl) 0;
 }
 
 .project-share .container,
@@ -1472,7 +1503,7 @@ p {
     background: rgba(255, 255, 255, 0.72);
     border: 1px solid rgba(14, 107, 82, 0.15);
     border-radius: var(--radius-xl);
-    padding: var(--space-xl);
+    padding: var(--space-lg);
 }
 
 .project-share__title {
@@ -1495,7 +1526,8 @@ p {
 .project-share__btn {
     border: 1px solid transparent;
     border-radius: 999px;
-    padding: 0.45rem 0.9rem;
+    padding: 0.4rem 0.75rem;
+    font-size: 0.9rem;
     text-decoration: none;
     font-weight: 700;
     transition: transform var(--transition-fast), box-shadow var(--transition-fast), background var(--transition-fast);

@@ -2,7 +2,7 @@
     'use strict';
 
     const API_ENDPOINT = '/.netlify/functions/community-submissions';
-    const REF_ALLOWLIST = ['instagram', 'facebook', 'direct', 'telegram'];
+    const REF_ALLOWLIST = ['instagram', 'facebook', 'direct', 'telegram', 'whatsapp_share', 'telegram_share', 'x_share'];
 
     const elements = {
         menuToggle: document.getElementById('menuToggle'),
@@ -98,7 +98,7 @@
         const refSource = initializeRefSource();
 
         try {
-            const params = new URLSearchParams({ page: '1', type: 'all', sort: 'latest', limit: '3' });
+            const params = new URLSearchParams({ page: '1', type: 'all', sort: 'latest', limit: '3', surface: 'homepage_preview' });
             const response = await fetch(`${API_ENDPOINT}?${params.toString()}`, {
                 headers: {
                     'x-ref-source': refSource,

@@ -13,6 +13,7 @@ import {
     validateAdmin,
     sanitizeMessage,
 } from './utils/shared.js';
+import { incrementGoalProgress } from './utils/community-goal.js';
 
 export async function handler(event, context) {
     const origin = event.headers.origin || '';
@@ -75,6 +76,12 @@ export async function handler(event, context) {
         if (updateError) {
             console.error('Admin approve error:', updateError.message);
             return error(500, 'حدث خطأ في تحديث البيانات', origin);
+        }
+
+        try {
+            await incrementGoalProgress(1);
+        } catch (goalError) {
+            console.error('Admin approve goal progress error:', goalError.message);
         }
 
         return success({ message: 'تمت الموافقة على المشاركة' }, origin);
