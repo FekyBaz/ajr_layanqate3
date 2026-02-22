@@ -6,6 +6,15 @@ const VALID_REF_SOURCES = ['instagram', 'facebook', 'direct', 'telegram'];
 const PAGE_SIZE = 10;
 const RESPONSE_CACHE_CONTROL = 'public, max-age=45, s-maxage=45, stale-while-revalidate=60';
 
+function parsePositiveInt(value, fallback) {
+    const parsed = Number.parseInt(value, 10);
+    if (!Number.isFinite(parsed) || parsed <= 0) {
+        return fallback;
+    }
+
+    return parsed;
+}
+
 function sanitizeRefSource(value) {
     if (typeof value !== 'string') return 'direct';
     const normalized = value.trim().toLowerCase();
@@ -103,10 +112,10 @@ export async function handler(event) {
 
     try {
         const params = new URLSearchParams(event.queryStringParameters || {});
-        const page = Math.max(parseInt(params.get('page') || '1', 10), 1);
+        const page = parsePositiveInt(params.get('page'), 1);
         const contentType = (params.get('type') || 'all').toLowerCase();
         const sortBy = (params.get('sort') || 'latest').toLowerCase();
-        const limit = Math.min(Math.max(parseInt(params.get('limit') || String(PAGE_SIZE), 10), 1), PAGE_SIZE);
+        const limit = Math.min(parsePositiveInt(params.get('limit'), PAGE_SIZE), PAGE_SIZE);
         const refSource = sanitizeRefSource(event.headers['x-ref-source'] || event.headers['X-Ref-Source'] || 'direct');
 
         if (!VALID_TYPES.includes(contentType)) {
@@ -161,18 +170,40 @@ export async function handler(event) {
             console.error('Featured submission fetch error:', featuredError.message);
         }
 
-        const [{ stats, source }, newApprovedToday] = await Promise.all([
+        const [statsResult, newApprovedTodayResult] = await Promise.allSettled([
             getStatsSnapshot(),
             getNewApprovedTodayCount(),
         ]);
+
+        if (statsResult.status === 'rejected') {
+            console.error('Community stats snapshot failed:', statsResult.reason?.message || 'unknown');
+        }
+
+        if (newApprovedTodayResult.status === 'rejected') {
+            console.error('Community today count failed:', newApprovedTodayResult.reason?.message || 'unknown');
+        }
+
+        const statsPayload = statsResult.status === 'fulfilled'
+            ? statsResult.value
+            : {
+                stats: {
+                    totalApproved: count || 0,
+                    totalPostCount: (data || []).reduce((sum, row) => sum + (Number(row.post_count) || 0), 0),
+                    averagePostCount: 0,
+                    updatedAt: new Date().toISOString(),
+                },
+                source: 'degraded_fallback',
+            };
+
+        const newApprovedToday = newApprovedTodayResult.status === 'fulfilled' ? newApprovedTodayResult.value : 0;
 
         return success({
             submissions: data || [],
             featured: featured || null,
             stats: {
-                ...stats,
+                ...statsPayload.stats,
                 newApprovedToday,
-                source,
+                source: statsPayload.source,
             },
             pagination: {
                 page,
