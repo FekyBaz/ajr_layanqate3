@@ -1,4 +1,8 @@
 const API_ENDPOINT = '/.netlify/functions/community-submissions';
+const VIEW_ENDPOINT = '/.netlify/functions/community-submission-view';
+const CTA_INTERVAL = 5;
+const REF_ALLOWLIST = ['instagram', 'facebook', 'direct', 'telegram'];
+const VIEW_DEBOUNCE_MS = 60_000;
 
 const badgeLabels = {
     dhikr: 'ذكر',
@@ -11,12 +15,18 @@ const state = {
     type: 'all',
     sort: 'latest',
     page: 1,
+    refSource: 'direct',
+    viewedIds: new Map(),
+    submissionsById: new Map(),
 };
 
 const elements = {
     stateMessage: document.getElementById('stateMessage'),
     submissionsContainer: document.getElementById('submissionsContainer'),
     approvedCount: document.getElementById('approvedCount'),
+    totalSharesCount: document.getElementById('totalSharesCount'),
+    mobileApprovedCount: document.getElementById('mobileApprovedCount'),
+    mobileStatsBar: document.getElementById('mobileStatsBar'),
     pagination: document.getElementById('pagination'),
     pageInfo: document.getElementById('pageInfo'),
     prevPage: document.getElementById('prevPage'),
@@ -25,7 +35,29 @@ const elements = {
     sortSelect: document.getElementById('sortSelect'),
     featuredSection: document.getElementById('featuredSection'),
     featuredCard: document.getElementById('featuredCard'),
+    shareToast: document.getElementById('shareToast'),
 };
+
+let toastTimeoutId;
+
+function sanitizeRefValue(value) {
+    if (typeof value !== 'string') return null;
+    const sanitized = value.trim().toLowerCase();
+    return REF_ALLOWLIST.includes(sanitized) ? sanitized : null;
+}
+
+function initializeRefSource() {
+    const params = new URLSearchParams(window.location.search);
+    const fromUrl = sanitizeRefValue(params.get('ref'));
+
+    if (fromUrl) {
+        localStorage.setItem('ajr_ref_source', fromUrl);
+        return fromUrl;
+    }
+
+    const stored = sanitizeRefValue(localStorage.getItem('ajr_ref_source'));
+    return stored || 'direct';
+}
 
 function formatDate(dateValue) {
     return new Intl.DateTimeFormat('ar-EG', {
@@ -35,27 +67,134 @@ function formatDate(dateValue) {
     }).format(new Date(dateValue));
 }
 
+function formatNumber(value) {
+    return new Intl.NumberFormat('ar-EG').format(Number(value) || 0);
+}
+
 function resolveMessage(item) {
     return item.corrected_message || item.message;
 }
 
-function createCard(item) {
+function getShareMessage(item) {
+    const siteUrl = window.location.origin;
+    return `"${resolveMessage(item)}"\n\n— ${item.author_name || 'عبدٌ يرجو الأجر'}\nمن مجتمع أجر لا ينقطع 🤍\n${siteUrl}`;
+}
+
+function renderCtaCard() {
+    return `
+        <aside class="community-cta card-enter" aria-label="دعوة للمشاركة">
+            <p>🤍 أضف ذكرك أنت أيضًا</p>
+            <a href="/index.html#form" class="btn btn--primary">أضف الآن</a>
+        </aside>
+    `;
+}
+
+function createCard(item, avgPostCount = 0) {
     const badge = badgeLabels[item.content_type] || item.content_type;
     const sharesMarkup = item.post_count > 0
-        ? `<p class="shares">🕊 تمت المشاركة ${item.post_count} مرة</p>`
+        ? `<p class="shares">🕊 تمت المشاركة ${formatNumber(item.post_count)} مرة</p>`
+        : '';
+    const trendingBadge = item.post_count > avgPostCount && item.post_count > 0
+        ? '<span class="trending-badge">🔥 رائج الآن</span>'
         : '';
 
     return `
-        <article class="submission-card card-enter">
-            <span class="content-badge badge-${item.content_type}">${badge}</span>
+        <article class="submission-card card-enter" data-submission-id="${item.id}" tabindex="0">
+            <div class="submission-card__top">
+                <span class="content-badge badge-${item.content_type}">${badge}</span>
+                ${trendingBadge}
+            </div>
             <p class="submission-message">"${resolveMessage(item)}"</p>
             <p class="submission-author">— ${item.author_name || 'عبدٌ يرجو الأجر'}</p>
             <div class="submission-meta">
                 <time datetime="${item.created_at}">${formatDate(item.created_at)}</time>
                 ${sharesMarkup}
             </div>
+            <button class="share-btn" type="button" data-share-id="${item.id}">📤 شارك هذا الذكر</button>
         </article>
     `;
+}
+
+function showToast() {
+    elements.shareToast.hidden = false;
+    elements.shareToast.classList.add('is-visible');
+    clearTimeout(toastTimeoutId);
+    toastTimeoutId = setTimeout(() => {
+        elements.shareToast.classList.remove('is-visible');
+        elements.shareToast.hidden = true;
+    }, 1800);
+}
+
+async function copyToClipboard(text) {
+    if (navigator.clipboard?.writeText) {
+        await navigator.clipboard.writeText(text);
+        return;
+    }
+
+    const textarea = document.createElement('textarea');
+    textarea.value = text;
+    textarea.setAttribute('readonly', '');
+    textarea.style.position = 'absolute';
+    textarea.style.left = '-9999px';
+    document.body.appendChild(textarea);
+    textarea.select();
+    document.execCommand('copy');
+    document.body.removeChild(textarea);
+}
+
+async function shareSubmission(item) {
+    const shareText = getShareMessage(item);
+
+    try {
+        if (navigator.share) {
+            await navigator.share({ text: shareText });
+        } else {
+            await copyToClipboard(shareText);
+            showToast();
+        }
+    } catch (err) {
+        if (err?.name !== 'AbortError') {
+            await copyToClipboard(shareText);
+            showToast();
+        }
+    }
+}
+
+async function incrementView(submissionId) {
+    const now = Date.now();
+    const lastViewedAt = state.viewedIds.get(submissionId) || 0;
+
+    if (now - lastViewedAt < VIEW_DEBOUNCE_MS) {
+        return;
+    }
+
+    state.viewedIds.set(submissionId, now);
+
+    try {
+        await fetch(VIEW_ENDPOINT, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({ submissionId }),
+        });
+    } catch (err) {
+        // Silently fail for lightweight analytics
+    }
+}
+
+function buildCards(submissions, avgPostCount) {
+    const chunks = [];
+
+    submissions.forEach((item, index) => {
+        chunks.push(createCard(item, avgPostCount));
+
+        if ((index + 1) % CTA_INTERVAL === 0 && index !== submissions.length - 1) {
+            chunks.push(renderCtaCard());
+        }
+    });
+
+    return chunks.join('');
 }
 
 async function fetchSubmissions() {
@@ -70,7 +209,12 @@ async function fetchSubmissions() {
     });
 
     try {
-        const response = await fetch(`${API_ENDPOINT}?${query.toString()}`);
+        const response = await fetch(`${API_ENDPOINT}?${query.toString()}`, {
+            headers: {
+                'x-ref-source': state.refSource,
+            },
+        });
+
         if (!response.ok) {
             throw new Error('Request failed');
         }
@@ -88,21 +232,38 @@ async function fetchSubmissions() {
     }
 }
 
-function renderFeatured(featured) {
+function renderFeatured(featured, avgPostCount) {
     if (!featured) {
         elements.featuredSection.hidden = true;
         return;
     }
 
     elements.featuredSection.hidden = false;
-    elements.featuredCard.innerHTML = createCard(featured);
+    elements.featuredCard.innerHTML = createCard(featured, avgPostCount);
+}
+
+function renderStats(stats = {}, pagination = {}) {
+    const totalApproved = pagination.total || 0;
+    const totalShares = stats.totalPostCount || 0;
+
+    elements.approvedCount.textContent = `🤍 ${formatNumber(totalApproved)} مشاركة معتمدة`;
+    elements.totalSharesCount.textContent = `📿 ${formatNumber(totalShares)} مرة تم نشر الأذكار`;
+    elements.mobileApprovedCount.textContent = `🤍 ${formatNumber(totalApproved)} مشاركة`;
+    elements.mobileStatsBar.hidden = false;
+}
+
+function cacheSubmissions(submissions = []) {
+    state.submissionsById.clear();
+    submissions.forEach((item) => state.submissionsById.set(Number(item.id), item));
 }
 
 function renderResponse(result) {
-    const { submissions, pagination, featured } = result;
+    const { submissions, pagination, featured, stats } = result;
+    const avgPostCount = Number(stats?.averagePostCount) || 0;
 
-    elements.approvedCount.textContent = `إجمالي المشاركات المعتمدة: ${pagination.total}`;
-    renderFeatured(featured);
+    cacheSubmissions(submissions);
+    renderStats(stats, pagination);
+    renderFeatured(featured, avgPostCount);
 
     if (!submissions.length) {
         elements.stateMessage.textContent = 'لا توجد مشاركات معتمدة ضمن هذا التصنيف حتى الآن.';
@@ -111,7 +272,7 @@ function renderResponse(result) {
     }
 
     elements.stateMessage.hidden = true;
-    elements.submissionsContainer.innerHTML = submissions.map(createCard).join('');
+    elements.submissionsContainer.innerHTML = buildCards(submissions, avgPostCount);
 
     elements.pagination.hidden = false;
     elements.pageInfo.textContent = `صفحة ${pagination.page} من ${pagination.totalPages}`;
@@ -153,4 +314,32 @@ elements.nextPage.addEventListener('click', () => {
     fetchSubmissions();
 });
 
+elements.submissionsContainer.addEventListener('click', async (event) => {
+    const shareButton = event.target.closest('[data-share-id]');
+    if (shareButton) {
+        const submissionId = Number(shareButton.dataset.shareId);
+        const selected = state.submissionsById.get(submissionId);
+        if (!selected) return;
+
+        await shareSubmission(selected);
+        return;
+    }
+
+    const clickedCard = event.target.closest('[data-submission-id]');
+    if (clickedCard) {
+        await incrementView(Number(clickedCard.dataset.submissionId));
+    }
+});
+
+elements.submissionsContainer.addEventListener('keydown', async (event) => {
+    if (event.key !== 'Enter' && event.key !== ' ') return;
+
+    const card = event.target.closest('[data-submission-id]');
+    if (!card) return;
+
+    event.preventDefault();
+    await incrementView(Number(card.dataset.submissionId));
+});
+
+state.refSource = initializeRefSource();
 fetchSubmissions();
