@@ -1,30 +1,32 @@
 import { supabase } from './utils/shared.js';
 
+const VISIBLE_STATUSES = ['Approved', 'Posted'];
+
 export const config = {
     schedule: '0 * * * *',
 };
 
 export async function handler() {
     try {
-        const { data, error: aggregateError, count } = await supabase
+        const { data, error: aggregateError } = await supabase
             .from('submissions')
-            .select('post_count', { count: 'exact' })
-            .eq('status', 'Approved');
+            .select('status,post_count')
+            .in('status', VISIBLE_STATUSES);
 
         if (aggregateError) {
             throw aggregateError;
         }
 
-        const rows = data || [];
-        const totalApproved = count || 0;
-        const totalPostCount = rows.reduce((sum, row) => sum + (Number(row.post_count) || 0), 0);
-        const averagePostCount = totalApproved ? totalPostCount / totalApproved : 0;
+        const visibleRows = (data || []).filter((row) => VISIBLE_STATUSES.includes(row.status));
+        const totalVisible = visibleRows.length;
+        const totalPostCount = visibleRows.reduce((sum, row) => sum + (Number(row.post_count) || 0), 0);
+        const averagePostCount = totalVisible ? totalPostCount / totalVisible : 0;
 
         const { error: upsertError } = await supabase
             .from('community_stats')
             .upsert({
                 id: 1,
-                total_approved: totalApproved,
+                total_approved: totalVisible,
                 total_post_count: totalPostCount,
                 average_post_count: averagePostCount,
                 updated_at: new Date().toISOString(),
@@ -38,7 +40,7 @@ export async function handler() {
             statusCode: 200,
             body: JSON.stringify({
                 success: true,
-                totalApproved,
+                totalVisible,
                 totalPostCount,
                 averagePostCount,
             }),

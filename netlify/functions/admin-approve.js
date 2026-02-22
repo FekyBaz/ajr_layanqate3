@@ -67,15 +67,21 @@ export async function handler(event, context) {
         }
 
         // Update in database
-        const { error: updateError } = await supabase
+        const { data: updatedRow, error: updateError } = await supabase
             .from('submissions')
             .update(updateData)
             .eq('id', id)
-            .eq('status', 'Pending');
+            .eq('status', 'Pending')
+            .select('id')
+            .maybeSingle();
 
         if (updateError) {
             console.error('Admin approve error:', updateError.message);
             return error(500, 'حدث خطأ في تحديث البيانات', origin);
+        }
+
+        if (!updatedRow) {
+            return error(404, 'المشاركة غير موجودة أو تمت مراجعتها مسبقًا', origin);
         }
 
         try {
