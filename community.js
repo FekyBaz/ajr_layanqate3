@@ -6,6 +6,12 @@ const VIEW_DEBOUNCE_MS = 60_000;
 const SHARE_TRACK_ENDPOINT = '/.netlify/functions/community-share-track';
 const SESSION_VIEW_KEY = 'ajr_community_view_count';
 const SESSION_POPUP_KEY = 'ajr_community_cta_shown';
+const STORAGE_KEYS = {
+    savedIds: 'ajr_community_saved_ids',
+    focusMode: 'ajr_community_focus_mode',
+    lastFilter: 'ajr_community_last_filter',
+    lastVisitDate: 'ajr_community_last_visit_date',
+};
 
 const badgeLabels = {
     dhikr: 'ذكر',
@@ -24,6 +30,8 @@ const state = {
     refSource: 'direct',
     viewedIds: new Map(),
     submissionsById: new Map(),
+    savedIds: new Set(),
+    focusMode: false,
 };
 
 const elements = {
@@ -47,9 +55,69 @@ const elements = {
     shareToast: document.getElementById('shareToast'),
     joinPopup: document.getElementById('joinPopup'),
     joinPopupClose: document.getElementById('joinPopupClose'),
+    focusModeToggle: document.getElementById('focusModeToggle'),
+    returnMemory: document.getElementById('returnMemory'),
+    savedItems: document.getElementById('savedItems'),
+    savedEmptyMessage: document.getElementById('savedEmptyMessage'),
+    savedTasteMessage: document.getElementById('savedTasteMessage'),
 };
 
 let toastTimeoutId;
+
+function storageAvailable() {
+    try {
+        const key = '__ajr_storage_test__';
+        localStorage.setItem(key, key);
+        localStorage.removeItem(key);
+        return true;
+    } catch {
+        return false;
+    }
+}
+
+const canUseStorage = storageAvailable();
+
+function safeStorageGet(key) {
+    if (!canUseStorage) return null;
+    try {
+        return localStorage.getItem(key);
+    } catch {
+        return null;
+    }
+}
+
+function safeStorageSet(key, value) {
+    if (!canUseStorage) return;
+    try {
+        localStorage.setItem(key, value);
+    } catch {
+        // graceful fallback in restrictive environments
+    }
+}
+
+function getTodayKey() {
+    return new Date().toISOString().slice(0, 10);
+}
+
+function loadSavedIds() {
+    const raw = safeStorageGet(STORAGE_KEYS.savedIds);
+    if (!raw) return new Set();
+
+    try {
+        const parsed = JSON.parse(raw);
+        if (!Array.isArray(parsed)) return new Set();
+
+        return new Set(parsed.map((id) => Number(id)).filter((id) => Number.isInteger(id) && id > 0));
+    } catch {
+        return new Set();
+    }
+}
+
+function persistSavedIds() {
+    const clipped = Array.from(state.savedIds).slice(0, 10);
+    state.savedIds = new Set(clipped);
+    safeStorageSet(STORAGE_KEYS.savedIds, JSON.stringify(clipped));
+}
 
 function sanitizeRefValue(value) {
     if (typeof value !== 'string') return null;
@@ -113,6 +181,14 @@ function createCardTop(item, avgPostCount) {
         trendingBadge.textContent = '🔥 رائج الآن';
         top.appendChild(trendingBadge);
     }
+
+    const saveButton = document.createElement('button');
+    saveButton.type = 'button';
+    saveButton.className = 'save-btn btn btn-ghost';
+    saveButton.dataset.saveId = String(item.id);
+    saveButton.setAttribute('aria-pressed', state.savedIds.has(Number(item.id)) ? 'true' : 'false');
+    saveButton.textContent = state.savedIds.has(Number(item.id)) ? '🤍 محفوظ' : '🤍 احفظ هذا الذكر';
+    top.appendChild(saveButton);
 
     return top;
 }
@@ -311,6 +387,100 @@ function buildCards(submissions, avgPostCount) {
     return fragment;
 }
 
+function buildSavedCard(item) {
+    const card = document.createElement('article');
+    card.className = 'submission-card card card-soft';
+
+    const top = document.createElement('div');
+    top.className = 'submission-card__top';
+    const badge = document.createElement('span');
+    badge.className = `content-badge badge-${item.content_type}`;
+    badge.textContent = badgeLabels[item.content_type] || item.content_type;
+    top.appendChild(badge);
+    card.appendChild(top);
+
+    const message = document.createElement('p');
+    message.className = 'submission-message';
+    message.textContent = `"${resolveMessage(item)}"`;
+    card.appendChild(message);
+
+    return card;
+}
+
+function renderSavedItems() {
+    if (!elements.savedItems || !elements.savedEmptyMessage || !elements.savedTasteMessage) return;
+
+    const savedItems = Array.from(state.savedIds)
+        .map((id) => state.submissionsById.get(id))
+        .filter(Boolean)
+        .slice(0, 10);
+
+    elements.savedItems.innerHTML = '';
+    savedItems.forEach((item) => {
+        elements.savedItems.appendChild(buildSavedCard(item));
+    });
+
+    elements.savedEmptyMessage.hidden = savedItems.length > 0;
+    elements.savedTasteMessage.hidden = state.savedIds.size < 3;
+}
+
+function syncSaveButtons() {
+    document.querySelectorAll('[data-save-id]').forEach((button) => {
+        const submissionId = Number(button.dataset.saveId);
+        const isSaved = state.savedIds.has(submissionId);
+        button.setAttribute('aria-pressed', isSaved ? 'true' : 'false');
+        button.textContent = isSaved ? '🤍 محفوظ' : '🤍 احفظ هذا الذكر';
+    });
+}
+
+function toggleSaved(submissionId) {
+    if (!submissionId) return;
+
+    if (state.savedIds.has(submissionId)) {
+        state.savedIds.delete(submissionId);
+    } else {
+        state.savedIds = new Set([submissionId, ...Array.from(state.savedIds)]);
+    }
+
+    persistSavedIds();
+    syncSaveButtons();
+    renderSavedItems();
+}
+
+function applyFocusMode() {
+    const active = state.focusMode;
+    document.body.classList.toggle('community-focus-mode', active);
+    if (elements.focusModeToggle) {
+        elements.focusModeToggle.setAttribute('aria-pressed', active ? 'true' : 'false');
+        elements.focusModeToggle.textContent = active ? 'إيقاف الوضع الهادئ' : 'وضع هادئ';
+    }
+}
+
+function initializeFocusMode() {
+    state.focusMode = safeStorageGet(STORAGE_KEYS.focusMode) === '1';
+    applyFocusMode();
+}
+
+function initializeLastFilter() {
+    const savedType = safeStorageGet(STORAGE_KEYS.lastFilter);
+    const allowed = ['all', 'dhikr', 'dua', 'ayah', 'hadith'];
+    if (allowed.includes(savedType)) {
+        state.type = savedType;
+        setActiveTab(state.type);
+    }
+}
+
+function initializeReturnMemory() {
+    const today = getTodayKey();
+    const previousVisit = safeStorageGet(STORAGE_KEYS.lastVisitDate);
+
+    if (previousVisit === today && elements.returnMemory) {
+        elements.returnMemory.hidden = false;
+    }
+
+    safeStorageSet(STORAGE_KEYS.lastVisitDate, today);
+}
+
 async function fetchSubmissions() {
     elements.stateMessage.textContent = 'جارٍ تحميل المشاركات...';
     elements.stateMessage.hidden = false;
@@ -386,7 +556,6 @@ function renderStats(stats = {}, pagination = {}) {
 }
 
 function cacheSubmissions(submissions = []) {
-    state.submissionsById.clear();
     submissions.forEach((item) => state.submissionsById.set(Number(item.id), item));
 }
 
@@ -416,6 +585,7 @@ function renderResponse(result) {
     elements.stateMessage.hidden = true;
     elements.submissionsContainer.innerHTML = '';
     elements.submissionsContainer.appendChild(buildCards(submissions, avgPostCount));
+    renderSavedItems();
 
     elements.pagination.hidden = false;
     elements.pageInfo.textContent = `صفحة ${state.page} من ${state.totalPages}`;
@@ -434,6 +604,7 @@ elements.filterTabs.addEventListener('click', (event) => {
     if (!button) return;
 
     state.type = button.dataset.type;
+    safeStorageSet(STORAGE_KEYS.lastFilter, state.type);
     state.page = 1;
     setActiveTab(state.type);
     fetchSubmissions();
@@ -468,6 +639,14 @@ elements.nextPage.addEventListener('click', () => {
 elements.communityPage = document.querySelector('.community-page');
 
 elements.communityPage.addEventListener('click', async (event) => {
+    const saveButton = event.target.closest('[data-save-id]');
+    if (saveButton) {
+        event.preventDefault();
+        event.stopPropagation();
+        toggleSaved(Number(saveButton.dataset.saveId));
+        return;
+    }
+
     const shareButton = event.target.closest('[data-share-id]');
     if (shareButton) {
         event.preventDefault();
@@ -502,6 +681,18 @@ if (elements.joinPopupClose) {
     });
 }
 
+if (elements.focusModeToggle) {
+    elements.focusModeToggle.addEventListener('click', () => {
+        state.focusMode = !state.focusMode;
+        safeStorageSet(STORAGE_KEYS.focusMode, state.focusMode ? '1' : '0');
+        applyFocusMode();
+    });
+}
+
 state.refSource = initializeRefSource();
+state.savedIds = loadSavedIds();
+initializeFocusMode();
+initializeLastFilter();
+initializeReturnMemory();
 showSubmissionReviewToastIfNeeded();
 fetchSubmissions();

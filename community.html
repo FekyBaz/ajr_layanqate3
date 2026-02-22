@@ -14,6 +14,7 @@
         <header class="community-header">
             <h1>مساهمات المجتمع</h1>
             <p>مساحة هادئة للمشاركات المعتمدة، بنية نشر الخير والأجر.</p>
+            <p id="returnMemory" class="community-return-memory" hidden>سعداء بعودتك اليوم 🤍</p>
             <div class="community-stats" aria-label="إحصاءات المجتمع">
                 <p id="approvedCount">🤍 ... مشاركة معتمدة</p>
                 <p id="totalSharesCount">📿 ... مرة تم نشر الأذكار</p>
@@ -40,13 +41,17 @@
                 <button class="tab" data-type="hadith">حديث</button>
             </div>
 
-            <label class="sort-wrap" for="sortSelect">
-                ترتيب:
-                <select id="sortSelect">
-                    <option value="latest">الأحدث</option>
-                    <option value="most_shared">الأكثر مشاركة</option>
-                </select>
-            </label>
+            <div class="community-controls__actions">
+                <label class="sort-wrap" for="sortSelect">
+                    ترتيب:
+                    <select id="sortSelect">
+                        <option value="latest">الأحدث</option>
+                        <option value="most_shared">الأكثر مشاركة</option>
+                    </select>
+                </label>
+
+                <button type="button" id="focusModeToggle" class="btn btn-ghost community-focus-toggle" aria-pressed="false">وضع هادئ</button>
+            </div>
         </section>
 
         <section id="stateMessage" class="state-message card card-outline">جارٍ تحميل المشاركات...</section>
@@ -72,6 +77,13 @@
         </aside>
 
         <hr class="community-divider" aria-hidden="true">
+
+        <section id="savedSection" class="community-saved card card-soft" aria-labelledby="savedSectionTitle">
+            <h2 id="savedSectionTitle" class="community-saved__title">🤍 محفوظاتك</h2>
+            <p id="savedTasteMessage" class="community-saved__taste" hidden>يبدو أن لك ذوقًا خاصًا 🤍</p>
+            <div id="savedItems" class="community-saved__grid"></div>
+            <p id="savedEmptyMessage" class="community-saved__empty">لم تحفظ شيئًا بعد 🤍</p>
+        </section>
 
         <section class="project-share card card-soft" aria-labelledby="project-share-title">
             <h2 id="project-share-title" class="project-share__title">انشر المشروع بلطف 🤍</h2>
