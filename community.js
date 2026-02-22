@@ -43,6 +43,7 @@ const elements = {
     goalTarget: document.getElementById('goalTarget'),
     goalProgress: document.getElementById('goalProgress'),
     goalBarFill: document.getElementById('goalBarFill'),
+    goalHint: document.getElementById('goalHint'),
     shareToast: document.getElementById('shareToast'),
     joinPopup: document.getElementById('joinPopup'),
     joinPopupClose: document.getElementById('joinPopupClose'),
@@ -367,6 +368,9 @@ function renderGoal(goal = {}) {
     elements.goalTarget.textContent = `🎯 هدف اليوم: ${formatNumber(dailyTarget)} ذكر`;
     elements.goalProgress.textContent = `🤍 تم تحقيق: ${formatNumber(currentProgress)}`;
     elements.goalBarFill.style.width = `${percent}%`;
+    if (elements.goalHint) {
+        elements.goalHint.textContent = goal.hint || 'هدف اليوم يتجدد كل صباح 🤍';
+    }
     elements.goalSection.querySelector('.community-goal__bar')?.setAttribute('aria-valuenow', String(percent));
     elements.goalSection.hidden = false;
 }

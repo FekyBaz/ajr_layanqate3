@@ -16,6 +16,10 @@
   # Include shared utilities
   included_files = ["netlify/functions/utils/**"]
 
+
+[functions."daily-feature-refresh"]
+  schedule = "0 0 * * *"
+
 # ═══════════════════════════════════════════════════════════════════════════
 # Redirects - API routes to functions
 # ═══════════════════════════════════════════════════════════════════════════
