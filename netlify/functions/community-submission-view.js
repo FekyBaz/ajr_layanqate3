@@ -1,11 +1,19 @@
-import { supabase, error, success, handleOptions, getClientIP } from './utils/shared.js';
+import { supabase, error, success, handleOptions, getClientIP, getCorsHeaders } from './utils/shared.js';
 
-const VIEW_DEBOUNCE_WINDOW_MS = 30_000;
+const VIEW_DEBOUNCE_WINDOW_MS = 60_000;
 const viewTracker = new Map();
+
+function getThrottleKey(clientIP, submissionId) {
+    if (clientIP && clientIP !== 'unknown') {
+        return `${clientIP}:${submissionId}`;
+    }
+
+    return `unknown-ip:${submissionId}`;
+}
 
 function canRecordView(clientIP, submissionId) {
     const now = Date.now();
-    const key = `${clientIP}:${submissionId}`;
+    const key = getThrottleKey(clientIP, submissionId);
     const previous = viewTracker.get(key) || 0;
 
     if (now - previous < VIEW_DEBOUNCE_WINDOW_MS) {
@@ -52,7 +60,14 @@ export async function handler(event) {
 
         const clientIP = getClientIP(event);
         if (!canRecordView(clientIP, submissionId)) {
-            return success({ updated: false, debounced: true }, origin);
+            return {
+                statusCode: 204,
+                headers: {
+                    ...getCorsHeaders(origin),
+                    'Cache-Control': 'no-store',
+                },
+                body: '',
+            };
         }
 
         const { data: existing, error: existingError } = await supabase
