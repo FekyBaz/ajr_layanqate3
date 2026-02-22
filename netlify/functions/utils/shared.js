@@ -50,10 +50,13 @@ export function getCorsHeaders(origin) {
 // Response Helpers
 // ═══════════════════════════════════════════════════════════════════════════
 
-export function success(data, origin) {
+export function success(data, origin, additionalHeaders = {}) {
     return {
         statusCode: 200,
-        headers: getCorsHeaders(origin),
+        headers: {
+            ...getCorsHeaders(origin),
+            ...additionalHeaders,
+        },
         body: JSON.stringify({ success: true, ...data }),
     };
 }

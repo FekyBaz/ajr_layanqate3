@@ -4,6 +4,7 @@ const VALID_TYPES = ['all', 'dhikr', 'dua', 'ayah', 'hadith'];
 const VALID_SORT = ['latest', 'most_shared'];
 const VALID_REF_SOURCES = ['instagram', 'facebook', 'direct', 'telegram'];
 const PAGE_SIZE = 10;
+const RESPONSE_CACHE_CONTROL = 'public, max-age=45, s-maxage=45, stale-while-revalidate=60';
 
 function sanitizeRefSource(value) {
     if (typeof value !== 'string') return 'direct';
@@ -11,24 +12,82 @@ function sanitizeRefSource(value) {
     return VALID_REF_SOURCES.includes(normalized) ? normalized : 'direct';
 }
 
-async function getApprovedAggregateStats() {
-    const { data, error: aggregateError } = await supabase
+async function getStatsSnapshot() {
+    const { data, error: statsError } = await supabase
+        .from('community_stats')
+        .select('total_approved,total_post_count,average_post_count,updated_at')
+        .eq('id', 1)
+        .maybeSingle();
+
+    if (statsError) {
+        throw statsError;
+    }
+
+    if (data) {
+        return {
+            stats: {
+                totalApproved: Number(data.total_approved) || 0,
+                totalPostCount: Number(data.total_post_count) || 0,
+                averagePostCount: Number(data.average_post_count) || 0,
+                updatedAt: data.updated_at,
+            },
+            source: 'table',
+        };
+    }
+
+    const { data: aggregateRows, error: aggregateError, count } = await supabase
         .from('submissions')
-        .select('post_count')
+        .select('post_count', { count: 'exact' })
         .eq('status', 'Approved');
 
     if (aggregateError) {
         throw aggregateError;
     }
 
-    const rows = data || [];
-    const totalPostCount = rows.reduce((sum, row) => sum + (Number(row.post_count) || 0), 0);
-    const averagePostCount = rows.length ? totalPostCount / rows.length : 0;
+    const totalPostCount = (aggregateRows || []).reduce((sum, row) => sum + (Number(row.post_count) || 0), 0);
+    const totalApproved = count || 0;
+    const averagePostCount = totalApproved ? totalPostCount / totalApproved : 0;
+
+    const { error: writeStatsError } = await supabase
+        .from('community_stats')
+        .upsert({
+            id: 1,
+            total_approved: totalApproved,
+            total_post_count: totalPostCount,
+            average_post_count: averagePostCount,
+            updated_at: new Date().toISOString(),
+        });
+
+    if (writeStatsError) {
+        console.error('Community stats fallback write error:', writeStatsError.message);
+    }
 
     return {
-        totalPostCount,
-        averagePostCount,
+        stats: {
+            totalApproved,
+            totalPostCount,
+            averagePostCount,
+            updatedAt: new Date().toISOString(),
+        },
+        source: 'fallback',
     };
+}
+
+async function getNewApprovedTodayCount() {
+    const startOfDay = new Date();
+    startOfDay.setHours(0, 0, 0, 0);
+
+    const { count, error: todayError } = await supabase
+        .from('submissions')
+        .select('id', { count: 'exact', head: true })
+        .eq('status', 'Approved')
+        .gte('created_at', startOfDay.toISOString());
+
+    if (todayError) {
+        throw todayError;
+    }
+
+    return count || 0;
 }
 
 export async function handler(event) {
@@ -47,6 +106,7 @@ export async function handler(event) {
         const page = Math.max(parseInt(params.get('page') || '1', 10), 1);
         const contentType = (params.get('type') || 'all').toLowerCase();
         const sortBy = (params.get('sort') || 'latest').toLowerCase();
+        const limit = Math.min(Math.max(parseInt(params.get('limit') || String(PAGE_SIZE), 10), 1), PAGE_SIZE);
         const refSource = sanitizeRefSource(event.headers['x-ref-source'] || event.headers['X-Ref-Source'] || 'direct');
 
         if (!VALID_TYPES.includes(contentType)) {
@@ -59,8 +119,8 @@ export async function handler(event) {
 
         console.log('[community-submissions] ref source:', refSource);
 
-        const from = (page - 1) * PAGE_SIZE;
-        const to = from + PAGE_SIZE - 1;
+        const from = (page - 1) * limit;
+        const to = from + limit - 1;
 
         let baseQuery = supabase
             .from('submissions')
@@ -101,19 +161,28 @@ export async function handler(event) {
             console.error('Featured submission fetch error:', featuredError.message);
         }
 
-        const stats = await getApprovedAggregateStats();
+        const [{ stats, source }, newApprovedToday] = await Promise.all([
+            getStatsSnapshot(),
+            getNewApprovedTodayCount(),
+        ]);
 
         return success({
             submissions: data || [],
             featured: featured || null,
-            stats,
+            stats: {
+                ...stats,
+                newApprovedToday,
+                source,
+            },
             pagination: {
                 page,
-                pageSize: PAGE_SIZE,
+                pageSize: limit,
                 total: count || 0,
-                totalPages: Math.max(Math.ceil((count || 0) / PAGE_SIZE), 1),
+                totalPages: Math.max(Math.ceil((count || 0) / limit), 1),
             },
-        }, origin);
+        }, origin, {
+            'Cache-Control': RESPONSE_CACHE_CONTROL,
+        });
     } catch (err) {
         console.error('Community submissions handler error:', err.message);
         return error(500, 'حدث خطأ غير متوقع', origin);

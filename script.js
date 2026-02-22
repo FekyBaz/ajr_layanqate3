@@ -360,11 +360,8 @@
             if (result.success) {
                 // Update client-side rate limiting
                 updateRateLimit();
-
-                // Show success message
-                form.hidden = true;
-                successMessage.hidden = false;
-                successMessage.focus();
+                sessionStorage.setItem('ajr_submission_pending_review', '1');
+                window.location.href = '/community.html?submitted=1';
             } else {
                 // Show error message from server
                 showError(null, contentError, result.message || ERRORS.submissionFailed);
