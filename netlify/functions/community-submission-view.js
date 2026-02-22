@@ -1,4 +1,29 @@
-import { supabase, error, success, handleOptions } from './utils/shared.js';
+import { supabase, error, success, handleOptions, getClientIP } from './utils/shared.js';
+
+const VIEW_DEBOUNCE_WINDOW_MS = 30_000;
+const viewTracker = new Map();
+
+function canRecordView(clientIP, submissionId) {
+    const now = Date.now();
+    const key = `${clientIP}:${submissionId}`;
+    const previous = viewTracker.get(key) || 0;
+
+    if (now - previous < VIEW_DEBOUNCE_WINDOW_MS) {
+        return false;
+    }
+
+    viewTracker.set(key, now);
+
+    if (viewTracker.size > 10_000) {
+        for (const [entryKey, timestamp] of viewTracker.entries()) {
+            if (now - timestamp > VIEW_DEBOUNCE_WINDOW_MS * 2) {
+                viewTracker.delete(entryKey);
+            }
+        }
+    }
+
+    return true;
+}
 
 export async function handler(event) {
     const origin = event.headers.origin || event.headers.Origin;
@@ -12,11 +37,22 @@ export async function handler(event) {
     }
 
     try {
-        const payload = JSON.parse(event.body || '{}');
+        let payload;
+        try {
+            payload = JSON.parse(event.body || '{}');
+        } catch {
+            return error(400, 'Invalid payload', origin);
+        }
+
         const submissionId = Number(payload.submissionId);
 
         if (!Number.isInteger(submissionId) || submissionId <= 0) {
             return error(400, 'Invalid submission id', origin);
+        }
+
+        const clientIP = getClientIP(event);
+        if (!canRecordView(clientIP, submissionId)) {
+            return success({ updated: false, debounced: true }, origin);
         }
 
         const { data: existing, error: existingError } = await supabase
@@ -48,7 +84,9 @@ export async function handler(event) {
             return error(500, 'تعذر تحديث عدد المشاهدات', origin);
         }
 
-        return success({ updated: true }, origin);
+        return success({ updated: true }, origin, {
+            'Cache-Control': 'no-store',
+        });
     } catch (err) {
         console.error('Community submission view handler error:', err.message);
         return error(500, 'حدث خطأ غير متوقع', origin);
