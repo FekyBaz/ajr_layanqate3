@@ -3,6 +3,7 @@ import { getOrCreateGoal } from './utils/community-goal.js';
 
 const VALID_TYPES = ['all', 'dhikr', 'dua', 'ayah', 'hadith'];
 const VALID_SORT = ['latest', 'most_shared'];
+const VISIBLE_STATUSES = ['Approved', 'Posted'];
 const VALID_REF_SOURCES = ['instagram', 'facebook', 'direct', 'telegram', 'whatsapp_share', 'telegram_share', 'x_share'];
 const DEFAULT_PAGE_SIZE = 10;
 const HOMEPAGE_PREVIEW_SIZE = 3;
@@ -51,7 +52,7 @@ async function getStatsSnapshot() {
     const { data: aggregateRows, error: aggregateError, count } = await supabase
         .from('submissions')
         .select('post_count', { count: 'exact' })
-        .eq('status', 'Approved');
+        .in('status', VISIBLE_STATUSES);
 
     if (aggregateError) {
         throw aggregateError;
@@ -86,14 +87,14 @@ async function getStatsSnapshot() {
     };
 }
 
-async function getNewApprovedTodayCount() {
+async function getNewVisibleTodayCount() {
     const startOfDay = new Date();
     startOfDay.setHours(0, 0, 0, 0);
 
     const { count, error: todayError } = await supabase
         .from('submissions')
         .select('id', { count: 'exact', head: true })
-        .eq('status', 'Approved')
+        .in('status', VISIBLE_STATUSES)
         .gte('created_at', startOfDay.toISOString());
 
     if (todayError) {
@@ -150,7 +151,7 @@ export async function handler(event) {
         let countQuery = supabase
             .from('submissions')
             .select('id', { count: 'exact', head: true })
-            .eq('status', 'Approved');
+            .in('status', VISIBLE_STATUSES);
 
         if (contentType !== 'all') {
             countQuery = countQuery.eq('content_type', contentType);
@@ -164,6 +165,7 @@ export async function handler(event) {
         }
 
         const total = count || 0;
+        console.log('[community-submissions] visible count:', total);
         const totalPages = total === 0 ? 1 : Math.ceil(total / limit);
         const page = Math.min(requestedPage, totalPages);
         const from = (page - 1) * limit;
@@ -180,7 +182,7 @@ export async function handler(event) {
         let baseQuery = supabase
             .from('submissions')
             .select('id,message,corrected_message,author_name,content_type,created_at,post_count')
-            .eq('status', 'Approved');
+            .in('status', VISIBLE_STATUSES);
 
         if (contentType !== 'all') {
             baseQuery = baseQuery.eq('content_type', contentType);
@@ -202,7 +204,7 @@ export async function handler(event) {
         const { data: featured, error: featuredError } = await supabase
             .from('submissions')
             .select('id,message,corrected_message,author_name,content_type,created_at,post_count')
-            .eq('status', 'Approved')
+            .in('status', VISIBLE_STATUSES)
             .gt('post_count', 0)
             .order('post_count', { ascending: false })
             .order('created_at', { ascending: false })
@@ -213,9 +215,9 @@ export async function handler(event) {
             console.error('Featured submission fetch error:', featuredError.message);
         }
 
-        const [statsResult, newApprovedTodayResult, goalResult] = await Promise.allSettled([
+        const [statsResult, newVisibleTodayResult, goalResult] = await Promise.allSettled([
             getStatsSnapshot(),
-            getNewApprovedTodayCount(),
+            getNewVisibleTodayCount(),
             getOrCreateGoal(),
         ]);
 
@@ -223,8 +225,8 @@ export async function handler(event) {
             console.error('Community stats snapshot failed:', statsResult.reason?.message || 'unknown');
         }
 
-        if (newApprovedTodayResult.status === 'rejected') {
-            console.error('Community today count failed:', newApprovedTodayResult.reason?.message || 'unknown');
+        if (newVisibleTodayResult.status === 'rejected') {
+            console.error('Community today count failed:', newVisibleTodayResult.reason?.message || 'unknown');
         }
 
         if (goalResult.status === 'rejected') {
@@ -243,7 +245,7 @@ export async function handler(event) {
                 source: 'degraded_fallback',
             };
 
-        const newApprovedToday = newApprovedTodayResult.status === 'fulfilled' ? newApprovedTodayResult.value : 0;
+        const newApprovedToday = newVisibleTodayResult.status === 'fulfilled' ? newVisibleTodayResult.value : 0;
         const goal = goalResult.status === 'fulfilled'
             ? goalResult.value
             : { daily_target: 200, current_progress: 0, date: new Date().toISOString().slice(0, 10) };
