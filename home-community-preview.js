@@ -11,6 +11,10 @@
         skeleton: document.getElementById('communityPreviewSkeleton'),
         empty: document.getElementById('communityPreviewEmpty'),
         newTodayBadge: document.getElementById('newTodayBadge'),
+        dailyFeatureCard: document.getElementById('dailyFeatureCard'),
+        dailyFeatureText: document.getElementById('dailyFeatureText'),
+        dailyFeatureShare: document.getElementById('dailyFeatureShare'),
+        dailyChangeLine: document.getElementById('dailyChangeLine'),
     };
 
     function sanitizeRefValue(value) {
@@ -45,6 +49,25 @@
 
     function resolveMessage(item) {
         return item.corrected_message || item.message || '';
+    }
+
+    function getDailyDateLine() {
+        const now = new Date();
+        const formatted = new Intl.DateTimeFormat('ar-EG', { day: 'numeric', month: 'long', year: 'numeric' }).format(now);
+        return `اليوم: ${formatted}`;
+    }
+
+    function renderDailyFeature(dailyFeature) {
+        if (elements.dailyChangeLine) {
+            elements.dailyChangeLine.textContent = getDailyDateLine();
+        }
+
+        const submission = dailyFeature?.submission;
+        if (!submission || !elements.dailyFeatureCard || !elements.dailyFeatureText || !elements.dailyFeatureShare) return;
+
+        elements.dailyFeatureText.textContent = `"${resolveMessage(submission)}"`;
+        elements.dailyFeatureCard.hidden = false;
+        elements.dailyFeatureShare.addEventListener('click', () => shareSubmission(submission));
     }
 
     async function shareSubmission(item) {
@@ -115,6 +138,7 @@
             const avgPostCount = Number(result.stats?.averagePostCount) || 0;
             const newToday = Number(result.stats?.newApprovedToday) || 0;
             const total = Number(result.pagination?.total) || 0;
+            renderDailyFeature(result.dailyFeature);
 
             console.debug('[home-preview] payload shape', {
                 submissions: submissions.length,

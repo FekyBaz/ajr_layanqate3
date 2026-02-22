@@ -1,5 +1,6 @@
 import { supabase, error, success, handleOptions } from './utils/shared.js';
 import { getOrCreateGoal } from './utils/community-goal.js';
+import { getDailyFeatureWithSubmission } from './utils/daily-feature.js';
 
 const VALID_TYPES = ['all', 'dhikr', 'dua', 'ayah', 'hadith'];
 const VALID_SORT = ['latest', 'most_shared'];
@@ -215,10 +216,11 @@ export async function handler(event) {
             console.error('Featured submission fetch error:', featuredError.message);
         }
 
-        const [statsResult, newVisibleTodayResult, goalResult] = await Promise.allSettled([
+        const [statsResult, newVisibleTodayResult, goalResult, dailyFeatureResult] = await Promise.allSettled([
             getStatsSnapshot(),
             getNewVisibleTodayCount(),
             getOrCreateGoal(),
+            getDailyFeatureWithSubmission(),
         ]);
 
         if (statsResult.status === 'rejected') {
@@ -231,6 +233,10 @@ export async function handler(event) {
 
         if (goalResult.status === 'rejected') {
             console.error('Community goal fetch failed:', goalResult.reason?.message || 'unknown');
+        }
+
+        if (dailyFeatureResult.status === 'rejected') {
+            console.error('Daily feature fetch failed:', dailyFeatureResult.reason?.message || 'unknown');
         }
 
         const statsPayload = statsResult.status === 'fulfilled'
@@ -249,6 +255,7 @@ export async function handler(event) {
         const goal = goalResult.status === 'fulfilled'
             ? goalResult.value
             : { daily_target: 200, current_progress: 0, date: new Date().toISOString().slice(0, 10) };
+        const dailyFeature = dailyFeatureResult.status === 'fulfilled' ? dailyFeatureResult.value : null;
 
         const payload = {
             submissions: data || [],
@@ -261,8 +268,10 @@ export async function handler(event) {
                     dailyTarget: Number(goal.daily_target) || 200,
                     currentProgress: Number(goal.current_progress) || 0,
                     date: goal.date,
+                    hint: 'هدف اليوم يتجدد كل صباح 🤍',
                 },
             },
+            dailyFeature,
             pagination: {
                 page,
                 pageSize: limit,
@@ -274,6 +283,7 @@ export async function handler(event) {
         console.log('[community-submissions] payload shape', {
             submissionsCount: payload.submissions.length,
             hasFeatured: Boolean(payload.featured),
+            hasDailyFeature: Boolean(payload.dailyFeature),
             statsSource: payload.stats.source,
             total: payload.pagination.total,
             totalPages: payload.pagination.totalPages,
