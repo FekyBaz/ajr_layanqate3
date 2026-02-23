@@ -56,6 +56,7 @@
     const charCount = document.getElementById('char-count');
     const successMessage = document.getElementById('success-message');
     const resetFormBtn = document.getElementById('reset-form');
+    const submitTransition = document.getElementById('submit-transition');
 
     // Error elements
     const contentTypeError = document.getElementById('content-type-error');
@@ -68,6 +69,7 @@
     const MAX_CONTENT_LENGTH = 1000; // Reduced to match backend limit
     const MAX_NAME_LENGTH = 100;
     const MIN_CONTENT_LENGTH = 3; // Match backend minimum
+    let isSubmitting = false;
 
     // Client-side rate limiting (supplementary to server-side)
     const RATE_LIMIT_KEY = 'ajr_submissions';
@@ -78,11 +80,11 @@
     // Arabic Error Messages
     // ═══════════════════════════════════════════════════════════════════════
     const ERRORS = {
-        contentTypeRequired: 'يرجى اختيار نوع المحتوى',
-        contentRequired: 'يرجى كتابة المحتوى',
-        contentTooShort: `المحتوى قصير جدًا (الحد الأدنى ${MIN_CONTENT_LENGTH} حروف)`,
-        contentTooLong: `المحتوى طويل جدًا (الحد الأقصى ${MAX_CONTENT_LENGTH} حرف)`,
-        consentRequired: 'يرجى الموافقة على شروط المشاركة',
+        contentTypeRequired: 'يرجى اختيار نوع المحتوى قبل الإرسال 🤍',
+        contentRequired: 'يرجى كتابة ذكر قبل الإرسال 🤍',
+        contentTooShort: `أضف قليلًا من التفصيل (على الأقل ${MIN_CONTENT_LENGTH} أحرف)`,
+        contentTooLong: `النص طويل قليلًا، حاول الاختصار بلطف (حتى ${MAX_CONTENT_LENGTH} حرف)`,
+        consentRequired: 'يرجى تأكيد التعهد قبل الإرسال 🤍',
         rateLimited: 'لقد تجاوزت الحد المسموح من المشاركات. يرجى المحاولة لاحقًا.',
         networkError: 'تعذر الاتصال بالخادم. يرجى التحقق من اتصالك بالإنترنت.',
         submissionFailed: 'حدث خطأ أثناء الإرسال. يرجى المحاولة مرة أخرى.'
@@ -323,6 +325,10 @@
     async function handleSubmit(e) {
         e.preventDefault();
 
+        if (isSubmitting) {
+            return;
+        }
+
         // Clear previous errors
         clearAllErrors();
 
@@ -343,8 +349,13 @@
         }
 
         // Show loading state
+        isSubmitting = true;
         submitBtn.classList.add('is-loading');
         submitBtn.disabled = true;
+        submitBtn.setAttribute('aria-busy', 'true');
+        if (submitTransition) {
+            submitTransition.hidden = false;
+        }
 
         // Prepare data for API - use backend field names
         const apiData = {
@@ -361,6 +372,7 @@
                 // Update client-side rate limiting
                 updateRateLimit();
                 sessionStorage.setItem('ajr_submission_pending_review', '1');
+                await new Promise(resolve => setTimeout(resolve, 500));
                 window.location.href = '/community.html?submitted=1';
             } else {
                 // Show error message from server
@@ -383,6 +395,11 @@
         } finally {
             submitBtn.classList.remove('is-loading');
             submitBtn.disabled = false;
+            submitBtn.removeAttribute('aria-busy');
+            isSubmitting = false;
+            if (submitTransition) {
+                submitTransition.hidden = true;
+            }
         }
     }
 
@@ -395,6 +412,9 @@
         successMessage.hidden = true;
         clearAllErrors();
         updateCharCount();
+        if (submitTransition) {
+            submitTransition.hidden = true;
+        }
         contentType.focus();
     }
 
@@ -405,18 +425,14 @@
     function updateCharCount() {
         const count = content.value.length;
 
-        // Update the counter span directly
-        const counterEl = document.getElementById('char-count');
-        if (counterEl) {
-            counterEl.textContent = count;
+        if (charCount) {
+            charCount.textContent = count;
+            charCount.classList.remove('is-near-limit', 'is-at-limit');
 
-            // Visual feedback when approaching limit
-            if (count > MAX_CONTENT_LENGTH * 0.9) {
-                counterEl.style.color = 'var(--color-error)';
-            } else if (count > MAX_CONTENT_LENGTH * 0.75) {
-                counterEl.style.color = 'var(--color-warning, orange)';
-            } else {
-                counterEl.style.color = '';
+            if (count >= MAX_CONTENT_LENGTH) {
+                charCount.classList.add('is-at-limit');
+            } else if (count >= MAX_CONTENT_LENGTH * 0.85) {
+                charCount.classList.add('is-near-limit');
             }
         }
     }
@@ -431,23 +447,9 @@
     // Reset form button
     resetFormBtn.addEventListener('click', resetForm);
 
-    // Character counting - attach with explicit function
+    // Character counting
     if (content) {
-        content.addEventListener('input', function () {
-            const count = this.value.length;
-            const counterEl = document.getElementById('char-count');
-            if (counterEl) {
-                counterEl.textContent = count;
-                // Visual feedback when approaching limit
-                if (count > MAX_CONTENT_LENGTH * 0.9) {
-                    counterEl.style.color = 'var(--color-error)';
-                } else if (count > MAX_CONTENT_LENGTH * 0.75) {
-                    counterEl.style.color = 'orange';
-                } else {
-                    counterEl.style.color = '';
-                }
-            }
-        });
+        content.addEventListener('input', updateCharCount);
         console.log('Character counter initialized for textarea');
     }
 
