@@ -1992,6 +1992,30 @@ body.community-focus-mode .submission-message {
     word-break: break-word;
 }
 
+
+.home-community-preview .community-preview-card__full-link {
+    align-self: flex-start;
+    margin-top: 0;
+    margin-bottom: 0.15rem;
+    font-size: 0.78rem;
+    color: var(--color-accent-primary);
+    text-decoration: none;
+    opacity: 0.88;
+}
+
+.home-community-preview .community-preview-card__full-link:hover {
+    opacity: 1;
+    text-decoration: underline;
+}
+
+.home-community-preview .community-preview-card__full-link:focus-visible {
+    outline: 2px solid rgba(14, 107, 82, 0.35);
+    outline-offset: 2px;
+    border-radius: 4px;
+    opacity: 1;
+}
+
+
 .community-preview .content-badge {
     border-radius: 999px;
     font-size: 0.7rem;

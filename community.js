@@ -33,6 +33,8 @@ const state = {
     submissionsById: new Map(),
     savedIds: new Set(),
     focusMode: false,
+    hashTargetSubmissionId: null,
+    hasHandledHashTarget: false,
 };
 
 const elements = {
@@ -253,6 +255,7 @@ function createCard(item, avgPostCount = 0) {
     const card = document.createElement('article');
     card.className = 'submission-card card card-soft card-enter';
     card.dataset.submissionId = String(item.id);
+    card.id = `submission-${item.id}`;
     card.tabIndex = 0;
 
     card.appendChild(createCardTop(item, avgPostCount));
@@ -386,6 +389,33 @@ function toggleCardExpansion(card, button) {
     };
 
     message.addEventListener('transitionend', onTransitionEnd);
+}
+
+function getSubmissionIdFromHash() {
+    const rawHash = window.location.hash || '';
+    const match = rawHash.match(/^#submission-(.+)$/);
+    if (!match?.[1]) return null;
+    return normalizeSubmissionId(decodeURIComponent(match[1]));
+}
+
+function revealHashTargetIfNeeded() {
+    if (!state.hashTargetSubmissionId || state.hasHandledHashTarget) return;
+
+    const targetCard = document.getElementById(`submission-${state.hashTargetSubmissionId}`);
+    if (!targetCard) return;
+
+    requestAnimationFrame(() => {
+        targetCard.scrollIntoView({ behavior: 'smooth', block: 'start' });
+
+        const expandButton = targetCard.querySelector('[data-expand-toggle]');
+        const isExpanded = expandButton?.getAttribute('aria-expanded') === 'true';
+
+        if (expandButton && !isExpanded) {
+            toggleCardExpansion(targetCard, expandButton);
+        }
+    });
+
+    state.hasHandledHashTarget = true;
 }
 
 function showToast() {
@@ -729,6 +759,7 @@ function renderResponse(result) {
     elements.submissionsContainer.innerHTML = '';
     elements.submissionsContainer.appendChild(buildCards(submissions, avgPostCount));
     setupExpandableCards(elements.submissionsContainer);
+    revealHashTargetIfNeeded();
     renderSavedItems();
 
     elements.pagination.hidden = false;
@@ -846,6 +877,7 @@ if (elements.focusModeToggle) {
 
 state.refSource = initializeRefSource();
 state.savedIds = loadSavedIds();
+state.hashTargetSubmissionId = getSubmissionIdFromHash();
 initializeFocusMode();
 initializeLastFilter();
 initializeReturnMemory();
