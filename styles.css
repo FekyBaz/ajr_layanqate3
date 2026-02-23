@@ -544,6 +544,60 @@ p {
     padding: var(--space-md) var(--space-xl);
 }
 
+/* Hero Context Override:
+   Keep the global button system untouched, but elevate CTA contrast inside `.hero`
+   so buttons stay readable over the dark-gold hero gradient.
+   Visual hierarchy inside hero:
+   1) Primary = strongest emphasis
+   2) Secondary = calm, supportive
+   3) Ghost = minimal, but still visible */
+.hero .btn-primary,
+.hero .btn--primary {
+    background: #fffaf1;
+    color: var(--color-accent-primary);
+    border-color: rgba(140, 106, 53, 0.28);
+    box-shadow: 0 10px 24px rgba(28, 19, 9, 0.25);
+}
+
+.hero .btn-primary:hover,
+.hero .btn-primary:focus-visible,
+.hero .btn--primary:hover,
+.hero .btn--primary:focus-visible {
+    background: #ffffff;
+    transform: translateY(-2px);
+    box-shadow: 0 16px 30px rgba(28, 19, 9, 0.3);
+}
+
+.hero .btn-secondary,
+.hero .btn--secondary {
+    background: rgba(72, 50, 20, 0.38);
+    color: #f4d7a5;
+    border-color: #f4d7a5;
+    box-shadow: 0 6px 16px rgba(20, 13, 6, 0.2);
+}
+
+.hero .btn-secondary:hover,
+.hero .btn-secondary:focus-visible,
+.hero .btn--secondary:hover,
+.hero .btn--secondary:focus-visible {
+    background: rgba(72, 50, 20, 0.52);
+    color: #ffe9bf;
+    border-color: #ffe9bf;
+}
+
+.hero .btn-ghost {
+    background: rgba(255, 250, 241, 0.1);
+    color: #fff7e8;
+    border-color: rgba(255, 236, 203, 0.5);
+}
+
+.hero .btn-ghost:hover,
+.hero .btn-ghost:focus-visible {
+    background: rgba(255, 250, 241, 0.18);
+    color: #ffffff;
+    border-color: rgba(255, 236, 203, 0.72);
+}
+
 /* Hero responsive adjustments */
 @media (min-width: 768px) {
     .hero__title {
