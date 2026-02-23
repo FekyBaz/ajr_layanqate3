@@ -259,6 +259,7 @@ function createCard(item, avgPostCount = 0) {
 
     const message = document.createElement('p');
     message.className = 'submission-message';
+    message.dataset.expanded = 'false';
     message.textContent = `"${resolveMessage(item)}"`;
     card.appendChild(message);
 
@@ -287,6 +288,104 @@ function createCard(item, avgPostCount = 0) {
     card.appendChild(shareButton);
 
     return card;
+}
+
+function ensureMessageRegionId(message, fallbackId) {
+    if (message.id) return message.id;
+
+    const regionId = `submission-content-${fallbackId}`;
+    message.id = regionId;
+    return regionId;
+}
+
+function measureCollapsedHeight(message) {
+    return message.clientHeight;
+}
+
+function setupExpandableCards(container) {
+    const cards = container.querySelectorAll('.submission-card[data-submission-id]');
+
+    cards.forEach((card) => {
+        const message = card.querySelector('.submission-message');
+        if (!message) return;
+
+        const fallbackId = card.dataset.submissionId || `${Date.now()}-${Math.random().toString(36).slice(2, 8)}`;
+        const regionId = ensureMessageRegionId(message, fallbackId);
+        const collapsedHeight = measureCollapsedHeight(message);
+        const isOverflowing = message.scrollHeight > collapsedHeight + 1;
+
+        message.style.setProperty('--collapsed-height', `${collapsedHeight}px`);
+
+        const existingToggle = card.querySelector('[data-expand-toggle]');
+        if (!isOverflowing) {
+            if (existingToggle) existingToggle.remove();
+            message.classList.remove('is-expandable', 'is-expanded');
+            message.dataset.expanded = 'false';
+            message.style.maxHeight = `${collapsedHeight}px`;
+            return;
+        }
+
+        message.classList.add('is-expandable');
+
+        if (existingToggle) return;
+
+        const toggleButton = document.createElement('button');
+        toggleButton.type = 'button';
+        toggleButton.className = 'submission-expand-btn';
+        toggleButton.dataset.expandToggle = 'true';
+        toggleButton.setAttribute('aria-controls', regionId);
+        toggleButton.setAttribute('aria-expanded', 'false');
+        toggleButton.textContent = 'عرض المزيد';
+        card.insertBefore(toggleButton, card.querySelector('.submission-meta'));
+    });
+}
+
+function toggleCardExpansion(card, button) {
+    const message = card.querySelector('.submission-message');
+    if (!message) return;
+
+    const collapsedHeight = Number.parseFloat(message.style.getPropertyValue('--collapsed-height')) || message.clientHeight;
+    const isExpanded = message.dataset.expanded === 'true';
+
+    const previousTop = card.getBoundingClientRect().top;
+
+    message.style.maxHeight = `${message.scrollHeight}px`;
+    void message.offsetHeight;
+
+    if (isExpanded) {
+        message.dataset.expanded = 'false';
+        card.dataset.expanded = 'false';
+        message.classList.remove('is-expanded');
+        button.setAttribute('aria-expanded', 'false');
+        button.textContent = 'عرض المزيد';
+        message.style.maxHeight = `${collapsedHeight}px`;
+    } else {
+        message.dataset.expanded = 'true';
+        card.dataset.expanded = 'true';
+        message.classList.add('is-expanded');
+        button.setAttribute('aria-expanded', 'true');
+        button.textContent = 'عرض أقل';
+        message.style.maxHeight = `${message.scrollHeight}px`;
+    }
+
+    const onTransitionEnd = (event) => {
+        if (event.propertyName !== 'max-height') return;
+
+        if (message.dataset.expanded === 'true') {
+            message.style.maxHeight = 'none';
+        } else {
+            message.style.maxHeight = `${collapsedHeight}px`;
+            const nextTop = card.getBoundingClientRect().top;
+            const delta = nextTop - previousTop;
+            if (Math.abs(delta) > 1) {
+                window.scrollBy({ top: delta, behavior: 'auto' });
+            }
+        }
+
+        message.removeEventListener('transitionend', onTransitionEnd);
+    };
+
+    message.addEventListener('transitionend', onTransitionEnd);
 }
 
 function showToast() {
@@ -629,6 +728,7 @@ function renderResponse(result) {
     elements.stateMessage.hidden = true;
     elements.submissionsContainer.innerHTML = '';
     elements.submissionsContainer.appendChild(buildCards(submissions, avgPostCount));
+    setupExpandableCards(elements.submissionsContainer);
     renderSavedItems();
 
     elements.pagination.hidden = false;
@@ -701,6 +801,16 @@ elements.communityPage.addEventListener('click', async (event) => {
         if (!selected) return;
 
         await shareSubmission(selected);
+        return;
+    }
+
+    const expandButton = event.target.closest('[data-expand-toggle]');
+    if (expandButton) {
+        event.preventDefault();
+        event.stopPropagation();
+        const card = expandButton.closest('.submission-card[data-submission-id]');
+        if (!card) return;
+        toggleCardExpansion(card, expandButton);
         return;
     }
 
