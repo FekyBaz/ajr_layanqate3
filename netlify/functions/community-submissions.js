@@ -2,7 +2,7 @@ import { supabase, error, success, handleOptions } from './utils/shared.js';
 import { getOrCreateGoal } from './utils/community-goal.js';
 import { getDailyFeatureWithSubmission } from './utils/daily-feature.js';
 
-const VALID_TYPES = ['all', 'dhikr', 'dua', 'ayah', 'hadith'];
+const VALID_TYPES = ['all', 'dhikr', 'dua', 'ayah', 'hadith', 'benefit'];
 const VALID_SORT = ['latest', 'most_shared'];
 const VISIBLE_STATUSES = ['Approved', 'Posted'];
 const VALID_REF_SOURCES = ['instagram', 'facebook', 'direct', 'telegram', 'whatsapp_share', 'telegram_share', 'x_share'];
