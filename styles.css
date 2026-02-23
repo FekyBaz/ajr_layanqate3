@@ -2360,8 +2360,8 @@ body.community-focus-mode .submission-message {
    ═══════════════════════════════════════════════════════════════════════════ */
 .adhkar-page {
     background-image:
-        radial-gradient(circle at 50% -8%, rgba(200, 166, 115, 0.2), transparent 42%),
-        radial-gradient(circle at 22% 20%, rgba(255, 255, 255, 0.45), transparent 30%),
+        radial-gradient(circle at 50% -8%, rgba(200, 166, 115, 0.14), transparent 42%),
+        radial-gradient(circle at 22% 20%, rgba(255, 255, 255, 0.34), transparent 30%),
         linear-gradient(180deg, rgba(255, 248, 236, 0.95), rgba(245, 237, 224, 0.98));
 }
 
@@ -2434,12 +2434,25 @@ body.community-focus-mode .submission-message {
     font-size: clamp(2.4rem, 9vw, 4rem);
     line-height: 1.2;
     margin-bottom: var(--space-lg);
-    transition: color var(--transition-fast), text-shadow var(--transition-fast);
+    min-width: 3.1ch;
+    display: inline-block;
+    text-align: center;
+    font-variant-numeric: tabular-nums;
+    transition: color var(--transition-fast), text-shadow var(--transition-fast), opacity 120ms ease;
+    will-change: opacity;
 }
 
 .adhkar-page .adhkar-tasbeeh__count.is-milestone {
     color: var(--color-accent-primary);
     text-shadow: 0 0 20px rgba(200, 166, 115, 0.35);
+}
+
+.adhkar-page .adhkar-tasbeeh__count.is-breathing {
+    animation: adhkarMilestoneBreath 300ms ease-out 1;
+}
+
+.adhkar-page .adhkar-tasbeeh__count.is-reset-dissolve {
+    opacity: 0.85;
 }
 
 .adhkar-page .adhkar-tasbeeh__button {
@@ -2462,6 +2475,8 @@ body.community-focus-mode .submission-message {
     transition: transform 140ms ease, box-shadow 180ms ease;
     -webkit-tap-highlight-color: transparent;
     touch-action: manipulation;
+    user-select: none;
+    -webkit-user-select: none;
 }
 
 .adhkar-page .adhkar-tasbeeh__button::after {
@@ -2474,11 +2489,18 @@ body.community-focus-mode .submission-message {
 }
 
 .adhkar-page .adhkar-tasbeeh__button.is-pressed {
-    transform: scale(0.96);
+    transform: translateY(2px) scale(0.96);
     box-shadow:
         inset 0 10px 16px rgba(255, 255, 255, 0.3),
         inset 0 -7px 14px rgba(120, 87, 45, 0.18),
         0 8px 18px rgba(77, 55, 26, 0.15);
+}
+
+.adhkar-page .adhkar-tasbeeh__button.is-pressed.is-pressed-deep {
+    box-shadow:
+        inset 0 9px 15px rgba(255, 255, 255, 0.28),
+        inset 0 -8px 15px rgba(120, 87, 45, 0.2),
+        0 6px 14px rgba(77, 55, 26, 0.16);
 }
 
 .adhkar-page .adhkar-tasbeeh__button.is-pressed::after {
@@ -2494,6 +2516,16 @@ body.community-focus-mode .submission-message {
     100% {
         opacity: 0;
         box-shadow: 0 0 0 16px rgba(200, 166, 115, 0);
+    }
+}
+
+@keyframes adhkarMilestoneBreath {
+    0% {
+        opacity: 0.96;
+    }
+
+    100% {
+        opacity: 1;
     }
 }
 
