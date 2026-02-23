@@ -1,0 +1,108 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>مسبحة شخصية | أجر لا ينقطع</title>
+    <meta name="description" content="مساحة شخصية هادئة للتسبيح والأذكار اليومية — تعمل محليًا على جهازك فقط.">
+    <link rel="stylesheet" href="styles.css">
+</head>
+
+<body class="adhkar-page">
+    <a class="skip-link" href="#main">تخطي إلى المحتوى</a>
+
+    <header class="adhkar-header">
+        <div class="site-container adhkar-header__content">
+            <div>
+                <p class="adhkar-header__eyebrow">مساحة شخصية هادئة</p>
+                <h1>مسبحتك الرقمية 🤍</h1>
+                <p class="adhkar-header__intro">بدون مزامنة، بدون تتبع، فقط ذكر بينك وبين الله.</p>
+            </div>
+            <a href="/index.html" class="btn btn-ghost adhkar-header__home">العودة للرئيسية</a>
+        </div>
+    </header>
+
+    <main id="main">
+        <section class="adhkar-tasbeeh" aria-labelledby="tasbeeh-title">
+            <div class="site-container">
+                <div class="adhkar-card adhkar-card--hero">
+                    <h2 id="tasbeeh-title" class="section-title">التسبيح الرقمي</h2>
+
+                    <label for="tasbeehDhikr" class="adhkar-select-label">الذكر المختار</label>
+                    <select id="tasbeehDhikr" class="form-select adhkar-select">
+                        <option value="سبحان الله">سبحان الله</option>
+                        <option value="الحمد لله">الحمد لله</option>
+                        <option value="الله أكبر">الله أكبر</option>
+                        <option value="لا إله إلا الله">لا إله إلا الله</option>
+                        <option value="أستغفر الله">أستغفر الله</option>
+                    </select>
+
+                    <p class="adhkar-tasbeeh__label" id="tasbeehLabel">سبحان الله</p>
+                    <p class="adhkar-tasbeeh__count" id="tasbeehCount" aria-live="polite">0</p>
+
+                    <button id="tasbeehButton" class="adhkar-tasbeeh__button" type="button" aria-label="عد التسبيح">
+                        <span>اذكر الله</span>
+                    </button>
+
+                    <div class="adhkar-inline-confirm" id="tasbeehResetConfirm" hidden>
+                        <p>إعادة العداد إلى الصفر؟</p>
+                        <div>
+                            <button type="button" class="btn btn-secondary" id="tasbeehResetYes">نعم، إعادة</button>
+                            <button type="button" class="btn btn-ghost" id="tasbeehResetNo">إلغاء</button>
+                        </div>
+                    </div>
+
+                    <button id="tasbeehResetTrigger" class="btn btn-ghost adhkar-reset-trigger" type="button">إعادة العداد</button>
+                </div>
+            </div>
+        </section>
+
+        <section class="adhkar-prayer" aria-labelledby="prayer-adhkar-title">
+            <div class="site-container">
+                <div class="adhkar-card">
+                    <h2 id="prayer-adhkar-title" class="section-title">أذكار بعد الصلاة</h2>
+                    <ul class="adhkar-list" id="prayerList"></ul>
+                </div>
+            </div>
+        </section>
+
+        <section class="adhkar-daily" aria-labelledby="daily-adhkar-title">
+            <div class="site-container">
+                <div class="adhkar-card">
+                    <h2 id="daily-adhkar-title" class="section-title">أذكار الصباح والمساء</h2>
+
+                    <details class="adhkar-group" open>
+                        <summary>أذكار الصباح</summary>
+                        <ul class="adhkar-list" id="morningList"></ul>
+                        <div class="adhkar-inline-confirm adhkar-inline-confirm--group" id="morningResetConfirm" hidden>
+                            <p>إعادة جميع أذكار الصباح؟</p>
+                            <div>
+                                <button type="button" class="btn btn-secondary" id="morningResetYes">نعم، إعادة</button>
+                                <button type="button" class="btn btn-ghost" id="morningResetNo">إلغاء</button>
+                            </div>
+                        </div>
+                        <button type="button" class="btn btn-ghost adhkar-reset-trigger" id="morningResetTrigger">إعادة الصباح</button>
+                    </details>
+
+                    <details class="adhkar-group">
+                        <summary>أذكار المساء</summary>
+                        <ul class="adhkar-list" id="eveningList"></ul>
+                        <div class="adhkar-inline-confirm adhkar-inline-confirm--group" id="eveningResetConfirm" hidden>
+                            <p>إعادة جميع أذكار المساء؟</p>
+                            <div>
+                                <button type="button" class="btn btn-secondary" id="eveningResetYes">نعم، إعادة</button>
+                                <button type="button" class="btn btn-ghost" id="eveningResetNo">إلغاء</button>
+                            </div>
+                        </div>
+                        <button type="button" class="btn btn-ghost adhkar-reset-trigger" id="eveningResetTrigger">إعادة المساء</button>
+                    </details>
+                </div>
+            </div>
+        </section>
+    </main>
+
+    <script src="adhkar.js"></script>
+</body>
+
+</html>
