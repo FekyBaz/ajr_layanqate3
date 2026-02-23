@@ -153,6 +153,7 @@
 
     function init() {
         var state = loadState();
+        var prefersReducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
 
         var tasbeehCount = document.getElementById('tasbeehCount');
         var tasbeehLabel = document.getElementById('tasbeehLabel');
@@ -163,6 +164,40 @@
         var eveningList = document.getElementById('eveningList');
 
         var isTapLocked = false;
+        var activePressTimer = null;
+        var releasePressTimer = null;
+        var resetDissolveTimer = null;
+        var breathTimer = null;
+        var previousTasbeehCount = state.tasbeeh.count;
+
+        function clearTimer(timerId) {
+            if (timerId !== null) {
+                window.clearTimeout(timerId);
+            }
+            return null;
+        }
+
+        function shouldBreathAtMilestone(nextCount) {
+            var isMilestone = nextCount === 33 || nextCount === 100;
+            return isMilestone && previousTasbeehCount !== nextCount;
+        }
+
+        function triggerMilestoneBreath() {
+            if (prefersReducedMotion) {
+                return;
+            }
+
+            tasbeehCount.classList.remove('is-breathing');
+
+            window.requestAnimationFrame(function () {
+                tasbeehCount.classList.add('is-breathing');
+                breathTimer = clearTimer(breathTimer);
+                breathTimer = window.setTimeout(function () {
+                    tasbeehCount.classList.remove('is-breathing');
+                    breathTimer = null;
+                }, 320);
+            });
+        }
 
         function renderTasbeeh() {
             tasbeehCount.textContent = state.tasbeeh.count;
@@ -170,6 +205,7 @@
             tasbeehDhikr.value = state.tasbeeh.dhikr;
 
             tasbeehCount.classList.toggle('is-milestone', state.tasbeeh.count === 33 || state.tasbeeh.count === 100);
+            previousTasbeehCount = state.tasbeeh.count;
         }
 
         function renderList(listEl, items, category) {
@@ -201,17 +237,36 @@
             }
 
             isTapLocked = true;
+            var nextCount = state.tasbeeh.count + 1;
+
             state.tasbeeh.count += 1;
             saveState(state);
 
+            activePressTimer = clearTimer(activePressTimer);
+            releasePressTimer = clearTimer(releasePressTimer);
             tasbeehButton.classList.remove('is-pressed');
+            tasbeehButton.classList.remove('is-pressed-deep');
             tasbeehButton.classList.add('is-pressed');
+
+            if (!prefersReducedMotion) {
+                activePressTimer = window.setTimeout(function () {
+                    tasbeehButton.classList.add('is-pressed-deep');
+                    activePressTimer = null;
+                }, 60);
+            }
+
             renderTasbeeh();
 
-            window.setTimeout(function () {
+            if (shouldBreathAtMilestone(nextCount)) {
+                triggerMilestoneBreath();
+            }
+
+            releasePressTimer = window.setTimeout(function () {
                 isTapLocked = false;
                 tasbeehButton.classList.remove('is-pressed');
-            }, 120);
+                tasbeehButton.classList.remove('is-pressed-deep');
+                releasePressTimer = null;
+            }, 80);
         });
 
         tasbeehDhikr.addEventListener('change', function (event) {
@@ -226,11 +281,32 @@
             document.getElementById('tasbeehResetYes'),
             document.getElementById('tasbeehResetNo'),
             function () {
-                state.tasbeeh.count = 0;
-                saveState(state);
-                renderTasbeeh();
+                resetDissolveTimer = clearTimer(resetDissolveTimer);
+
+                if (prefersReducedMotion) {
+                    state.tasbeeh.count = 0;
+                    saveState(state);
+                    renderTasbeeh();
+                    return;
+                }
+
+                tasbeehCount.classList.add('is-reset-dissolve');
+
+                resetDissolveTimer = window.setTimeout(function () {
+                    state.tasbeeh.count = 0;
+                    saveState(state);
+                    renderTasbeeh();
+                    tasbeehCount.classList.remove('is-reset-dissolve');
+                    resetDissolveTimer = null;
+                }, 70);
             }
         );
+
+        tasbeehCount.addEventListener('animationend', function (event) {
+            if (event.animationName === 'adhkarMilestoneBreath') {
+                tasbeehCount.classList.remove('is-breathing');
+            }
+        });
 
         setupInlineConfirm(
             document.getElementById('morningResetTrigger'),
@@ -255,6 +331,10 @@
                 render();
             }
         );
+
+        tasbeehButton.addEventListener('dragstart', function (event) {
+            event.preventDefault();
+        });
 
         render();
     }
