@@ -50,7 +50,6 @@
     const form = document.getElementById('submission-form');
     const contentType = document.getElementById('content-type');
     const content = document.getElementById('content');
-    const nameField = document.getElementById('name');
     const consent = document.getElementById('consent');
     const submitBtn = document.getElementById('submit-btn');
     const charCount = document.getElementById('char-count');
@@ -67,7 +66,6 @@
     // Constants
     // ═══════════════════════════════════════════════════════════════════════
     const MAX_CONTENT_LENGTH = 1000; // Reduced to match backend limit
-    const MAX_NAME_LENGTH = 100;
     const MIN_CONTENT_LENGTH = 3; // Match backend minimum
     let isSubmitting = false;
 
@@ -361,7 +359,6 @@
         const apiData = {
             message: sanitizeInput(content.value),
             content_type: contentType.value,
-            author_name: sanitizeInput(nameField.value) || null,
         };
 
         try {
