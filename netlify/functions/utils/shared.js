@@ -107,7 +107,7 @@ export function validateAdmin(event) {
 // Input Sanitization
 // ═══════════════════════════════════════════════════════════════════════════
 
-const VALID_CONTENT_TYPES = ['dhikr', 'dua', 'ayah', 'hadith'];
+const VALID_CONTENT_TYPES = ['dhikr', 'dua', 'ayah', 'hadith', 'benefit'];
 
 const ARABIC_PATTERN = /^[\u0600-\u06FF\u0750-\u077F\uFB50-\uFDFF\uFE70-\uFEFF\u0660-\u0669\s\d.,،؛:؟!()«»/\-\n\r]+$/;
 

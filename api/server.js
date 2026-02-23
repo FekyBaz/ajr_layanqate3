@@ -144,7 +144,7 @@ const submitLimiter = rateLimit({
 /**
  * Valid content types
  */
-const VALID_CONTENT_TYPES = ['dhikr', 'dua', 'ayah', 'hadith'];
+const VALID_CONTENT_TYPES = ['dhikr', 'dua', 'ayah', 'hadith', 'benefit'];
 
 /**
  * Arabic Unicode ranges (includes Arabic letters, diacritics, numbers)

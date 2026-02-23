@@ -343,10 +343,6 @@ p {
     overflow: hidden;
 }
 
-.hero + .spiritual-anchor {
-    margin-top: -1.2rem;
-}
-
 .hero__ornament {
     position: absolute;
     color: rgba(242, 221, 181, 0.36);
@@ -487,28 +483,6 @@ p {
     font-size: 0.95rem;
 }
 
-.spiritual-anchor {
-    text-align: center;
-    color: var(--color-text-secondary);
-    font-size: 0.95rem;
-    margin-bottom: 0.4rem;
-}
-
-.spiritual-anchor__divider {
-    display: inline-flex;
-    align-items: center;
-    gap: 0.65rem;
-    opacity: 0.9;
-}
-
-.spiritual-anchor__divider::before,
-.spiritual-anchor__divider::after {
-    content: '';
-    width: 42px;
-    height: 1px;
-    background: linear-gradient(90deg, transparent, rgba(140, 106, 53, 0.45), transparent);
-}
-
 .hero__ayah {
     max-width: 640px;
     margin: 0 auto var(--space-2xl);
@@ -535,6 +509,21 @@ p {
 .hero__cta {
     font-size: var(--font-size-lg);
     padding: var(--space-lg) var(--space-2xl);
+}
+
+.hero__cta--community {
+    background: #f4e6c9;
+    color: #3f2e17;
+    border-color: rgba(122, 91, 47, 0.5);
+    box-shadow: 0 6px 16px rgba(41, 27, 10, 0.18);
+    cursor: pointer;
+}
+
+.hero__cta--community:hover,
+.hero__cta--community:focus-visible {
+    transform: translateY(-1px);
+    background: #f8edd6;
+    box-shadow: 0 10px 20px rgba(41, 27, 10, 0.2);
 }
 
 /* Hero responsive adjustments */
@@ -1437,6 +1426,9 @@ p {
 .community-page .badge-dua { background: #e6f0fc; color: #2b5a96; }
 .community-page .badge-ayah { background: #fef4d9; color: #9a6420; }
 .community-page .badge-hadith { background: #f0e9fb; color: #6d3f9d; }
+.community-page .badge-benefit { background: #eaf5fe; color: #255f93; }
+
+.community-preview .badge-benefit { background: #eaf5fe; color: #255f93; }
 
 .community-page .submission-message {
     line-height: 1.95;
@@ -1831,30 +1823,40 @@ body.community-focus-mode .submission-message {
 }
 
 .community-preview {
+    margin-top: var(--space-xl);
+    padding-top: var(--space-lg);
     background: linear-gradient(180deg, rgba(255, 255, 255, 0.72), rgba(245, 239, 226, 0.62));
     border-top: 1px solid rgba(14, 107, 82, 0.08);
     border-bottom: 1px solid rgba(14, 107, 82, 0.08);
 }
 
 .community-preview .site-container {
-    background: rgba(255, 255, 255, 0.7);
-    border: 1px solid rgba(14, 107, 82, 0.1);
+    background: rgba(255, 255, 255, 0.82);
+    border: 1px solid rgba(14, 107, 82, 0.12);
     border-radius: var(--radius-xl);
     padding: var(--space-xl);
+    box-shadow: 0 12px 30px rgba(14, 64, 50, 0.06);
 }
 
 .community-preview__head {
     display: flex;
     justify-content: space-between;
-    align-items: center;
+    align-items: flex-start;
     gap: var(--space-md);
-    margin-bottom: var(--space-md);
+    margin-bottom: var(--space-lg);
 }
 
 .community-preview__title {
     font-family: var(--font-display);
-    font-size: clamp(1.05rem, 1.5vw, 1.3rem);
+    font-size: clamp(1.18rem, 1.7vw, 1.45rem);
     color: var(--color-text-primary);
+    margin-bottom: 0.25rem;
+}
+
+.community-preview__subtitle {
+    color: var(--color-text-secondary);
+    margin: 0;
+    font-size: var(--font-size-sm);
 }
 
 .new-today-badge {
@@ -1877,21 +1879,34 @@ body.community-focus-mode .submission-message {
 .community-preview-card {
     border: 1px solid rgba(14, 107, 82, 0.14);
     border-radius: var(--radius-md);
-    padding: 0.7rem;
+    padding: 0.82rem;
     background: #fff;
-    min-height: 140px;
-    max-height: 180px;
-    overflow: hidden;
+    min-height: 176px;
+    display: flex;
+    flex-direction: column;
+    gap: 0.45rem;
     box-shadow: var(--shadow-sm);
+    transition: transform var(--transition-fast), box-shadow var(--transition-fast);
+}
+
+.community-preview-card:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 12px 24px rgba(14, 64, 50, 0.12);
 }
 
 .community-preview-card p {
-    font-size: 0.9rem;
+    font-size: 0.92rem;
     color: var(--color-text-secondary);
     margin: var(--space-sm) 0;
-    line-height: 1.7;
-    max-height: 4.8em;
+    line-height: 1.78;
+    min-height: calc(1.78em * 3);
+    display: -webkit-box;
+    -webkit-line-clamp: 3;
+    line-clamp: 3;
+    -webkit-box-orient: vertical;
     overflow: hidden;
+    text-overflow: ellipsis;
+    word-break: break-word;
 }
 
 .community-preview .content-badge {
@@ -1930,6 +1945,11 @@ body.community-focus-mode .submission-message {
     gap: var(--space-sm);
 }
 
+.community-preview-card__meta {
+    margin-top: auto;
+    padding-top: 0.35rem;
+}
+
 .share-btn--small {
     font-size: 0.76rem;
     padding: 0.25rem 0.4rem;
@@ -1937,10 +1957,23 @@ body.community-focus-mode .submission-message {
 
 .community-preview__more {
     display: inline-flex;
-    margin-top: var(--space-md);
+    align-items: center;
+    gap: 0.35rem;
+    margin-top: var(--space-lg);
+    padding: 0.3rem 0.1rem;
     color: var(--color-accent-primary);
     font-weight: 680;
     text-decoration: none;
+    border-bottom: 1px solid transparent;
+    cursor: pointer;
+    transition: color var(--transition-fast), border-color var(--transition-fast), transform var(--transition-fast);
+}
+
+.community-preview__more:hover,
+.community-preview__more:focus-visible {
+    color: #0d5a44;
+    border-color: rgba(14, 107, 82, 0.35);
+    transform: translateX(-2px);
 }
 
 .project-share {
