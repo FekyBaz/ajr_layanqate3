@@ -1462,6 +1462,8 @@ p {
     -webkit-box-orient: vertical;
     overflow: hidden;
     position: relative;
+    max-height: var(--collapsed-height, 6em);
+    transition: max-height 240ms ease-out;
 }
 
 .community-page .submission-message::after {
@@ -1473,6 +1475,39 @@ p {
     height: 1.6rem;
     background: linear-gradient(180deg, rgba(252, 254, 253, 0), rgba(252, 254, 253, 1));
     pointer-events: none;
+}
+
+.community-page .submission-message.is-expanded {
+    display: block;
+    -webkit-line-clamp: unset;
+    -webkit-box-orient: initial;
+}
+
+.community-page .submission-message.is-expanded::after {
+    content: none;
+}
+
+.community-page .submission-expand-btn {
+    align-self: flex-end;
+    margin-top: -0.15rem;
+    margin-bottom: 0.3rem;
+    border: 0;
+    background: transparent;
+    color: #52766c;
+    font-family: inherit;
+    font-size: 0.84rem;
+    line-height: 1.4;
+    cursor: pointer;
+    text-decoration: underline;
+    text-decoration-color: rgba(82, 118, 108, 0.45);
+    text-underline-offset: 0.18rem;
+    transition: color var(--transition-normal), text-decoration-color var(--transition-normal);
+}
+
+.community-page .submission-expand-btn:hover,
+.community-page .submission-expand-btn:focus-visible {
+    color: #35594f;
+    text-decoration-color: rgba(53, 89, 79, 0.72);
 }
 
 .community-page .submission-meta {
