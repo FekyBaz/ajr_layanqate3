@@ -41,12 +41,6 @@
             month: 'short',
         }).format(new Date(value));
     }
-
-    function truncateText(value = '', max = 120) {
-        if (value.length <= max) return value;
-        return `${value.slice(0, max).trim()}…`;
-    }
-
     function resolveMessage(item) {
         return item.corrected_message || item.message || '';
     }
@@ -90,7 +84,8 @@
     function renderCards(submissions, avgPostCount) {
         const previewItems = submissions.slice(0, 3);
         elements.list.innerHTML = previewItems.map((item) => {
-            const badge = item.content_type === 'dhikr' ? 'ذكر' : item.content_type === 'dua' ? 'دعاء' : item.content_type === 'ayah' ? 'آية' : 'حديث';
+            const badgeMap = { dhikr: 'ذكر', dua: 'دعاء', ayah: 'آية', hadith: 'حديث', benefit: 'فائدة' };
+            const badge = badgeMap[item.content_type] || 'مشاركة';
             const isTrending = (Number(item.post_count) || 0) > avgPostCount && Number(item.post_count) > 0;
 
             return `
@@ -99,7 +94,7 @@
                         <span class="content-badge badge-${item.content_type}">${badge}</span>
                         ${isTrending ? '<span class="trending-badge">🔥 رائج الآن</span>' : ''}
                     </div>
-                    <p>${truncateText(resolveMessage(item), 120)}</p>
+                    <p>${resolveMessage(item)}</p>
                     <div class="community-preview-card__meta">
                         <small>${formatDate(item.created_at)}</small>
                         <button type="button" data-share-id="${item.id}" class="share-btn share-btn--small btn btn-ghost">📤 مشاركة</button>
