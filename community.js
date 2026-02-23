@@ -108,16 +108,42 @@ function loadSavedIds() {
         const parsed = JSON.parse(raw);
         if (!Array.isArray(parsed)) return new Set();
 
-        return new Set(parsed.map((id) => Number(id)).filter((id) => Number.isInteger(id) && id > 0));
+        return new Set(
+            parsed
+                .map((id) => (typeof id === 'string' ? id.trim() : String(id || '').trim()))
+                .filter(Boolean),
+        );
     } catch {
         return new Set();
     }
 }
 
 function persistSavedIds() {
-    const clipped = Array.from(state.savedIds).slice(0, 10);
+    const clipped = Array.from(state.savedIds)
+        .map((id) => (typeof id === 'string' ? id.trim() : String(id || '').trim()))
+        .filter(Boolean)
+        .slice(0, 10);
+
     state.savedIds = new Set(clipped);
-    safeStorageSet(STORAGE_KEYS.savedIds, JSON.stringify(clipped));
+
+    try {
+        safeStorageSet(STORAGE_KEYS.savedIds, JSON.stringify(clipped));
+    } catch (err) {
+        console.warn('[community] unable to persist saved IDs', err);
+    }
+}
+
+function normalizeSubmissionId(value) {
+    if (typeof value === 'string') {
+        const trimmed = value.trim();
+        return trimmed || null;
+    }
+
+    if (typeof value === 'number' && Number.isFinite(value)) {
+        return String(value);
+    }
+
+    return null;
 }
 
 function sanitizeRefValue(value) {
@@ -186,9 +212,14 @@ function createCardTop(item, avgPostCount) {
     const saveButton = document.createElement('button');
     saveButton.type = 'button';
     saveButton.className = 'save-btn btn btn-ghost';
-    saveButton.dataset.saveId = String(item.id);
-    saveButton.setAttribute('aria-pressed', state.savedIds.has(Number(item.id)) ? 'true' : 'false');
-    saveButton.textContent = state.savedIds.has(Number(item.id)) ? '🤍 محفوظ' : '🤍 احفظ هذا الذكر';
+    const submissionId = normalizeSubmissionId(item.id);
+    if (submissionId) {
+        saveButton.dataset.saveId = submissionId;
+    }
+
+    const isSaved = submissionId ? state.savedIds.has(submissionId) : false;
+    saveButton.setAttribute('aria-pressed', isSaved ? 'true' : 'false');
+    saveButton.textContent = isSaved ? '🤍 محفوظ' : '🤍 احفظ هذا الذكر';
     top.appendChild(saveButton);
 
     return top;
@@ -196,12 +227,18 @@ function createCardTop(item, avgPostCount) {
 
 function renderCtaCard() {
     const cta = document.createElement('aside');
-    cta.className = 'community-cta card-enter';
+    cta.className = 'community-cta card card-elevated card-enter';
     cta.setAttribute('aria-label', 'دعوة للمشاركة');
 
-    const label = document.createElement('p');
-    label.textContent = '🤍 أضف ذكرك أنت أيضًا';
-    cta.appendChild(label);
+    const title = document.createElement('h3');
+    title.className = 'community-cta__title';
+    title.textContent = '🤍 أضف ذكرك أنت أيضًا';
+    cta.appendChild(title);
+
+    const microcopy = document.createElement('p');
+    microcopy.className = 'community-cta__microcopy';
+    microcopy.textContent = 'شاركنا ذكرًا نافعًا بلطف، ليصل أثره إلى قلوب أكثر.';
+    cta.appendChild(microcopy);
 
     const link = document.createElement('a');
     link.href = '/index.html#form';
@@ -427,7 +464,8 @@ function renderSavedItems() {
 
 function syncSaveButtons() {
     document.querySelectorAll('[data-save-id]').forEach((button) => {
-        const submissionId = Number(button.dataset.saveId);
+        const submissionId = normalizeSubmissionId(button.dataset.saveId);
+        if (!submissionId) return;
         const isSaved = state.savedIds.has(submissionId);
         button.setAttribute('aria-pressed', isSaved ? 'true' : 'false');
         button.textContent = isSaved ? '🤍 محفوظ' : '🤍 احفظ هذا الذكر';
@@ -435,12 +473,13 @@ function syncSaveButtons() {
 }
 
 function toggleSaved(submissionId) {
-    if (!submissionId) return;
+    const normalizedId = normalizeSubmissionId(submissionId);
+    if (!normalizedId) return;
 
-    if (state.savedIds.has(submissionId)) {
-        state.savedIds.delete(submissionId);
+    if (state.savedIds.has(normalizedId)) {
+        state.savedIds.delete(normalizedId);
     } else {
-        state.savedIds = new Set([submissionId, ...Array.from(state.savedIds)]);
+        state.savedIds = new Set([normalizedId, ...Array.from(state.savedIds)]);
     }
 
     persistSavedIds();
@@ -557,7 +596,11 @@ function renderStats(stats = {}, pagination = {}) {
 }
 
 function cacheSubmissions(submissions = []) {
-    submissions.forEach((item) => state.submissionsById.set(Number(item.id), item));
+    submissions.forEach((item) => {
+        const submissionId = normalizeSubmissionId(item.id);
+        if (!submissionId) return;
+        state.submissionsById.set(submissionId, item);
+    });
 }
 
 function renderResponse(result) {
@@ -644,7 +687,7 @@ elements.communityPage.addEventListener('click', async (event) => {
     if (saveButton) {
         event.preventDefault();
         event.stopPropagation();
-        toggleSaved(Number(saveButton.dataset.saveId));
+        toggleSaved(saveButton.dataset.saveId);
         return;
     }
 
@@ -652,7 +695,8 @@ elements.communityPage.addEventListener('click', async (event) => {
     if (shareButton) {
         event.preventDefault();
         event.stopPropagation();
-        const submissionId = Number(shareButton.dataset.shareId);
+        const submissionId = normalizeSubmissionId(shareButton.dataset.shareId);
+        if (!submissionId) return;
         const selected = state.submissionsById.get(submissionId);
         if (!selected) return;
 
