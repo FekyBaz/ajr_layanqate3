@@ -195,8 +195,8 @@
 
         <section id="form" class="form-section" aria-labelledby="form-section-title">
             <div class="site-container">
-                <h2 id="form-section-title" class="section-title">🤍 شارك ذكرك الآن</h2>
-                <p class="form-section__intro">اكتب ذكرًا أو دعاءً أو آية أو حديثًا بنية الأجر، وسيُراجع قبل نشره.</p>
+                <h2 id="form-section-title" class="section-title">أضف ذكرك 🤍</h2>
+                <p class="form-section__intro">كل كلمة طيبة قد تكون نورًا لقلبٍ لا تعرفه</p>
 
                 <form id="submission-form" class="submission-form" novalidate>
                     <div class="form-group">
@@ -212,40 +212,43 @@
                         <span id="content-type-error" class="form-error" role="alert" aria-live="polite"></span>
                     </div>
 
-                    <div class="form-group">
+                    <div class="form-group form-group--content">
                         <label for="content" class="form-label">النص <span class="required">*</span></label>
-                        <textarea id="content" class="form-textarea" rows="6" required aria-describedby="content-hint content-error"
-                            placeholder="اكتب ذكرك هنا بنية الأجر..."></textarea>
-                        <p id="content-hint" class="form-hint">الحد الأقصى 1000 حرف — <span id="char-count">0</span>/1000</p>
+                        <textarea id="content" class="form-textarea" rows="8" required aria-describedby="content-hint content-error"
+                            placeholder="اكتب ذكرك أو دعاءك هنا… 🤍"></textarea>
+                        <p id="content-hint" class="form-hint">يمكنك الكتابة بهدوء ووضوح — <span id="char-count" class="form-hint__counter">0</span>/1000</p>
                         <span id="content-error" class="form-error" role="alert" aria-live="polite"></span>
                     </div>
 
-                    <div class="form-group">
-                        <label for="name" class="form-label">الاسم (اختياري) <span class="optional">سيظهر مع المشاركة إن رغبت</span></label>
+                    <div class="form-group form-group--secondary">
+                        <label for="name" class="form-label">الاسم <span class="optional">(اختياري)</span> <span class="optional">سيظهر مع المشاركة إن رغبت</span></label>
                         <input id="name" class="form-input" type="text" maxlength="100" autocomplete="name" placeholder="مثال: عبدالله">
                     </div>
 
-                    <div class="form-group form-group--checkbox">
+                    <div class="form-group form-group--checkbox form-group--secondary">
                         <label class="checkbox-label" for="consent">
                             <input id="consent" type="checkbox" required>
                             <span class="checkbox-custom" aria-hidden="true"></span>
-                            <span class="checkbox-text">أتعهد أن المحتوى صحيح وخالٍ من الإساءة أو المخالفة.</span>
+                            <span class="checkbox-text">أتعهد أن المحتوى لائق ومحترم 🤍</span>
                         </label>
                         <span id="consent-error" class="form-error" role="alert" aria-live="polite"></span>
                     </div>
 
                     <button id="submit-btn" type="submit" class="btn btn-primary btn--submit">
-                        <span class="btn__text">إرسال المشاركة</span>
-                        <span class="btn__loading" aria-hidden="true">⏳</span>
+                        <span class="btn__text">أرسل ذكرك 🤍</span>
+                        <span class="btn__loading" aria-live="polite">جارِ الإرسال…</span>
                     </button>
                 </form>
 
                 <div id="success-message" class="success-message" hidden>
                     <span class="success-icon" aria-hidden="true">✓</span>
-                    <h3>تم إرسال مشاركتك بنجاح 🤍</h3>
-                    <p>جزاك الله خيرًا. ستظهر المشاركة في المجتمع بعد المراجعة.</p>
+                    <h3>تم استلام ذكرك 🤍</h3>
+                    <p>سيظهر بعد المراجعة بإذن الله</p>
+                    <a href="/community.html" class="success-message__link">تصفح المجتمع</a>
                     <button id="reset-form" type="button" class="btn btn-secondary">إرسال مشاركة أخرى</button>
                 </div>
+
+                <p id="submit-transition" class="submit-transition" role="status" aria-live="polite" hidden>لحظات يسيرة… يتم حفظ ذكرك 🤍</p>
             </div>
         </section>
 
