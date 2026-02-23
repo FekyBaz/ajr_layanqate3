@@ -110,6 +110,23 @@ After adding env vars, trigger a redeploy from Netlify dashboard.
 
 ---
 
+
+## 🔘 Button System Rules
+
+Use only the shared button classes from `styles.css`:
+
+- `.btn`: base structure (size, alignment, interaction).
+- `.btn-primary`: one primary action per section.
+- `.btn-secondary`: optional supporting action.
+- `.btn-ghost`: only for lightweight actions inside cards.
+
+Guardrails:
+
+- Do not add inline styles to buttons.
+- Do not override button colors per element.
+- Keep accessible contrast (minimum 4.5:1) for text/background pairings.
+- Do not introduce transparent buttons without a visible boundary.
+
 ## 🔌 API Endpoints
 
 | Method | Endpoint | Description |
