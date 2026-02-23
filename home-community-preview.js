@@ -17,6 +17,8 @@
         dailyChangeLine: document.getElementById('dailyChangeLine'),
     };
 
+    const HOME_PREVIEW_SCOPE_CLASS = 'home-community-preview';
+
     function sanitizeRefValue(value) {
         if (typeof value !== 'string') return null;
         const normalized = value.trim().toLowerCase();
@@ -95,6 +97,7 @@
                         ${isTrending ? '<span class="trending-badge">🔥 رائج الآن</span>' : ''}
                     </div>
                     <p>${resolveMessage(item)}</p>
+                    <a class="community-preview-card__full-link" href="/community.html#submission-${item.id}">عرض كامل →</a>
                     <div class="community-preview-card__meta">
                         <small>${formatDate(item.created_at)}</small>
                         <button type="button" data-share-id="${item.id}" class="share-btn share-btn--small btn btn-ghost">📤 مشاركة</button>
@@ -111,6 +114,12 @@
                 }
             });
         });
+    }
+
+    function applyPreviewScopeClass() {
+        const previewSection = elements.list?.closest('.community-preview');
+        if (!previewSection) return;
+        previewSection.classList.add(HOME_PREVIEW_SCOPE_CLASS);
     }
 
     async function loadCommunityPreview() {
@@ -179,5 +188,6 @@
     }
 
     setupMobileMenu();
+    applyPreviewScopeClass();
     window.requestIdleCallback ? requestIdleCallback(loadCommunityPreview) : setTimeout(loadCommunityPreview, 0);
 })();
