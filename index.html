@@ -162,16 +162,12 @@
                 <a href="#form" class="btn btn-primary hero__cta">
                     ✍️ شارك بذكر
                 </a>
-                <a href="/community.html" class="btn btn-secondary hero__cta">
+                <a href="/community.html" class="btn btn-primary hero__cta hero__cta--community" role="button">
                     شاهد أذكار الناس اليوم 🤍
                 </a>
             </div>
         </div>
     </header>
-
-    <section class="spiritual-anchor" aria-label="رسالة روحانية">
-        <p class="spiritual-anchor__divider">✨ كل كلمة طيبة هنا… قد تُضيء قلبًا لا تعرفه</p>
-    </section>
 
     <!-- ═══════════════════════════════════════════════════════════════════
          Main Content
@@ -220,11 +216,6 @@
                         <span id="content-error" class="form-error" role="alert" aria-live="polite"></span>
                     </div>
 
-                    <div class="form-group form-group--secondary">
-                        <label for="name" class="form-label">الاسم <span class="optional">(اختياري)</span> <span class="optional">سيظهر مع المشاركة إن رغبت</span></label>
-                        <input id="name" class="form-input" type="text" maxlength="100" autocomplete="name" placeholder="مثال: عبدالله">
-                    </div>
-
                     <div class="form-group form-group--checkbox form-group--secondary">
                         <label class="checkbox-label" for="consent">
                             <input id="consent" type="checkbox" required>
@@ -255,7 +246,10 @@
         <section class="community-preview" aria-labelledby="community-preview-title">
             <div class="site-container">
                 <div class="community-preview__head">
-                    <h2 id="community-preview-title" class="community-preview__title">🤍 أحدث مشاركات المجتمع</h2>
+                    <div>
+                        <h2 id="community-preview-title" class="community-preview__title">🤍 أحدث مشاركات المجتمع</h2>
+                        <p class="community-preview__subtitle">مختارات معتمدة حديثًا لتقرأها وتشارك أجرها.</p>
+                    </div>
                     <span id="newTodayBadge" class="new-today-badge" hidden></span>
                 </div>
                 <div id="communityPreviewSkeleton" class="community-preview__skeleton" aria-hidden="true">

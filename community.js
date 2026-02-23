@@ -18,6 +18,7 @@ const badgeLabels = {
     dua: 'دعاء',
     ayah: 'آية',
     hadith: 'حديث',
+    benefit: 'فائدة',
 };
 
 const state = {
@@ -463,7 +464,7 @@ function initializeFocusMode() {
 
 function initializeLastFilter() {
     const savedType = safeStorageGet(STORAGE_KEYS.lastFilter);
-    const allowed = ['all', 'dhikr', 'dua', 'ayah', 'hadith'];
+    const allowed = ['all', 'dhikr', 'dua', 'ayah', 'hadith', 'benefit'];
     if (allowed.includes(savedType)) {
         state.type = savedType;
         setActiveTab(state.type);
