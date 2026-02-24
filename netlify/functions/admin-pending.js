@@ -34,19 +34,38 @@ export async function handler(event, context) {
     }
 
     try {
-        const { data, error: queryError } = await supabaseAdmin
-            .from('submissions')
-            .select('id, message, corrected_message, content_type, author_name, created_at')
-            .eq('status', STATUS.PENDING)
-            .order('created_at', { ascending: true });
+        const params = event.queryStringParameters || {};
+        const limit = Math.min(Math.max(parseInt(params.limit, 10) || 50, 1), 100);
+        const page = Math.max(parseInt(params.page, 10) || 1, 1);
+        const from = (page - 1) * limit;
+        const to = from + limit - 1;
 
-        if (queryError) {
-            return error(500, 'حدث خطأ في جلب البيانات', origin, queryError.message);
+        // Get total count + page data in parallel
+        const [countResult, dataResult] = await Promise.all([
+            supabaseAdmin
+                .from('submissions')
+                .select('id', { count: 'exact', head: true })
+                .eq('status', STATUS.PENDING),
+            supabaseAdmin
+                .from('submissions')
+                .select('id, message, corrected_message, content_type, author_name, created_at')
+                .eq('status', STATUS.PENDING)
+                .order('created_at', { ascending: true })
+                .range(from, to),
+        ]);
+
+        if (dataResult.error) {
+            return error(500, 'حدث خطأ في جلب البيانات', origin, dataResult.error.message);
         }
 
+        const totalCount = countResult.count || 0;
+
         return success({
-            data: data || [],
-            count: data?.length || 0,
+            data: dataResult.data || [],
+            count: totalCount,
+            page,
+            limit,
+            totalPages: Math.ceil(totalCount / limit),
         }, origin);
 
     } catch (err) {
