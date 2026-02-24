@@ -6,12 +6,14 @@
  */
 
 import {
-    supabase,
+    supabaseAdmin,
     success,
     error,
     handleOptions,
     validateAdmin,
     sanitizeMessage,
+    STATUS,
+    logger,
 } from './utils/shared.js';
 import { incrementGoalProgress } from './utils/community-goal.js';
 
@@ -51,7 +53,7 @@ export async function handler(event, context) {
 
         // Prepare update data
         const updateData = {
-            status: 'Approved',
+            status: STATUS.APPROVED,
             reviewed_at: new Date().toISOString(),
         };
 
@@ -67,16 +69,16 @@ export async function handler(event, context) {
         }
 
         // Update in database
-        const { data: updatedRow, error: updateError } = await supabase
+        const { data: updatedRow, error: updateError } = await supabaseAdmin
             .from('submissions')
             .update(updateData)
             .eq('id', id)
-            .eq('status', 'Pending')
+            .eq('status', STATUS.PENDING)
             .select('id')
             .maybeSingle();
 
         if (updateError) {
-            console.error('Admin approve error:', updateError.message);
+            logger.error('Admin approve error:', updateError.message);
             return error(500, 'حدث خطأ في تحديث البيانات', origin);
         }
 
@@ -87,13 +89,13 @@ export async function handler(event, context) {
         try {
             await incrementGoalProgress(1);
         } catch (goalError) {
-            console.error('Admin approve goal progress error:', goalError.message);
+            logger.error('Admin approve goal progress error:', goalError.message);
         }
 
         return success({ message: 'تمت الموافقة على المشاركة' }, origin);
 
     } catch (err) {
-        console.error('Admin approve error:', err.message);
+        logger.error('Admin approve error:', err.message);
         return error(500, 'حدث خطأ. يرجى المحاولة لاحقًا.', origin);
     }
 }

@@ -1,38 +1,5 @@
-import { supabase, error, success, handleOptions, getClientIP, getCorsHeaders } from './utils/shared.js';
-
-const VIEW_DEBOUNCE_WINDOW_MS = 60_000;
-const VISIBLE_STATUSES = ['Approved', 'Posted'];
-const viewTracker = new Map();
-
-function getThrottleKey(clientIP, submissionId) {
-    if (clientIP && clientIP !== 'unknown') {
-        return `${clientIP}:${submissionId}`;
-    }
-
-    return `unknown-ip:${submissionId}`;
-}
-
-function canRecordView(clientIP, submissionId) {
-    const now = Date.now();
-    const key = getThrottleKey(clientIP, submissionId);
-    const previous = viewTracker.get(key) || 0;
-
-    if (now - previous < VIEW_DEBOUNCE_WINDOW_MS) {
-        return false;
-    }
-
-    viewTracker.set(key, now);
-
-    if (viewTracker.size > 10_000) {
-        for (const [entryKey, timestamp] of viewTracker.entries()) {
-            if (now - timestamp > VIEW_DEBOUNCE_WINDOW_MS * 2) {
-                viewTracker.delete(entryKey);
-            }
-        }
-    }
-
-    return true;
-}
+import { supabaseAdmin, error, success, handleOptions, getClientIP, getCorsHeaders, logger } from './utils/shared.js';
+import crypto from 'crypto';
 
 export async function handler(event) {
     const origin = event.headers.origin || event.headers.Origin;
@@ -59,8 +26,29 @@ export async function handler(event) {
             return error(400, 'Invalid submission id', origin);
         }
 
+        // Hash the client IP for privacy-safe deduplication
         const clientIP = getClientIP(event);
-        if (!canRecordView(clientIP, submissionId)) {
+        const ipHash = crypto.createHash('sha256')
+            .update(clientIP || 'unknown')
+            .digest('hex')
+            .substring(0, 32);
+
+        // Use atomic RPC with database-backed deduplication
+        // This replaces the old in-memory Map throttling + read-modify-write counter
+        const { data, error: rpcError } = await supabaseAdmin
+            .rpc('record_and_increment_view', {
+                p_submission_id: submissionId,
+                p_ip_hash: ipHash,
+                p_debounce_seconds: 60,
+            });
+
+        if (rpcError) {
+            logger.error('View counter RPC error:', rpcError.message);
+            return error(500, 'تعذر تحديث عدد المشاهدات', origin);
+        }
+
+        if (!data || !data.recorded) {
+            // Debounced or not found — return 204 No Content
             return {
                 statusCode: 204,
                 headers: {
@@ -71,40 +59,11 @@ export async function handler(event) {
             };
         }
 
-        const { data: existing, error: existingError } = await supabase
-            .from('submissions')
-            .select('id,views,status')
-            .eq('id', submissionId)
-            .in('status', VISIBLE_STATUSES)
-            .maybeSingle();
-
-        if (existingError) {
-            console.error('View counter lookup error:', existingError.message);
-            return error(500, 'تعذر تحديث عدد المشاهدات', origin);
-        }
-
-        if (!existing) {
-            return error(404, 'Submission not found', origin);
-        }
-
-        const nextViews = (Number(existing.views) || 0) + 1;
-
-        const { error: updateError } = await supabase
-            .from('submissions')
-            .update({ views: nextViews })
-            .eq('id', submissionId)
-            .in('status', VISIBLE_STATUSES);
-
-        if (updateError) {
-            console.error('View counter update error:', updateError.message);
-            return error(500, 'تعذر تحديث عدد المشاهدات', origin);
-        }
-
-        return success({ updated: true }, origin, {
+        return success({ updated: true, views: data.views }, origin, {
             'Cache-Control': 'no-store',
         });
     } catch (err) {
-        console.error('Community submission view handler error:', err.message);
+        logger.error('Community submission view handler error:', err.message);
         return error(500, 'حدث خطأ غير متوقع', origin);
     }
 }
