@@ -1,4 +1,4 @@
-import { supabaseAdmin, error, success, handleOptions, VISIBLE_STATUSES, logger } from './utils/shared.js';
+import { supabaseAdmin, error, success, handleOptions, logger } from './utils/shared.js';
 import { incrementGoalProgress } from './utils/community-goal.js';
 
 const VALID_PLATFORMS = ['whatsapp', 'telegram', 'x', 'native'];

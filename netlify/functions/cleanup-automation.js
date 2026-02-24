@@ -8,18 +8,19 @@
 import { supabaseAdmin, cleanupRateLimits, logger, success, error } from './utils/shared.js';
 
 export async function handler(event, context) {
+    const origin = event.headers?.origin || '';
     // Basic auth check if called manually via HTTP
     // Only allow scheduled calls (no httpMethod) or admin calls
     if (event.httpMethod) {
         const adminKey = process.env.ADMIN_API_KEY;
         if (!adminKey) {
             logger.error('[cleanup-automation] ADMIN_API_KEY not configured');
-            return error(500, 'Server configuration error');
+            return error(500, 'Server configuration error', origin);
         }
         const providedKey = event.headers['x-admin-key'];
 
         if (providedKey !== adminKey) {
-            return error(401, 'Unauthorized');
+            return error(401, 'Unauthorized', origin);
         }
     }
 
@@ -48,10 +49,10 @@ export async function handler(event, context) {
                 rateLimitsDeleted: rateLimitResult.count || 0,
                 viewEventsDeleted: viewEventsCount || 0,
             }
-        });
+        }, origin);
 
     } catch (err) {
         logger.error('[cleanup-automation] Critical failure:', err.message);
-        return error(500, 'Maintenance cycle failed');
+        return error(500, 'Maintenance cycle failed', origin);
     }
 }

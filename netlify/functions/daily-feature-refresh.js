@@ -1,4 +1,4 @@
-import { error, success, getTodayDateKey } from './utils/shared.js';
+import { error, success, getTodayDateKey, logger } from './utils/shared.js';
 import { getDailyFeatureWithSubmission } from './utils/daily-feature.js';
 import { getOrCreateGoal } from './utils/community-goal.js';
 
@@ -14,7 +14,7 @@ export async function handler(event) {
             getOrCreateGoal(today),
         ]);
 
-        console.log('[daily-feature-refresh] completed', {
+        logger.info('[daily-feature-refresh] completed', {
             date: today,
             dailyFeatureId: dailyFeature?.id || null,
             submissionId: dailyFeature?.submission_id || null,
