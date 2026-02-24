@@ -1,10 +1,9 @@
-import { supabase, error, success, handleOptions } from './utils/shared.js';
+import { supabasePublic, supabaseAdmin, error, success, handleOptions, VISIBLE_STATUSES, logger } from './utils/shared.js';
 import { getOrCreateGoal } from './utils/community-goal.js';
 import { getDailyFeatureWithSubmission } from './utils/daily-feature.js';
 
 const VALID_TYPES = ['all', 'dhikr', 'dua', 'ayah', 'hadith', 'benefit'];
 const VALID_SORT = ['latest', 'most_shared'];
-const VISIBLE_STATUSES = ['Approved', 'Posted'];
 const VALID_REF_SOURCES = ['instagram', 'facebook', 'direct', 'telegram', 'whatsapp_share', 'telegram_share', 'x_share'];
 const DEFAULT_PAGE_SIZE = 10;
 const HOMEPAGE_PREVIEW_SIZE = 3;
@@ -28,7 +27,7 @@ function sanitizeRefSource(value) {
 }
 
 async function getStatsSnapshot() {
-    const { data, error: statsError } = await supabase
+    const { data, error: statsError } = await supabasePublic
         .from('community_stats')
         .select('total_approved,total_post_count,average_post_count,updated_at')
         .eq('id', 1)
@@ -50,7 +49,7 @@ async function getStatsSnapshot() {
         };
     }
 
-    const { data: aggregateRows, error: aggregateError, count } = await supabase
+    const { data: aggregateRows, error: aggregateError, count } = await supabasePublic
         .from('submissions')
         .select('post_count', { count: 'exact' })
         .in('status', VISIBLE_STATUSES);
@@ -63,7 +62,8 @@ async function getStatsSnapshot() {
     const totalApproved = count || 0;
     const averagePostCount = totalApproved ? totalPostCount / totalApproved : 0;
 
-    const { error: writeStatsError } = await supabase
+    // Fallback write uses admin client (needs write access to community_stats)
+    const { error: writeStatsError } = await supabaseAdmin
         .from('community_stats')
         .upsert({
             id: 1,
@@ -74,7 +74,7 @@ async function getStatsSnapshot() {
         });
 
     if (writeStatsError) {
-        console.error('Community stats fallback write error:', writeStatsError.message);
+        logger.error('Community stats fallback write error:', writeStatsError.message);
     }
 
     return {
@@ -92,7 +92,7 @@ async function getNewVisibleTodayCount() {
     const startOfDay = new Date();
     startOfDay.setHours(0, 0, 0, 0);
 
-    const { count, error: todayError } = await supabase
+    const { count, error: todayError } = await supabasePublic
         .from('submissions')
         .select('id', { count: 'exact', head: true })
         .in('status', VISIBLE_STATUSES)
@@ -139,7 +139,7 @@ export async function handler(event) {
             return error(400, 'Invalid surface', origin);
         }
 
-        console.log('[community-submissions] request meta', {
+        logger.info('[community-submissions] request meta', {
             refSource,
             surface,
             requestedPage,
@@ -149,7 +149,8 @@ export async function handler(event) {
             sortBy,
         });
 
-        let countQuery = supabase
+        // Count query — uses public client (respects RLS)
+        let countQuery = supabasePublic
             .from('submissions')
             .select('id', { count: 'exact', head: true })
             .in('status', VISIBLE_STATUSES);
@@ -161,26 +162,27 @@ export async function handler(event) {
         const { count, error: countError } = await countQuery;
 
         if (countError) {
-            console.error('Community submissions count error:', countError.message);
+            logger.error('Community submissions count error:', countError.message);
             return error(500, 'تعذر تحميل المشاركات المعتمدة', origin);
         }
 
         const total = count || 0;
-        console.log('[community-submissions] visible count:', total);
+        logger.info('[community-submissions] visible count:', total);
         const totalPages = total === 0 ? 1 : Math.ceil(total / limit);
         const page = Math.min(requestedPage, totalPages);
         const from = (page - 1) * limit;
         const to = from + limit - 1;
 
         if (requestedPage > totalPages) {
-            console.warn('[community-submissions] overflow page corrected', {
+            logger.warn('[community-submissions] overflow page corrected', {
                 requestedPage,
                 correctedPage: page,
                 totalPages,
             });
         }
 
-        let baseQuery = supabase
+        // Data query — uses public client (respects RLS)
+        let baseQuery = supabasePublic
             .from('submissions')
             .select('id,message,corrected_message,author_name,content_type,created_at,post_count')
             .in('status', VISIBLE_STATUSES);
@@ -195,26 +197,31 @@ export async function handler(event) {
             baseQuery = baseQuery.order('created_at', { ascending: false });
         }
 
-        const { data, error: fetchError } = await baseQuery.range(from, to);
+        // Featured query runs in parallel with the main data query (P-2 optimization)
+        const [dataResult, featuredResult] = await Promise.all([
+            baseQuery.range(from, to),
+            supabasePublic
+                .from('submissions')
+                .select('id,message,corrected_message,author_name,content_type,created_at,post_count')
+                .in('status', VISIBLE_STATUSES)
+                .gt('post_count', 0)
+                .order('post_count', { ascending: false })
+                .order('created_at', { ascending: false })
+                .limit(1)
+                .maybeSingle(),
+        ]);
 
-        if (fetchError) {
-            console.error('Community submissions fetch error:', fetchError.message);
+        if (dataResult.error) {
+            logger.error('Community submissions fetch error:', dataResult.error.message);
             return error(500, 'تعذر تحميل المشاركات المعتمدة', origin);
         }
 
-        const { data: featured, error: featuredError } = await supabase
-            .from('submissions')
-            .select('id,message,corrected_message,author_name,content_type,created_at,post_count')
-            .in('status', VISIBLE_STATUSES)
-            .gt('post_count', 0)
-            .order('post_count', { ascending: false })
-            .order('created_at', { ascending: false })
-            .limit(1)
-            .maybeSingle();
-
-        if (featuredError) {
-            console.error('Featured submission fetch error:', featuredError.message);
+        if (featuredResult.error) {
+            logger.error('Featured submission fetch error:', featuredResult.error.message);
         }
+
+        const data = dataResult.data;
+        const featured = featuredResult.data;
 
         const [statsResult, newVisibleTodayResult, goalResult, dailyFeatureResult] = await Promise.allSettled([
             getStatsSnapshot(),
@@ -224,19 +231,19 @@ export async function handler(event) {
         ]);
 
         if (statsResult.status === 'rejected') {
-            console.error('Community stats snapshot failed:', statsResult.reason?.message || 'unknown');
+            logger.error('Community stats snapshot failed:', statsResult.reason?.message || 'unknown');
         }
 
         if (newVisibleTodayResult.status === 'rejected') {
-            console.error('Community today count failed:', newVisibleTodayResult.reason?.message || 'unknown');
+            logger.error('Community today count failed:', newVisibleTodayResult.reason?.message || 'unknown');
         }
 
         if (goalResult.status === 'rejected') {
-            console.error('Community goal fetch failed:', goalResult.reason?.message || 'unknown');
+            logger.error('Community goal fetch failed:', goalResult.reason?.message || 'unknown');
         }
 
         if (dailyFeatureResult.status === 'rejected') {
-            console.error('Daily feature fetch failed:', dailyFeatureResult.reason?.message || 'unknown');
+            logger.error('Daily feature fetch failed:', dailyFeatureResult.reason?.message || 'unknown');
         }
 
         const statsPayload = statsResult.status === 'fulfilled'
@@ -280,7 +287,7 @@ export async function handler(event) {
             },
         };
 
-        console.log('[community-submissions] payload shape', {
+        logger.info('[community-submissions] payload shape', {
             submissionsCount: payload.submissions.length,
             hasFeatured: Boolean(payload.featured),
             hasDailyFeature: Boolean(payload.dailyFeature),
@@ -297,7 +304,7 @@ export async function handler(event) {
             'Cache-Control': RESPONSE_CACHE_CONTROL,
         });
     } catch (err) {
-        console.error('Community submissions handler error:', err.message);
+        logger.error('Community submissions handler error:', err.message);
         return error(500, 'حدث خطأ غير متوقع', origin);
     }
 }

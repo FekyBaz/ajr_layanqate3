@@ -6,11 +6,13 @@
  */
 
 import {
-    supabase,
+    supabaseAdmin,
     success,
     error,
     handleOptions,
     validateAdmin,
+    STATUS,
+    logger,
 } from './utils/shared.js';
 
 export async function handler(event, context) {
@@ -32,14 +34,14 @@ export async function handler(event, context) {
     }
 
     try {
-        const { data, error: queryError } = await supabase
+        const { data, error: queryError } = await supabaseAdmin
             .from('submissions')
             .select('id, message, corrected_message, content_type, author_name, created_at')
-            .eq('status', 'Pending')
+            .eq('status', STATUS.PENDING)
             .order('created_at', { ascending: true });
 
         if (queryError) {
-            console.error('Admin pending query error:', queryError.message);
+            logger.error('Admin pending query error:', queryError.message);
             return error(500, 'حدث خطأ في جلب البيانات', origin);
         }
 
@@ -49,7 +51,7 @@ export async function handler(event, context) {
         }, origin);
 
     } catch (err) {
-        console.error('Admin pending error:', err.message);
+        logger.error('Admin pending error:', err.message);
         return error(500, 'حدث خطأ. يرجى المحاولة لاحقًا.', origin);
     }
 }

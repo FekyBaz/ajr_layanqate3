@@ -1,0 +1,90 @@
+/* ═══════════════════════════════════════════════════════════════════════════
+   أجر لا ينقطع - Adhkar Page Styles
+   Tasbeeh button, lists, progress bars
+   ═══════════════════════════════════════════════════════════════════════════ */
+
+.adhkar-page main>section {
+    padding: 40px 0;
+}
+
+.adhkar-header {
+    padding: var(--space-2xl) 0 var(--space-lg);
+    text-align: center;
+}
+
+.adhkar-header h1 {
+    margin-bottom: var(--space-sm);
+}
+
+.adhkar-card {
+    background: rgba(255, 250, 241, 0.9);
+    border: 1px solid var(--color-border);
+    border-radius: var(--radius-lg);
+    padding: var(--space-xl);
+    max-width: 600px;
+    margin: 0 auto;
+}
+
+/* Tasbeeh Button */
+.adhkar-tasbeeh__button {
+    width: 200px;
+    height: 200px;
+    border-radius: 50%;
+    border: 1px solid var(--color-gold);
+    background: radial-gradient(circle, #fffaf1, #f0e5cf);
+    box-shadow: var(--shadow-md);
+    cursor: pointer;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    margin: var(--space-xl) auto;
+    transition: transform 0.1s ease;
+}
+
+.adhkar-tasbeeh__button:active {
+    transform: scale(0.95);
+}
+
+.adhkar-tasbeeh__count {
+    font-size: 3rem;
+    font-weight: 700;
+    color: var(--color-accent-primary);
+}
+
+/* Adhkar List */
+.adhkar-list {
+    list-style: none;
+    margin-top: var(--space-lg);
+    display: grid;
+    gap: var(--space-md);
+}
+
+.adhkar-item {
+    border: 1px solid var(--color-border);
+    border-radius: var(--radius-md);
+    padding: var(--space-md);
+    background: #fff;
+}
+
+.adhkar-progress {
+    height: 8px;
+    background: var(--color-muted);
+    border-radius: 4px;
+    overflow: hidden;
+    margin: var(--space-sm) 0;
+}
+
+.adhkar-progress span {
+    display: block;
+    height: 100%;
+    background: var(--color-accent-primary);
+    transition: width 0.3s ease;
+}
+
+@media (max-width: 600px) {
+    .adhkar-tasbeeh__button {
+        width: 160px;
+        height: 160px;
+    }
+}

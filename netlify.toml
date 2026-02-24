@@ -64,31 +64,48 @@
 
 # ═══════════════════════════════════════════════════════════════════════════
 # Security Headers - Applied to all pages
+# Fixes:
+#   - Removed deprecated X-XSS-Protection (S-7)
+#   - Removed 'unsafe-inline' from script-src (S-6)
+#   - Added base-uri, form-action, upgrade-insecure-requests to CSP
 # ═══════════════════════════════════════════════════════════════════════════
 [[headers]]
   for = "/*"
   [headers.values]
     X-Frame-Options = "DENY"
     X-Content-Type-Options = "nosniff"
-    X-XSS-Protection = "1; mode=block"
     Referrer-Policy = "strict-origin-when-cross-origin"
     Permissions-Policy = "geolocation=(), microphone=(), camera=()"
-    Content-Security-Policy = "default-src 'self'; script-src 'self' 'unsafe-inline'; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src 'self' https://fonts.gstatic.com; img-src 'self' data:; connect-src 'self' https://*.supabase.co;"
+    Content-Security-Policy = "default-src 'self'; script-src 'self'; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src 'self' https://fonts.gstatic.com; img-src 'self' data:; connect-src 'self' https://*.supabase.co; base-uri 'self'; form-action 'self'; upgrade-insecure-requests;"
 
 # ═══════════════════════════════════════════════════════════════════════════
 # Cache Control
+# Fixes:
+#   - Removed immutable from non-fingerprinted .css/.js files (P-3)
+#   - Use reasonable max-age for static assets without content hashing
 # ═══════════════════════════════════════════════════════════════════════════
 [[headers]]
   for = "/*.css"
   [headers.values]
-    Cache-Control = "public, max-age=31536000, immutable"
+    Cache-Control = "public, max-age=3600, must-revalidate"
 
 [[headers]]
   for = "/*.js"
   [headers.values]
-    Cache-Control = "public, max-age=31536000, immutable"
+    Cache-Control = "public, max-age=3600, must-revalidate"
 
 [[headers]]
   for = "/*.html"
   [headers.values]
     Cache-Control = "public, max-age=0, must-revalidate"
+
+# Fingerprinted / versioned assets (fonts) can be long-cached
+[[headers]]
+  for = "/*.woff2"
+  [headers.values]
+    Cache-Control = "public, max-age=31536000, immutable"
+
+[[headers]]
+  for = "/*.woff"
+  [headers.values]
+    Cache-Control = "public, max-age=31536000, immutable"

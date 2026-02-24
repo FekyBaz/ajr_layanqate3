@@ -6,7 +6,8 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>مساهمات المجتمع | أجر لا ينقطع</title>
     <meta name="description" content="تصفح المساهمات المعتمدة من المجتمع: أذكار، أدعية، آيات وأحاديث.">
-    <link rel="stylesheet" href="styles.css">
+    <link rel="stylesheet" href="base.css">
+    <link rel="stylesheet" href="community.css">
 </head>
 
 <body class="community-body community-page-root">
@@ -33,7 +34,8 @@
             <p id="goalTarget">🎯 هدف اليوم: ... ذكر</p>
             <p id="goalProgress">🤍 تم تحقيق: ...</p>
             <p id="goalHint" class="community-goal__hint">هدف اليوم يتجدد كل صباح 🤍</p>
-            <div class="community-goal__bar" role="progressbar" aria-label="تقدم هدف اليوم" aria-valuemin="0" aria-valuemax="100">
+            <div class="community-goal__bar" role="progressbar" aria-label="تقدم هدف اليوم" aria-valuemin="0"
+                aria-valuemax="100">
                 <span id="goalBarFill" class="community-goal__fill"></span>
             </div>
         </section>
@@ -57,7 +59,8 @@
                     </select>
                 </label>
 
-                <button type="button" id="focusModeToggle" class="btn btn-ghost community-focus-toggle" aria-pressed="false">وضع هادئ</button>
+                <button type="button" id="focusModeToggle" class="btn btn-ghost community-focus-toggle"
+                    aria-pressed="false">وضع هادئ</button>
             </div>
         </section>
 
@@ -96,10 +99,17 @@
             <h2 id="project-share-title" class="project-share__title">انشر المشروع بلطف 🤍</h2>
             <p class="project-share__text">مشاركة واحدة قد تُلهم قلبًا جديدًا للذكر.</p>
             <div class="project-share__actions">
-                <a class="btn btn-share project-share__btn project-share__btn--whatsapp" data-share-platform="whatsapp" href="#" target="_blank" rel="noopener noreferrer"><span aria-hidden="true">🟢</span><span>WhatsApp</span></a>
-                <a class="btn btn-share project-share__btn project-share__btn--telegram" data-share-platform="telegram" href="#" target="_blank" rel="noopener noreferrer"><span aria-hidden="true">🔵</span><span>Telegram</span></a>
-                <a class="btn btn-share project-share__btn project-share__btn--x" data-share-platform="x" href="#" target="_blank" rel="noopener noreferrer"><span aria-hidden="true">⚫</span><span>X</span></a>
-                <button type="button" class="btn btn-share project-share__btn project-share__btn--native" data-share-platform="native" hidden><span aria-hidden="true">📱</span><span>مشاركة الجهاز</span></button>
+                <a class="btn btn-share project-share__btn project-share__btn--whatsapp" data-share-platform="whatsapp"
+                    href="#" target="_blank" rel="noopener noreferrer"><span
+                        aria-hidden="true">🟢</span><span>WhatsApp</span></a>
+                <a class="btn btn-share project-share__btn project-share__btn--telegram" data-share-platform="telegram"
+                    href="#" target="_blank" rel="noopener noreferrer"><span
+                        aria-hidden="true">🔵</span><span>Telegram</span></a>
+                <a class="btn btn-share project-share__btn project-share__btn--x" data-share-platform="x" href="#"
+                    target="_blank" rel="noopener noreferrer"><span aria-hidden="true">⚫</span><span>X</span></a>
+                <button type="button" class="btn btn-share project-share__btn project-share__btn--native"
+                    data-share-platform="native" hidden><span aria-hidden="true">📱</span><span>مشاركة
+                        الجهاز</span></button>
             </div>
         </section>
 

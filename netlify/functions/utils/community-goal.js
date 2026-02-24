@@ -1,4 +1,4 @@
-import { supabase } from './shared.js';
+import { supabaseAdmin, logger } from './shared.js';
 
 const DEFAULT_DAILY_TARGET = 200;
 const TARGET_VARIANCE = 20;
@@ -14,68 +14,72 @@ function getDailyTargetForDate(dateKey) {
 }
 
 export async function getOrCreateGoal(today = getTodayDateKey()) {
-    const { data: existing, error: fetchError } = await supabase
+    const target = getDailyTargetForDate(today);
+
+    const { data: existing, error: fetchError } = await supabaseAdmin
         .from('community_goal')
-        .select('id,daily_target,current_progress,date,updated_at')
+        .select('id,date,daily_target,current_progress')
         .eq('date', today)
         .maybeSingle();
 
     if (fetchError) {
+        logger.error('Goal fetch error:', fetchError.message);
         throw fetchError;
     }
 
-    if (existing) return existing;
+    if (existing) {
+        return existing;
+    }
 
-    const { data: created, error: createError } = await supabase
+    const { data: created, error: createError } = await supabaseAdmin
         .from('community_goal')
         .insert({
             date: today,
-            daily_target: getDailyTargetForDate(today),
+            daily_target: target,
             current_progress: 0,
         })
-        .select('id,daily_target,current_progress,date,updated_at')
+        .select('id,date,daily_target,current_progress')
         .single();
 
     if (createError) {
-        const isUniqueConflict = String(createError.code || '') === '23505';
-        if (isUniqueConflict) {
-            const { data: retryData, error: retryError } = await supabase
+        if (createError.code === '23505') {
+            const { data: retry, error: retryError } = await supabaseAdmin
                 .from('community_goal')
-                .select('id,daily_target,current_progress,date,updated_at')
+                .select('id,date,daily_target,current_progress')
                 .eq('date', today)
                 .maybeSingle();
 
             if (retryError) {
+                logger.error('Goal retry fetch error:', retryError.message);
                 throw retryError;
             }
 
-            if (retryData) return retryData;
+            return retry;
         }
 
+        logger.error('Goal create error:', createError.message);
         throw createError;
     }
 
     return created;
 }
 
-export async function incrementGoalProgress(incrementBy = 1) {
-    const amount = Number.isInteger(incrementBy) && incrementBy > 0 ? incrementBy : 1;
-    const goal = await getOrCreateGoal();
-    const nextProgress = (Number(goal.current_progress) || 0) + amount;
+// Atomic goal progress increment via RPC — no more read-modify-write race condition
+export async function incrementGoalProgress(amount = 1) {
+    const today = getTodayDateKey();
 
-    const { data, error } = await supabase
-        .from('community_goal')
-        .update({
-            current_progress: nextProgress,
-            updated_at: new Date().toISOString(),
-        })
-        .eq('id', goal.id)
-        .select('id,daily_target,current_progress,date,updated_at')
-        .single();
+    // Ensure the goal exists first
+    await getOrCreateGoal(today);
 
-    if (error) {
-        throw error;
+    const { data: newProgress, error: rpcError } = await supabaseAdmin
+        .rpc('increment_goal_progress', {
+            p_date: today,
+            p_amount: amount,
+        });
+
+    if (rpcError) {
+        logger.error('Goal progress RPC error:', rpcError.message);
     }
 
-    return data;
+    return newProgress;
 }
