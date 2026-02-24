@@ -1,5 +1,8 @@
 import { supabaseAdmin, logger, getTodayDateKey } from './shared.js';
 
+const DEFAULT_DAILY_TARGET = 100;
+const TARGET_VARIANCE = 20;
+
 function getDailyTargetForDate(dateKey) {
     const seed = Number(dateKey.replaceAll('-', '')) || 0;
     const variance = (seed % ((TARGET_VARIANCE * 2) + 1)) - TARGET_VARIANCE;
