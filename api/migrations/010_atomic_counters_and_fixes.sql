@@ -334,8 +334,8 @@ WHERE message_hash IS NOT NULL
 -- 7. GRANT EXECUTE
 -- ═══════════════════════════════════════════════════════════════════════════
 
-GRANT EXECUTE ON FUNCTION public.record_and_increment_view(uuid, text, integer) TO anon;
-GRANT EXECUTE ON FUNCTION public.increment_post_count(uuid) TO anon;
-GRANT EXECUTE ON FUNCTION public.increment_goal_progress(date, integer) TO anon;
-GRANT EXECUTE ON FUNCTION public.increment_view(uuid) TO anon;
-GRANT EXECUTE ON FUNCTION public.cleanup_view_events(integer) TO anon;
+GRANT EXECUTE ON FUNCTION public.record_and_increment_view(uuid, text, integer) TO service_role;
+GRANT EXECUTE ON FUNCTION public.increment_post_count(uuid) TO service_role;
+GRANT EXECUTE ON FUNCTION public.increment_goal_progress(date, integer) TO service_role;
+GRANT EXECUTE ON FUNCTION public.increment_view(uuid) TO service_role;
+GRANT EXECUTE ON FUNCTION public.cleanup_view_events(integer) TO service_role;
