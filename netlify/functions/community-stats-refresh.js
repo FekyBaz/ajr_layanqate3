@@ -1,6 +1,4 @@
-import { supabase } from './utils/shared.js';
-
-const VISIBLE_STATUSES = ['Approved', 'Posted'];
+import { supabaseAdmin, VISIBLE_STATUSES, logger, success, error } from './utils/shared.js';
 
 export const config = {
     schedule: '0 * * * *',
@@ -8,7 +6,7 @@ export const config = {
 
 export async function handler() {
     try {
-        const { data, error: aggregateError } = await supabase
+        const { data, error: aggregateError } = await supabaseAdmin
             .from('submissions')
             .select('status,post_count')
             .in('status', VISIBLE_STATUSES);
@@ -22,7 +20,7 @@ export async function handler() {
         const totalPostCount = visibleRows.reduce((sum, row) => sum + (Number(row.post_count) || 0), 0);
         const averagePostCount = totalVisible ? totalPostCount / totalVisible : 0;
 
-        const { error: upsertError } = await supabase
+        const { error: upsertError } = await supabaseAdmin
             .from('community_stats')
             .upsert({
                 id: 1,
@@ -36,20 +34,13 @@ export async function handler() {
             throw upsertError;
         }
 
-        return {
-            statusCode: 200,
-            body: JSON.stringify({
-                success: true,
-                totalVisible,
-                totalPostCount,
-                averagePostCount,
-            }),
-        };
+        return success({
+            totalVisible,
+            totalPostCount,
+            averagePostCount,
+        });
     } catch (err) {
-        console.error('community-stats-refresh failed:', err.message);
-        return {
-            statusCode: 500,
-            body: JSON.stringify({ success: false, message: 'Failed to refresh community stats' }),
-        };
+        logger.error('community-stats-refresh failed:', err.message);
+        return error(500, 'Failed to refresh community stats');
     }
 }

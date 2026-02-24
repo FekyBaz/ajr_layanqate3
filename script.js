@@ -62,6 +62,9 @@
     const contentError = document.getElementById('content-error');
     const consentError = document.getElementById('consent-error');
 
+    // Guard: only run form logic on pages that have the submission form
+    if (!form) return;
+
     // ═══════════════════════════════════════════════════════════════════════
     // Constants
     // ═══════════════════════════════════════════════════════════════════════
