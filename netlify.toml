@@ -20,6 +20,9 @@
 [functions."daily-feature-refresh"]
   schedule = "0 0 * * *"
 
+[functions."cleanup-automation"]
+  schedule = "0 3 * * *"
+
 # ═══════════════════════════════════════════════════════════════════════════
 # Redirects - API routes to functions
 # ═══════════════════════════════════════════════════════════════════════════

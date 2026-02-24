@@ -1,11 +1,4 @@
-import { supabaseAdmin, logger } from './shared.js';
-
-const DEFAULT_DAILY_TARGET = 200;
-const TARGET_VARIANCE = 20;
-
-function getTodayDateKey() {
-    return new Date().toISOString().slice(0, 10);
-}
+import { supabaseAdmin, logger, getTodayDateKey } from './shared.js';
 
 function getDailyTargetForDate(dateKey) {
     const seed = Number(dateKey.replaceAll('-', '')) || 0;

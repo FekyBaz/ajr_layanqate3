@@ -59,7 +59,6 @@ export async function handler(event, context) {
         }, origin);
 
     } catch (err) {
-        logger.error('Admin stats error:', err.message);
-        return error(500, 'حدث خطأ. يرجى المحاولة لاحقًا.', origin);
+        return error(500, 'حدث خطأ. يرجى المحاولة لاحقًا.', origin, err.message);
     }
 }

@@ -78,8 +78,7 @@ export async function handler(event, context) {
             .maybeSingle();
 
         if (updateError) {
-            logger.error('Admin approve error:', updateError.message);
-            return error(500, 'حدث خطأ في تحديث البيانات', origin);
+            return error(500, 'حدث خطأ في تحديث البيانات', origin, updateError.message);
         }
 
         if (!updatedRow) {
@@ -95,7 +94,6 @@ export async function handler(event, context) {
         return success({ message: 'تمت الموافقة على المشاركة' }, origin);
 
     } catch (err) {
-        logger.error('Admin approve error:', err.message);
-        return error(500, 'حدث خطأ. يرجى المحاولة لاحقًا.', origin);
+        return error(500, 'حدث خطأ. يرجى المحاولة لاحقًا.', origin, err.message);
     }
 }
