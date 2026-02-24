@@ -50,18 +50,24 @@ export async function handler(event, context) {
         }
 
         // Update in database
-        const { error: updateError } = await supabaseAdmin
+        const { data: updatedRow, error: updateError } = await supabaseAdmin
             .from('submissions')
             .update({
                 status: STATUS.REJECTED,
                 reviewed_at: new Date().toISOString(),
             })
             .eq('id', id)
-            .eq('status', STATUS.PENDING);
+            .eq('status', STATUS.PENDING)
+            .select('id')
+            .maybeSingle();
 
         if (updateError) {
             logger.error('Admin reject error:', updateError.message);
             return error(500, 'حدث خطأ في تحديث البيانات', origin);
+        }
+
+        if (!updatedRow) {
+            return error(404, 'المشاركة غير موجودة أو تمت مراجعتها مسبقًا', origin);
         }
 
         return success({ message: 'تم رفض المشاركة' }, origin);

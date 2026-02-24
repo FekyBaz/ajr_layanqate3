@@ -11,9 +11,12 @@ export async function handler(event, context) {
     // Basic auth check if called manually via HTTP
     // Only allow scheduled calls (no httpMethod) or admin calls
     if (event.httpMethod) {
-        // This is an optional layer of safety for manual triggers
         const adminKey = process.env.ADMIN_API_KEY;
-        const providedKey = event.headers['x-admin-key'] || event.queryStringParameters?.key;
+        if (!adminKey) {
+            logger.error('[cleanup-automation] ADMIN_API_KEY not configured');
+            return error(500, 'Server configuration error');
+        }
+        const providedKey = event.headers['x-admin-key'];
 
         if (providedKey !== adminKey) {
             return error(401, 'Unauthorized');
