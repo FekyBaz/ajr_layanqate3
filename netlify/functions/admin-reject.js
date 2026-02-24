@@ -6,11 +6,13 @@
  */
 
 import {
-    supabase,
+    supabaseAdmin,
     success,
     error,
     handleOptions,
     validateAdmin,
+    STATUS,
+    logger,
 } from './utils/shared.js';
 
 export async function handler(event, context) {
@@ -48,24 +50,24 @@ export async function handler(event, context) {
         }
 
         // Update in database
-        const { error: updateError } = await supabase
+        const { error: updateError } = await supabaseAdmin
             .from('submissions')
             .update({
-                status: 'Rejected',
+                status: STATUS.REJECTED,
                 reviewed_at: new Date().toISOString(),
             })
             .eq('id', id)
-            .eq('status', 'Pending');
+            .eq('status', STATUS.PENDING);
 
         if (updateError) {
-            console.error('Admin reject error:', updateError.message);
+            logger.error('Admin reject error:', updateError.message);
             return error(500, 'حدث خطأ في تحديث البيانات', origin);
         }
 
         return success({ message: 'تم رفض المشاركة' }, origin);
 
     } catch (err) {
-        console.error('Admin reject error:', err.message);
+        logger.error('Admin reject error:', err.message);
         return error(500, 'حدث خطأ. يرجى المحاولة لاحقًا.', origin);
     }
 }

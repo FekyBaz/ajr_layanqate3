@@ -47,6 +47,12 @@
         return item.corrected_message || item.message || '';
     }
 
+    function escapeHtml(text) {
+        const div = document.createElement('div');
+        div.textContent = text;
+        return div.innerHTML;
+    }
+
     function getDailyDateLine() {
         const now = new Date();
         const formatted = new Intl.DateTimeFormat('ar-EG', { day: 'numeric', month: 'long', year: 'numeric' }).format(now);
@@ -85,22 +91,26 @@
 
     function renderCards(submissions, avgPostCount) {
         const previewItems = submissions.slice(0, 3);
+        const VALID_TYPES = ['dhikr', 'dua', 'ayah', 'hadith', 'benefit'];
         elements.list.innerHTML = previewItems.map((item) => {
             const badgeMap = { dhikr: 'ذكر', dua: 'دعاء', ayah: 'آية', hadith: 'حديث', benefit: 'فائدة' };
-            const badge = badgeMap[item.content_type] || 'مشاركة';
+            const safeType = VALID_TYPES.includes(item.content_type) ? item.content_type : 'dhikr';
+            const badge = badgeMap[safeType] || 'مشاركة';
             const isTrending = (Number(item.post_count) || 0) > avgPostCount && Number(item.post_count) > 0;
+            const safeId = escapeHtml(String(item.id));
+            const safeMessage = escapeHtml(resolveMessage(item));
 
             return `
                 <article class="community-preview-card card card-outline">
                     <div class="community-preview-card__top">
-                        <span class="content-badge badge-${item.content_type}">${badge}</span>
+                        <span class="content-badge badge-${safeType}">${badge}</span>
                         ${isTrending ? '<span class="trending-badge">🔥 رائج الآن</span>' : ''}
                     </div>
-                    <p>${resolveMessage(item)}</p>
-                    <a class="community-preview-card__full-link" href="/community.html#submission-${item.id}">عرض كامل →</a>
+                    <p>${safeMessage}</p>
+                    <a class="community-preview-card__full-link" href="/community.html#submission-${safeId}">عرض كامل →</a>
                     <div class="community-preview-card__meta">
                         <small>${formatDate(item.created_at)}</small>
-                        <button type="button" data-share-id="${item.id}" class="share-btn share-btn--small btn btn-ghost">📤 مشاركة</button>
+                        <button type="button" data-share-id="${safeId}" class="share-btn share-btn--small btn btn-ghost">📤 مشاركة</button>
                     </div>
                 </article>
             `;

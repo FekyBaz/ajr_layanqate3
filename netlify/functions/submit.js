@@ -6,7 +6,7 @@
  */
 
 import {
-    supabase,
+    supabaseAdmin,
     success,
     error,
     handleOptions,
@@ -17,6 +17,7 @@ import {
     checkRateLimit,
     recordRequest,
     getClientIP,
+    logger,
 } from './utils/shared.js';
 
 export async function handler(event, context) {
@@ -69,7 +70,7 @@ export async function handler(event, context) {
         const messageHash = generateMessageHash(messageResult.sanitized);
 
         // Check for duplicates
-        const { data: existing } = await supabase
+        const { data: existing } = await supabaseAdmin
             .from('submissions')
             .select('id')
             .eq('message_hash', messageHash)
@@ -91,12 +92,12 @@ export async function handler(event, context) {
         };
 
         // Insert submission
-        const { error: insertError } = await supabase
+        const { error: insertError } = await supabaseAdmin
             .from('submissions')
             .insert(insertData);
 
         if (insertError) {
-            console.error('Database insert error:', insertError.message);
+            logger.error('Database insert error:', insertError.message);
             return error(500, 'حدث خطأ. يرجى المحاولة لاحقًا.', origin);
         }
 
@@ -106,7 +107,7 @@ export async function handler(event, context) {
         return success({ message: 'تم استلام مشاركتك. جزاك الله خيرًا.' }, origin);
 
     } catch (err) {
-        console.error('Unexpected error:', err.message);
+        logger.error('Unexpected error:', err.message);
         return error(500, 'حدث خطأ. يرجى المحاولة لاحقًا.', origin);
     }
 }

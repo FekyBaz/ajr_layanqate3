@@ -1,8 +1,7 @@
-import { supabase, error, success, handleOptions } from './utils/shared.js';
+import { supabaseAdmin, error, success, handleOptions, VISIBLE_STATUSES, logger } from './utils/shared.js';
 import { incrementGoalProgress } from './utils/community-goal.js';
 
 const VALID_PLATFORMS = ['whatsapp', 'telegram', 'x', 'native'];
-const VISIBLE_STATUSES = ['Approved', 'Posted'];
 
 function sanitizePlatform(value) {
     if (typeof value !== 'string') return 'unknown';
@@ -33,7 +32,7 @@ export async function handler(event) {
         const submissionId = Number(payload.submissionId);
         const hasSubmissionId = Number.isInteger(submissionId) && submissionId > 0;
 
-        console.log('[community-share-track] share click', {
+        logger.info('[community-share-track] share click', {
             platform,
             hasSubmissionId,
         });
@@ -42,46 +41,29 @@ export async function handler(event) {
             return success({ tracked: true }, origin, { 'Cache-Control': 'no-store' });
         }
 
-        const { data: row, error: fetchError } = await supabase
-            .from('submissions')
-            .select('id,post_count,status')
-            .eq('id', submissionId)
-            .in('status', VISIBLE_STATUSES)
-            .maybeSingle();
+        // Use atomic RPC to increment post_count — no more read-modify-write race condition
+        const { data: newCount, error: rpcError } = await supabaseAdmin
+            .rpc('increment_post_count', { p_submission_id: submissionId });
 
-        if (fetchError) {
-            console.error('Share track lookup error:', fetchError.message);
+        if (rpcError) {
+            logger.error('Share track RPC error:', rpcError.message);
             return success({ tracked: false }, origin, { 'Cache-Control': 'no-store' });
         }
 
-        if (!row) {
-            return success({ tracked: false }, origin, { 'Cache-Control': 'no-store' });
-        }
-
-        const nextPostCount = (Number(row.post_count) || 0) + 1;
-        const { error: updateError } = await supabase
-            .from('submissions')
-            .update({
-                post_count: nextPostCount,
-                last_posted_at: new Date().toISOString(),
-            })
-            .eq('id', submissionId)
-            .in('status', VISIBLE_STATUSES);
-
-        if (updateError) {
-            console.error('Share track update error:', updateError.message);
+        if (newCount === null || newCount === undefined) {
+            // Submission not found or not visible
             return success({ tracked: false }, origin, { 'Cache-Control': 'no-store' });
         }
 
         try {
             await incrementGoalProgress(1);
         } catch (goalError) {
-            console.error('Share track goal progress error:', goalError.message);
+            logger.error('Share track goal progress error:', goalError.message);
         }
 
         return success({ tracked: true }, origin, { 'Cache-Control': 'no-store' });
     } catch (err) {
-        console.error('Community share track handler error:', err.message);
+        logger.error('Community share track handler error:', err.message);
         return error(500, 'حدث خطأ غير متوقع', origin);
     }
 }

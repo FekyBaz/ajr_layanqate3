@@ -6,11 +6,13 @@
  */
 
 import {
-    supabase,
+    supabaseAdmin,
     success,
     error,
     handleOptions,
     validateAdmin,
+    STATUS,
+    logger,
 } from './utils/shared.js';
 
 export async function handler(event, context) {
@@ -34,18 +36,18 @@ export async function handler(event, context) {
     try {
         // Get counts by status using separate queries
         const [pendingResult, approvedResult, rejectedResult] = await Promise.all([
-            supabase
+            supabaseAdmin
                 .from('submissions')
                 .select('id', { count: 'exact', head: true })
-                .eq('status', 'Pending'),
-            supabase
+                .eq('status', STATUS.PENDING),
+            supabaseAdmin
                 .from('submissions')
                 .select('id', { count: 'exact', head: true })
-                .eq('status', 'Approved'),
-            supabase
+                .eq('status', STATUS.APPROVED),
+            supabaseAdmin
                 .from('submissions')
                 .select('id', { count: 'exact', head: true })
-                .eq('status', 'Rejected'),
+                .eq('status', STATUS.REJECTED),
         ]);
 
         return success({
@@ -57,7 +59,7 @@ export async function handler(event, context) {
         }, origin);
 
     } catch (err) {
-        console.error('Admin stats error:', err.message);
+        logger.error('Admin stats error:', err.message);
         return error(500, 'حدث خطأ. يرجى المحاولة لاحقًا.', origin);
     }
 }

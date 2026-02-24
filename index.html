@@ -93,7 +93,8 @@
     <!-- ═══════════════════════════════════════════════════════════════════
          Stylesheet
          ═══════════════════════════════════════════════════════════════════ -->
-    <link rel="stylesheet" href="styles.css">
+    <link rel="stylesheet" href="base.css">
+    <link rel="stylesheet" href="home.css">
 </head>
 
 <body class="home-page">
@@ -106,7 +107,8 @@
     <header class="site-header" role="navigation" aria-label="التنقل الرئيسي">
         <div class="site-container site-header__content">
             <a href="/index.html" class="site-logo" aria-label="العودة للصفحة الرئيسية">أجر لا ينقطع 🤍</a>
-            <button class="menu-toggle" id="menuToggle" type="button" aria-expanded="false" aria-controls="mainMenu">☰</button>
+            <button class="menu-toggle" id="menuToggle" type="button" aria-expanded="false"
+                aria-controls="mainMenu">☰</button>
             <nav class="site-nav" id="mainMenu">
                 <a href="/community.html">المجتمع 🤍</a>
                 <a href="/adhkar.html">الأذكار</a>
@@ -200,7 +202,8 @@
 
                 <form id="submission-form" class="submission-form" novalidate>
                     <div class="form-group">
-                        <label for="content-type" class="form-label">نوع المشاركة <span class="required">*</span></label>
+                        <label for="content-type" class="form-label">نوع المشاركة <span
+                                class="required">*</span></label>
                         <select id="content-type" class="form-select" required aria-describedby="content-type-error">
                             <option value="">اختر نوع المحتوى</option>
                             <option value="dhikr">ذكر</option>
@@ -214,9 +217,11 @@
 
                     <div class="form-group form-group--content">
                         <label for="content" class="form-label">النص <span class="required">*</span></label>
-                        <textarea id="content" class="form-textarea" rows="8" required aria-describedby="content-hint content-error"
+                        <textarea id="content" class="form-textarea" rows="8" required
+                            aria-describedby="content-hint content-error"
                             placeholder="اكتب ذكرك أو دعاءك هنا… 🤍"></textarea>
-                        <p id="content-hint" class="form-hint">يمكنك الكتابة بهدوء ووضوح — <span id="char-count" class="form-hint__counter">0</span>/1000</p>
+                        <p id="content-hint" class="form-hint">يمكنك الكتابة بهدوء ووضوح — <span id="char-count"
+                                class="form-hint__counter">0</span>/1000</p>
                         <span id="content-error" class="form-error" role="alert" aria-live="polite"></span>
                     </div>
 
@@ -243,7 +248,8 @@
                     <button id="reset-form" type="button" class="btn btn-secondary">إرسال مشاركة أخرى</button>
                 </div>
 
-                <p id="submit-transition" class="submit-transition" role="status" aria-live="polite" hidden>لحظات يسيرة… يتم حفظ ذكرك 🤍</p>
+                <p id="submit-transition" class="submit-transition" role="status" aria-live="polite" hidden>لحظات يسيرة…
+                    يتم حفظ ذكرك 🤍</p>
             </div>
         </section>
 
@@ -284,10 +290,14 @@
                 <h2 id="project-share-title" class="project-share__title">🤍 ساهم في نشر المشروع</h2>
                 <p class="project-share__text">انشر الرابط مع من تحب ليصل الذكر إلى قلوب أكثر.</p>
                 <div class="project-share__actions">
-                    <a class="btn btn-share project-share__btn project-share__btn--whatsapp" data-share-platform="whatsapp" href="#" target="_blank" rel="noopener noreferrer">WhatsApp</a>
-                    <a class="btn btn-share project-share__btn project-share__btn--telegram" data-share-platform="telegram" href="#" target="_blank" rel="noopener noreferrer">Telegram</a>
-                    <a class="btn btn-share project-share__btn project-share__btn--x" data-share-platform="x" href="#" target="_blank" rel="noopener noreferrer">X</a>
-                    <button type="button" class="btn btn-share project-share__btn project-share__btn--native" data-share-platform="native" hidden>مشاركة الجهاز</button>
+                    <a class="btn btn-share project-share__btn project-share__btn--whatsapp"
+                        data-share-platform="whatsapp" href="#" target="_blank" rel="noopener noreferrer">WhatsApp</a>
+                    <a class="btn btn-share project-share__btn project-share__btn--telegram"
+                        data-share-platform="telegram" href="#" target="_blank" rel="noopener noreferrer">Telegram</a>
+                    <a class="btn btn-share project-share__btn project-share__btn--x" data-share-platform="x" href="#"
+                        target="_blank" rel="noopener noreferrer">X</a>
+                    <button type="button" class="btn btn-share project-share__btn project-share__btn--native"
+                        data-share-platform="native" hidden>مشاركة الجهاز</button>
                 </div>
             </div>
         </section>
