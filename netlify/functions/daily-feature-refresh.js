@@ -1,4 +1,4 @@
-import { error, success } from './utils/shared.js';
+import { error, success, getTodayDateKey } from './utils/shared.js';
 import { getDailyFeatureWithSubmission } from './utils/daily-feature.js';
 import { getOrCreateGoal } from './utils/community-goal.js';
 
@@ -8,7 +8,7 @@ export async function handler(event) {
     }
 
     try {
-        const today = new Date().toISOString().slice(0, 10);
+        const today = getTodayDateKey();
         const [dailyFeature, goal] = await Promise.all([
             getDailyFeatureWithSubmission(today),
             getOrCreateGoal(today),

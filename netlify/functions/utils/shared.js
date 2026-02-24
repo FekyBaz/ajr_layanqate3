@@ -126,15 +126,27 @@ export function success(data, origin, additionalHeaders = {}) {
             ...getCorsHeaders(origin),
             ...additionalHeaders,
         },
-        body: JSON.stringify({ success: true, ...data }),
+        body: JSON.stringify({
+            success: true,
+            timestamp: new Date().toISOString(),
+            ...data
+        }),
     };
 }
 
-export function error(statusCode, message, origin) {
+export function error(statusCode, message, origin, devMessage = null) {
+    if (devMessage) {
+        logger.error(`[HTTP ${statusCode}] ${message} | Dev: ${devMessage}`);
+    }
+
     return {
         statusCode,
         headers: getCorsHeaders(origin),
-        body: JSON.stringify({ success: false, message }),
+        body: JSON.stringify({
+            success: false,
+            message,
+            ...(process.env.NODE_ENV === 'development' && { debug: devMessage })
+        }),
     };
 }
 
@@ -266,6 +278,17 @@ export function sanitizeName(input) {
 
 export function validateContentType(contentType) {
     return contentType && VALID_CONTENT_TYPES.includes(contentType);
+}
+
+// ═══════════════════════════════════════════════════════════════════════════
+// Date & Time Helpers
+// ═══════════════════════════════════════════════════════════════════════════
+
+/**
+ * Returns YYYY-MM-DD in UTC (Single Source of Truth)
+ */
+export function getTodayDateKey() {
+    return new Date().toISOString().slice(0, 10);
 }
 
 // ═══════════════════════════════════════════════════════════════════════════

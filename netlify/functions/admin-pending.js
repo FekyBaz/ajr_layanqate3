@@ -41,8 +41,7 @@ export async function handler(event, context) {
             .order('created_at', { ascending: true });
 
         if (queryError) {
-            logger.error('Admin pending query error:', queryError.message);
-            return error(500, 'حدث خطأ في جلب البيانات', origin);
+            return error(500, 'حدث خطأ في جلب البيانات', origin, queryError.message);
         }
 
         return success({
@@ -51,7 +50,6 @@ export async function handler(event, context) {
         }, origin);
 
     } catch (err) {
-        logger.error('Admin pending error:', err.message);
-        return error(500, 'حدث خطأ. يرجى المحاولة لاحقًا.', origin);
+        return error(500, 'حدث خطأ. يرجى المحاولة لاحقًا.', origin, err.message);
     }
 }
