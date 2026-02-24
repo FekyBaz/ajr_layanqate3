@@ -1,8 +1,4 @@
-import { supabaseAdmin, VISIBLE_STATUSES, logger } from './shared.js';
-
-function getTodayDateKey() {
-    return new Date().toISOString().slice(0, 10);
-}
+import { supabaseAdmin, VISIBLE_STATUSES, logger, getTodayDateKey } from './shared.js';
 
 function getDayOffset(dateKey, total) {
     if (!total) return 0;
