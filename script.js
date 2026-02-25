@@ -81,11 +81,11 @@
     // Arabic Error Messages
     // ═══════════════════════════════════════════════════════════════════════
     const ERRORS = {
-        contentTypeRequired: 'يرجى اختيار نوع المحتوى قبل الإرسال 🤍',
-        contentRequired: 'يرجى كتابة ذكر قبل الإرسال 🤍',
+        contentTypeRequired: 'يرجى اختيار نوع المحتوى قبل الإرسال',
+        contentRequired: 'يرجى كتابة ذكر قبل الإرسال',
         contentTooShort: `أضف قليلًا من التفصيل (على الأقل ${MIN_CONTENT_LENGTH} أحرف)`,
         contentTooLong: `النص طويل قليلًا، حاول الاختصار بلطف (حتى ${MAX_CONTENT_LENGTH} حرف)`,
-        consentRequired: 'يرجى تأكيد التعهد قبل الإرسال 🤍',
+        consentRequired: 'يرجى تأكيد التعهد قبل الإرسال',
         rateLimited: 'لقد تجاوزت الحد المسموح من المشاركات. يرجى المحاولة لاحقًا.',
         networkError: 'تعذر الاتصال بالخادم. يرجى التحقق من اتصالك بالإنترنت.',
         submissionFailed: 'حدث خطأ أثناء الإرسال. يرجى المحاولة مرة أخرى.'

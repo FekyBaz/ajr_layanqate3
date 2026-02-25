@@ -73,7 +73,7 @@
     }
 
     async function shareSubmission(item) {
-        const text = `"${resolveMessage(item)}"\n\nمن مشروع أجر لا ينقطع 🤍\n${window.location.origin}`;
+        const text = `"${resolveMessage(item)}"\n\nمن مشروع أجر لا ينقطع\n${window.location.origin}`;
 
         try {
             if (navigator.share) {
