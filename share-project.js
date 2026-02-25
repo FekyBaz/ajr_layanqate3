@@ -1,7 +1,7 @@
 (function () {
     'use strict';
 
-    const SHARE_TEXT = 'مشروع أجر لا ينقطع 🤍\nساهم بذكر أو دعاء واجعل لك أثرًا دائمًا';
+    const SHARE_TEXT = 'مشروع أجر لا ينقطع\nساهم بذكر أو دعاء واجعل لك أثرًا دائمًا ✨';
     const TRACK_ENDPOINT = '/.netlify/functions/community-share-track';
     const baseUrl = window.location.origin;
 

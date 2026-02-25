@@ -12,16 +12,19 @@
 <body class="community-body community-page-root">
     <main class="community-page site-container" aria-live="polite">
         <header class="community-header">
+            <nav class="community-nav">
+                <a href="index.html" class="btn btn-ghost btn-sm">العودة للرئيسية</a>
+            </nav>
             <div class="community-header__intro">
                 <h1>مساهمات المجتمع</h1>
                 <p>مساحة هادئة للمشاركات المعتمدة، بنية نشر الخير والأجر.</p>
-                <p id="returnMemory" class="community-return-memory" hidden>سعداء بعودتك اليوم 🤍</p>
+                <p id="returnMemory" class="community-return-memory" hidden>سعداء بعودتك اليوم</p>
             </div>
 
             <div class="community-header__stats-wrap">
                 <h2 class="community-header__stats-title">لمحة المجتمع</h2>
                 <div class="community-stats" aria-label="إحصاءات المجتمع">
-                    <p id="approvedCount">🤍 ... مشاركة معتمدة</p>
+                    <p id="approvedCount">... مشاركة معتمدة</p>
                     <p id="totalSharesCount">📿 ... مرة تم نشر الأذكار</p>
                 </div>
             </div>
@@ -31,8 +34,8 @@
 
         <section id="goalSection" class="community-goal card card-elevated" hidden>
             <p id="goalTarget">🎯 هدف اليوم: ... ذكر</p>
-            <p id="goalProgress">🤍 تم تحقيق: ...</p>
-            <p id="goalHint" class="community-goal__hint">هدف اليوم يتجدد كل صباح 🤍</p>
+            <p id="goalProgress">تم تحقيق: ...</p>
+            <p id="goalHint" class="community-goal__hint">هدف اليوم يتجدد كل صباح ✨</p>
             <div class="community-goal__bar" role="progressbar" aria-label="تقدم هدف اليوم" aria-valuemin="0"
                 aria-valuemax="100">
                 <span id="goalBarFill" class="community-goal__fill"></span>
@@ -73,14 +76,14 @@
         </nav>
 
         <aside class="mobile-stats-bar" id="mobileStatsBar" hidden>
-            <span id="mobileApprovedCount">🤍 ... مشاركة</span>
+            <span id="mobileApprovedCount">... مشاركة</span>
             <a href="/index.html#form" class="btn btn-primary mobile-stats-bar__cta">أضف ذكرك</a>
         </aside>
 
-        <div class="toast" id="shareToast" role="status" aria-live="polite" hidden>تم النسخ 🤍</div>
+        <div class="toast" id="shareToast" role="status" aria-live="polite" hidden>تم النسخ ✨</div>
 
         <aside id="joinPopup" class="join-popup" hidden>
-            <p>🤍 هل ترغب في إضافة ذكرك أنت أيضًا؟</p>
+            <p>هل ترغب في إضافة ذكرك أنت أيضًا؟ ✨</p>
             <a href="/index.html#form" class="btn btn-primary">أضف ذكرك</a>
             <button type="button" id="joinPopupClose" class="join-popup__close" aria-label="إغلاق">✕</button>
         </aside>
@@ -88,14 +91,14 @@
         <hr class="community-divider" aria-hidden="true">
 
         <section id="savedSection" class="community-saved card card-soft" aria-labelledby="savedSectionTitle">
-            <h2 id="savedSectionTitle" class="community-saved__title">🤍 محفوظاتك</h2>
-            <p id="savedTasteMessage" class="community-saved__taste" hidden>يبدو أن لك ذوقًا خاصًا 🤍</p>
+            <h2 id="savedSectionTitle" class="community-saved__title">محفوظاتك</h2>
+            <p id="savedTasteMessage" class="community-saved__taste" hidden>يبدو أن لك ذوقًا خاصًا ✨</p>
             <div id="savedItems" class="community-saved__grid"></div>
-            <p id="savedEmptyMessage" class="community-saved__empty">لم تحفظ شيئًا بعد 🤍</p>
+            <p id="savedEmptyMessage" class="community-saved__empty">لم تحفظ شيئًا بعد</p>
         </section>
 
         <section class="project-share card card-soft" aria-labelledby="project-share-title">
-            <h2 id="project-share-title" class="project-share__title">انشر المشروع بلطف 🤍</h2>
+            <h2 id="project-share-title" class="project-share__title">انشر المشروع بلطف ✨</h2>
             <p class="project-share__text">مشاركة واحدة قد تُلهم قلبًا جديدًا للذكر.</p>
             <div class="project-share__actions">
                 <a class="btn btn-share project-share__btn project-share__btn--whatsapp" data-share-platform="whatsapp"
