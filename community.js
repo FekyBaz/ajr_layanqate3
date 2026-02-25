@@ -191,7 +191,7 @@ function getShareTargetUrl(platform = 'whatsapp') {
 
 function getShareMessage(item, platform = 'whatsapp') {
     const siteUrl = getShareTargetUrl(platform);
-    return `"${resolveMessage(item)}"\n\nمن مشروع أجر لا ينقطع 🤍\n${siteUrl}`;
+    return `"${resolveMessage(item)}"\n\nمن مشروع أجر لا ينقطع\n${siteUrl}`;
 }
 
 function createCardTop(item, avgPostCount) {
@@ -221,7 +221,7 @@ function createCardTop(item, avgPostCount) {
 
     const isSaved = submissionId ? state.savedIds.has(submissionId) : false;
     saveButton.setAttribute('aria-pressed', isSaved ? 'true' : 'false');
-    saveButton.textContent = isSaved ? '🤍 محفوظ' : '🤍 احفظ هذا الذكر';
+    saveButton.textContent = isSaved ? 'محفوظ' : 'احفظ هذا الذكر';
     top.appendChild(saveButton);
 
     return top;
@@ -434,7 +434,7 @@ function showSubmissionReviewToastIfNeeded() {
 
     if (!hasSubmissionFlag) return;
 
-    elements.shareToast.textContent = 'تم إضافة ذكرك للمراجعة 🤍';
+    elements.shareToast.textContent = 'تم إضافة ذكرك للمراجعة ✨';
     showToast();
     sessionStorage.removeItem('ajr_submission_pending_review');
     window.scrollTo({ top: 0, behavior: 'smooth' });
@@ -597,7 +597,7 @@ function syncSaveButtons() {
         if (!submissionId) return;
         const isSaved = state.savedIds.has(submissionId);
         button.setAttribute('aria-pressed', isSaved ? 'true' : 'false');
-        button.textContent = isSaved ? '🤍 محفوظ' : '🤍 احفظ هذا الذكر';
+        button.textContent = isSaved ? 'محفوظ' : 'احفظ هذا الذكر';
     });
 }
 
@@ -705,10 +705,10 @@ function renderGoal(goal = {}) {
     const percent = Math.min(Math.round((currentProgress / dailyTarget) * 100), 100);
 
     elements.goalTarget.textContent = `🎯 هدف اليوم: ${formatNumber(dailyTarget)} ذكر`;
-    elements.goalProgress.textContent = `🤍 تم تحقيق: ${formatNumber(currentProgress)}`;
+    elements.goalProgress.textContent = `تم تحقيق: ${formatNumber(currentProgress)}`;
     elements.goalBarFill.style.width = `${percent}%`;
     if (elements.goalHint) {
-        elements.goalHint.textContent = goal.hint || 'هدف اليوم يتجدد كل صباح 🤍';
+        elements.goalHint.textContent = goal.hint || 'هدف اليوم يتجدد كل صباح ✨';
     }
     elements.goalSection.querySelector('.community-goal__bar')?.setAttribute('aria-valuenow', String(percent));
     elements.goalSection.hidden = false;
@@ -718,9 +718,9 @@ function renderStats(stats = {}, pagination = {}) {
     const totalApproved = stats.totalApproved || pagination.total || 0;
     const totalShares = stats.totalPostCount || 0;
 
-    elements.approvedCount.textContent = `🤍 ${formatNumber(totalApproved)} مشاركة معتمدة`;
+    elements.approvedCount.textContent = `${formatNumber(totalApproved)} مشاركة معتمدة`;
     elements.totalSharesCount.textContent = `📿 ${formatNumber(totalShares)} مرة تم نشر الأذكار`;
-    elements.mobileApprovedCount.textContent = `🤍 ${formatNumber(totalApproved)} مشاركة`;
+    elements.mobileApprovedCount.textContent = `${formatNumber(totalApproved)} مشاركة`;
     elements.mobileStatsBar.hidden = false;
 }
 

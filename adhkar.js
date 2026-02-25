@@ -114,7 +114,7 @@
             '<div class="adhkar-item__progress-row">',
             '<span class="adhkar-item__count">' + count + ' / ' + item.required + '</span>',
             '<div class="adhkar-progress" aria-hidden="true"><span style="width: ' + (progressRatio(count, item.required) * 100) + '%;"></span></div>',
-            complete ? '<span class="adhkar-item__done">تم 🤍</span>' : '',
+            complete ? '<span class="adhkar-item__done">تم ✨</span>' : '',
             '</div>',
             '<div class="adhkar-item__actions">',
             '<button type="button" class="btn btn-secondary adhkar-small-btn" data-action="increment">تسبيحة</button>',
