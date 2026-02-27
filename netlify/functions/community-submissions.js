@@ -10,6 +10,7 @@ const HOMEPAGE_PREVIEW_SIZE = 3;
 const MAX_PAGE_SIZE = 20;
 const VALID_SURFACES = ['community', 'homepage_preview'];
 const RESPONSE_CACHE_CONTROL = 'public, max-age=45, s-maxage=45, stale-while-revalidate=60';
+const COMMUNITY_CACHE_CONTROL = 'no-store';
 
 function parsePositiveInt(value, fallback) {
     const parsed = Number.parseInt(value, 10);
@@ -300,8 +301,10 @@ export async function handler(event) {
             sort: sortBy,
         });
 
+        const cacheControl = surface === 'community' ? COMMUNITY_CACHE_CONTROL : RESPONSE_CACHE_CONTROL;
+
         return success(payload, origin, {
-            'Cache-Control': RESPONSE_CACHE_CONTROL,
+            'Cache-Control': cacheControl,
         });
     } catch (err) {
         logger.error('Community submissions handler error:', err.message);

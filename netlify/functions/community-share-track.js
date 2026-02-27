@@ -2,11 +2,18 @@ import { supabaseAdmin, error, success, handleOptions, logger } from './utils/sh
 import { incrementGoalProgress } from './utils/community-goal.js';
 
 const VALID_PLATFORMS = ['whatsapp', 'telegram', 'x', 'native'];
+const UUID_V4_REGEX = /^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i;
 
 function sanitizePlatform(value) {
     if (typeof value !== 'string') return 'unknown';
     const normalized = value.trim().toLowerCase();
     return VALID_PLATFORMS.includes(normalized) ? normalized : 'unknown';
+}
+
+function sanitizeSubmissionId(value) {
+    if (typeof value !== 'string') return null;
+    const normalized = value.trim().toLowerCase();
+    return UUID_V4_REGEX.test(normalized) ? normalized : null;
 }
 
 export async function handler(event) {
@@ -29,8 +36,8 @@ export async function handler(event) {
         }
 
         const platform = sanitizePlatform(payload.platform);
-        const submissionId = Number(payload.submissionId);
-        const hasSubmissionId = Number.isInteger(submissionId) && submissionId > 0;
+        const submissionId = sanitizeSubmissionId(payload.submissionId);
+        const hasSubmissionId = Boolean(submissionId);
 
         logger.info('[community-share-track] share click', {
             platform,
