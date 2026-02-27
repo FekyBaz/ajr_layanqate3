@@ -90,12 +90,12 @@
 [[headers]]
   for = "/*.css"
   [headers.values]
-    Cache-Control = "public, max-age=3600, must-revalidate"
+    Cache-Control = "public, no-cache, must-revalidate"
 
 [[headers]]
   for = "/*.js"
   [headers.values]
-    Cache-Control = "public, max-age=3600, must-revalidate"
+    Cache-Control = "public, no-cache, must-revalidate"
 
 [[headers]]
   for = "/*.html"
