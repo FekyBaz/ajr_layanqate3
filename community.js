@@ -33,6 +33,15 @@ const state = {
     submissionsById: new Map(),
     savedIds: new Set(),
     focusMode: false,
+    stats: {
+        totalPostCount: 0,
+        totalApproved: 0,
+    },
+    goal: {
+        dailyTarget: 1,
+        currentProgress: 0,
+        hint: '',
+    },
     hashTargetSubmissionId: null,
     hasHandledHashTarget: false,
 };
@@ -221,7 +230,8 @@ function createCardTop(item, avgPostCount) {
 
     const isSaved = submissionId ? state.savedIds.has(submissionId) : false;
     saveButton.setAttribute('aria-pressed', isSaved ? 'true' : 'false');
-    saveButton.textContent = isSaved ? 'محفوظ' : 'احفظ هذا الذكر';
+    saveButton.setAttribute('aria-label', isSaved ? 'إزالة من المفضلة' : 'إضافة إلى المفضلة');
+    saveButton.textContent = isSaved ? '♥' : '♡';
     top.appendChild(saveButton);
 
     return top;
@@ -274,12 +284,11 @@ function createCard(item, avgPostCount = 0) {
     timestamp.textContent = formatDate(item.created_at);
     meta.appendChild(timestamp);
 
-    if (item.post_count > 0) {
-        const shares = document.createElement('p');
-        shares.className = 'shares';
-        shares.textContent = `🕊 تمت المشاركة ${formatNumber(item.post_count)} مرة`;
-        meta.appendChild(shares);
-    }
+    const shares = document.createElement('p');
+    shares.className = 'shares';
+    shares.dataset.shareCountId = String(item.id);
+    shares.textContent = `🕊 تمت المشاركة ${formatNumber(item.post_count)} مرة`;
+    meta.appendChild(shares);
 
     card.appendChild(meta);
 
@@ -477,16 +486,41 @@ async function copyToClipboard(text) {
 
 async function trackShare(platform, submissionId) {
     try {
-        await fetch(SHARE_TRACK_ENDPOINT, {
+        const response = await fetch(SHARE_TRACK_ENDPOINT, {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json',
             },
             body: JSON.stringify({ platform, submissionId }),
         });
+
+        if (!response.ok) return false;
+        const result = await response.json();
+        return result?.tracked === true;
     } catch {
         // lightweight tracking only
+        return false;
     }
+}
+
+function incrementLocalShareMetrics(submissionId) {
+    const normalizedId = normalizeSubmissionId(submissionId);
+    if (!normalizedId) return;
+
+    const item = state.submissionsById.get(normalizedId);
+    if (!item) return;
+
+    item.post_count = Math.max(Number(item.post_count) || 0, 0) + 1;
+
+    document.querySelectorAll(`[data-share-count-id="${CSS.escape(normalizedId)}"]`).forEach((element) => {
+        element.textContent = `🕊 تمت المشاركة ${formatNumber(item.post_count)} مرة`;
+    });
+
+    state.stats.totalPostCount = Math.max(Number(state.stats.totalPostCount) || 0, 0) + 1;
+    elements.totalSharesCount.textContent = `📿 ${formatNumber(state.stats.totalPostCount)} مرة تم نشر الأذكار`;
+
+    state.goal.currentProgress = Math.max(Number(state.goal.currentProgress) || 0, 0) + 1;
+    renderGoal(state.goal);
 }
 
 async function shareSubmission(item) {
@@ -496,18 +530,27 @@ async function shareSubmission(item) {
     try {
         if (navigator.share) {
             await navigator.share({ text: shareText, url: getShareTargetUrl(preferredPlatform) });
-            await trackShare('native', item.id);
+            const tracked = await trackShare('native', item.id);
+            if (tracked) {
+                incrementLocalShareMetrics(item.id);
+            }
             return;
         }
 
         await copyToClipboard(shareText);
-        await trackShare(preferredPlatform, item.id);
+        const tracked = await trackShare(preferredPlatform, item.id);
+        if (tracked) {
+            incrementLocalShareMetrics(item.id);
+        }
         showToast();
     } catch (err) {
         if (err?.name !== 'AbortError') {
             try {
                 await copyToClipboard(shareText);
-                await trackShare(preferredPlatform, item.id);
+                const tracked = await trackShare(preferredPlatform, item.id);
+                if (tracked) {
+                    incrementLocalShareMetrics(item.id);
+                }
                 showToast();
             } catch (copyErr) {
                 console.error('[community] Share failed after fallback', { err, copyErr, submissionId: item?.id });
@@ -597,7 +640,8 @@ function syncSaveButtons() {
         if (!submissionId) return;
         const isSaved = state.savedIds.has(submissionId);
         button.setAttribute('aria-pressed', isSaved ? 'true' : 'false');
-        button.textContent = isSaved ? 'محفوظ' : 'احفظ هذا الذكر';
+        button.setAttribute('aria-label', isSaved ? 'إزالة من المفضلة' : 'إضافة إلى المفضلة');
+        button.textContent = isSaved ? '♥' : '♡';
     });
 }
 
@@ -704,11 +748,17 @@ function renderGoal(goal = {}) {
     const currentProgress = Math.max(Number(goal.currentProgress) || 0, 0);
     const percent = Math.min(Math.round((currentProgress / dailyTarget) * 100), 100);
 
+    state.goal = {
+        dailyTarget,
+        currentProgress,
+        hint: goal.hint || 'هدف اليوم يتجدد كل صباح ✨',
+    };
+
     elements.goalTarget.textContent = `🎯 هدف اليوم: ${formatNumber(dailyTarget)} ذكر`;
     elements.goalProgress.textContent = `تم تحقيق: ${formatNumber(currentProgress)}`;
     elements.goalBarFill.style.width = `${percent}%`;
     if (elements.goalHint) {
-        elements.goalHint.textContent = goal.hint || 'هدف اليوم يتجدد كل صباح ✨';
+        elements.goalHint.textContent = state.goal.hint;
     }
     elements.goalSection.querySelector('.community-goal__bar')?.setAttribute('aria-valuenow', String(percent));
     elements.goalSection.hidden = false;
@@ -717,6 +767,9 @@ function renderGoal(goal = {}) {
 function renderStats(stats = {}, pagination = {}) {
     const totalApproved = stats.totalApproved || pagination.total || 0;
     const totalShares = stats.totalPostCount || 0;
+
+    state.stats.totalApproved = totalApproved;
+    state.stats.totalPostCount = totalShares;
 
     elements.approvedCount.textContent = `${formatNumber(totalApproved)} مشاركة معتمدة`;
     elements.totalSharesCount.textContent = `📿 ${formatNumber(totalShares)} مرة تم نشر الأذكار`;
