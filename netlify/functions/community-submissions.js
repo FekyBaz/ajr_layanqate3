@@ -5,7 +5,7 @@ import { getDailyFeatureWithSubmission } from './utils/daily-feature.js';
 const VALID_TYPES = ['all', 'dhikr', 'dua', 'ayah', 'hadith', 'benefit'];
 const VALID_SORT = ['latest', 'most_shared'];
 const VALID_REF_SOURCES = ['instagram', 'facebook', 'direct', 'telegram', 'whatsapp_share', 'telegram_share', 'x_share'];
-const DEFAULT_PAGE_SIZE = 10;
+const DEFAULT_PAGE_SIZE = 11;
 const HOMEPAGE_PREVIEW_SIZE = 3;
 const MAX_PAGE_SIZE = 20;
 const VALID_SURFACES = ['community', 'homepage_preview'];
