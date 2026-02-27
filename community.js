@@ -25,7 +25,7 @@ const state = {
     type: 'all',
     sort: 'latest',
     page: 1,
-    limit: 10,
+    limit: 11,
     totalPages: 1,
     total: 0,
     refSource: 'direct',
