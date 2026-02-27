@@ -1493,12 +1493,24 @@ p {
 }
 
 .community-page .save-btn {
+    width: 2.1rem;
+    height: 2.1rem;
     border-radius: 999px;
-    border: 1px solid #dce8e2;
-    background: #f6faf8;
-    color: #456660;
-    padding: 0.28rem 0.65rem;
-    font-size: 0.8rem;
+    border: 1px solid #eadadf;
+    background: #fff8fa;
+    color: #b4537a;
+    padding: 0;
+    font-size: 1.05rem;
+    line-height: 1;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.community-page .save-btn[aria-pressed="true"] {
+    border-color: #d34779;
+    background: #ffe6ef;
+    color: #c0265f;
 }
 
 .community-page .trending-badge {
