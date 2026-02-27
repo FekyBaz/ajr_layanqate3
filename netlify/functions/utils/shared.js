@@ -218,7 +218,7 @@ export async function validateAdminWithRateLimit(event) {
 // Input Sanitization
 // ═══════════════════════════════════════════════════════════════════════════
 
-const ARABIC_PATTERN = /^[\u0600-\u06FF\u0750-\u077F\uFB50-\uFDFF\uFE70-\uFEFF\u0660-\u0669\s\d.,،؛:؟!()«»/\-\n\r]+$/;
+const ARABIC_PATTERN = /^[\u0600-\u06FF\u0750-\u077F\uFB50-\uFDFF\uFE70-\uFEFF\u0660-\u0669\s\d.,،؛:؟!()«»/\-#_…\\\n\r🌿"']+$/;
 
 export function sanitizeMessage(input) {
     if (typeof input !== 'string') {
