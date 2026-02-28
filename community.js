@@ -1,6 +1,5 @@
 const API_ENDPOINT = '/.netlify/functions/community-submissions';
 const VIEW_ENDPOINT = '/.netlify/functions/community-submission-view';
-const CTA_INTERVAL = 5;
 const REF_ALLOWLIST = ['instagram', 'facebook', 'direct', 'telegram', 'whatsapp_share', 'telegram_share', 'x_share'];
 const VIEW_DEBOUNCE_MS = 60_000;
 const SHARE_TRACK_ENDPOINT = '/.netlify/functions/community-share-track';
@@ -25,7 +24,7 @@ const state = {
     type: 'all',
     sort: 'latest',
     page: 1,
-    limit: 11,
+    limit: 12,
     totalPages: 1,
     total: 0,
     refSource: 'direct',
@@ -235,30 +234,6 @@ function createCardTop(item, avgPostCount) {
     top.appendChild(saveButton);
 
     return top;
-}
-
-function renderCtaCard() {
-    const cta = document.createElement('aside');
-    cta.className = 'community-cta card card-elevated card-enter';
-    cta.setAttribute('aria-label', 'دعوة للمشاركة');
-
-    const title = document.createElement('h3');
-    title.className = 'community-cta__title';
-    title.textContent = '🤍 أضف ذكرك أنت أيضًا';
-    cta.appendChild(title);
-
-    const microcopy = document.createElement('p');
-    microcopy.className = 'community-cta__microcopy';
-    microcopy.textContent = 'شاركنا ذكرًا نافعًا بلطف، ليصل أثره إلى قلوب أكثر.';
-    cta.appendChild(microcopy);
-
-    const link = document.createElement('a');
-    link.href = '/index.html#form';
-    link.className = 'btn btn-primary';
-    link.textContent = 'أضف الآن';
-    cta.appendChild(link);
-
-    return cta;
 }
 
 function createCard(item, avgPostCount = 0) {
@@ -586,12 +561,8 @@ async function incrementView(submissionId) {
 function buildCards(submissions, avgPostCount) {
     const fragment = document.createDocumentFragment();
 
-    submissions.forEach((item, index) => {
+    submissions.forEach((item) => {
         fragment.appendChild(createCard(item, avgPostCount));
-
-        if ((index + 1) % CTA_INTERVAL === 0 && index !== submissions.length - 1) {
-            fragment.appendChild(renderCtaCard());
-        }
     });
 
     return fragment;
