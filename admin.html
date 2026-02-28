@@ -53,22 +53,52 @@
                         <div class="stat-value" id="rejected-count">-</div>
                         <div class="stat-label">مرفوضة</div>
                     </div>
+                    <div class="stat">
+                        <div class="stat-value" id="memory-pending-count">-</div>
+                        <div class="stat-label">ذكريات معلقة</div>
+                    </div>
                 </div>
                 <div class="mt-1">
                     <button class="logout-btn" onclick="logout()">تسجيل الخروج</button>
                 </div>
             </header>
 
-            <button class="btn refresh-btn" onclick="loadPending()">🔄 تحديث القائمة</button>
+            <!-- Tab Navigation -->
+            <div class="admin-tabs" style="display:flex;gap:8px;margin-bottom:16px;">
+                <button class="btn btn-primary btn-sm admin-tab active" id="tab-submissions"
+                    onclick="switchTab('submissions')">المشاركات</button>
+                <button class="btn btn-ghost btn-sm admin-tab" id="tab-memories" onclick="switchTab('memories')">صفحات
+                    الذكرى</button>
+            </div>
 
-            <div id="notification" class="hidden"></div>
+            <!-- Submissions Tab -->
+            <div id="submissions-tab">
+                <button class="btn refresh-btn" onclick="loadPending()">🔄 تحديث القائمة</button>
 
-            <div id="loading" class="loading">جاري التحميل...</div>
+                <div id="notification" class="hidden"></div>
 
-            <div id="submissions-list" class="submissions-list hidden"></div>
+                <div id="loading" class="loading">جاري التحميل...</div>
 
-            <div id="empty-state" class="empty-state hidden">
-                <p>✅ لا توجد مشاركات في الانتظار</p>
+                <div id="submissions-list" class="submissions-list hidden"></div>
+
+                <div id="empty-state" class="empty-state hidden">
+                    <p>✅ لا توجد مشاركات في الانتظار</p>
+                </div>
+            </div>
+
+            <!-- Memories Tab -->
+            <div id="memories-tab" class="hidden">
+                <button class="btn refresh-btn" onclick="loadPendingMemories()">🔄 تحديث قائمة الذكريات</button>
+
+                <div id="memory-notification" class="hidden"></div>
+
+                <div id="memory-loading" class="loading hidden">جاري التحميل...</div>
+
+                <div id="memories-list" class="submissions-list hidden"></div>
+
+                <div id="memory-empty-state" class="empty-state hidden">
+                    <p>✅ لا توجد صفحات ذكرى في الانتظار</p>
+                </div>
             </div>
         </section>
     </div>

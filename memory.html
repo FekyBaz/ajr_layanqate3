@@ -1,0 +1,83 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>صدقة جارية | أجر لا ينقطع</title>
+    <meta name="description" content="صفحة صدقة جارية على روح متوفى — أجر لا ينقطع">
+
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link
+        href="https://fonts.googleapis.com/css2?family=Noto+Naskh+Arabic:wght@400;500;600;700&family=Cairo:wght@400;600;700&display=swap"
+        rel="stylesheet">
+
+    <link rel="stylesheet" href="/base.css">
+    <link rel="stylesheet" href="/memory.css">
+</head>
+
+<body>
+    <main class="memory-page" id="memory-page">
+        <!-- Loading State -->
+        <div class="memory-loading" id="memory-loading">
+            <div class="spinner"></div>
+            <p>جاري التحميل...</p>
+        </div>
+
+        <!-- Error State -->
+        <div class="memory-error hidden" id="memory-error">
+            <p id="memory-error-text"></p>
+            <a href="/" class="back-link">← العودة للرئيسية</a>
+        </div>
+
+        <!-- Memory Card -->
+        <div class="memory-card hidden" id="memory-card">
+            <div class="memory-ornament" aria-hidden="true">﷽</div>
+
+            <div class="memory-label">صدقة جارية على روح</div>
+            <h1 class="memory-name" id="memory-name"></h1>
+
+            <div class="memory-relation" id="memory-relation"></div>
+
+            <hr class="memory-separator">
+
+            <p class="memory-message" id="memory-message"></p>
+
+            <!-- Counter -->
+            <div class="memory-counter-section">
+                <div class="memory-counter">
+                    <span class="memory-counter-value" id="memory-counter-value">0</span>
+                    <span class="memory-counter-label">تفاعل</span>
+                </div>
+            </div>
+
+            <!-- Interaction Buttons -->
+            <div class="memory-actions" id="memory-actions">
+                <button class="memory-btn" id="btn-tasbeeh" data-type="tasbeeh" type="button">
+                    <span class="memory-btn__icon" aria-hidden="true">📿</span>
+                    <span class="memory-btn__label">تسبيح</span>
+                </button>
+                <button class="memory-btn" id="btn-dua" data-type="dua" type="button">
+                    <span class="memory-btn__icon" aria-hidden="true">🤲</span>
+                    <span class="memory-btn__label">دعاء</span>
+                </button>
+                <button class="memory-btn" id="btn-share" data-type="share" type="button">
+                    <span class="memory-btn__icon" aria-hidden="true">🔗</span>
+                    <span class="memory-btn__label">مشاركة</span>
+                </button>
+            </div>
+
+            <!-- Footer -->
+            <div class="memory-footer">
+                <a href="/" class="memory-footer-link">أجر لا ينقطع</a>
+                <br>
+                <a href="/create-memory" class="memory-create-link">أنشئ صفحة صدقة جارية</a>
+            </div>
+        </div>
+    </main>
+
+    <script src="/memory.js"></script>
+</body>
+
+</html>
