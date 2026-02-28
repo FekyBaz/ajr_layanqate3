@@ -32,7 +32,7 @@ export async function handler(event, context) {
 
         // 2. Cleanup View Events (using the RPC defined in 010 migration)
         const { error: viewEventsError, data: viewEventsCount } = await supabaseAdmin
-            .rpc('cleanup_view_events', { hours_cutoff: 48 }); // Keep 48 hours of view history
+            .rpc('cleanup_view_events', { p_older_than_hours: 48 }); // Keep 48 hours of view history
 
         if (viewEventsError) {
             logger.error('[cleanup-automation] view_events cleanup failed:', viewEventsError.message);
