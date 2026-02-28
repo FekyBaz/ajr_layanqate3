@@ -20,14 +20,11 @@ const badgeLabels = {
     benefit: 'فائدة',
 };
 
-const COMMUNITY_INVITE_SUBMISSION = {
-    id: 'community-invite-12',
-    message: '🤍 أضف ذكرك أنت أيضًا\nشاركنا ذكرًا نافعًا بلطف، ليصل أثره إلى قلوب أكثر.\n\nأضف الآن',
-    corrected_message: null,
-    author_name: 'فريق أجر لا ينقطع',
-    content_type: 'benefit',
-    created_at: '2026-02-27T12:00:00.000Z',
-    post_count: 0,
+const COMMUNITY_INVITE_CARD = {
+    contentType: 'benefit',
+    message: '🤍 أضف ذكرك أنت أيضًا\nشاركنا ذكرًا نافعًا بلطف، ليصل أثره إلى قلوب أكثر.',
+    ctaText: 'أضف الآن',
+    formUrl: '/index.html#form',
 };
 
 const state = {
@@ -283,6 +280,35 @@ function createCard(item, avgPostCount = 0) {
     shareButton.dataset.shareId = String(item.id);
     shareButton.textContent = '📤 شارك هذا الذكر';
     card.appendChild(shareButton);
+
+    return card;
+}
+
+function createInviteCard() {
+    const card = document.createElement('article');
+    card.className = 'submission-card card card-soft card-enter';
+
+    const top = document.createElement('div');
+    top.className = 'submission-card__top';
+
+    const badge = document.createElement('span');
+    badge.className = `content-badge badge-${COMMUNITY_INVITE_CARD.contentType}`;
+    badge.textContent = badgeLabels[COMMUNITY_INVITE_CARD.contentType] || COMMUNITY_INVITE_CARD.contentType;
+    top.appendChild(badge);
+
+    card.appendChild(top);
+
+    const message = document.createElement('p');
+    message.className = 'submission-message';
+    message.textContent = COMMUNITY_INVITE_CARD.message;
+    card.appendChild(message);
+
+    const addButton = document.createElement('a');
+    addButton.className = 'btn btn-primary';
+    addButton.href = COMMUNITY_INVITE_CARD.formUrl;
+    addButton.dataset.inviteAction = 'add-dhikr';
+    addButton.textContent = COMMUNITY_INVITE_CARD.ctaText;
+    card.appendChild(addButton);
 
     return card;
 }
@@ -568,12 +594,20 @@ async function incrementView(submissionId) {
     }
 }
 
-function buildCards(submissions, avgPostCount) {
+function buildCards(submissions, avgPostCount, shouldInjectInvite = false) {
     const fragment = document.createDocumentFragment();
+    const inviteIndex = submissions.length <= 1 ? submissions.length : Math.floor(submissions.length / 2);
 
-    submissions.forEach((item) => {
+    submissions.forEach((item, index) => {
+        if (shouldInjectInvite && index === inviteIndex) {
+            fragment.appendChild(createInviteCard());
+        }
         fragment.appendChild(createCard(item, avgPostCount));
     });
+
+    if (shouldInjectInvite && inviteIndex === submissions.length) {
+        fragment.appendChild(createInviteCard());
+    }
 
     return fragment;
 }
@@ -768,37 +802,19 @@ function cacheSubmissions(submissions = []) {
 
 function renderResponse(result) {
     const { submissions, pagination, stats } = result;
-    const shouldInjectInvite = state.type === 'all' || state.type === COMMUNITY_INVITE_SUBMISSION.content_type;
-    const hasInviteSubmission = Array.isArray(submissions)
-        && submissions.some((item) => normalizeSubmissionId(item.id) === COMMUNITY_INVITE_SUBMISSION.id);
-    const visibleSubmissions = shouldInjectInvite && !hasInviteSubmission
-        ? [COMMUNITY_INVITE_SUBMISSION, ...submissions]
-        : submissions;
-
-    const paginationWithInvite = shouldInjectInvite && !hasInviteSubmission
-        ? {
-            ...pagination,
-            total: (Number(pagination?.total) || 0) + 1,
-        }
-        : pagination;
-
-    const statsWithInvite = shouldInjectInvite && !hasInviteSubmission
-        ? {
-            ...stats,
-            totalApproved: (Number(stats?.totalApproved) || Number(pagination?.total) || 0) + 1,
-        }
-        : stats;
+    const shouldInjectInvite = state.type === 'all' || state.type === COMMUNITY_INVITE_CARD.contentType;
+    const visibleSubmissions = Array.isArray(submissions) ? submissions : [];
 
     const avgPostCount = Number(stats?.averagePostCount) || 0;
-    state.totalPages = Math.max(Number(paginationWithInvite?.totalPages) || 1, 1);
-    state.total = Number(paginationWithInvite?.total) || 0;
-    state.page = Math.min(Math.max(Number(paginationWithInvite?.page) || state.page, 1), state.totalPages);
+    state.totalPages = Math.max(Number(pagination?.totalPages) || 1, 1);
+    state.total = Number(pagination?.total) || 0;
+    state.page = Math.min(Math.max(Number(pagination?.page) || state.page, 1), state.totalPages);
 
     cacheSubmissions(visibleSubmissions);
-    renderStats(statsWithInvite, paginationWithInvite);
+    renderStats(stats, pagination);
     renderGoal(stats?.goal || {});
 
-    if (!visibleSubmissions.length) {
+    if (!visibleSubmissions.length && !shouldInjectInvite) {
         if (state.total === 0) {
             elements.stateMessage.textContent = 'لا توجد مشاركات معتمدة ضمن هذا التصنيف حتى الآن.';
             elements.pagination.hidden = true;
@@ -812,7 +828,7 @@ function renderResponse(result) {
 
     elements.stateMessage.hidden = true;
     elements.submissionsContainer.innerHTML = '';
-    elements.submissionsContainer.appendChild(buildCards(visibleSubmissions, avgPostCount));
+    elements.submissionsContainer.appendChild(buildCards(visibleSubmissions, avgPostCount, shouldInjectInvite));
     setupExpandableCards(elements.submissionsContainer);
     revealHashTargetIfNeeded();
     renderSavedItems();
@@ -869,6 +885,13 @@ elements.nextPage.addEventListener('click', () => {
 elements.communityPage = document.querySelector('.community-page');
 
 elements.communityPage.addEventListener('click', async (event) => {
+    const inviteButton = event.target.closest('[data-invite-action="add-dhikr"]');
+    if (inviteButton) {
+        event.preventDefault();
+        window.location.href = COMMUNITY_INVITE_CARD.formUrl;
+        return;
+    }
+
     const saveButton = event.target.closest('[data-save-id]');
     if (saveButton) {
         event.preventDefault();
