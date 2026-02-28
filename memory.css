@@ -45,6 +45,60 @@
     user-select: none;
 }
 
+/* ── Badges ─────────────────────────────────────────────────────────── */
+.memory-badges {
+    display: flex;
+    gap: var(--space-sm);
+    justify-content: center;
+    margin-bottom: var(--space-md);
+    flex-wrap: wrap;
+}
+
+.memory-active-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+    background: rgba(39, 174, 96, 0.12);
+    color: var(--color-success);
+    padding: 4px 12px;
+    border-radius: 999px;
+    font-size: var(--font-size-xs);
+    font-weight: 600;
+}
+
+.memory-active-badge::before {
+    content: '';
+    display: inline-block;
+    width: 6px;
+    height: 6px;
+    border-radius: 50%;
+    background: var(--color-success);
+    animation: pulse-dot 2s ease-in-out infinite;
+}
+
+@keyframes pulse-dot {
+
+    0%,
+    100% {
+        opacity: 1;
+    }
+
+    50% {
+        opacity: 0.3;
+    }
+}
+
+.memory-approved-badge {
+    display: inline-flex;
+    align-items: center;
+    background: var(--color-accent-light);
+    color: var(--color-accent);
+    padding: 4px 12px;
+    border-radius: 999px;
+    font-size: var(--font-size-xs);
+    font-weight: 500;
+}
+
 /* ── Labels ────────────────────────────────────────────────────────────── */
 .memory-label {
     font-size: var(--font-size-sm);
@@ -183,6 +237,14 @@
     font-size: var(--font-size-xs);
     color: var(--color-text-secondary);
     font-weight: 500;
+}
+
+.memory-btn__count {
+    font-size: 0.7rem;
+    color: var(--color-text-muted);
+    font-family: var(--font-display);
+    font-weight: 600;
+    opacity: 0.7;
 }
 
 /* Ripple animation on click */

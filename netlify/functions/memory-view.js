@@ -36,7 +36,7 @@ export async function handler(event, context) {
         // Use public client — RLS enforces status = 'Approved'
         const { data: memory, error: queryError } = await supabasePublic
             .from('memories')
-            .select('id, slug, deceased_name, relation, message, total_interactions, created_at, last_activity_at')
+            .select('id, slug, deceased_name, relation, message, total_interactions, tasbeeh_count, dua_count, share_count, created_at, approved_at, last_activity_at')
             .eq('slug', slug)
             .maybeSingle();
 
@@ -48,6 +48,11 @@ export async function handler(event, context) {
         if (!memory) {
             return error(404, 'الصفحة غير موجودة أو قيد المراجعة', origin);
         }
+
+        // Compute activity status (active = interaction within last 7 days)
+        const SEVEN_DAYS_MS = 7 * 24 * 60 * 60 * 1000;
+        memory.is_active = !!(memory.last_activity_at &&
+            (Date.now() - new Date(memory.last_activity_at).getTime()) < SEVEN_DAYS_MS);
 
         return success({
             memory,
