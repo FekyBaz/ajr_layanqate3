@@ -49,39 +49,18 @@ async function getStatsSnapshot() {
         };
     }
 
-    const { data: aggregateRows, error: aggregateError, count } = await supabasePublic
-        .from('submissions')
-        .select('post_count', { count: 'exact' })
-        .in('status', VISIBLE_STATUSES);
+    // Fallback uses the background RPC to quickly build the stats without OOMing the node lambda
+    const { data: rpcData, error: rpcError } = await supabaseAdmin.rpc('refresh_community_stats');
 
-    if (aggregateError) {
-        throw aggregateError;
-    }
-
-    const totalPostCount = (aggregateRows || []).reduce((sum, row) => sum + (Number(row.post_count) || 0), 0);
-    const totalApproved = count || 0;
-    const averagePostCount = totalApproved ? totalPostCount / totalApproved : 0;
-
-    // Fallback write uses admin client (needs write access to community_stats)
-    const { error: writeStatsError } = await supabaseAdmin
-        .from('community_stats')
-        .upsert({
-            id: 1,
-            total_approved: totalApproved,
-            total_post_count: totalPostCount,
-            average_post_count: averagePostCount,
-            updated_at: new Date().toISOString(),
-        });
-
-    if (writeStatsError) {
-        logger.error('Community stats fallback write error:', writeStatsError.message);
+    if (rpcError) {
+        throw rpcError;
     }
 
     return {
         stats: {
-            totalApproved,
-            totalPostCount,
-            averagePostCount,
+            totalApproved: Number(rpcData.total_approved) || 0,
+            totalPostCount: Number(rpcData.total_post_count) || 0,
+            averagePostCount: Number(rpcData.average_post_count) || 0,
             updatedAt: new Date().toISOString(),
         },
         source: 'fallback',
@@ -149,10 +128,10 @@ export async function handler(event) {
             sortBy,
         });
 
-        // Count query — uses public client (respects RLS)
+        // Count query — uses estimated count for large tables to prevent DoS via full-table scans
         let countQuery = supabasePublic
             .from('submissions')
-            .select('id', { count: 'exact', head: true })
+            .select('id', { count: 'estimated', head: true })
             .in('status', VISIBLE_STATUSES);
 
         if (contentType !== 'all') {
