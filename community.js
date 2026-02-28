@@ -1,6 +1,5 @@
 const API_ENDPOINT = '/.netlify/functions/community-submissions';
 const VIEW_ENDPOINT = '/.netlify/functions/community-submission-view';
-const CTA_INTERVAL = 5;
 const REF_ALLOWLIST = ['instagram', 'facebook', 'direct', 'telegram', 'whatsapp_share', 'telegram_share', 'x_share'];
 const VIEW_DEBOUNCE_MS = 60_000;
 const SHARE_TRACK_ENDPOINT = '/.netlify/functions/community-share-track';
@@ -21,11 +20,18 @@ const badgeLabels = {
     benefit: 'فائدة',
 };
 
+const COMMUNITY_INVITE_CARD = {
+    contentType: 'benefit',
+    message: '🤍 أضف ذكرك أنت أيضًا\nشاركنا ذكرًا نافعًا بلطف، ليصل أثره إلى قلوب أكثر.',
+    ctaText: 'أضف الآن',
+    formUrl: '/index.html#form',
+};
+
 const state = {
     type: 'all',
     sort: 'latest',
     page: 1,
-    limit: 10,
+    limit: 12,
     totalPages: 1,
     total: 0,
     refSource: 'direct',
@@ -33,6 +39,15 @@ const state = {
     submissionsById: new Map(),
     savedIds: new Set(),
     focusMode: false,
+    stats: {
+        totalPostCount: 0,
+        totalApproved: 0,
+    },
+    goal: {
+        dailyTarget: 1,
+        currentProgress: 0,
+        hint: '',
+    },
     hashTargetSubmissionId: null,
     hasHandledHashTarget: false,
 };
@@ -221,34 +236,11 @@ function createCardTop(item, avgPostCount) {
 
     const isSaved = submissionId ? state.savedIds.has(submissionId) : false;
     saveButton.setAttribute('aria-pressed', isSaved ? 'true' : 'false');
-    saveButton.textContent = isSaved ? 'محفوظ' : 'احفظ هذا الذكر';
+    saveButton.setAttribute('aria-label', isSaved ? 'إزالة من المفضلة' : 'إضافة إلى المفضلة');
+    saveButton.textContent = isSaved ? '♥' : '♡';
     top.appendChild(saveButton);
 
     return top;
-}
-
-function renderCtaCard() {
-    const cta = document.createElement('aside');
-    cta.className = 'community-cta card card-elevated card-enter';
-    cta.setAttribute('aria-label', 'دعوة للمشاركة');
-
-    const title = document.createElement('h3');
-    title.className = 'community-cta__title';
-    title.textContent = '🤍 أضف ذكرك أنت أيضًا';
-    cta.appendChild(title);
-
-    const microcopy = document.createElement('p');
-    microcopy.className = 'community-cta__microcopy';
-    microcopy.textContent = 'شاركنا ذكرًا نافعًا بلطف، ليصل أثره إلى قلوب أكثر.';
-    cta.appendChild(microcopy);
-
-    const link = document.createElement('a');
-    link.href = '/index.html#form';
-    link.className = 'btn btn-primary';
-    link.textContent = 'أضف الآن';
-    cta.appendChild(link);
-
-    return cta;
 }
 
 function createCard(item, avgPostCount = 0) {
@@ -274,12 +266,11 @@ function createCard(item, avgPostCount = 0) {
     timestamp.textContent = formatDate(item.created_at);
     meta.appendChild(timestamp);
 
-    if (item.post_count > 0) {
-        const shares = document.createElement('p');
-        shares.className = 'shares';
-        shares.textContent = `🕊 تمت المشاركة ${formatNumber(item.post_count)} مرة`;
-        meta.appendChild(shares);
-    }
+    const shares = document.createElement('p');
+    shares.className = 'shares';
+    shares.dataset.shareCountId = String(item.id);
+    shares.textContent = `🕊 تمت المشاركة ${formatNumber(item.post_count)} مرة`;
+    meta.appendChild(shares);
 
     card.appendChild(meta);
 
@@ -289,6 +280,35 @@ function createCard(item, avgPostCount = 0) {
     shareButton.dataset.shareId = String(item.id);
     shareButton.textContent = '📤 شارك هذا الذكر';
     card.appendChild(shareButton);
+
+    return card;
+}
+
+function createInviteCard() {
+    const card = document.createElement('article');
+    card.className = 'submission-card card card-soft card-enter';
+
+    const top = document.createElement('div');
+    top.className = 'submission-card__top';
+
+    const badge = document.createElement('span');
+    badge.className = `content-badge badge-${COMMUNITY_INVITE_CARD.contentType}`;
+    badge.textContent = badgeLabels[COMMUNITY_INVITE_CARD.contentType] || COMMUNITY_INVITE_CARD.contentType;
+    top.appendChild(badge);
+
+    card.appendChild(top);
+
+    const message = document.createElement('p');
+    message.className = 'submission-message';
+    message.textContent = COMMUNITY_INVITE_CARD.message;
+    card.appendChild(message);
+
+    const addButton = document.createElement('a');
+    addButton.className = 'btn btn-primary';
+    addButton.href = COMMUNITY_INVITE_CARD.formUrl;
+    addButton.dataset.inviteAction = 'add-dhikr';
+    addButton.textContent = COMMUNITY_INVITE_CARD.ctaText;
+    card.appendChild(addButton);
 
     return card;
 }
@@ -477,16 +497,41 @@ async function copyToClipboard(text) {
 
 async function trackShare(platform, submissionId) {
     try {
-        await fetch(SHARE_TRACK_ENDPOINT, {
+        const response = await fetch(SHARE_TRACK_ENDPOINT, {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json',
             },
             body: JSON.stringify({ platform, submissionId }),
         });
+
+        if (!response.ok) return false;
+        const result = await response.json();
+        return result?.tracked === true;
     } catch {
         // lightweight tracking only
+        return false;
     }
+}
+
+function incrementLocalShareMetrics(submissionId) {
+    const normalizedId = normalizeSubmissionId(submissionId);
+    if (!normalizedId) return;
+
+    const item = state.submissionsById.get(normalizedId);
+    if (!item) return;
+
+    item.post_count = Math.max(Number(item.post_count) || 0, 0) + 1;
+
+    document.querySelectorAll(`[data-share-count-id="${CSS.escape(normalizedId)}"]`).forEach((element) => {
+        element.textContent = `🕊 تمت المشاركة ${formatNumber(item.post_count)} مرة`;
+    });
+
+    state.stats.totalPostCount = Math.max(Number(state.stats.totalPostCount) || 0, 0) + 1;
+    elements.totalSharesCount.textContent = `📿 ${formatNumber(state.stats.totalPostCount)} مرة تم نشر الأذكار`;
+
+    state.goal.currentProgress = Math.max(Number(state.goal.currentProgress) || 0, 0) + 1;
+    renderGoal(state.goal);
 }
 
 async function shareSubmission(item) {
@@ -496,18 +541,27 @@ async function shareSubmission(item) {
     try {
         if (navigator.share) {
             await navigator.share({ text: shareText, url: getShareTargetUrl(preferredPlatform) });
-            await trackShare('native', item.id);
+            const tracked = await trackShare('native', item.id);
+            if (tracked) {
+                incrementLocalShareMetrics(item.id);
+            }
             return;
         }
 
         await copyToClipboard(shareText);
-        await trackShare(preferredPlatform, item.id);
+        const tracked = await trackShare(preferredPlatform, item.id);
+        if (tracked) {
+            incrementLocalShareMetrics(item.id);
+        }
         showToast();
     } catch (err) {
         if (err?.name !== 'AbortError') {
             try {
                 await copyToClipboard(shareText);
-                await trackShare(preferredPlatform, item.id);
+                const tracked = await trackShare(preferredPlatform, item.id);
+                if (tracked) {
+                    incrementLocalShareMetrics(item.id);
+                }
                 showToast();
             } catch (copyErr) {
                 console.error('[community] Share failed after fallback', { err, copyErr, submissionId: item?.id });
@@ -540,16 +594,20 @@ async function incrementView(submissionId) {
     }
 }
 
-function buildCards(submissions, avgPostCount) {
+function buildCards(submissions, avgPostCount, shouldInjectInvite = false) {
     const fragment = document.createDocumentFragment();
+    const inviteIndex = submissions.length <= 1 ? submissions.length : Math.floor(submissions.length / 2);
 
     submissions.forEach((item, index) => {
-        fragment.appendChild(createCard(item, avgPostCount));
-
-        if ((index + 1) % CTA_INTERVAL === 0 && index !== submissions.length - 1) {
-            fragment.appendChild(renderCtaCard());
+        if (shouldInjectInvite && index === inviteIndex) {
+            fragment.appendChild(createInviteCard());
         }
+        fragment.appendChild(createCard(item, avgPostCount));
     });
+
+    if (shouldInjectInvite && inviteIndex === submissions.length) {
+        fragment.appendChild(createInviteCard());
+    }
 
     return fragment;
 }
@@ -597,7 +655,8 @@ function syncSaveButtons() {
         if (!submissionId) return;
         const isSaved = state.savedIds.has(submissionId);
         button.setAttribute('aria-pressed', isSaved ? 'true' : 'false');
-        button.textContent = isSaved ? 'محفوظ' : 'احفظ هذا الذكر';
+        button.setAttribute('aria-label', isSaved ? 'إزالة من المفضلة' : 'إضافة إلى المفضلة');
+        button.textContent = isSaved ? '♥' : '♡';
     });
 }
 
@@ -704,11 +763,17 @@ function renderGoal(goal = {}) {
     const currentProgress = Math.max(Number(goal.currentProgress) || 0, 0);
     const percent = Math.min(Math.round((currentProgress / dailyTarget) * 100), 100);
 
+    state.goal = {
+        dailyTarget,
+        currentProgress,
+        hint: goal.hint || 'هدف اليوم يتجدد كل صباح ✨',
+    };
+
     elements.goalTarget.textContent = `🎯 هدف اليوم: ${formatNumber(dailyTarget)} ذكر`;
     elements.goalProgress.textContent = `تم تحقيق: ${formatNumber(currentProgress)}`;
     elements.goalBarFill.style.width = `${percent}%`;
     if (elements.goalHint) {
-        elements.goalHint.textContent = goal.hint || 'هدف اليوم يتجدد كل صباح ✨';
+        elements.goalHint.textContent = state.goal.hint;
     }
     elements.goalSection.querySelector('.community-goal__bar')?.setAttribute('aria-valuenow', String(percent));
     elements.goalSection.hidden = false;
@@ -717,6 +782,9 @@ function renderGoal(goal = {}) {
 function renderStats(stats = {}, pagination = {}) {
     const totalApproved = stats.totalApproved || pagination.total || 0;
     const totalShares = stats.totalPostCount || 0;
+
+    state.stats.totalApproved = totalApproved;
+    state.stats.totalPostCount = totalShares;
 
     elements.approvedCount.textContent = `${formatNumber(totalApproved)} مشاركة معتمدة`;
     elements.totalSharesCount.textContent = `📿 ${formatNumber(totalShares)} مرة تم نشر الأذكار`;
@@ -734,16 +802,19 @@ function cacheSubmissions(submissions = []) {
 
 function renderResponse(result) {
     const { submissions, pagination, stats } = result;
+    const shouldInjectInvite = state.type === 'all' || state.type === COMMUNITY_INVITE_CARD.contentType;
+    const visibleSubmissions = Array.isArray(submissions) ? submissions : [];
+
     const avgPostCount = Number(stats?.averagePostCount) || 0;
     state.totalPages = Math.max(Number(pagination?.totalPages) || 1, 1);
     state.total = Number(pagination?.total) || 0;
     state.page = Math.min(Math.max(Number(pagination?.page) || state.page, 1), state.totalPages);
 
-    cacheSubmissions(submissions);
+    cacheSubmissions(visibleSubmissions);
     renderStats(stats, pagination);
     renderGoal(stats?.goal || {});
 
-    if (!submissions.length) {
+    if (!visibleSubmissions.length && !shouldInjectInvite) {
         if (state.total === 0) {
             elements.stateMessage.textContent = 'لا توجد مشاركات معتمدة ضمن هذا التصنيف حتى الآن.';
             elements.pagination.hidden = true;
@@ -757,7 +828,7 @@ function renderResponse(result) {
 
     elements.stateMessage.hidden = true;
     elements.submissionsContainer.innerHTML = '';
-    elements.submissionsContainer.appendChild(buildCards(submissions, avgPostCount));
+    elements.submissionsContainer.appendChild(buildCards(visibleSubmissions, avgPostCount, shouldInjectInvite));
     setupExpandableCards(elements.submissionsContainer);
     revealHashTargetIfNeeded();
     renderSavedItems();
@@ -814,6 +885,13 @@ elements.nextPage.addEventListener('click', () => {
 elements.communityPage = document.querySelector('.community-page');
 
 elements.communityPage.addEventListener('click', async (event) => {
+    const inviteButton = event.target.closest('[data-invite-action="add-dhikr"]');
+    if (inviteButton) {
+        event.preventDefault();
+        window.location.href = COMMUNITY_INVITE_CARD.formUrl;
+        return;
+    }
+
     const saveButton = event.target.closest('[data-save-id]');
     if (saveButton) {
         event.preventDefault();
