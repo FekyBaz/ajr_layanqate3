@@ -1281,6 +1281,11 @@ p {
     align-items: center;
 }
 
+.community-page .community-nav {
+    width: 100%;
+    text-align: left;
+}
+
 .community-page .community-header__intro {
     display: grid;
     gap: 0.75rem;
