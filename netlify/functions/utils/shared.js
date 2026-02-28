@@ -205,7 +205,7 @@ export async function validateAdminWithRateLimit(event) {
         // Uses the composite index (ip_hash, created_at)
         const { count, error: countError } = await supabaseAdmin
             .from('rate_limits')
-            .select('*', { count: 'exact', head: true })
+            .select('id', { head: true })
             .eq('ip_hash', ipHash)
             .gte('created_at', windowStart.toISOString());
 
@@ -326,7 +326,7 @@ export async function checkRateLimit(ip) {
     try {
         const { count, error: countError } = await supabaseAdmin
             .from('rate_limits')
-            .select('*', { count: 'exact', head: true })
+            .select('id', { head: true })
             .eq('ip_hash', ipHash)
             .gte('created_at', windowStart.toISOString());
 
