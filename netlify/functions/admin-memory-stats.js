@@ -1,7 +1,7 @@
 /**
  * ═══════════════════════════════════════════════════════════════════════════
- * GET /.netlify/functions/admin-stats
- * Returns submission statistics
+ * GET /.netlify/functions/admin-memory-stats
+ * Returns aggregated statistics for memorial pages
  * ═══════════════════════════════════════════════════════════════════════════
  */
 
@@ -11,7 +11,6 @@ import {
     error,
     handleOptions,
     validateAdminWithRateLimit,
-    STATUS,
     logger,
 } from './utils/shared.js';
 
@@ -38,24 +37,20 @@ export async function handler(event, context) {
     }
 
     try {
-        // Use the aggregation RPC defined in 014 migration
-        // Replaces 3 separate expensive count:'exact' queries
-        const { data: stats, error: rpcError } = await supabaseAdmin.rpc('get_submission_stats');
+        // Call the aggregation RPC defined in 014 migration
+        const { data: stats, error: rpcError } = await supabaseAdmin.rpc('get_memory_stats');
 
         if (rpcError) {
-            logger.error('admin-stats RPC error:', rpcError.message);
+            logger.error('admin-memory-stats RPC error:', rpcError.message);
             return error(500, 'حدث خطأ في جلب الإحصائيات', origin);
         }
 
         return success({
-            stats: {
-                pending: stats.pending || 0,
-                approved: stats.approved || 0,
-                rejected: stats.rejected || 0,
-            },
+            stats,
         }, origin);
 
     } catch (err) {
-        return error(500, 'حدث خطأ. يرجى المحاولة لاحقًا.', origin, err.message);
+        logger.error('admin-memory-stats unexpected error:', err.message);
+        return error(500, 'حدث خطأ. يرجى المحاولة لاحقًا.', origin);
     }
 }
