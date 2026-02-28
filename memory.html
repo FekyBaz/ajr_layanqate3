@@ -35,6 +35,11 @@
         <div class="memory-card hidden" id="memory-card">
             <div class="memory-ornament" aria-hidden="true">﷽</div>
 
+            <div class="memory-badges">
+                <span class="memory-active-badge hidden" id="memory-active-badge">نشطة</span>
+                <span class="memory-approved-badge hidden" id="memory-approved-badge"></span>
+            </div>
+
             <div class="memory-label">صدقة جارية على روح</div>
             <h1 class="memory-name" id="memory-name"></h1>
 
@@ -57,14 +62,17 @@
                 <button class="memory-btn" id="btn-tasbeeh" data-type="tasbeeh" type="button">
                     <span class="memory-btn__icon" aria-hidden="true">📿</span>
                     <span class="memory-btn__label">تسبيح</span>
+                    <span class="memory-btn__count" id="count-tasbeeh">0</span>
                 </button>
                 <button class="memory-btn" id="btn-dua" data-type="dua" type="button">
                     <span class="memory-btn__icon" aria-hidden="true">🤲</span>
                     <span class="memory-btn__label">دعاء</span>
+                    <span class="memory-btn__count" id="count-dua">0</span>
                 </button>
                 <button class="memory-btn" id="btn-share" data-type="share" type="button">
                     <span class="memory-btn__icon" aria-hidden="true">🔗</span>
                     <span class="memory-btn__label">مشاركة</span>
+                    <span class="memory-btn__count" id="count-share">0</span>
                 </button>
             </div>
 
