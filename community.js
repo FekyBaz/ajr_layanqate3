@@ -20,6 +20,16 @@ const badgeLabels = {
     benefit: 'فائدة',
 };
 
+const COMMUNITY_INVITE_SUBMISSION = {
+    id: 'community-invite-12',
+    message: '🤍 أضف ذكرك أنت أيضًا\nشاركنا ذكرًا نافعًا بلطف، ليصل أثره إلى قلوب أكثر.\n\nأضف الآن',
+    corrected_message: null,
+    author_name: 'فريق أجر لا ينقطع',
+    content_type: 'benefit',
+    created_at: '2026-02-27T12:00:00.000Z',
+    post_count: 0,
+};
+
 const state = {
     type: 'all',
     sort: 'latest',
@@ -758,16 +768,37 @@ function cacheSubmissions(submissions = []) {
 
 function renderResponse(result) {
     const { submissions, pagination, stats } = result;
-    const avgPostCount = Number(stats?.averagePostCount) || 0;
-    state.totalPages = Math.max(Number(pagination?.totalPages) || 1, 1);
-    state.total = Number(pagination?.total) || 0;
-    state.page = Math.min(Math.max(Number(pagination?.page) || state.page, 1), state.totalPages);
+    const shouldInjectInvite = state.type === 'all' || state.type === COMMUNITY_INVITE_SUBMISSION.content_type;
+    const hasInviteSubmission = Array.isArray(submissions)
+        && submissions.some((item) => normalizeSubmissionId(item.id) === COMMUNITY_INVITE_SUBMISSION.id);
+    const visibleSubmissions = shouldInjectInvite && !hasInviteSubmission
+        ? [COMMUNITY_INVITE_SUBMISSION, ...submissions]
+        : submissions;
 
-    cacheSubmissions(submissions);
-    renderStats(stats, pagination);
+    const paginationWithInvite = shouldInjectInvite && !hasInviteSubmission
+        ? {
+            ...pagination,
+            total: (Number(pagination?.total) || 0) + 1,
+        }
+        : pagination;
+
+    const statsWithInvite = shouldInjectInvite && !hasInviteSubmission
+        ? {
+            ...stats,
+            totalApproved: (Number(stats?.totalApproved) || Number(pagination?.total) || 0) + 1,
+        }
+        : stats;
+
+    const avgPostCount = Number(stats?.averagePostCount) || 0;
+    state.totalPages = Math.max(Number(paginationWithInvite?.totalPages) || 1, 1);
+    state.total = Number(paginationWithInvite?.total) || 0;
+    state.page = Math.min(Math.max(Number(paginationWithInvite?.page) || state.page, 1), state.totalPages);
+
+    cacheSubmissions(visibleSubmissions);
+    renderStats(statsWithInvite, paginationWithInvite);
     renderGoal(stats?.goal || {});
 
-    if (!submissions.length) {
+    if (!visibleSubmissions.length) {
         if (state.total === 0) {
             elements.stateMessage.textContent = 'لا توجد مشاركات معتمدة ضمن هذا التصنيف حتى الآن.';
             elements.pagination.hidden = true;
@@ -781,7 +812,7 @@ function renderResponse(result) {
 
     elements.stateMessage.hidden = true;
     elements.submissionsContainer.innerHTML = '';
-    elements.submissionsContainer.appendChild(buildCards(submissions, avgPostCount));
+    elements.submissionsContainer.appendChild(buildCards(visibleSubmissions, avgPostCount));
     setupExpandableCards(elements.submissionsContainer);
     revealHashTargetIfNeeded();
     renderSavedItems();
