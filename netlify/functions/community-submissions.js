@@ -5,11 +5,12 @@ import { getDailyFeatureWithSubmission } from './utils/daily-feature.js';
 const VALID_TYPES = ['all', 'dhikr', 'dua', 'ayah', 'hadith', 'benefit'];
 const VALID_SORT = ['latest', 'most_shared'];
 const VALID_REF_SOURCES = ['instagram', 'facebook', 'direct', 'telegram', 'whatsapp_share', 'telegram_share', 'x_share'];
-const DEFAULT_PAGE_SIZE = 10;
+const DEFAULT_PAGE_SIZE = 11;
 const HOMEPAGE_PREVIEW_SIZE = 3;
 const MAX_PAGE_SIZE = 20;
 const VALID_SURFACES = ['community', 'homepage_preview'];
 const RESPONSE_CACHE_CONTROL = 'public, max-age=45, s-maxage=45, stale-while-revalidate=60';
+const COMMUNITY_CACHE_CONTROL = 'no-store';
 
 function parsePositiveInt(value, fallback) {
     const parsed = Number.parseInt(value, 10);
@@ -279,8 +280,10 @@ export async function handler(event) {
             sort: sortBy,
         });
 
+        const cacheControl = surface === 'community' ? COMMUNITY_CACHE_CONTROL : RESPONSE_CACHE_CONTROL;
+
         return success(payload, origin, {
-            'Cache-Control': RESPONSE_CACHE_CONTROL,
+            'Cache-Control': cacheControl,
         });
     } catch (err) {
         logger.error('Community submissions handler error:', err.message);
