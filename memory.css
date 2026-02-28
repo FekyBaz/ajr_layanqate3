@@ -1,0 +1,438 @@
+/* ═══════════════════════════════════════════════════════════════════════════
+   أجر لا ينقطع - Memory Page Styles
+   صدقة جارية على روح متوفى
+   ═══════════════════════════════════════════════════════════════════════════ */
+
+/* ── Memorial Card ─────────────────────────────────────────────────────── */
+.memory-page {
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    padding: var(--space-xl) var(--space-lg);
+}
+
+.memory-card {
+    width: 100%;
+    max-width: 560px;
+    background: var(--color-surface);
+    border-radius: var(--radius-lg);
+    box-shadow: var(--shadow-soft);
+    border: 1px solid var(--color-border);
+    padding: var(--space-3xl) var(--space-xl);
+    text-align: center;
+    position: relative;
+    overflow: hidden;
+}
+
+.memory-card::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: 6px;
+    background: linear-gradient(to left, var(--color-accent), var(--color-gold), var(--color-accent));
+}
+
+/* ── Islamic Ornament ──────────────────────────────────────────────────── */
+.memory-ornament {
+    font-size: 2rem;
+    color: var(--color-gold);
+    margin-bottom: var(--space-md);
+    opacity: 0.7;
+    user-select: none;
+}
+
+/* ── Labels ────────────────────────────────────────────────────────────── */
+.memory-label {
+    font-size: var(--font-size-sm);
+    color: var(--color-text-muted);
+    margin-bottom: var(--space-xs);
+    font-weight: 500;
+}
+
+/* ── Deceased Name ─────────────────────────────────────────────────────── */
+.memory-name {
+    font-family: var(--font-display);
+    font-size: var(--font-size-2xl);
+    font-weight: 700;
+    color: var(--color-text-primary);
+    margin-bottom: var(--space-xs);
+    line-height: var(--line-height-tight);
+}
+
+/* ── Relation ──────────────────────────────────────────────────────────── */
+.memory-relation {
+    font-size: var(--font-size-sm);
+    color: var(--color-text-secondary);
+    margin-bottom: var(--space-lg);
+    display: none;
+}
+
+.memory-relation.visible {
+    display: block;
+}
+
+/* ── Separator ─────────────────────────────────────────────────────────── */
+.memory-separator {
+    width: 80px;
+    height: 2px;
+    background: linear-gradient(to left, transparent, var(--color-gold), transparent);
+    margin: 0 auto var(--space-lg);
+    border: none;
+}
+
+/* ── Message ───────────────────────────────────────────────────────────── */
+.memory-message {
+    font-size: var(--font-size-md);
+    color: var(--color-text-secondary);
+    line-height: var(--line-height-relaxed);
+    margin-bottom: var(--space-xl);
+    white-space: pre-wrap;
+    word-break: break-word;
+}
+
+/* ── Interaction Counter ───────────────────────────────────────────────── */
+.memory-counter-section {
+    margin-bottom: var(--space-xl);
+}
+
+.memory-counter {
+    display: inline-flex;
+    align-items: center;
+    gap: var(--space-sm);
+    background: var(--color-accent-light);
+    padding: var(--space-sm) var(--space-lg);
+    border-radius: 999px;
+    font-size: var(--font-size-sm);
+    color: var(--color-accent);
+    font-weight: 600;
+}
+
+.memory-counter-value {
+    font-family: var(--font-display);
+    font-size: var(--font-size-lg);
+    font-weight: 700;
+    transition: transform var(--transition-fast);
+}
+
+.memory-counter-value.bumped {
+    transform: scale(1.3);
+}
+
+.memory-counter-label {
+    font-size: var(--font-size-xs);
+    color: var(--color-text-muted);
+}
+
+/* ── Interaction Buttons ───────────────────────────────────────────────── */
+.memory-actions {
+    display: flex;
+    gap: var(--space-md);
+    justify-content: center;
+    flex-wrap: wrap;
+    margin-bottom: var(--space-xl);
+}
+
+.memory-btn {
+    display: inline-flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 6px;
+    padding: var(--space-md) var(--space-lg);
+    min-width: 110px;
+    background: var(--color-surface);
+    border: 1px solid var(--color-border);
+    border-radius: var(--radius-md);
+    cursor: pointer;
+    font-family: var(--font-primary);
+    font-size: var(--font-size-sm);
+    color: var(--color-text-primary);
+    transition: all var(--transition-normal);
+    user-select: none;
+    -webkit-tap-highlight-color: transparent;
+    position: relative;
+    overflow: hidden;
+}
+
+.memory-btn:hover {
+    background: var(--color-accent-light);
+    border-color: var(--color-accent);
+    transform: translateY(-2px);
+    box-shadow: 0 6px 18px rgba(140, 106, 53, 0.12);
+}
+
+.memory-btn:active {
+    transform: translateY(0);
+    box-shadow: none;
+}
+
+.memory-btn.cooldown {
+    opacity: 0.6;
+    pointer-events: none;
+}
+
+.memory-btn__icon {
+    font-size: 1.6rem;
+    line-height: 1;
+}
+
+.memory-btn__label {
+    font-size: var(--font-size-xs);
+    color: var(--color-text-secondary);
+    font-weight: 500;
+}
+
+/* Ripple animation on click */
+.memory-btn .ripple {
+    position: absolute;
+    border-radius: 50%;
+    background: rgba(140, 106, 53, 0.2);
+    transform: scale(0);
+    animation: rippleEffect 0.5s ease-out;
+    pointer-events: none;
+}
+
+@keyframes rippleEffect {
+    to {
+        transform: scale(3);
+        opacity: 0;
+    }
+}
+
+/* ── Footer Link ───────────────────────────────────────────────────────── */
+.memory-footer {
+    padding-top: var(--space-lg);
+    border-top: 1px solid var(--color-muted);
+}
+
+.memory-footer-link {
+    font-size: var(--font-size-xs);
+    color: var(--color-text-muted);
+    text-decoration: none;
+    transition: color var(--transition-fast);
+}
+
+.memory-footer-link:hover {
+    color: var(--color-accent);
+}
+
+.memory-create-link {
+    display: inline-block;
+    margin-top: var(--space-md);
+    font-size: var(--font-size-sm);
+    color: var(--color-accent);
+    text-decoration: none;
+    font-weight: 600;
+    transition: opacity var(--transition-fast);
+}
+
+.memory-create-link:hover {
+    opacity: 0.8;
+}
+
+/* ── Loading / Error States ────────────────────────────────────────────── */
+.memory-loading,
+.memory-error,
+.memory-pending {
+    text-align: center;
+    padding: var(--space-3xl) var(--space-lg);
+    color: var(--color-text-secondary);
+}
+
+.memory-loading .spinner {
+    display: inline-block;
+    width: 32px;
+    height: 32px;
+    border: 3px solid var(--color-muted);
+    border-top-color: var(--color-accent);
+    border-radius: 50%;
+    animation: spin 0.8s linear infinite;
+    margin-bottom: var(--space-md);
+}
+
+@keyframes spin {
+    to {
+        transform: rotate(360deg);
+    }
+}
+
+.memory-error {
+    color: var(--color-error);
+}
+
+/* ── Create Memory Form ────────────────────────────────────────────────── */
+.create-memory-page {
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    padding: var(--space-3xl) var(--space-lg);
+}
+
+.create-memory-form-card {
+    width: 100%;
+    max-width: 520px;
+    background: var(--color-surface);
+    border-radius: var(--radius-lg);
+    box-shadow: var(--shadow-soft);
+    border: 1px solid var(--color-border);
+    padding: var(--space-xl);
+}
+
+.create-memory-title {
+    font-family: var(--font-display);
+    font-size: var(--font-size-lg);
+    text-align: center;
+    margin-bottom: var(--space-lg);
+    color: var(--color-text-primary);
+}
+
+.form-group {
+    margin-bottom: var(--space-lg);
+}
+
+.form-group label {
+    display: block;
+    font-size: var(--font-size-sm);
+    font-weight: 600;
+    color: var(--color-text-primary);
+    margin-bottom: var(--space-xs);
+}
+
+.form-group input,
+.form-group textarea {
+    width: 100%;
+    padding: 12px 14px;
+    font-family: var(--font-primary);
+    font-size: var(--font-size-md);
+    color: var(--color-text-primary);
+    background: #fff;
+    border: 1px solid var(--color-border);
+    border-radius: var(--radius-sm);
+    transition: border-color var(--transition-fast);
+    direction: rtl;
+}
+
+.form-group input:focus,
+.form-group textarea:focus {
+    outline: none;
+    border-color: var(--color-border-focus);
+    box-shadow: 0 0 0 3px var(--color-accent-light);
+}
+
+.form-group textarea {
+    min-height: 120px;
+    resize: vertical;
+    line-height: var(--line-height-relaxed);
+}
+
+.form-group .char-count {
+    font-size: var(--font-size-xs);
+    color: var(--color-text-muted);
+    text-align: left;
+    margin-top: 4px;
+}
+
+.form-group .char-count.over-limit {
+    color: var(--color-error);
+    font-weight: 600;
+}
+
+.form-group .field-error {
+    font-size: var(--font-size-xs);
+    color: var(--color-error);
+    margin-top: 4px;
+    display: none;
+}
+
+.form-group .field-error.visible {
+    display: block;
+}
+
+.form-hint {
+    font-size: var(--font-size-xs);
+    color: var(--color-text-muted);
+    margin-top: 2px;
+}
+
+.create-memory-submit {
+    width: 100%;
+    padding: 14px;
+    font-family: var(--font-primary);
+    font-size: var(--font-size-md);
+    font-weight: 600;
+    background: var(--color-accent);
+    color: white;
+    border: none;
+    border-radius: 999px;
+    cursor: pointer;
+    transition: all var(--transition-normal);
+}
+
+.create-memory-submit:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 8px 20px rgba(140, 106, 53, 0.2);
+}
+
+.create-memory-submit:disabled {
+    opacity: 0.5;
+    pointer-events: none;
+    transform: none;
+    box-shadow: none;
+}
+
+.form-status {
+    text-align: center;
+    margin-top: var(--space-md);
+    font-size: var(--font-size-sm);
+    padding: var(--space-sm) var(--space-md);
+    border-radius: var(--radius-sm);
+    display: none;
+}
+
+.form-status.success {
+    display: block;
+    background: rgba(39, 174, 96, 0.1);
+    color: var(--color-success);
+}
+
+.form-status.error {
+    display: block;
+    background: rgba(192, 57, 43, 0.1);
+    color: var(--color-error);
+}
+
+.back-link {
+    display: inline-block;
+    margin-top: var(--space-xl);
+    font-size: var(--font-size-sm);
+    color: var(--color-text-muted);
+    text-decoration: none;
+}
+
+.back-link:hover {
+    color: var(--color-accent);
+}
+
+/* ── Responsive ────────────────────────────────────────────────────────── */
+@media (max-width: 520px) {
+    .memory-card {
+        padding: var(--space-xl) var(--space-lg);
+    }
+
+    .memory-name {
+        font-size: var(--font-size-lg);
+    }
+
+    .memory-actions {
+        gap: var(--space-sm);
+    }
+
+    .memory-btn {
+        min-width: 90px;
+        padding: var(--space-sm) var(--space-md);
+    }
+}

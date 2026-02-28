@@ -59,10 +59,53 @@
   to = "/.netlify/functions/admin-stats"
   status = 200
 
+# Memory (صدقة جارية) API
+[[redirects]]
+  from = "/api/memory/create"
+  to = "/.netlify/functions/memory-create"
+  status = 200
+
+[[redirects]]
+  from = "/api/memory/interact"
+  to = "/.netlify/functions/memory-interact"
+  status = 200
+
+[[redirects]]
+  from = "/api/memory/view"
+  to = "/.netlify/functions/memory-view"
+  status = 200
+
+# Memory Admin API
+[[redirects]]
+  from = "/api/admin/memory/pending"
+  to = "/.netlify/functions/admin-memory-pending"
+  status = 200
+
+[[redirects]]
+  from = "/api/admin/memory/approve"
+  to = "/.netlify/functions/admin-memory-approve"
+  status = 200
+
+[[redirects]]
+  from = "/api/admin/memory/reject"
+  to = "/.netlify/functions/admin-memory-reject"
+  status = 200
+
 # Clean URLs for pages
 [[redirects]]
   from = "/admin"
   to = "/admin.html"
+  status = 200
+
+[[redirects]]
+  from = "/create-memory"
+  to = "/create-memory.html"
+  status = 200
+
+# SPA-style slug routing: /memory/:slug → memory.html
+[[redirects]]
+  from = "/memory/*"
+  to = "/memory.html"
   status = 200
 
 # ═══════════════════════════════════════════════════════════════════════════

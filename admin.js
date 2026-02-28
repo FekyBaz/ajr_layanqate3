@@ -288,10 +288,164 @@
     }
 
     // ═══════════════════════════════════════════════════════════════════
+    // Memories Moderation (صفحات الذكرى)
+    // ═══════════════════════════════════════════════════════════════════
+    const memoriesList = document.getElementById('memories-list');
+    const memoryLoadingEl = document.getElementById('memory-loading');
+    const memoryEmptyState = document.getElementById('memory-empty-state');
+    const memoryNotification = document.getElementById('memory-notification');
+
+    // Tab Switching
+    function switchTab(tabName) {
+        const submissionsTab = document.getElementById('submissions-tab');
+        const memoriesTab = document.getElementById('memories-tab');
+        const tabSubmissions = document.getElementById('tab-submissions');
+        const tabMemories = document.getElementById('tab-memories');
+
+        if (tabName === 'submissions') {
+            submissionsTab.classList.remove('hidden');
+            memoriesTab.classList.add('hidden');
+            tabSubmissions.className = 'btn btn-primary btn-sm admin-tab active';
+            tabMemories.className = 'btn btn-ghost btn-sm admin-tab';
+        } else {
+            submissionsTab.classList.add('hidden');
+            memoriesTab.classList.remove('hidden');
+            tabSubmissions.className = 'btn btn-ghost btn-sm admin-tab';
+            tabMemories.className = 'btn btn-primary btn-sm admin-tab active';
+            loadPendingMemories();
+        }
+    }
+
+    async function loadPendingMemories() {
+        memoryLoadingEl.classList.remove('hidden');
+        memoriesList.classList.add('hidden');
+        memoryEmptyState.classList.add('hidden');
+
+        try {
+            const result = await apiRequest('/api/admin/memory/pending');
+
+            memoryLoadingEl.classList.add('hidden');
+
+            if (result.success && result.data.length > 0) {
+                renderMemories(result.data);
+                memoriesList.classList.remove('hidden');
+                document.getElementById('memory-pending-count').textContent = result.data.length;
+            } else {
+                memoryEmptyState.classList.remove('hidden');
+                document.getElementById('memory-pending-count').textContent = '0';
+            }
+        } catch (error) {
+            memoryLoadingEl.classList.add('hidden');
+            showMemoryNotification('فشل تحميل البيانات', 'error');
+        }
+    }
+
+    function renderMemories(memories) {
+        memoriesList.innerHTML = memories.map(mem => `
+            <div class="submission-card" data-memory-id="${escapeHtml(String(mem.id))}">
+                <div class="submission-meta">
+                    <span class="content-type-badge">صدقة جارية</span>
+                    <span>${formatDate(mem.created_at)}</span>
+                </div>
+                
+                <div class="original-message-label">اسم المتوفى:</div>
+                <div class="original-message" style="font-weight:600;">${escapeHtml(mem.deceased_name)}</div>
+                
+                ${mem.relation ? `<div style="font-size:0.85rem;color:#8b7961;margin-top:4px;">صلة القرابة: ${escapeHtml(mem.relation)}</div>` : ''}
+                
+                <div class="original-message-label" style="margin-top:12px;">الرسالة:</div>
+                <div class="original-message">${escapeHtml(mem.message)}</div>
+                
+                <div class="actions">
+                    <button class="btn btn-success btn-sm" data-memory-action="approve" data-memory-id="${escapeHtml(String(mem.id))}">
+                        ✓ موافقة
+                    </button>
+                    <button class="btn btn-danger btn-sm" data-memory-action="reject" data-memory-id="${escapeHtml(String(mem.id))}">
+                        ✗ رفض
+                    </button>
+                </div>
+            </div>
+        `).join('');
+
+        // Event delegation for memory actions
+        memoriesList.addEventListener('click', handleMemoryAction);
+    }
+
+    function handleMemoryAction(e) {
+        const btn = e.target.closest('[data-memory-action]');
+        if (!btn) return;
+
+        const action = btn.dataset.memoryAction;
+        const id = btn.dataset.memoryId;
+
+        if (action === 'approve') approveMemory(id);
+        if (action === 'reject') rejectMemory(id);
+    }
+
+    async function approveMemory(id) {
+        try {
+            const result = await apiRequest('/api/admin/memory/approve', 'POST', { id });
+
+            if (result.success) {
+                showMemoryNotification('تمت الموافقة على صفحة الذكرى', 'success');
+                removeMemoryCard(id);
+            } else {
+                showMemoryNotification(result.message || 'حدث خطأ', 'error');
+            }
+        } catch (error) {
+            showMemoryNotification('فشل الاتصال بالخادم', 'error');
+        }
+    }
+
+    async function rejectMemory(id) {
+        if (!confirm('هل أنت متأكد من رفض صفحة الذكرى هذه؟')) return;
+
+        try {
+            const result = await apiRequest('/api/admin/memory/reject', 'POST', { id });
+
+            if (result.success) {
+                showMemoryNotification('تم رفض صفحة الذكرى', 'success');
+                removeMemoryCard(id);
+            } else {
+                showMemoryNotification(result.message || 'حدث خطأ', 'error');
+            }
+        } catch (error) {
+            showMemoryNotification('فشل الاتصال بالخادم', 'error');
+        }
+    }
+
+    function removeMemoryCard(id) {
+        const card = document.querySelector(`.submission-card[data-memory-id="${id}"]`);
+        if (card) card.remove();
+
+        if (memoriesList.children.length === 0) {
+            memoriesList.classList.add('hidden');
+            memoryEmptyState.classList.remove('hidden');
+        }
+
+        // Update count
+        const countEl = document.getElementById('memory-pending-count');
+        const current = parseInt(countEl.textContent) || 0;
+        countEl.textContent = Math.max(0, current - 1);
+    }
+
+    function showMemoryNotification(message, type) {
+        memoryNotification.textContent = message;
+        memoryNotification.className = type === 'error' ? 'error-message' : 'success-message';
+        memoryNotification.classList.remove('hidden');
+
+        setTimeout(() => {
+            memoryNotification.classList.add('hidden');
+        }, 3000);
+    }
+
+    // ═══════════════════════════════════════════════════════════════════
     // Expose functions needed by inline handlers
     // ═══════════════════════════════════════════════════════════════════
     window.logout = logout;
     window.loadPending = loadPending;
+    window.switchTab = switchTab;
+    window.loadPendingMemories = loadPendingMemories;
 
     // ═══════════════════════════════════════════════════════════════════
     // Initialize
@@ -308,3 +462,4 @@
             .catch(() => logout());
     }
 })();
+
