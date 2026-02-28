@@ -182,17 +182,27 @@ export function validateAdmin(event) {
  * @returns {{ valid: boolean, rateLimited: boolean }}
  */
 export async function validateAdminWithRateLimit(event) {
-    if (!validateAdmin(event)) {
-        return { valid: false, rateLimited: false };
-    }
-
+    const isValid = validateAdmin(event);
     const clientIP = getClientIP(event);
     const ipHash = crypto.createHash('sha256').update(clientIP || 'unknown').digest('hex').substring(0, 32);
+
+    // [SECURITY] We log EVERY attempt, including failures, to prevent brute-forcing.
+    // This happens BEFORE we return 'valid: false' to ensure failed attempts are counted.
+    try {
+        await recordRequest(clientIP);
+    } catch (logLimitError) {
+        logger.error('Admin attempt logging failed:', logLimitError.message);
+    }
+
+    if (!isValid) {
+        return { valid: false, rateLimited: false };
+    }
 
     try {
         const windowStart = new Date();
         windowStart.setHours(windowStart.getHours() - ADMIN_RATE_LIMIT_WINDOW_HOURS);
 
+        // Uses the composite index (ip_hash, created_at)
         const { count, error: countError } = await supabaseAdmin
             .from('rate_limits')
             .select('*', { count: 'exact', head: true })

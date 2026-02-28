@@ -1,9 +1,13 @@
 -- ═══════════════════════════════════════════════════════════════════════════
--- أجر لا ينقطع — Migration 012
--- Critical fixes: Atomic submit and fast stats aggregation
+-- أجر لا ينقطع — Migration 012 (Hardened)
+-- Defensive Architecture Hardening: 64-bit locks, Composite indexes, Atomic inserts
 -- ═══════════════════════════════════════════════════════════════════════════
 
--- 1. Atomic sumbit RPC to prevent race condition bypassing rate limits
+-- 0. Infrastructure: Hardened indexing for high-frequency lookups
+-- Optimized for range scans on created_at per IP (O(log N))
+CREATE INDEX IF NOT EXISTS idx_rate_limits_composite ON public.rate_limits (ip_hash, created_at DESC);
+
+-- 1. Atomic submit RPC to prevent race condition bypassing rate limits
 CREATE OR REPLACE FUNCTION public.submit_post(
     p_message text,
     p_message_hash text,
@@ -16,22 +20,23 @@ CREATE OR REPLACE FUNCTION public.submit_post(
 RETURNS jsonb
 LANGUAGE plpgsql
 SECURITY DEFINER
+SET search_path = public
 AS $$
 DECLARE
     v_window_start timestamptz;
     v_recent_count integer;
-    v_exists boolean;
     v_submission_id uuid;
 BEGIN
     v_window_start := now() - (p_rate_limit_hours || ' hours')::interval;
 
-    -- Use advisory lock to prevent concurrent requests from the same IP
-    -- hashtext converts string to integer for the lock ID
-    PERFORM pg_advisory_xact_lock(hashtext('rate_limit_' || p_ip_hash));
+    -- [SECURITY] Upgrade to 64-bit advisory lock using hashtextextended 
+    -- Reduces collision probability at 1M IPs from ~1/2^32 to ~1/2^64
+    PERFORM pg_advisory_xact_lock(hashtextextended('rate_limit_' || p_ip_hash, 0));
 
-    -- Check rate limit
+    -- Check rate limit (transactional & locked)
+    -- Hits idx_rate_limits_composite for optimal performance
     SELECT count(*) INTO v_recent_count
-    FROM public.rate_limits
+    FROM rate_limits
     WHERE ip_hash = p_ip_hash
       AND created_at >= v_window_start;
 
@@ -39,30 +44,21 @@ BEGIN
         RETURN jsonb_build_object('success', false, 'reason', 'rate_limit_exceeded');
     END IF;
 
-    -- Check duplicate message
-    SELECT EXISTS(
-        SELECT 1 FROM public.submissions
-        WHERE message_hash = p_message_hash
-    ) INTO v_exists;
+    -- [ATOMICITY] Use ON CONFLICT for duplicate handling
+    -- Requires UNIQUE index on message_hash (created in migration 001)
+    INSERT INTO submissions (message, message_hash, content_type, author_name)
+    VALUES (p_message, p_message_hash, p_content_type, COALESCE(p_author_name, 'فاعل خير'))
+    ON CONFLICT (message_hash) DO NOTHING
+    RETURNING id INTO v_submission_id;
 
-    IF v_exists THEN
-        -- Silent success to prevent probing
+    -- If v_submission_id is NULL, it means the ON CONFLICT triggered
+    IF v_submission_id IS NULL THEN
+        -- Silent success prevents content probing timing attacks
         RETURN jsonb_build_object('success', true, 'reason', 'duplicate_silent_success');
     END IF;
 
-    -- Insert submission
-    IF p_author_name IS NOT NULL THEN
-        INSERT INTO public.submissions (message, message_hash, content_type, author_name)
-        VALUES (p_message, p_message_hash, p_content_type, p_author_name)
-        RETURNING id INTO v_submission_id;
-    ELSE
-        INSERT INTO public.submissions (message, message_hash, content_type)
-        VALUES (p_message, p_message_hash, p_content_type)
-        RETURNING id INTO v_submission_id;
-    END IF;
-
-    -- Record request for rate limiting
-    INSERT INTO public.rate_limits (ip_hash) VALUES (p_ip_hash);
+    -- Record request for rate limiting (atomic with submission)
+    INSERT INTO rate_limits (ip_hash) VALUES (p_ip_hash);
 
     RETURN jsonb_build_object('success', true, 'submission_id', v_submission_id);
 END;
@@ -77,21 +73,24 @@ CREATE OR REPLACE FUNCTION public.refresh_community_stats()
 RETURNS jsonb
 LANGUAGE plpgsql
 SECURITY DEFINER
+SET search_path = public
 AS $$
 DECLARE
     v_total_approved bigint;
     v_total_post_count bigint;
     v_average_post_count numeric;
 BEGIN
+    -- [PERFORMANCE] Aggregation happens entirely in-database to avoid Node.js OOM
+    -- Relies on idx_submissions_status (partial index or status index)
     SELECT 
         COUNT(*),
         COALESCE(SUM(post_count), 0),
         CASE WHEN COUNT(*) > 0 THEN COALESCE(SUM(post_count), 0)::numeric / COUNT(*) ELSE 0 END
     INTO v_total_approved, v_total_post_count, v_average_post_count
-    FROM public.submissions
+    FROM submissions
     WHERE status IN ('Approved', 'Posted');
 
-    INSERT INTO public.community_stats (id, total_approved, total_post_count, average_post_count, updated_at)
+    INSERT INTO community_stats (id, total_approved, total_post_count, average_post_count, updated_at)
     VALUES (1, v_total_approved, v_total_post_count, v_average_post_count, now())
     ON CONFLICT (id) DO UPDATE SET
         total_approved = EXCLUDED.total_approved,
