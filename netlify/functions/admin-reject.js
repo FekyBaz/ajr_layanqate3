@@ -10,7 +10,7 @@ import {
     success,
     error,
     handleOptions,
-    validateAdmin,
+    validateAdminWithRateLimit,
     STATUS,
     logger,
 } from './utils/shared.js';
@@ -29,8 +29,12 @@ export async function handler(event, context) {
     }
 
     // Validate admin authentication
-    if (!validateAdmin(event)) {
+    const authResult = await validateAdminWithRateLimit(event);
+    if (!authResult.valid) {
         return error(401, 'غير مصرح بالوصول', origin);
+    }
+    if (authResult.rateLimited) {
+        return error(429, 'تم تجاوز الحد المسموح للمحاولات', origin);
     }
 
     try {

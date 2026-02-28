@@ -5,6 +5,7 @@
  * ═══════════════════════════════════════════════════════════════════════════
  */
 
+import crypto from 'crypto';
 import {
     supabaseAdmin,
     success,
@@ -35,74 +36,28 @@ export async function handler(event, context) {
 
     try {
         // Get client IP and check rate limit
-        const clientIP = getClientIP(event);
-        const withinLimit = await checkRateLimit(clientIP);
+        // Use atomic check-and-insert RPC to prevent rate limit bypass race conditions
+        const { data: result, error: rpcError } = await supabaseAdmin.rpc('submit_post', {
+            p_message: messageResult.sanitized,
+            p_message_hash: messageHash,
+            p_content_type: content_type,
+            p_author_name: sanitizedName,
+            p_ip_hash: crypto.createHash('sha256').update((clientIP || 'unknown') + (process.env.IP_SALT || '')).digest('hex').substring(0, 32),
+            p_rate_limit_max: parseInt(process.env.RATE_LIMIT_MAX || '10', 10),
+            p_rate_limit_hours: parseInt(process.env.RATE_LIMIT_WINDOW || '24', 10),
+        });
 
-        if (!withinLimit) {
-            return error(429, 'تم تجاوز الحد المسموح من المشاركات. يرجى المحاولة لاحقًا.', origin);
-        }
-
-        // Parse request body
-        let body;
-        try {
-            body = JSON.parse(event.body || '{}');
-        } catch (e) {
-            return error(400, 'طلب غير صالح', origin);
-        }
-
-        const { message, content_type, author_name } = body;
-
-        // Validate content_type
-        if (!validateContentType(content_type)) {
-            return error(400, 'يرجى اختيار نوع المحتوى', origin);
-        }
-
-        // Sanitize message
-        const messageResult = sanitizeMessage(message);
-        if (!messageResult.isValid) {
-            return error(400, messageResult.error, origin);
-        }
-
-        // Sanitize author name
-        const sanitizedName = sanitizeName(author_name);
-
-        // Generate hash for duplicate detection
-        const messageHash = generateMessageHash(messageResult.sanitized);
-
-        // Check for duplicates
-        const { data: existing } = await supabaseAdmin
-            .from('submissions')
-            .select('id')
-            .eq('message_hash', messageHash)
-            .limit(1)
-            .single();
-
-        if (existing) {
-            // Silent rejection - return success to prevent probing
-            return success({ message: 'تم استلام مشاركتك. جزاك الله خيرًا.' }, origin);
-        }
-
-        // Build insert data - omit author_name if empty to use DB default
-        const insertData = {
-            message: messageResult.sanitized,
-            content_type: content_type,
-            message_hash: messageHash,
-            // Only include author_name if sanitizedName is truthy (not null/undefined/empty)
-            ...(sanitizedName && { author_name: sanitizedName }),
-        };
-
-        // Insert submission
-        const { error: insertError } = await supabaseAdmin
-            .from('submissions')
-            .insert(insertData);
-
-        if (insertError) {
-            logger.error('Database insert error:', insertError.message);
+        if (rpcError) {
+            logger.error('Submit RPC error:', rpcError.message);
             return error(500, 'حدث خطأ. يرجى المحاولة لاحقًا.', origin);
         }
 
-        // Record successful request for rate limiting
-        await recordRequest(clientIP);
+        if (!result.success) {
+            if (result.reason === 'rate_limit_exceeded') {
+                return error(429, 'تم تجاوز الحد المسموح من المشاركات. يرجى المحاولة لاحقًا.', origin);
+            }
+            // duplicate goes here, we return success
+        }
 
         return success({ message: 'تم استلام مشاركتك. جزاك الله خيرًا.' }, origin);
 
