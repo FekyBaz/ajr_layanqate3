@@ -1,0 +1,255 @@
+/**
+ * ═══════════════════════════════════════════════════════════════════════════
+ * أجر لا ينقطع - Memorial Page Script (memory.js)
+ * Public memorial page: fetches memory by slug, renders with textContent,
+ * handles interactions with client-side throttling.
+ * ═══════════════════════════════════════════════════════════════════════════
+ */
+
+(function () {
+    'use strict';
+
+    // ═══════════════════════════════════════════════════════════════════
+    // Configuration
+    // ═══════════════════════════════════════════════════════════════════
+    const PRODUCTION_API_URL = '';
+    const isProduction = !window.location.hostname.includes('localhost') &&
+        !window.location.hostname.includes('127.0.0.1');
+    const API_BASE = isProduction ? PRODUCTION_API_URL : 'http://localhost:8888';
+
+    // Client-side cooldown per button (UX only — real limit in RPC)
+    const INTERACTION_COOLDOWN_MS = 5000;
+
+    // ═══════════════════════════════════════════════════════════════════
+    // DOM Elements
+    // ═══════════════════════════════════════════════════════════════════
+    const loadingEl = document.getElementById('memory-loading');
+    const errorEl = document.getElementById('memory-error');
+    const errorTextEl = document.getElementById('memory-error-text');
+    const cardEl = document.getElementById('memory-card');
+    const nameEl = document.getElementById('memory-name');
+    const relationEl = document.getElementById('memory-relation');
+    const messageEl = document.getElementById('memory-message');
+    const counterEl = document.getElementById('memory-counter-value');
+    const actionsEl = document.getElementById('memory-actions');
+
+    // State
+    let memoryData = null;
+    const cooldowns = {};
+
+    // ═══════════════════════════════════════════════════════════════════
+    // Slug Extraction
+    // ═══════════════════════════════════════════════════════════════════
+    function getSlugFromPath() {
+        // URL: /memory/:slug
+        const parts = window.location.pathname.split('/').filter(Boolean);
+        if (parts.length >= 2 && parts[0] === 'memory') {
+            return decodeURIComponent(parts[1]);
+        }
+        return null;
+    }
+
+    // ═══════════════════════════════════════════════════════════════════
+    // API Helpers
+    // ═══════════════════════════════════════════════════════════════════
+    async function fetchMemory(slug) {
+        const response = await fetch(`${API_BASE}/api/memory/view?slug=${encodeURIComponent(slug)}`);
+        return response.json();
+    }
+
+    async function sendInteraction(memoryId, interactionType) {
+        const response = await fetch(`${API_BASE}/api/memory/interact`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+                memory_id: memoryId,
+                interaction_type: interactionType,
+            }),
+        });
+        return response.json();
+    }
+
+    // ═══════════════════════════════════════════════════════════════════
+    // Render (textContent only — no innerHTML for user data)
+    // ═══════════════════════════════════════════════════════════════════
+    function renderMemory(memory) {
+        // All user-provided text set via textContent (XSS-safe)
+        nameEl.textContent = memory.deceased_name;
+
+        if (memory.relation) {
+            relationEl.textContent = memory.relation;
+            relationEl.classList.add('visible');
+        }
+
+        messageEl.textContent = memory.message;
+        counterEl.textContent = formatNumber(memory.total_interactions || 0);
+
+        // Update page title
+        document.title = `صدقة جارية على روح ${memory.deceased_name} | أجر لا ينقطع`;
+
+        // Show card, hide loading
+        loadingEl.classList.add('hidden');
+        cardEl.classList.remove('hidden');
+    }
+
+    function showError(message) {
+        errorTextEl.textContent = message;
+        loadingEl.classList.add('hidden');
+        errorEl.classList.remove('hidden');
+    }
+
+    function formatNumber(n) {
+        if (n >= 1000000) return (n / 1000000).toFixed(1).replace(/\.0$/, '') + 'M';
+        if (n >= 1000) return (n / 1000).toFixed(1).replace(/\.0$/, '') + 'K';
+        return String(n);
+    }
+
+    // ═══════════════════════════════════════════════════════════════════
+    // Counter Animation
+    // ═══════════════════════════════════════════════════════════════════
+    function bumpCounter(newTotal) {
+        counterEl.textContent = formatNumber(newTotal);
+        counterEl.classList.add('bumped');
+        setTimeout(() => counterEl.classList.remove('bumped'), 200);
+    }
+
+    // ═══════════════════════════════════════════════════════════════════
+    // Ripple Effect
+    // ═══════════════════════════════════════════════════════════════════
+    function createRipple(button, event) {
+        const ripple = document.createElement('span');
+        ripple.classList.add('ripple');
+        const rect = button.getBoundingClientRect();
+        const size = Math.max(rect.width, rect.height);
+        ripple.style.width = ripple.style.height = size + 'px';
+        ripple.style.left = (event.clientX - rect.left - size / 2) + 'px';
+        ripple.style.top = (event.clientY - rect.top - size / 2) + 'px';
+        button.appendChild(ripple);
+        ripple.addEventListener('animationend', () => ripple.remove());
+    }
+
+    // ═══════════════════════════════════════════════════════════════════
+    // Share Functionality
+    // ═══════════════════════════════════════════════════════════════════
+    async function handleShare() {
+        const url = window.location.href;
+        const title = `صدقة جارية على روح ${memoryData.deceased_name}`;
+
+        if (navigator.share) {
+            try {
+                await navigator.share({ title, url });
+            } catch (e) {
+                // User cancelled or error — fall through to clipboard
+                if (e.name !== 'AbortError') {
+                    copyToClipboard(url);
+                }
+            }
+        } else {
+            copyToClipboard(url);
+        }
+    }
+
+    function copyToClipboard(text) {
+        navigator.clipboard.writeText(text).then(() => {
+            showToast('تم نسخ الرابط');
+        }).catch(() => {
+            // Fallback
+            const input = document.createElement('input');
+            input.value = text;
+            document.body.appendChild(input);
+            input.select();
+            document.execCommand('copy');
+            document.body.removeChild(input);
+            showToast('تم نسخ الرابط');
+        });
+    }
+
+    function showToast(message) {
+        // Create a temporary toast notification
+        const toast = document.createElement('div');
+        toast.textContent = message;
+        toast.style.cssText = `
+            position: fixed; bottom: 24px; left: 50%; transform: translateX(-50%);
+            background: var(--color-accent, #8c6a35); color: white;
+            padding: 10px 24px; border-radius: 999px; font-size: 14px;
+            font-family: var(--font-primary); z-index: 9999;
+            opacity: 0; transition: opacity 0.3s;
+        `;
+        document.body.appendChild(toast);
+        requestAnimationFrame(() => { toast.style.opacity = '1'; });
+        setTimeout(() => {
+            toast.style.opacity = '0';
+            setTimeout(() => toast.remove(), 300);
+        }, 2000);
+    }
+
+    // ═══════════════════════════════════════════════════════════════════
+    // Interaction Handler (Event Delegation)
+    // ═══════════════════════════════════════════════════════════════════
+    actionsEl.addEventListener('click', async function (e) {
+        const btn = e.target.closest('.memory-btn');
+        if (!btn || !memoryData) return;
+
+        const type = btn.dataset.type;
+        if (!type) return;
+
+        // Share has special handling
+        if (type === 'share') {
+            createRipple(btn, e);
+            handleShare();
+            // Also record the share interaction
+            sendInteraction(memoryData.id, 'share').catch(() => { });
+            return;
+        }
+
+        // Client-side cooldown (UX only)
+        if (cooldowns[type]) return;
+
+        // Visual feedback
+        createRipple(btn, e);
+        btn.classList.add('cooldown');
+        cooldowns[type] = true;
+
+        try {
+            const result = await sendInteraction(memoryData.id, type);
+            if (result.success && result.total_interactions) {
+                bumpCounter(result.total_interactions);
+            }
+        } catch (err) {
+            // Silent fail — don't disrupt UX
+        }
+
+        // Cooldown timer
+        setTimeout(() => {
+            btn.classList.remove('cooldown');
+            cooldowns[type] = false;
+        }, INTERACTION_COOLDOWN_MS);
+    });
+
+    // ═══════════════════════════════════════════════════════════════════
+    // Initialize
+    // ═══════════════════════════════════════════════════════════════════
+    async function init() {
+        const slug = getSlugFromPath();
+        if (!slug) {
+            showError('رابط الصفحة غير صالح');
+            return;
+        }
+
+        try {
+            const result = await fetchMemory(slug);
+
+            if (!result.success || !result.memory) {
+                showError(result.message || 'الصفحة غير موجودة أو قيد المراجعة');
+                return;
+            }
+
+            memoryData = result.memory;
+            renderMemory(memoryData);
+        } catch (err) {
+            showError('حدث خطأ في تحميل الصفحة');
+        }
+    }
+
+    init();
+})();
