@@ -48,14 +48,15 @@ export async function handler(event, context) {
         const [countResult, dataResult] = await Promise.all([
             supabaseAdmin
                 .from('submissions')
-                .select('id', { count: 'exact', head: true })
+                .select('id', { head: true })
                 .eq('status', STATUS.PENDING),
             supabaseAdmin
                 .from('submissions')
                 .select('id, message, corrected_message, content_type, author_name, created_at')
                 .eq('status', STATUS.PENDING)
                 .order('created_at', { ascending: true })
-                .range(from, to),
+                .range(from, to)
+                .limit(100), // Added safety cap
         ]);
 
         if (dataResult.error) {

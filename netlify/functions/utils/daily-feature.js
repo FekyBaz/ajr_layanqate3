@@ -7,15 +7,14 @@ function getDayOffset(dateKey, total) {
 }
 
 async function selectCandidateSubmission(dateKey) {
-    const { count, error: countError } = await supabaseAdmin
-        .from('submissions')
-        .select('id', { count: 'exact', head: true })
-        .in('status', VISIBLE_STATUSES);
+    const { data: stats, error: rpcError } = await supabaseAdmin.rpc('get_submission_stats');
 
-    if (countError) {
-        logger.error('Daily feature count error:', countError.message);
-        throw countError;
+    if (rpcError) {
+        logger.error('Daily feature stats error:', rpcError.message);
+        throw rpcError;
     }
+
+    const count = (stats.approved || 0);
 
     if (!count) {
         return null;
