@@ -13,6 +13,8 @@ import {
     handleOptions,
     sanitizeMessage,
     sanitizeName,
+    sanitizeLegacyText,
+    sanitizeExternalLinks,
     getClientIP,
     logger,
 } from './utils/shared.js';
@@ -92,8 +94,8 @@ export async function handler(event, context) {
         });
 
         if (rpcError) {
-            logger.error('create_memory RPC error:', rpcError.message);
-            return error(500, 'حدث خطأ. يرجى المحاولة لاحقًا.', origin);
+            logger.error('create_memory RPC error:', rpcError.message, rpcError.details, rpcError.hint, rpcError.code);
+            return error(500, 'خطأ في قاعدة البيانات أثناء إنشاء الصفحة', origin, `RPC: ${rpcError.message} | Code: ${rpcError.code}`);
         }
 
         if (!result.success) {
@@ -102,9 +104,12 @@ export async function handler(event, context) {
             }
             if (result.reason === 'slug_generation_failed') {
                 logger.error('Slug generation failed after max retries');
-                return error(500, 'حدث خطأ. يرجى المحاولة لاحقًا.', origin);
+                return error(500, 'فشل في توليد رابط الصفحة. يرجى المحاولة مرة أخرى.', origin);
             }
-            return error(500, 'حدث خطأ. يرجى المحاولة لاحقًا.', origin);
+            if (result.reason === 'payload_too_large') {
+                return error(400, 'حجم المحتوى يتجاوز الحد المسموح.', origin);
+            }
+            return error(500, 'خطأ غير متوقع في الخادم.', origin, `RPC reason: ${result.reason}`);
         }
 
         return success({
@@ -113,7 +118,7 @@ export async function handler(event, context) {
         }, origin);
 
     } catch (err) {
-        logger.error('memory-create unexpected error:', err.message);
-        return error(500, 'حدث خطأ. يرجى المحاولة لاحقًا.', origin);
+        logger.error('memory-create unexpected error:', err.message, err.stack);
+        return error(500, 'خطأ في إعداد الخادم. يرجى التواصل مع الدعم.', origin, err.message);
     }
 }
