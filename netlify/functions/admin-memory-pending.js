@@ -40,7 +40,7 @@ export async function handler(event, context) {
     try {
         const { data, error: queryError } = await supabaseAdmin
             .from('memories')
-            .select('id, slug, deceased_name, relation, message, created_at, created_by_ip_hash')
+            .select('id, slug, deceased_name, relation, message, biography, good_traits, ongoing_charity, external_links, story, created_at, created_by_ip_hash')
             .eq('status', STATUS.PENDING)
             .order('created_at', { ascending: true })
             .limit(50);

@@ -341,31 +341,66 @@
     }
 
     function renderMemories(memories) {
-        memoriesList.innerHTML = memories.map(mem => `
-            <div class="submission-card" data-memory-id="${escapeHtml(String(mem.id))}">
-                <div class="submission-meta">
-                    <span class="content-type-badge">صدقة جارية</span>
-                    <span>${formatDate(mem.created_at)}</span>
+        memoriesList.innerHTML = memories.map(mem => {
+            // Helper to securely format links
+            let linksHtml = '';
+            if (Array.isArray(mem.external_links) && mem.external_links.length > 0) {
+                linksHtml = '<div style="margin-top:8px;"><strong>روابط الصدقة:</strong><ul>' +
+                    mem.external_links.map(l =>
+                        `<li><a href="${escapeHtml(l.url)}" target="_blank" rel="noopener noreferrer">${escapeHtml(l.title || l.url)}</a></li>`
+                    ).join('') +
+                    '</ul></div>';
+            }
+
+            return `
+                <div class="submission-card" data-memory-id="${escapeHtml(String(mem.id))}">
+                    <div class="submission-meta">
+                        <span class="content-type-badge">صدقة جارية</span>
+                        <span>${formatDate(mem.created_at)}</span>
+                    </div>
+                    
+                    <div class="original-message-label">اسم المتوفى:</div>
+                    <div class="original-message" style="font-weight:600;">${escapeHtml(mem.deceased_name)}</div>
+                    
+                    ${mem.relation ? `<div style="font-size:0.85rem;color:#8b7961;margin-top:4px;">صلة القرابة: ${escapeHtml(mem.relation)}</div>` : ''}
+                    
+                    ${mem.biography ? `
+                        <div class="original-message-label" style="margin-top:12px;">عن المتوفى (نبذة):</div>
+                        <div class="original-message">${escapeHtml(mem.biography)}</div>
+                    ` : ''}
+
+                    ${mem.good_traits ? `
+                        <div class="original-message-label" style="margin-top:12px;">من صفاته الطيبة:</div>
+                        <div class="original-message">${escapeHtml(mem.good_traits)}</div>
+                    ` : ''}
+
+                    ${mem.ongoing_charity || linksHtml ? `
+                        <div class="original-message-label" style="margin-top:12px;">الصدقة الجارية:</div>
+                        ${mem.ongoing_charity ? `<div class="original-message">${escapeHtml(mem.ongoing_charity)}</div>` : ''}
+                        ${linksHtml}
+                    ` : ''}
+
+                    ${mem.story ? `
+                        <div class="original-message-label" style="margin-top:12px;">مواقف أو ذكريات:</div>
+                        <div class="original-message">${escapeHtml(mem.story)}</div>
+                    ` : ''}
+
+                    ${(!mem.biography && mem.message) ? `
+                        <div class="original-message-label" style="margin-top:12px;">الرسالة (قديم):</div>
+                        <div class="original-message">${escapeHtml(mem.message)}</div>
+                    ` : ''}
+                    
+                    <div class="actions" style="margin-top:20px;">
+                        <button class="btn btn-success btn-sm" data-memory-action="approve" data-memory-id="${escapeHtml(String(mem.id))}">
+                            ✓ موافقة
+                        </button>
+                        <button class="btn btn-danger btn-sm" data-memory-action="reject" data-memory-id="${escapeHtml(String(mem.id))}">
+                            ✗ رفض
+                        </button>
+                    </div>
                 </div>
-                
-                <div class="original-message-label">اسم المتوفى:</div>
-                <div class="original-message" style="font-weight:600;">${escapeHtml(mem.deceased_name)}</div>
-                
-                ${mem.relation ? `<div style="font-size:0.85rem;color:#8b7961;margin-top:4px;">صلة القرابة: ${escapeHtml(mem.relation)}</div>` : ''}
-                
-                <div class="original-message-label" style="margin-top:12px;">الرسالة:</div>
-                <div class="original-message">${escapeHtml(mem.message)}</div>
-                
-                <div class="actions">
-                    <button class="btn btn-success btn-sm" data-memory-action="approve" data-memory-id="${escapeHtml(String(mem.id))}">
-                        ✓ موافقة
-                    </button>
-                    <button class="btn btn-danger btn-sm" data-memory-action="reject" data-memory-id="${escapeHtml(String(mem.id))}">
-                        ✗ رفض
-                    </button>
-                </div>
-            </div>
-        `).join('');
+            `;
+        }).join('');
 
         // Event delegation for memory actions
         memoriesList.addEventListener('click', handleMemoryAction);

@@ -36,7 +36,7 @@ export async function handler(event, context) {
         // Use public client — RLS enforces status = 'Approved'
         const { data: memory, error: queryError } = await supabasePublic
             .from('memories')
-            .select('id, slug, deceased_name, relation, message, total_interactions, tasbeeh_count, dua_count, share_count, created_at, approved_at, last_activity_at')
+            .select('id, slug, deceased_name, relation, message, biography, good_traits, ongoing_charity, external_links, story, total_interactions, tasbeeh_count, dua_count, share_count, created_at, approved_at, last_activity_at')
             .eq('slug', slug)
             .maybeSingle();
 

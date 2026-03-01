@@ -39,7 +39,7 @@ export async function handler(event, context) {
             return error(400, 'طلب غير صالح', origin);
         }
 
-        const { deceased_name, relation, message } = body;
+        const { deceased_name, relation, biography, good_traits, ongoing_charity, external_links, story } = body;
 
         // Validate deceased_name (required)
         const nameResult = sanitizeName(deceased_name);
@@ -47,10 +47,23 @@ export async function handler(event, context) {
             return error(400, 'اسم المتوفى مطلوب', origin);
         }
 
-        // Validate message (required, Arabic-only)
-        const messageResult = sanitizeMessage(message);
-        if (!messageResult.isValid) {
-            return error(400, messageResult.error, origin);
+        // Validate structured text fields
+        const bioResult = sanitizeLegacyText(biography, 3, 1000, true);
+        if (!bioResult.isValid) return error(400, `نبذة عن المتوفى: ${bioResult.error}`, origin);
+
+        const traitsResult = sanitizeLegacyText(good_traits, 3, 500, false);
+        if (!traitsResult.isValid) return error(400, `صفات المتوفى: ${traitsResult.error}`, origin);
+
+        const charityResult = sanitizeLegacyText(ongoing_charity, 3, 1000, false);
+        if (!charityResult.isValid) return error(400, `الصدقة الجارية: ${charityResult.error}`, origin);
+
+        const storyResult = sanitizeLegacyText(story, 3, 2000, false);
+        if (!storyResult.isValid) return error(400, `مواقف مؤثرة: ${storyResult.error}`, origin);
+
+        // Validate external links array
+        const linksResult = sanitizeExternalLinks(external_links);
+        if (!linksResult.isValid) {
+            return error(400, linksResult.error, origin);
         }
 
         // Sanitize relation (optional)
@@ -68,7 +81,11 @@ export async function handler(event, context) {
         const { data: result, error: rpcError } = await supabaseAdmin.rpc('create_memory', {
             p_deceased_name: nameResult,
             p_relation: sanitizedRelation,
-            p_message: messageResult.sanitized,
+            p_biography: bioResult.sanitized,
+            p_good_traits: traitsResult.sanitized,
+            p_ongoing_charity: charityResult.sanitized,
+            p_external_links: linksResult.links,
+            p_story: storyResult.sanitized,
             p_ip_hash: ipHash,
             p_rate_limit_max: parseInt(process.env.MEMORY_RATE_LIMIT_MAX || '3', 10),
             p_rate_limit_hours: parseInt(process.env.MEMORY_RATE_LIMIT_HOURS || '24', 10),

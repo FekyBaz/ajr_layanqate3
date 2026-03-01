@@ -138,14 +138,87 @@
     border: none;
 }
 
-/* ── Message ───────────────────────────────────────────────────────────── */
+/* ── Sections ───────────────────────────────────────────────────────────── */
+.memory-section {
+    margin-bottom: var(--space-2xl);
+    text-align: right;
+    background: #fafafa;
+    border-radius: var(--radius-md);
+    padding: var(--space-xl);
+    border: 1px solid var(--color-border);
+}
+
+.memory-section-title {
+    font-family: var(--font-display);
+    font-size: var(--font-size-md);
+    font-weight: 700;
+    color: var(--color-accent);
+    margin-bottom: var(--space-md);
+    display: flex;
+    align-items: center;
+    gap: var(--space-sm);
+}
+
+.memory-section-title::before {
+    content: '';
+    display: inline-block;
+    width: 4px;
+    height: 16px;
+    background: var(--color-gold);
+    border-radius: 99px;
+}
+
+.memory-subsection-title {
+    font-size: var(--font-size-sm);
+    font-weight: 700;
+    color: var(--color-text-secondary);
+    margin: var(--space-lg) 0 var(--space-xs);
+}
+
+/* ── Content Text ──────────────────────────────────────────────────────── */
+.memory-biography,
+.memory-traits,
+.memory-charity,
+.memory-story,
 .memory-message {
     font-size: var(--font-size-md);
-    color: var(--color-text-secondary);
+    color: var(--color-text-primary);
     line-height: var(--line-height-relaxed);
-    margin-bottom: var(--space-xl);
     white-space: pre-wrap;
     word-break: break-word;
+}
+
+/* ── External Links ────────────────────────────────────────────────────── */
+.memory-links {
+    margin-top: var(--space-md);
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-sm);
+}
+
+.external-link {
+    display: flex;
+    align-items: center;
+    gap: var(--space-sm);
+    background: var(--color-surface);
+    padding: var(--space-sm) var(--space-md);
+    border-radius: var(--radius-sm);
+    border: 1px solid var(--color-border);
+    text-decoration: none;
+    color: var(--color-accent);
+    font-weight: 600;
+    transition: all 0.2s;
+}
+
+.external-link:hover {
+    background: var(--color-accent-light);
+    border-color: var(--color-accent);
+    transform: translateX(-4px);
+}
+
+.external-link::before {
+    content: '🔗';
+    font-size: 1.2rem;
 }
 
 /* ── Interaction Counter ───────────────────────────────────────────────── */
@@ -336,7 +409,7 @@
 
 .create-memory-form-card {
     width: 100%;
-    max-width: 520px;
+    max-width: 600px;
     background: var(--color-surface);
     border-radius: var(--radius-lg);
     box-shadow: var(--shadow-soft);
@@ -350,6 +423,24 @@
     text-align: center;
     margin-bottom: var(--space-lg);
     color: var(--color-text-primary);
+}
+
+/* Form Sections */
+.form-section {
+    border: 1px solid var(--color-border);
+    border-radius: var(--radius-md);
+    padding: var(--space-lg) var(--space-md) var(--space-sm);
+    margin-bottom: var(--space-xl);
+    background: #fafafa;
+}
+
+.form-section legend {
+    font-family: var(--font-display);
+    font-size: var(--font-size-md);
+    font-weight: 700;
+    color: var(--color-accent);
+    padding: 0 var(--space-sm);
+    margin-right: -4px;
 }
 
 .form-group {
@@ -376,6 +467,72 @@
     border-radius: var(--radius-sm);
     transition: border-color var(--transition-fast);
     direction: rtl;
+}
+
+/* Dynamic Links */
+.links-container {
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-sm);
+    margin-bottom: var(--space-sm);
+}
+
+.link-row {
+    display: flex;
+    gap: var(--space-sm);
+    align-items: flex-start;
+}
+
+.link-row input {
+    margin-bottom: 0;
+}
+
+.link-row .link-title {
+    flex: 1;
+}
+
+.link-row .link-url {
+    flex: 2;
+    direction: ltr;
+    text-align: left;
+}
+
+.remove-link-btn {
+    background: var(--color-error);
+    color: white;
+    border: none;
+    border-radius: var(--radius-sm);
+    padding: 12px 14px;
+    cursor: pointer;
+    font-size: 1.1rem;
+    line-height: 1;
+    transition: opacity 0.2s;
+}
+
+.remove-link-btn:hover {
+    opacity: 0.8;
+}
+
+.add-link-btn {
+    background: var(--color-surface);
+    color: var(--color-accent);
+    border: 1px dashed var(--color-accent);
+    padding: 10px 14px;
+    width: 100%;
+    border-radius: var(--radius-sm);
+    cursor: pointer;
+    font-weight: 600;
+    transition: all 0.2s;
+    margin-bottom: var(--space-xs);
+}
+
+.add-link-btn:hover {
+    background: var(--color-accent-light);
+}
+
+.add-link-btn:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
 }
 
 .form-group input:focus,
