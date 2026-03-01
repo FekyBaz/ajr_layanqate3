@@ -24,28 +24,82 @@
             <h1 class="create-memory-title">إنشاء صفحة صدقة جارية</h1>
 
             <form id="create-memory-form" novalidate>
-                <div class="form-group">
-                    <label for="deceased-name">اسم المتوفى / المتوفاة *</label>
-                    <input type="text" id="deceased-name" maxlength="100" required placeholder="مثال: أحمد بن محمد"
-                        autocomplete="off">
-                    <div class="char-count" id="name-char-count">0 / 100</div>
-                    <div class="field-error" id="name-error"></div>
-                </div>
+                <!-- Section 1: Basic Info -->
+                <fieldset class="form-section">
+                    <legend>البيانات الأساسية</legend>
+                    <div class="form-group">
+                        <label for="deceased-name">اسم المتوفى / المتوفاة *</label>
+                        <input type="text" id="deceased-name" maxlength="100" required placeholder="مثال: أحمد بن محمد"
+                            autocomplete="off">
+                        <div class="char-count" id="name-char-count">0 / 100</div>
+                        <div class="field-error" id="name-error"></div>
+                    </div>
 
-                <div class="form-group">
-                    <label for="relation">صلة القرابة (اختياري)</label>
-                    <input type="text" id="relation" maxlength="50" placeholder="مثال: والدي، جدتي، صديقي"
-                        autocomplete="off">
-                    <div class="form-hint">سيظهر في الصفحة بجانب الاسم</div>
-                </div>
+                    <div class="form-group">
+                        <label for="relation">صلة القرابة (اختياري)</label>
+                        <input type="text" id="relation" maxlength="50" placeholder="مثال: والدي، جدتي، صديقي"
+                            autocomplete="off">
+                        <div class="form-hint">مَن هو المتوفى بالنسبة لك؟</div>
+                    </div>
+                </fieldset>
 
-                <div class="form-group">
-                    <label for="memory-message">رسالة / دعاء *</label>
-                    <textarea id="memory-message" maxlength="1000" required
-                        placeholder="اكتب رسالة أو دعاء للمتوفى..."></textarea>
-                    <div class="char-count" id="message-char-count">0 / 1000</div>
-                    <div class="field-error" id="message-error"></div>
-                </div>
+                <!-- Section 2: About Them -->
+                <fieldset class="form-section">
+                    <legend>عن المتوفى</legend>
+                    <div class="form-group">
+                        <label for="biography">نبذة تعريفية *</label>
+                        <textarea id="biography" maxlength="1000" required
+                            placeholder="من هو المتوفى، وما أثره الطيب في حياته..."></textarea>
+                        <div class="form-hint">تعريف موجز ليذكره زوار الصفحة بالخير والدعاء.</div>
+                        <div class="char-count" id="bio-char-count">0 / 1000</div>
+                        <div class="field-error" id="bio-error"></div>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="good-traits">صفات حميدة للمتوفى (اختياري)</label>
+                        <textarea id="good-traits" maxlength="500"
+                            placeholder="مثال: كان باراً بوالديه، ومحباً للصدقة..."></textarea>
+                        <div class="form-hint">صفات لتكون أسوة حسنة لمن يقرأ.</div>
+                        <div class="char-count" id="traits-char-count">0 / 500</div>
+                        <div class="field-error" id="traits-error"></div>
+                    </div>
+                </fieldset>
+
+                <!-- Section 3: Ongoing Charity -->
+                <fieldset class="form-section">
+                    <legend>الصدقة الجارية</legend>
+                    <div class="form-group">
+                        <label for="ongoing-charity">وصف للصدقة الجارية الحالية (اختياري)</label>
+                        <textarea id="ongoing-charity" maxlength="1000"
+                            placeholder="هل هناك وقف أو مشروع خيري تم إقامته عن المتوفى؟"></textarea>
+                        <div class="form-hint">بناء مسجد، حفر بئر، طباعة مصحف...</div>
+                        <div class="char-count" id="charity-char-count">0 / 1000</div>
+                        <div class="field-error" id="charity-error"></div>
+                    </div>
+
+                    <div class="form-group">
+                        <label>روابط للصدقة الجارية (اختياري - حتى 5 روابط)</label>
+                        <div id="links-container" class="links-container">
+                            <!-- Dynamic link fields will go here -->
+                        </div>
+                        <button type="button" id="add-link-btn" class="add-link-btn">+ إضافة رابط جديد</button>
+                        <div class="form-hint">روابط موثوقة لمؤسسات خيرية للمساهمة عن المتوفى.</div>
+                        <div class="field-error" id="links-error"></div>
+                    </div>
+                </fieldset>
+
+                <!-- Section 4: Optional Story -->
+                <fieldset class="form-section">
+                    <legend>قصة أو مواقف (اختياري)</legend>
+                    <div class="form-group">
+                        <label for="story">مواقف مؤثرة عن المتوفى</label>
+                        <textarea id="story" maxlength="2000"
+                            placeholder="قصة أثرت فيك، نصيحة خالدة، أو موقف يعبر عن نبله..."></textarea>
+                        <div class="form-hint">مساحة أوسع لتدوين الذكريات الجميلة.</div>
+                        <div class="char-count" id="story-char-count">0 / 2000</div>
+                        <div class="field-error" id="story-error"></div>
+                    </div>
+                </fieldset>
 
                 <button type="submit" class="create-memory-submit" id="submit-btn">
                     إنشاء صفحة صدقة جارية

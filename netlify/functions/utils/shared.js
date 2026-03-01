@@ -394,3 +394,71 @@ export function getClientIP(event) {
         event.headers['client-ip'] ||
         'unknown';
 }
+
+// ═══════════════════════════════════════════════════════════════════════════
+// Phase 3: Legacy Hub Helpers
+// ═══════════════════════════════════════════════════════════════════════════
+
+export function sanitizeLegacyText(input, minLen, maxLen, isRequired) {
+    if (typeof input !== 'string') {
+        return { isValid: !isRequired, sanitized: null, error: isRequired ? 'هذا الحقل مطلوب' : null };
+    }
+
+    let sanitized = input.trim();
+    if (!sanitized) {
+        return { isValid: !isRequired, sanitized: null, error: isRequired ? 'هذا الحقل مطلوب' : null };
+    }
+
+    sanitized = sanitized.replace(/<[^>]*>/g, '');
+    sanitized = sanitized.replace(/javascript:/gi, '');
+    sanitized = sanitized.replace(/vbscript:/gi, '');
+    sanitized = sanitized.replace(/data:/gi, '');
+    sanitized = sanitized.replace(/[ \t]+/g, ' ');
+    sanitized = sanitized.replace(/\n{3,}/g, '\n\n').trim();
+
+    if (sanitized.length < minLen) {
+        return { isValid: false, sanitized: null, error: `المحتوى قصير جدًا (الأدنى ${minLen} أحرف)` };
+    }
+
+    if (sanitized.length > maxLen) {
+        return { isValid: false, sanitized: null, error: `المحتوى طويل جدًا (الأقصى ${maxLen} حرف)` };
+    }
+
+    if (!ARABIC_PATTERN.test(sanitized)) {
+        return { isValid: false, sanitized: null, error: 'يرجى الكتابة باللغة العربية فقط' };
+    }
+
+    return { isValid: true, sanitized };
+}
+
+export function sanitizeExternalLinks(linksArray) {
+    if (!Array.isArray(linksArray) || linksArray.length === 0) {
+        return { isValid: true, links: null };
+    }
+
+    if (linksArray.length > 5) {
+        return { isValid: false, links: null, error: 'الحد الأقصى للروابط هو 5' };
+    }
+
+    const validLinks = [];
+    for (const link of linksArray) {
+        if (!link || typeof link !== 'object') continue;
+
+        let title = link.title ? link.title.trim().replace(/<[^>]*>/g, '') : '';
+        let url = link.url ? link.url.trim() : '';
+
+        if (!url) continue;
+
+        try {
+            const parsed = new URL(url);
+            if (parsed.protocol !== 'http:' && parsed.protocol !== 'https:') {
+                continue;
+            }
+            validLinks.push({ title: title.substring(0, 100), url: parsed.href });
+        } catch (e) {
+            continue;
+        }
+    }
+
+    return { isValid: true, links: validLinks.length > 0 ? validLinks : null };
+}
