@@ -27,9 +27,30 @@
     const errorEl = document.getElementById('memory-error');
     const errorTextEl = document.getElementById('memory-error-text');
     const cardEl = document.getElementById('memory-card');
+
+    // Header
     const nameEl = document.getElementById('memory-name');
     const relationEl = document.getElementById('memory-relation');
+    const activeBadge = document.getElementById('memory-active-badge');
+    const approvedBadge = document.getElementById('memory-approved-badge');
+
+    // Sections
+    const sectionAbout = document.getElementById('section-about');
+    const bioEl = document.getElementById('memory-biography');
+    const traitsContainer = document.getElementById('traits-container');
+    const traitsEl = document.getElementById('memory-traits');
+
+    const sectionCharity = document.getElementById('section-charity');
+    const charityEl = document.getElementById('memory-charity');
+    const linksContainer = document.getElementById('links-container');
+
+    const sectionStory = document.getElementById('section-story');
+    const storyEl = document.getElementById('memory-story');
+
+    // Legacy fallback
     const messageEl = document.getElementById('memory-message');
+
+    // Counters/Actions
     const counterEl = document.getElementById('memory-counter-value');
     const actionsEl = document.getElementById('memory-actions');
 
@@ -41,7 +62,6 @@
     // Slug Extraction
     // ═══════════════════════════════════════════════════════════════════
     function getSlugFromPath() {
-        // URL: /memory/:slug
         const parts = window.location.pathname.split('/').filter(Boolean);
         if (parts.length >= 2 && parts[0] === 'memory') {
             return decodeURIComponent(parts[1]);
@@ -73,16 +93,88 @@
     // Render (textContent only — no innerHTML for user data)
     // ═══════════════════════════════════════════════════════════════════
     function renderMemory(memory) {
-        // All user-provided text set via textContent (XSS-safe)
+        // --- Header ---
         nameEl.textContent = memory.deceased_name;
-
         if (memory.relation) {
             relationEl.textContent = memory.relation;
             relationEl.classList.add('visible');
         }
 
-        messageEl.textContent = memory.message;
+        // --- Badges (Phase 2 feature retained) ---
+        if (memory.is_active) {
+            activeBadge.classList.remove('hidden');
+        }
+        if (memory.approved_at) {
+            const approvedDate = new Date(memory.approved_at).toLocaleDateString('ar-EG');
+            approvedBadge.textContent = 'نُشرت بتاريخ ' + approvedDate;
+            approvedBadge.classList.remove('hidden');
+        }
+
+        // --- Structured Content (Phase 3) ---
+        let hasStructuredContent = false;
+
+        // About Section
+        if (memory.biography) {
+            hasStructuredContent = true;
+            bioEl.textContent = memory.biography;
+            if (memory.good_traits) {
+                traitsEl.textContent = memory.good_traits;
+                traitsContainer.classList.remove('hidden');
+            }
+        } else {
+            sectionAbout.classList.add('hidden');
+        }
+
+        // Charity Section
+        let hasCharity = false;
+        if (memory.ongoing_charity) {
+            charityEl.textContent = memory.ongoing_charity;
+            hasCharity = true;
+        }
+
+        // External Links mapping safely (XSS defense)
+        if (Array.isArray(memory.external_links) && memory.external_links.length > 0) {
+            hasCharity = true;
+            linksContainer.innerHTML = ''; // clear initial safe
+            linksContainer.classList.remove('hidden');
+
+            memory.external_links.forEach(link => {
+                if (!link.url) return;
+                const a = document.createElement('a');
+                a.href = link.url;
+                a.className = 'external-link';
+                a.target = '_blank';
+                a.rel = 'noopener noreferrer';
+                a.textContent = link.title || link.url;
+                linksContainer.appendChild(a);
+            });
+        }
+
+        if (hasCharity) sectionCharity.classList.remove('hidden');
+
+        // Story Section
+        if (memory.story) {
+            hasStructuredContent = true;
+            storyEl.textContent = memory.story;
+            sectionStory.classList.remove('hidden');
+        }
+
+        // Legacy Fallback (if no bio exists, show old message)
+        if (!hasStructuredContent && memory.message) {
+            messageEl.textContent = memory.message;
+            messageEl.classList.remove('hidden');
+        }
+
+        // --- Counters ---
         counterEl.textContent = formatNumber(memory.total_interactions || 0);
+
+        // Update specific counts on buttons
+        const btnTasbeeh = document.getElementById('count-tasbeeh');
+        const btnDua = document.getElementById('count-dua');
+        const btnShare = document.getElementById('count-share');
+        if (btnTasbeeh) btnTasbeeh.textContent = formatNumber(memory.tasbeeh_count || 0);
+        if (btnDua) btnDua.textContent = formatNumber(memory.dua_count || 0);
+        if (btnShare) btnShare.textContent = formatNumber(memory.share_count || 0);
 
         // Update page title
         document.title = `صدقة جارية على روح ${memory.deceased_name} | أجر لا ينقطع`;
@@ -227,29 +319,31 @@
     });
 
     // ═══════════════════════════════════════════════════════════════════
-    // Initialize
+    // Initialization
     // ═══════════════════════════════════════════════════════════════════
     async function init() {
         const slug = getSlugFromPath();
+
         if (!slug) {
-            showError('رابط الصفحة غير صالح');
+            showError('لم يتم العثور على رابط صالح');
             return;
         }
 
         try {
             const result = await fetchMemory(slug);
 
-            if (!result.success || !result.memory) {
-                showError(result.message || 'الصفحة غير موجودة أو قيد المراجعة');
-                return;
+            if (result.success && result.memory) {
+                memoryData = result.memory; // Store for interactions
+                renderMemory(memoryData);
+            } else {
+                showError(result.message || 'عذراً، لم نتمكن من إيجاد الصفحة المطلوبة');
             }
-
-            memoryData = result.memory;
-            renderMemory(memoryData);
         } catch (err) {
-            showError('حدث خطأ في تحميل الصفحة');
+            showError('حدث خطأ أثناء تحميل البيانات. يرجى التأكد من اتصالك بالإنترنت وتحديث الصفحة.');
         }
     }
 
+    // Start
     init();
+
 })();

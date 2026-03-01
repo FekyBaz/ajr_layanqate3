@@ -42,12 +42,41 @@
 
             <div class="memory-label">صدقة جارية على روح</div>
             <h1 class="memory-name" id="memory-name"></h1>
-
             <div class="memory-relation" id="memory-relation"></div>
 
             <hr class="memory-separator">
 
-            <p class="memory-message" id="memory-message"></p>
+            <!-- Section: About -->
+            <div class="memory-section" id="section-about">
+                <div class="memory-section-title">عن المتوفى</div>
+                <div class="memory-biography" id="memory-biography"></div>
+
+                <div id="traits-container" class="hidden">
+                    <div class="memory-subsection-title">من صفاته الطيبة</div>
+                    <div class="memory-traits" id="memory-traits"></div>
+                </div>
+            </div>
+
+            <!-- Section: Charity -->
+            <div class="memory-section hidden" id="section-charity">
+                <div class="memory-section-title">الصدقة الجارية</div>
+                <div class="memory-charity" id="memory-charity"></div>
+
+                <div id="links-container" class="memory-links hidden">
+                    <!-- Dynamic links injected here securely via JS -->
+                </div>
+            </div>
+
+            <!-- Section: Story -->
+            <div class="memory-section hidden" id="section-story">
+                <div class="memory-section-title">مواقف أو ذكريات</div>
+                <div class="memory-story" id="memory-story"></div>
+            </div>
+
+            <!-- Fallback for old legacy messages -->
+            <div class="memory-message hidden" id="memory-message"></div>
+
+            <hr class="memory-separator">
 
             <!-- Counter -->
             <div class="memory-counter-section">
