@@ -61,6 +61,23 @@ BEGIN
         RETURN jsonb_build_object('success', false, 'reason', 'rate_limit_exceeded');
     END IF;
 
+    -- [SECURITY] Defensive guards: Hard limits in DB to prevent internal bypass
+    IF length(coalesce(p_deceased_name, '')) > 200 THEN
+        RETURN jsonb_build_object('success', false, 'reason', 'payload_too_large');
+    END IF;
+    IF length(coalesce(p_biography, '')) > 2000 THEN
+        RETURN jsonb_build_object('success', false, 'reason', 'payload_too_large');
+    END IF;
+    IF length(coalesce(p_good_traits, '')) > 1000 THEN
+        RETURN jsonb_build_object('success', false, 'reason', 'payload_too_large');
+    END IF;
+    IF length(coalesce(p_ongoing_charity, '')) > 2000 THEN
+        RETURN jsonb_build_object('success', false, 'reason', 'payload_too_large');
+    END IF;
+    IF length(coalesce(p_story, '')) > 4000 THEN
+        RETURN jsonb_build_object('success', false, 'reason', 'payload_too_large');
+    END IF;
+
     -- Generate URL-safe slug from deceased_name + random suffix
     v_base_slug := lower(regexp_replace(
         left(trim(p_deceased_name), 30),

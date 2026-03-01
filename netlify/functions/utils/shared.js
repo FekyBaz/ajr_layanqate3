@@ -223,12 +223,12 @@ export async function validateAdminWithRateLimit(event) {
 
     return { valid: true, rateLimited: false };
 }
-
 // ═══════════════════════════════════════════════════════════════════════════
 // Input Sanitization
 // ═══════════════════════════════════════════════════════════════════════════
 
-const ARABIC_PATTERN = /^[\u0600-\u06FF\u0750-\u077F\uFB50-\uFDFF\uFE70-\uFEFF\u0660-\u0669\s\d.,،؛:؟!()«»/\-#_…\\\n\r🌿"']+$/;
+// Allow Arabic, English, Numbers, Punctuation, Whitespace, and basic emojis
+const ARABIC_PATTERN = /^[\u0600-\u06FF\u0750-\u077F\uFB50-\uFDFF\uFE70-\uFEFF\u0660-\u0669\s\d.,،؛:؟!()«»/\-#_…\\\n\r🌿"'a-zA-Z]+$/;
 
 export function sanitizeMessage(input) {
     if (typeof input !== 'string') {

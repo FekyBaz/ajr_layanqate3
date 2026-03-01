@@ -17,8 +17,8 @@
         !window.location.hostname.includes('127.0.0.1');
     const API_BASE = isProduction ? PRODUCTION_API_URL : 'http://localhost:8888';
 
-    // Arabic-only pattern (mirrors ARABIC_PATTERN from shared.js)
-    const ARABIC_PATTERN = /^[\u0600-\u06FF\u0750-\u077F\uFB50-\uFDFF\uFE70-\uFEFF\u0660-\u0669\s\d.,،؛:؟!()«»/\-#_…\\\n\r🌿"']+$/;
+    // Arabic/English/Numbers pattern (mirrors ARABIC_PATTERN from shared.js)
+    const ARABIC_PATTERN = /^[\u0600-\u06FF\u0750-\u077F\uFB50-\uFDFF\uFE70-\uFEFF\u0660-\u0669\s\d.,،؛:؟!()«»/\-#_…\\\n\r🌿"'a-zA-Z]+$/;
 
     const NAME_MAX_LENGTH = 100;
     const MESSAGE_MIN_LENGTH = 3;
