@@ -31,7 +31,7 @@ export async function handler(event, context) {
     // Validate admin authentication
     const authResult = await validateAdminWithRateLimit(event);
     if (!authResult.valid) {
-        return error(401, 'غير مصرح بالوصول', origin);
+        return error(401, 'بيانات تسجيل الدخول غير صحيحة', origin, 'Admin key validation failed');
     }
     if (authResult.rateLimited) {
         return error(429, 'تم تجاوز الحد المسموح للمحاولات', origin);

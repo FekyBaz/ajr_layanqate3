@@ -31,7 +31,7 @@ export async function handler(event, context) {
     // Validate admin authentication
     const authResult = await validateAdminWithRateLimit(event);
     if (!authResult.valid) {
-        return error(401, 'غير مصرح بالوصول', origin);
+        return error(401, 'بيانات تسجيل الدخول غير صحيحة', origin, 'Admin key validation failed');
     }
     if (authResult.rateLimited) {
         return error(429, 'تم تجاوز الحد المسموح للمحاولات', origin);
@@ -43,8 +43,8 @@ export async function handler(event, context) {
         const { data: stats, error: rpcError } = await supabaseAdmin.rpc('get_submission_stats');
 
         if (rpcError) {
-            logger.error('admin-stats RPC error:', rpcError.message);
-            return error(500, 'حدث خطأ في جلب الإحصائيات', origin);
+            logger.error('admin-stats RPC error:', rpcError.message, rpcError.code);
+            return error(500, 'فشل الاتصال بقاعدة البيانات', origin, rpcError.message);
         }
 
         return success({

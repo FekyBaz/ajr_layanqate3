@@ -135,18 +135,23 @@ export function success(data, origin, additionalHeaders = {}) {
 }
 
 export function error(statusCode, message, origin, devMessage = null) {
-    if (devMessage) {
-        logger.error(`[HTTP ${statusCode}] ${message} | Dev: ${devMessage}`);
+    const errorCode = statusCode === 401 ? 'INVALID_CREDENTIALS'
+        : statusCode === 429 ? 'RATE_LIMIT_EXCEEDED'
+            : statusCode === 400 ? 'VALIDATION_ERROR'
+                : statusCode === 405 ? 'METHOD_NOT_ALLOWED'
+                    : statusCode === 500 ? 'SERVER_ERROR'
+                        : 'UNKNOWN_ERROR';
+
+    const body = { success: false, message, error_code: errorCode };
+
+    if (devMessage && (process.env.NODE_ENV !== 'production' || process.env.LOG_LEVEL === 'debug')) {
+        body.dev_message = devMessage;
     }
 
     return {
         statusCode,
         headers: getCorsHeaders(origin),
-        body: JSON.stringify({
-            success: false,
-            message,
-            ...(process.env.NODE_ENV === 'development' && { debug: devMessage })
-        }),
+        body: JSON.stringify(body),
     };
 }
 
@@ -172,9 +177,25 @@ export function validateAdmin(event) {
     // Also check X-Admin-Key header for backwards compatibility
     const adminKeyHeader = event.headers['x-admin-key'] || '';
 
-    const adminApiKey = process.env.ADMIN_API_KEY;
+    // Support both ADMIN_API_KEY and ADMIN_KEY env var names
+    const adminApiKey = process.env.ADMIN_API_KEY || process.env.ADMIN_KEY;
 
-    return token === adminApiKey || adminKeyHeader === adminApiKey;
+    if (!adminApiKey) {
+        logger.error('[AUTH] Neither ADMIN_API_KEY nor ADMIN_KEY env var is set!');
+        return false;
+    }
+
+    const isValid = (token && token === adminApiKey) || (adminKeyHeader && adminKeyHeader === adminApiKey);
+
+    if (!isValid) {
+        logger.debug('[AUTH] Validation failed.',
+            'Header received:', adminKeyHeader ? 'yes' : 'no',
+            'Bearer received:', token ? 'yes' : 'no',
+            'Key configured:', adminApiKey ? 'yes' : 'no'
+        );
+    }
+
+    return isValid;
 }
 
 /**
