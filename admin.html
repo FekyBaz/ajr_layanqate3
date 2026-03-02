@@ -69,6 +69,8 @@
                     onclick="switchTab('submissions')">المشاركات</button>
                 <button class="btn btn-ghost btn-sm admin-tab" id="tab-memories" onclick="switchTab('memories')">صفحات
                     الذكرى</button>
+                <button class="btn btn-ghost btn-sm admin-tab" id="tab-feedback"
+                    onclick="switchTab('feedback')">الرسائل</button>
             </div>
 
             <!-- Submissions Tab -->
@@ -98,6 +100,21 @@
 
                 <div id="memory-empty-state" class="empty-state hidden">
                     <p>✅ لا توجد صفحات ذكرى في الانتظار</p>
+                </div>
+            </div>
+
+            <!-- Feedback Tab -->
+            <div id="feedback-tab" class="hidden">
+                <button class="btn refresh-btn" onclick="loadFeedback()">🔄 تحديث الرسائل</button>
+
+                <div id="feedback-notification" class="hidden"></div>
+
+                <div id="feedback-loading" class="loading hidden">جاري التحميل...</div>
+
+                <div id="feedback-list" class="submissions-list hidden"></div>
+
+                <div id="feedback-empty-state" class="empty-state hidden">
+                    <p>📭 لا توجد رسائل بعد</p>
                 </div>
             </div>
         </section>

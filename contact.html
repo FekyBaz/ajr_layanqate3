@@ -1,0 +1,278 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>تواصل معنا | أجر لا ينقطع</title>
+    <meta name="description" content="أرسل لنا اقتراحك أو ملاحظتك — أجر لا ينقطع">
+
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link
+        href="https://fonts.googleapis.com/css2?family=Noto+Naskh+Arabic:wght@400;500;600;700&family=Cairo:wght@400;600;700&display=swap"
+        rel="stylesheet">
+
+    <link rel="stylesheet" href="/base.css">
+    <style>
+        .contact-page {
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            padding: var(--space-xl) var(--space-lg);
+        }
+
+        .contact-card {
+            width: 100%;
+            max-width: 560px;
+            background: var(--color-surface);
+            border-radius: var(--radius-lg);
+            box-shadow: var(--shadow-soft);
+            border: 1px solid var(--color-border);
+            padding: var(--space-3xl) var(--space-xl);
+            text-align: center;
+        }
+
+        .contact-title {
+            font-family: var(--font-display);
+            font-size: var(--font-size-xl);
+            color: var(--color-text-primary);
+            margin-bottom: var(--space-sm);
+        }
+
+        .contact-subtitle {
+            font-size: var(--font-size-sm);
+            color: var(--color-text-muted);
+            margin-bottom: var(--space-xl);
+        }
+
+        .contact-form {
+            text-align: right;
+        }
+
+        .contact-group {
+            margin-bottom: var(--space-lg);
+        }
+
+        .contact-label {
+            display: block;
+            font-size: var(--font-size-sm);
+            font-weight: 500;
+            margin-bottom: var(--space-xs);
+            color: var(--color-text-primary);
+        }
+
+        .contact-input,
+        .contact-textarea {
+            width: 100%;
+            padding: var(--space-md);
+            font-family: var(--font-primary);
+            font-size: var(--font-size-md);
+            color: var(--color-text-primary);
+            background: #fffdf7;
+            border: 2px solid var(--color-border);
+            border-radius: var(--radius-md);
+            transition: border-color 150ms ease;
+            direction: rtl;
+        }
+
+        .contact-input:focus,
+        .contact-textarea:focus {
+            border-color: var(--color-border-focus);
+            box-shadow: 0 0 0 3px rgba(140, 106, 53, 0.16);
+            outline: none;
+        }
+
+        .contact-textarea {
+            resize: vertical;
+            min-height: 120px;
+        }
+
+        .contact-hint {
+            font-size: var(--font-size-xs);
+            color: var(--color-text-muted);
+            margin-top: var(--space-xs);
+        }
+
+        .contact-error {
+            display: none;
+            font-size: var(--font-size-sm);
+            color: var(--color-error);
+            margin-top: var(--space-xs);
+        }
+
+        .contact-error.visible {
+            display: block;
+        }
+
+        .contact-submit {
+            width: 100%;
+            padding: var(--space-md) var(--space-xl);
+            font-family: var(--font-primary);
+            font-size: var(--font-size-md);
+            font-weight: 600;
+            background: var(--color-accent);
+            color: white;
+            border: none;
+            border-radius: 999px;
+            cursor: pointer;
+            transition: 0.2s ease;
+        }
+
+        .contact-submit:hover:not(:disabled) {
+            transform: translateY(-1px);
+            box-shadow: 0 6px 16px rgba(0, 0, 0, 0.12);
+        }
+
+        .contact-submit:disabled {
+            opacity: 0.7;
+            cursor: not-allowed;
+        }
+
+        .contact-success {
+            display: none;
+            text-align: center;
+            padding: var(--space-xl);
+        }
+
+        .contact-success.visible {
+            display: block;
+        }
+
+        .contact-success h3 {
+            font-family: var(--font-display);
+            color: var(--color-success);
+            margin-bottom: var(--space-sm);
+        }
+
+        .contact-footer {
+            margin-top: var(--space-xl);
+            text-align: center;
+        }
+
+        .contact-footer a {
+            color: var(--color-accent);
+            text-decoration: none;
+            font-size: var(--font-size-sm);
+        }
+
+        .contact-footer a:hover {
+            text-decoration: underline;
+        }
+    </style>
+</head>
+
+<body>
+    <main class="contact-page">
+        <div class="contact-card">
+            <h1 class="contact-title">📩 تواصل معنا</h1>
+            <p class="contact-subtitle">لديك اقتراح، ملاحظة، أو ترغب بالمساهمة؟ نسعد بسماعك.</p>
+
+            <form class="contact-form" id="contactForm" novalidate>
+                <div class="contact-group">
+                    <label class="contact-label" for="contact-name">الاسم <span
+                            style="color: var(--color-text-muted); font-weight: 400;">(اختياري)</span></label>
+                    <input class="contact-input" id="contact-name" type="text" maxlength="100" placeholder="اسمك">
+                </div>
+
+                <div class="contact-group">
+                    <label class="contact-label" for="contact-email">البريد الإلكتروني <span
+                            style="color: var(--color-text-muted); font-weight: 400;">(اختياري)</span></label>
+                    <input class="contact-input" id="contact-email" type="email" maxlength="200"
+                        placeholder="example@email.com" dir="ltr" style="text-align: left;">
+                </div>
+
+                <div class="contact-group">
+                    <label class="contact-label" for="contact-message">الرسالة <span
+                            style="color: var(--color-error);">*</span></label>
+                    <textarea class="contact-textarea" id="contact-message" rows="5" maxlength="1000" required
+                        placeholder="اكتب رسالتك هنا..."></textarea>
+                    <p class="contact-hint"><span id="msg-count">0</span>/1000</p>
+                    <p class="contact-error" id="message-error"></p>
+                </div>
+
+                <button type="submit" class="contact-submit" id="contactSubmit">إرسال الرسالة</button>
+            </form>
+
+            <div class="contact-success" id="contactSuccess">
+                <h3>✓ تم الإرسال</h3>
+                <p>وصلتنا رسالتك. جزاك الله خيرًا.</p>
+            </div>
+
+            <div class="contact-footer">
+                <a href="/">← العودة للصفحة الرئيسية</a>
+            </div>
+        </div>
+    </main>
+
+    <script>
+        (function () {
+            'use strict';
+
+            const PRODUCTION_API_URL = '';
+            const isProduction = !window.location.hostname.includes('localhost') &&
+                !window.location.hostname.includes('127.0.0.1');
+            const API_BASE = isProduction ? PRODUCTION_API_URL : 'http://localhost:8888';
+
+            const form = document.getElementById('contactForm');
+            const nameInput = document.getElementById('contact-name');
+            const emailInput = document.getElementById('contact-email');
+            const messageInput = document.getElementById('contact-message');
+            const msgCount = document.getElementById('msg-count');
+            const messageError = document.getElementById('message-error');
+            const submitBtn = document.getElementById('contactSubmit');
+            const successEl = document.getElementById('contactSuccess');
+
+            messageInput.addEventListener('input', () => {
+                msgCount.textContent = messageInput.value.length;
+            });
+
+            form.addEventListener('submit', async (e) => {
+                e.preventDefault();
+                messageError.classList.remove('visible');
+
+                const message = messageInput.value.trim();
+                if (message.length < 10) {
+                    messageError.textContent = 'الرسالة قصيرة جدًا (الأدنى 10 أحرف)';
+                    messageError.classList.add('visible');
+                    return;
+                }
+
+                submitBtn.disabled = true;
+                submitBtn.textContent = 'جاري الإرسال...';
+
+                try {
+                    const response = await fetch(`${API_BASE}/api/contact`, {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({
+                            name: nameInput.value.trim() || null,
+                            email: emailInput.value.trim() || null,
+                            message: message,
+                        }),
+                    });
+
+                    const result = await response.json();
+
+                    if (result.success) {
+                        form.style.display = 'none';
+                        successEl.classList.add('visible');
+                    } else {
+                        messageError.textContent = result.message || 'حدث خطأ. يرجى المحاولة لاحقًا.';
+                        messageError.classList.add('visible');
+                        submitBtn.disabled = false;
+                        submitBtn.textContent = 'إرسال الرسالة';
+                    }
+                } catch (err) {
+                    messageError.textContent = 'حدث خطأ في الاتصال. يرجى المحاولة لاحقًا.';
+                    messageError.classList.add('visible');
+                    submitBtn.disabled = false;
+                    submitBtn.textContent = 'إرسال الرسالة';
+                }
+            });
+        })();
+    </script>
+</body>
+
+</html>
