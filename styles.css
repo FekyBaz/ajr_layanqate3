@@ -526,79 +526,61 @@ p {
 }
 
 .hero__cta {
-    font-size: var(--font-size-lg);
-    padding: var(--space-lg) var(--space-2xl);
-}
-
-.hero__cta--community {
-    cursor: pointer;
-}
-
-.hero__cta--community:hover,
-.hero__cta--community:focus-visible {
-    transform: translateY(-2px);
-}
-
-.hero__cta--adhkar {
     font-size: var(--font-size-md);
-    padding: var(--space-md) var(--space-xl);
+    padding: 14px 28px;
+    height: 54px;
+    font-weight: 600;
+    border-radius: 12px;
 }
 
-/* Hero Context Override:
-   Keep the global button system untouched, but elevate CTA contrast inside `.hero`
-   so buttons stay readable over the dark-gold hero gradient.
-   Visual hierarchy inside hero:
-   1) Primary = strongest emphasis
-   2) Secondary = calm, supportive
-   3) Ghost = minimal, but still visible
-   Architecture note: this is intentionally hero-specific; if other dark sections are
-   introduced later, prefer a shared contextual pattern like `.section--dark`
-   instead of duplicating per-section overrides. */
+/* Hero Context Override: Balanced Hierarchy */
 .hero .btn-primary,
 .hero .btn--primary {
-    background: #fffaf1;
-    color: var(--color-accent-primary);
-    border-color: rgba(140, 106, 53, 0.18);
-    box-shadow: 0 10px 24px rgba(28, 19, 9, 0.22);
+    background: linear-gradient(135deg, #C79A3B, #A8741F);
+    color: #ffffff;
+    border: none;
+    box-shadow: 0 4px 14px rgba(0, 0, 0, 0.2);
 }
 
 .hero .btn-primary:hover,
 .hero .btn-primary:focus-visible,
 .hero .btn--primary:hover,
 .hero .btn--primary:focus-visible {
-    background: #ffffff;
+    filter: brightness(1.1);
     transform: translateY(-2px);
-    box-shadow: 0 14px 28px rgba(28, 19, 9, 0.27);
+    box-shadow: 0 6px 20px rgba(0, 0, 0, 0.25);
 }
 
 .hero .btn-secondary,
 .hero .btn--secondary {
-    background: rgba(72, 50, 20, 0.45);
-    color: #f4d7a5;
-    border-color: #f4d7a5;
-    box-shadow: 0 6px 16px rgba(20, 13, 6, 0.2);
+    background: rgba(255, 255, 255, 0.08);
+    border: 1px solid rgba(255, 255, 255, 0.3);
+    color: #ffffff;
+    backdrop-filter: blur(4px);
+    box-shadow: none;
 }
 
 .hero .btn-secondary:hover,
 .hero .btn-secondary:focus-visible,
 .hero .btn--secondary:hover,
 .hero .btn--secondary:focus-visible {
-    background: rgba(72, 50, 20, 0.56);
-    color: #ffe9bf;
-    border-color: #ffe9bf;
+    background: rgba(255, 255, 255, 0.15);
+    border-color: rgba(255, 255, 255, 0.45);
+    transform: translateY(-2px);
+    color: #ffffff;
 }
 
 .hero .btn-ghost {
-    background: rgba(255, 250, 241, 0.12);
-    color: #fff8eb;
-    border-color: rgba(255, 236, 203, 0.56);
+    background: transparent;
+    color: #ffffff;
+    border-color: rgba(255, 255, 255, 0.2);
 }
 
 .hero .btn-ghost:hover,
 .hero .btn-ghost:focus-visible {
-    background: rgba(255, 250, 241, 0.2);
+    background: rgba(255, 255, 255, 0.05);
     color: #ffffff;
-    border-color: rgba(255, 236, 203, 0.68);
+    border-color: rgba(255, 255, 255, 0.4);
 }
 
 /* Hero responsive adjustments */
