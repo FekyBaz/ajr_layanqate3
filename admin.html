@@ -13,6 +13,23 @@
         rel="stylesheet">
 
     <link rel="stylesheet" href="admin.css?v=20260227">
+    <style>
+        .badge-new {
+            position: absolute;
+            top: -4px;
+            right: -4px;
+            width: 10px;
+            height: 10px;
+            background-color: #e74c3c;
+            border-radius: 50%;
+            border: 2px solid white;
+            display: inline-block;
+        }
+
+        .hidden {
+            display: none !important;
+        }
+    </style>
 </head>
 
 <body>
@@ -69,8 +86,11 @@
                     onclick="switchTab('submissions')">المشاركات</button>
                 <button class="btn btn-ghost btn-sm admin-tab" id="tab-memories" onclick="switchTab('memories')">صفحات
                     الذكرى</button>
-                <button class="btn btn-ghost btn-sm admin-tab" id="tab-feedback"
-                    onclick="switchTab('feedback')">الرسائل</button>
+                <button class="btn btn-ghost btn-sm admin-tab" id="tab-feedback" style="position:relative;"
+                    onclick="switchTab('feedback')">
+                    الرسائل
+                    <span id="feedback-badge" class="badge-new hidden"></span>
+                </button>
             </div>
 
             <!-- Submissions Tab -->
