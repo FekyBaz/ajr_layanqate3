@@ -185,12 +185,12 @@ body {
     padding: 0 var(--container-padding);
 }
 
-main > section {
+main>section {
     padding: 80px 0;
     position: relative;
 }
 
-main > section::before {
+main>section::before {
     content: '';
     position: absolute;
     inset: 0;
@@ -997,13 +997,25 @@ p {
 }
 
 @keyframes textareaFocusGlow {
-    0% { box-shadow: 0 0 0 0 rgba(140, 106, 53, 0.04); }
-    100% { box-shadow: 0 0 0 3px rgba(140, 106, 53, 0.16); }
+    0% {
+        box-shadow: 0 0 0 0 rgba(140, 106, 53, 0.04);
+    }
+
+    100% {
+        box-shadow: 0 0 0 3px rgba(140, 106, 53, 0.16);
+    }
 }
 
 @keyframes successFadeIn {
-    from { opacity: 0; transform: translateY(8px); }
-    to { opacity: 1; transform: translateY(0); }
+    from {
+        opacity: 0;
+        transform: translateY(8px);
+    }
+
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
 }
 
 /* ═══════════════════════════════════════════════════════════════════════════
@@ -1261,7 +1273,7 @@ p {
    Community Contributions Page
    ═══════════════════════════════════════════════════════════════════════════ */
 
-  .community-body {
+.community-body {
     background: linear-gradient(180deg, #f8f2e8 0%, #f3e8d8 100%);
     color: #382e22;
 }
@@ -1545,13 +1557,35 @@ p {
     font-weight: 600;
 }
 
-.community-page .badge-dhikr { background: #e4f5ed; color: #226348; }
-.community-page .badge-dua { background: #e6f0fc; color: #2b5a96; }
-.community-page .badge-ayah { background: #fef4d9; color: #9a6420; }
-.community-page .badge-hadith { background: #f0e9fb; color: #6d3f9d; }
-.community-page .badge-benefit { background: #eaf5fe; color: #255f93; }
+.community-page .badge-dhikr {
+    background: #e4f5ed;
+    color: #226348;
+}
 
-.community-preview .badge-benefit { background: #eaf5fe; color: #255f93; }
+.community-page .badge-dua {
+    background: #e6f0fc;
+    color: #2b5a96;
+}
+
+.community-page .badge-ayah {
+    background: #fef4d9;
+    color: #9a6420;
+}
+
+.community-page .badge-hadith {
+    background: #f0e9fb;
+    color: #6d3f9d;
+}
+
+.community-page .badge-benefit {
+    background: #eaf5fe;
+    color: #255f93;
+}
+
+.community-preview .badge-benefit {
+    background: #eaf5fe;
+    color: #255f93;
+}
 
 .community-page .submission-message {
     line-height: 1.95;
@@ -1870,6 +1904,7 @@ body.community-focus-mode .submission-message {
         opacity: 0;
         transform: translateY(5px);
     }
+
     to {
         opacity: 1;
         transform: translateY(0);
@@ -2142,8 +2177,13 @@ body.community-focus-mode .submission-message {
 }
 
 @keyframes shimmer {
-    0% { background-position: 200% 0; }
-    100% { background-position: -200% 0; }
+    0% {
+        background-position: 200% 0;
+    }
+
+    100% {
+        background-position: -200% 0;
+    }
 }
 
 .community-preview-card__top,
@@ -2263,8 +2303,14 @@ body.community-focus-mode .submission-message {
     box-shadow: var(--shadow-sm);
 }
 
-.project-share__btn--telegram { background: #2995e8; }
-.project-share__btn--x { background: #111; }
+.project-share__btn--telegram {
+    background: #2995e8;
+}
+
+.project-share__btn--x {
+    background: #111;
+}
+
 .project-share__btn--native {
     background: #fff;
     color: var(--color-accent-primary);
@@ -2295,6 +2341,7 @@ body.community-focus-mode .submission-message {
 }
 
 @media (max-width: 768px) {
+
     .community-preview__skeleton,
     .community-preview__list {
         grid-template-columns: 1fr;
@@ -2344,7 +2391,7 @@ body.community-focus-mode .submission-message {
     padding-inline: var(--space-md);
 }
 
-.home-page main > section {
+.home-page main>section {
     padding-block: var(--space-xl);
 }
 
@@ -2449,6 +2496,7 @@ body.community-focus-mode .submission-message {
 }
 
 @media (max-width: 768px) {
+
     .community-page,
     .home-page .site-container {
         padding-inline: var(--space-sm);
@@ -2851,4 +2899,125 @@ body.community-focus-mode .submission-message {
     .adhkar-item__actions {
         flex-wrap: wrap;
     }
+}
+
+/* ═══════════════════════════════════════════════════════════════════════════
+   Recent Memorial Pages Section (Homepage)
+   ═══════════════════════════════════════════════════════════════════════════ */
+.recent-memories {
+    padding: var(--space-3xl) 0;
+    text-align: center;
+}
+
+.recent-memories__list {
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: var(--space-lg);
+    margin-bottom: var(--space-xl);
+}
+
+@media (min-width: 640px) {
+    .recent-memories__list {
+        grid-template-columns: repeat(3, 1fr);
+    }
+}
+
+.recent-memories__card {
+    background: var(--color-surface);
+    border: 1px solid var(--color-border);
+    border-radius: var(--radius-lg);
+    padding: var(--space-xl) var(--space-lg);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: var(--space-sm);
+    transition: transform var(--transition-normal), box-shadow var(--transition-normal);
+}
+
+.recent-memories__card:hover {
+    transform: translateY(-3px);
+    box-shadow: var(--shadow-soft);
+}
+
+.recent-memories__name {
+    font-family: var(--font-display);
+    font-size: var(--font-size-lg);
+    font-weight: 600;
+    color: var(--color-text-primary);
+    margin: 0;
+}
+
+.recent-memories__subtitle {
+    font-size: var(--font-size-sm);
+    color: var(--color-text-muted);
+    margin: 0 0 var(--space-sm);
+}
+
+.recent-memories__btn {
+    font-size: var(--font-size-sm);
+    padding: 8px 18px;
+}
+
+.recent-memories__cta {
+    display: inline-block;
+    margin-top: var(--space-md);
+    color: var(--color-accent-primary);
+    text-decoration: none;
+    font-size: var(--font-size-sm);
+    font-weight: 500;
+    transition: color var(--transition-fast);
+}
+
+.recent-memories__cta:hover {
+    color: var(--color-accent-hover);
+    text-decoration: underline;
+}
+
+/* ═══════════════════════════════════════════════════════════════════════════
+   Spiritual Guidance Section (Memorial Page)
+   "How to benefit the deceased" — calm, respectful, static
+   ═══════════════════════════════════════════════════════════════════════════ */
+.spiritual-guidance {
+    background: linear-gradient(180deg, rgba(237, 227, 210, 0.5), rgba(246, 240, 228, 0.7));
+    border: 1px solid rgba(201, 170, 113, 0.25);
+    border-radius: var(--radius-lg);
+    padding: var(--space-xl) var(--space-lg);
+    margin-top: var(--space-xl);
+    text-align: center;
+}
+
+.spiritual-guidance__title {
+    font-family: var(--font-display);
+    font-size: var(--font-size-lg);
+    font-weight: 600;
+    color: var(--color-text-primary);
+    margin-bottom: var(--space-lg);
+}
+
+.spiritual-guidance__list {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-md);
+    text-align: right;
+    max-width: 480px;
+    margin: 0 auto;
+}
+
+.spiritual-guidance__item {
+    font-size: var(--font-size-md);
+    color: var(--color-text-secondary);
+    line-height: var(--line-height-relaxed);
+    padding-right: var(--space-md);
+    position: relative;
+}
+
+.spiritual-guidance__item::before {
+    content: '•';
+    position: absolute;
+    right: 0;
+    color: var(--color-gold);
+    font-weight: 700;
 }

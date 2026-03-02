@@ -75,6 +75,11 @@
   to = "/.netlify/functions/memory-view"
   status = 200
 
+[[redirects]]
+  from = "/api/memories/recent"
+  to = "/.netlify/functions/memories-recent"
+  status = 200
+
 # Memory Admin API
 [[redirects]]
   from = "/api/admin/memory/pending"
