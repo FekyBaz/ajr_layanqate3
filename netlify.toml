@@ -107,6 +107,11 @@
   to = "/.netlify/functions/admin-feedback"
   status = 200
 
+[[redirects]]
+  from = "/api/admin/feedback/update"
+  to = "/.netlify/functions/admin-feedback-update"
+  status = 200
+
 # Clean URLs for pages
 [[redirects]]
   from = "/admin"

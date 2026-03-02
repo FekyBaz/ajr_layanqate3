@@ -105,17 +105,34 @@
 
             <!-- Feedback Tab -->
             <div id="feedback-tab" class="hidden">
-                <button class="btn refresh-btn" onclick="loadFeedback()">🔄 تحديث الرسائل</button>
-
-                <div id="feedback-notification" class="hidden"></div>
+                <div style="display:flex;gap:8px;align-items:center;margin-bottom:12px;flex-wrap:wrap;">
+                    <select id="feedback-filter" class="form-select"
+                        style="width:auto;min-width:140px;padding:8px 12px;font-size:0.85rem;border-radius:8px;"
+                        onchange="loadFeedback()">
+                        <option value="">الكل</option>
+                        <option value="New" selected>جديدة</option>
+                        <option value="In Progress">قيد المعالجة</option>
+                        <option value="Resolved">تم الحل</option>
+                        <option value="Archived">مؤرشفة</option>
+                    </select>
+                    <button class="btn refresh-btn" onclick="loadFeedback()">🔄 تحديث</button>
+                    <span id="feedback-total"
+                        style="font-size:0.8rem;color:var(--color-text-muted);margin-right:auto;"></span>
+                </div>
 
                 <div id="feedback-loading" class="loading hidden">جاري التحميل...</div>
 
                 <div id="feedback-list" class="submissions-list hidden"></div>
 
                 <div id="feedback-empty-state" class="empty-state hidden">
-                    <p>📭 لا توجد رسائل بعد</p>
+                    <p>📭 لا توجد رسائل حالياً</p>
                 </div>
+            </div>
+
+            <!-- Toast Notification -->
+            <div id="feedback-toast"
+                style="display:none;position:fixed;bottom:24px;left:50%;transform:translateX(-50%);background:#27ae60;color:white;padding:10px 24px;border-radius:999px;font-size:0.9rem;z-index:9999;box-shadow:0 4px 16px rgba(0,0,0,0.2);transition:opacity 0.3s ease;">
+                تم تحديث الحالة بنجاح
             </div>
         </section>
     </div>
