@@ -39,7 +39,7 @@
 
                 const sub = document.createElement('p');
                 sub.className = 'recent-memories__subtitle';
-                sub.textContent = 'صدقة جارية على روح...';
+                sub.textContent = `صدقة جارية على روح ${memory.deceased_name}`;
 
                 const link = document.createElement('a');
                 link.className = 'btn btn-secondary recent-memories__btn';
