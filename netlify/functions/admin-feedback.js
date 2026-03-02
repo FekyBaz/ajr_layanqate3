@@ -35,7 +35,12 @@ export async function handler(event, context) {
     }
 
     try {
+        // Read optional status filter from query string
+        const params = event.queryStringParameters || {};
+        const statusFilter = params.status || null;
+
         const { data, error: rpcError } = await supabaseAdmin.rpc('get_feedback_messages', {
+            p_status: statusFilter,
             p_limit: 50,
             p_offset: 0,
         });

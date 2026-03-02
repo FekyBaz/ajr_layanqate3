@@ -492,29 +492,66 @@
     window.switchTab = switchTab;
     window.loadPendingMemories = loadPendingMemories;
     window.loadFeedback = loadFeedback;
+    window.updateFeedbackStatus = updateFeedbackStatus;
 
     // ═══════════════════════════════════════════════════════════════════
-    // Feedback Messages
+    // Feedback Messages (Upgraded)
     // ═══════════════════════════════════════════════════════════════════
     const feedbackList = document.getElementById('feedback-list');
     const feedbackLoadingEl = document.getElementById('feedback-loading');
     const feedbackEmptyState = document.getElementById('feedback-empty-state');
+    const feedbackFilter = document.getElementById('feedback-filter');
+    const feedbackTotal = document.getElementById('feedback-total');
+    const feedbackToast = document.getElementById('feedback-toast');
+
+    const STATUS_LABELS = {
+        'New': 'جديدة',
+        'In Progress': 'قيد المعالجة',
+        'Resolved': 'تم الحل',
+        'Archived': 'مؤرشفة',
+    };
+
+    const STATUS_COLORS = {
+        'New': '#3498db',
+        'In Progress': '#e67e22',
+        'Resolved': '#27ae60',
+        'Archived': '#95a5a6',
+    };
+
+    function showToast(message) {
+        if (!feedbackToast) return;
+        feedbackToast.textContent = message;
+        feedbackToast.style.display = 'block';
+        feedbackToast.style.opacity = '1';
+        setTimeout(() => {
+            feedbackToast.style.opacity = '0';
+            setTimeout(() => { feedbackToast.style.display = 'none'; }, 300);
+        }, 2500);
+    }
 
     async function loadFeedback() {
         if (!feedbackList || !feedbackLoadingEl) return;
         feedbackLoadingEl.classList.remove('hidden');
         feedbackList.classList.add('hidden');
         feedbackEmptyState.classList.add('hidden');
+        if (feedbackTotal) feedbackTotal.textContent = '';
+
+        const statusVal = feedbackFilter ? feedbackFilter.value : '';
+        const queryStr = statusVal ? `?status=${encodeURIComponent(statusVal)}` : '';
 
         try {
-            const result = await apiRequest('/api/admin/feedback');
+            const result = await apiRequest(`/api/admin/feedback${queryStr}`);
             feedbackLoadingEl.classList.add('hidden');
 
             if (result.success && result.data && result.data.length > 0) {
                 renderFeedback(result.data);
                 feedbackList.classList.remove('hidden');
+                if (feedbackTotal && result.total != null) {
+                    feedbackTotal.textContent = `${result.total} رسالة`;
+                }
             } else {
                 feedbackEmptyState.classList.remove('hidden');
+                if (feedbackTotal) feedbackTotal.textContent = '0 رسالة';
             }
         } catch (err) {
             feedbackLoadingEl.classList.add('hidden');
@@ -527,34 +564,117 @@
         messages.forEach(msg => {
             const card = document.createElement('div');
             card.className = 'card';
+            card.id = `feedback-${msg.id}`;
             card.style.cssText = 'padding:16px;margin-bottom:12px;border:1px solid var(--color-border);border-radius:12px;background:var(--color-surface);';
 
+            // --- Header row: name + date + status badge ---
             const header = document.createElement('div');
-            header.style.cssText = 'display:flex;justify-content:space-between;align-items:center;margin-bottom:8px;font-size:0.85rem;color:var(--color-text-muted);';
+            header.style.cssText = 'display:flex;justify-content:space-between;align-items:center;margin-bottom:8px;flex-wrap:wrap;gap:6px;';
 
             const nameSpan = document.createElement('span');
+            nameSpan.style.cssText = 'font-weight:600;font-size:0.95rem;';
             nameSpan.textContent = msg.name || 'مجهول';
             header.appendChild(nameSpan);
 
+            const rightGroup = document.createElement('div');
+            rightGroup.style.cssText = 'display:flex;align-items:center;gap:8px;';
+
+            const badge = document.createElement('span');
+            const badgeColor = STATUS_COLORS[msg.status] || '#95a5a6';
+            badge.style.cssText = `display:inline-block;padding:2px 10px;border-radius:999px;font-size:0.75rem;font-weight:500;color:white;background:${badgeColor};`;
+            badge.textContent = STATUS_LABELS[msg.status] || msg.status;
+            rightGroup.appendChild(badge);
+
             const dateSpan = document.createElement('span');
+            dateSpan.style.cssText = 'font-size:0.8rem;color:var(--color-text-muted);';
             dateSpan.textContent = formatDate(msg.created_at);
-            header.appendChild(dateSpan);
+            rightGroup.appendChild(dateSpan);
+
+            header.appendChild(rightGroup);
             card.appendChild(header);
 
+            // --- Email (if exists) ---
             if (msg.email) {
                 const emailEl = document.createElement('p');
-                emailEl.style.cssText = 'font-size:0.8rem;color:var(--color-accent);margin-bottom:8px;direction:ltr;text-align:left;';
+                emailEl.style.cssText = 'font-size:0.8rem;color:var(--color-accent);margin-bottom:6px;direction:ltr;text-align:left;';
                 emailEl.textContent = msg.email;
                 card.appendChild(emailEl);
             }
 
+            // --- IP Hash (small muted) ---
+            if (msg.ip_hash) {
+                const ipEl = document.createElement('p');
+                ipEl.style.cssText = 'font-size:0.7rem;color:var(--color-text-muted);margin-bottom:8px;opacity:0.6;direction:ltr;text-align:left;';
+                ipEl.textContent = `IP: ${msg.ip_hash.substring(0, 12)}…`;
+                card.appendChild(ipEl);
+            }
+
+            // --- Message body ---
             const body = document.createElement('p');
-            body.style.cssText = 'white-space:pre-wrap;line-height:1.8;';
+            body.style.cssText = 'white-space:pre-wrap;line-height:1.8;margin-bottom:8px;';
             body.textContent = msg.message;
             card.appendChild(body);
 
+            // --- Admin note (if exists) ---
+            if (msg.admin_note) {
+                const noteEl = document.createElement('p');
+                noteEl.style.cssText = 'font-size:0.8rem;color:var(--color-text-muted);font-style:italic;margin-bottom:8px;padding:6px 10px;background:rgba(0,0,0,0.03);border-radius:8px;';
+                noteEl.textContent = `ملاحظة: ${msg.admin_note}`;
+                card.appendChild(noteEl);
+            }
+
+            // --- Action buttons ---
+            const actions = document.createElement('div');
+            actions.style.cssText = 'display:flex;gap:6px;flex-wrap:wrap;margin-top:8px;';
+
+            if (msg.status !== 'In Progress') {
+                const btnProgress = document.createElement('button');
+                btnProgress.className = 'btn btn-ghost btn-sm';
+                btnProgress.style.cssText = 'font-size:0.78rem;padding:4px 12px;border-radius:8px;color:#e67e22;border-color:#e67e22;';
+                btnProgress.textContent = 'قيد المعالجة';
+                btnProgress.onclick = () => updateFeedbackStatus(msg.id, 'In Progress');
+                actions.appendChild(btnProgress);
+            }
+
+            if (msg.status !== 'Resolved') {
+                const btnResolved = document.createElement('button');
+                btnResolved.className = 'btn btn-ghost btn-sm';
+                btnResolved.style.cssText = 'font-size:0.78rem;padding:4px 12px;border-radius:8px;color:#27ae60;border-color:#27ae60;';
+                btnResolved.textContent = 'تم الحل';
+                btnResolved.onclick = () => updateFeedbackStatus(msg.id, 'Resolved');
+                actions.appendChild(btnResolved);
+            }
+
+            if (msg.status !== 'Archived') {
+                const btnArchive = document.createElement('button');
+                btnArchive.className = 'btn btn-ghost btn-sm';
+                btnArchive.style.cssText = 'font-size:0.78rem;padding:4px 12px;border-radius:8px;color:#95a5a6;border-color:#95a5a6;';
+                btnArchive.textContent = 'أرشفة';
+                btnArchive.onclick = () => updateFeedbackStatus(msg.id, 'Archived');
+                actions.appendChild(btnArchive);
+            }
+
+            card.appendChild(actions);
             feedbackList.appendChild(card);
         });
+    }
+
+    async function updateFeedbackStatus(msgId, newStatus) {
+        try {
+            const result = await apiRequest('/api/admin/feedback/update', 'POST', {
+                id: msgId,
+                status: newStatus,
+            });
+
+            if (result.success) {
+                showToast('تم تحديث الحالة بنجاح');
+                loadFeedback(); // Refresh list
+            } else {
+                showToast(result.message || 'حدث خطأ في التحديث');
+            }
+        } catch (err) {
+            showToast('فشل الاتصال بالخادم');
+        }
     }
 
     // ═══════════════════════════════════════════════════════════════════
