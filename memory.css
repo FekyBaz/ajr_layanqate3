@@ -655,3 +655,51 @@
         padding: var(--space-sm) var(--space-md);
     }
 }
+
+/* ═══════════════════════════════════════════════════════════════════════════
+   Spiritual Guidance Section
+   "How to benefit the deceased" — calm, respectful, static
+   ═══════════════════════════════════════════════════════════════════════════ */
+.spiritual-guidance {
+    background: linear-gradient(180deg, rgba(237, 227, 210, 0.5), rgba(246, 240, 228, 0.7));
+    border: 1px solid rgba(201, 170, 113, 0.25);
+    border-radius: var(--radius-lg);
+    padding: var(--space-xl) var(--space-lg);
+    margin-top: var(--space-xl);
+    text-align: center;
+}
+
+.spiritual-guidance__title {
+    font-family: var(--font-display);
+    font-size: var(--font-size-lg);
+    font-weight: 600;
+    color: var(--color-text-primary);
+    margin-bottom: var(--space-lg);
+}
+
+.spiritual-guidance__list {
+    list-style: none;
+    padding: 0;
+    margin: 0 auto;
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-md);
+    text-align: right;
+    max-width: 480px;
+}
+
+.spiritual-guidance__item {
+    font-size: var(--font-size-md);
+    color: var(--color-text-secondary);
+    line-height: var(--line-height-relaxed);
+    padding-right: var(--space-md);
+    position: relative;
+}
+
+.spiritual-guidance__item::before {
+    content: '•';
+    position: absolute;
+    right: 0;
+    color: var(--color-gold);
+    font-weight: 700;
+}
