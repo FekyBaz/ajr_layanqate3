@@ -248,8 +248,9 @@ export async function validateAdminWithRateLimit(event) {
 // Input Sanitization
 // ═══════════════════════════════════════════════════════════════════════════
 
-// Allow Arabic, English, Numbers, Punctuation, Whitespace, and basic emojis
-const ARABIC_PATTERN = /^[\u0600-\u06FF\u0750-\u077F\uFB50-\uFDFF\uFE70-\uFEFF\u0660-\u0669\s\d.,،؛:؟!()«»/\-#_…\\\n\r🌿"'a-zA-Z]+$/;
+// Content pattern: Arabic, English, numbers, common punctuation, whitespace, emojis
+// Security does NOT depend on this filter — HTML/script stripping + parameterized RPCs are the real gates.
+const CONTENT_PATTERN = /^[\u0600-\u06FF\u0750-\u077F\uFB50-\uFDFF\uFE70-\uFEFF\u0660-\u0669a-zA-Z0-9\s.,،؛:؟?!()«»\[\]{}\/\-#_…@+=%&*~^\\\n\r🌿💚🤲🕌📖🌙"']+$/;
 
 export function sanitizeMessage(input) {
     if (typeof input !== 'string') {
@@ -283,9 +284,9 @@ export function sanitizeMessage(input) {
         return { isValid: false, sanitized: '', error: 'المحتوى طويل جدًا' };
     }
 
-    // Primary security gate: Arabic-only content
-    if (!ARABIC_PATTERN.test(sanitized)) {
-        return { isValid: false, sanitized: '', error: 'يرجى كتابة المحتوى باللغة العربية فقط' };
+    // Content filter (defense-in-depth, not the primary security gate)
+    if (!CONTENT_PATTERN.test(sanitized)) {
+        return { isValid: false, sanitized: '', error: 'المحتوى يحتوي على رموز غير مسموحة' };
     }
 
     return { isValid: true, sanitized };
@@ -430,10 +431,12 @@ export function sanitizeLegacyText(input, minLen, maxLen, isRequired) {
         return { isValid: !isRequired, sanitized: null, error: isRequired ? 'هذا الحقل مطلوب' : null };
     }
 
+    // Defense-in-depth: strip dangerous patterns (security does NOT rely on language filtering)
     sanitized = sanitized.replace(/<[^>]*>/g, '');
     sanitized = sanitized.replace(/javascript:/gi, '');
     sanitized = sanitized.replace(/vbscript:/gi, '');
     sanitized = sanitized.replace(/data:/gi, '');
+    sanitized = sanitized.replace(/on\w+\s*=/gi, '');  // inline event handlers
     sanitized = sanitized.replace(/[ \t]+/g, ' ');
     sanitized = sanitized.replace(/\n{3,}/g, '\n\n').trim();
 
@@ -445,8 +448,8 @@ export function sanitizeLegacyText(input, minLen, maxLen, isRequired) {
         return { isValid: false, sanitized: null, error: `المحتوى طويل جدًا (الأقصى ${maxLen} حرف)` };
     }
 
-    if (!ARABIC_PATTERN.test(sanitized)) {
-        return { isValid: false, sanitized: null, error: 'يرجى الكتابة باللغة العربية فقط' };
+    if (!CONTENT_PATTERN.test(sanitized)) {
+        return { isValid: false, sanitized: null, error: 'المحتوى يحتوي على رموز غير مسموحة' };
     }
 
     return { isValid: true, sanitized };
@@ -462,7 +465,8 @@ export function sanitizeExternalLinks(linksArray) {
     }
 
     const validLinks = [];
-    for (const link of linksArray) {
+    for (let i = 0; i < linksArray.length; i++) {
+        const link = linksArray[i];
         if (!link || typeof link !== 'object') continue;
 
         let title = link.title ? link.title.trim().replace(/<[^>]*>/g, '') : '';
@@ -473,11 +477,14 @@ export function sanitizeExternalLinks(linksArray) {
         try {
             const parsed = new URL(url);
             if (parsed.protocol !== 'http:' && parsed.protocol !== 'https:') {
-                continue;
+                return { isValid: false, links: null, error: `الرابط ${i + 1}: يجب أن يبدأ بـ http:// أو https://` };
+            }
+            if (!parsed.hostname || parsed.hostname.length < 3) {
+                return { isValid: false, links: null, error: `الرابط ${i + 1}: عنوان الموقع غير صالح` };
             }
             validLinks.push({ title: title.substring(0, 100), url: parsed.href });
         } catch (e) {
-            continue;
+            return { isValid: false, links: null, error: `الرابط ${i + 1}: رابط غير صالح` };
         }
     }
 
