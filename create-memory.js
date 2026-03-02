@@ -17,8 +17,8 @@
         !window.location.hostname.includes('127.0.0.1');
     const API_BASE = isProduction ? PRODUCTION_API_URL : 'http://localhost:8888';
 
-    // Arabic/English/Numbers pattern (mirrors ARABIC_PATTERN from shared.js)
-    const ARABIC_PATTERN = /^[\u0600-\u06FF\u0750-\u077F\uFB50-\uFDFF\uFE70-\uFEFF\u0660-\u0669\s\d.,،؛:؟!()«»/\-#_…\\\n\r🌿"'a-zA-Z]+$/;
+    // Content pattern: Arabic, English, numbers, common punctuation (mirrors CONTENT_PATTERN from shared.js)
+    const CONTENT_PATTERN = /^[\u0600-\u06FF\u0750-\u077F\uFB50-\uFDFF\uFE70-\uFEFF\u0660-\u0669a-zA-Z0-9\s.,،؛:؟?!()«»\[\]{}\\/\-#_…@+=%&*~^\\\n\r🌿💚🤲🕌📖🌙"']+$/;
 
     const NAME_MAX_LENGTH = 100;
     const MESSAGE_MIN_LENGTH = 3;
@@ -149,15 +149,29 @@
 
     function getExternalLinks() {
         const links = [];
+        const errors = [];
         const rows = linksContainer.querySelectorAll('.link-row');
-        rows.forEach(row => {
+        rows.forEach((row, idx) => {
             const title = row.querySelector('.link-title').value.trim();
             const url = row.querySelector('.link-url').value.trim();
-            if (url) { // Title is optional, URL is required if row exists
-                links.push({ title, url });
+            if (!url) return; // Empty rows are ignored
+
+            try {
+                const parsed = new URL(url);
+                if (parsed.protocol !== 'http:' && parsed.protocol !== 'https:') {
+                    errors.push(`الرابط ${idx + 1}: يجب أن يبدأ بـ http:// أو https://`);
+                    return;
+                }
+                if (!parsed.hostname || parsed.hostname.length < 3) {
+                    errors.push(`الرابط ${idx + 1}: عنوان الموقع غير صالح`);
+                    return;
+                }
+                links.push({ title, url: parsed.href });
+            } catch (e) {
+                errors.push(`الرابط ${idx + 1}: رابط غير صالح "${url.substring(0, 40)}"`);
             }
         });
-        return links.length ? links : null;
+        return { links: links.length ? links : null, errors };
     }
 
     // ═══════════════════════════════════════════════════════════════════
@@ -168,7 +182,7 @@
         if (!trimmed) return required ? `${name} مطلوب` : null;
         if (trimmed.length < min) return `${name} قصير جدًا`;
         if (trimmed.length > max) return `${name} طويل جدًا (الحد ${max})`;
-        if (!ARABIC_PATTERN.test(trimmed)) return 'يرجى كتابة المحتوى باللغة العربية فقط';
+        if (!CONTENT_PATTERN.test(trimmed)) return 'المحتوى يحتوي على رموز غير مسموحة';
         return null;
     }
 
@@ -205,10 +219,14 @@
         const storyErr = validateInput(storyInput.value, 'المواقف', 3, 2000, false);
         if (storyErr) { showFieldError(elements.story.error, storyErr); hasError = true; }
 
-        if (hasError) return;
-
         // Build Payload
-        const externalLinks = getExternalLinks();
+        const linkResult = getExternalLinks();
+        if (linkResult.errors.length > 0) {
+            showFieldError(linksError, linkResult.errors.join('\n'));
+            hasError = true;
+        }
+
+        if (hasError) return;
 
         submitBtn.disabled = true;
         submitBtn.textContent = 'جاري الإرسال...';
@@ -223,7 +241,7 @@
                     biography: bioInput.value.trim(),
                     good_traits: traitsInput.value.trim() || null,
                     ongoing_charity: charityInput.value.trim() || null,
-                    external_links: externalLinks,
+                    external_links: linkResult.links,
                     story: storyInput.value.trim() || null
                 }),
             });
