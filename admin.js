@@ -107,6 +107,7 @@
         adminSection.classList.remove('hidden');
         loadStats();
         loadPending();
+        loadFeedback(); // Initial load to update the badge
     }
 
     // ═══════════════════════════════════════════════════════════════════
@@ -503,6 +504,7 @@
     const feedbackFilter = document.getElementById('feedback-filter');
     const feedbackTotal = document.getElementById('feedback-total');
     const feedbackToast = document.getElementById('feedback-toast');
+    const feedbackBadge = document.getElementById('feedback-badge');
 
     const STATUS_LABELS = {
         'New': 'جديدة',
@@ -549,9 +551,25 @@
                 if (feedbackTotal && result.total != null) {
                     feedbackTotal.textContent = `${result.total} رسالة`;
                 }
+                // Update Badge
+                if (feedbackBadge) {
+                    if (result.new_count > 0) {
+                        feedbackBadge.classList.remove('hidden');
+                    } else {
+                        feedbackBadge.classList.add('hidden');
+                    }
+                }
             } else {
                 feedbackEmptyState.classList.remove('hidden');
                 if (feedbackTotal) feedbackTotal.textContent = '0 رسالة';
+                // Even on empty data, result may carry new_count (e.g. if we are filtering for Archived but have 5 New)
+                if (feedbackBadge) {
+                    if (result.new_count > 0) {
+                        feedbackBadge.classList.remove('hidden');
+                    } else {
+                        feedbackBadge.classList.add('hidden');
+                    }
+                }
             }
         } catch (err) {
             feedbackLoadingEl.classList.add('hidden');
@@ -660,6 +678,11 @@
     }
 
     async function updateFeedbackStatus(msgId, newStatus) {
+        // Prevent race condition: disable all buttons in the card
+        const card = document.getElementById(`feedback-${msgId}`);
+        const btns = card ? card.querySelectorAll('button') : [];
+        btns.forEach(b => b.disabled = true);
+
         try {
             const result = await apiRequest('/api/admin/feedback/update', 'POST', {
                 id: msgId,
@@ -668,12 +691,14 @@
 
             if (result.success) {
                 showToast('تم تحديث الحالة بنجاح');
-                loadFeedback(); // Refresh list
+                loadFeedback(); // Refresh list & badge
             } else {
                 showToast(result.message || 'حدث خطأ في التحديث');
+                btns.forEach(b => b.disabled = false); // Re-enable on failure
             }
         } catch (err) {
             showToast('فشل الاتصال بالخادم');
+            btns.forEach(b => b.disabled = false); // Re-enable on failure
         }
     }
 
