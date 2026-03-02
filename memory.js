@@ -62,9 +62,16 @@
     // Slug Extraction
     // ═══════════════════════════════════════════════════════════════════
     function getSlugFromPath() {
+        // Try path-based: /memory/slug-here
         const parts = window.location.pathname.split('/').filter(Boolean);
         if (parts.length >= 2 && parts[0] === 'memory') {
             return decodeURIComponent(parts[1]);
+        }
+        // Fallback: ?slug=slug-here (direct URL or query-based access)
+        const params = new URLSearchParams(window.location.search);
+        const slugParam = params.get('slug');
+        if (slugParam && slugParam.trim()) {
+            return slugParam.trim();
         }
         return null;
     }
