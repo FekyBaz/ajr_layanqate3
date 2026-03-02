@@ -299,20 +299,30 @@
     function switchTab(tabName) {
         const submissionsTab = document.getElementById('submissions-tab');
         const memoriesTab = document.getElementById('memories-tab');
+        const feedbackTab = document.getElementById('feedback-tab');
         const tabSubmissions = document.getElementById('tab-submissions');
         const tabMemories = document.getElementById('tab-memories');
+        const tabFeedback = document.getElementById('tab-feedback');
+
+        // Hide all tabs
+        submissionsTab.classList.add('hidden');
+        memoriesTab.classList.add('hidden');
+        if (feedbackTab) feedbackTab.classList.add('hidden');
+        tabSubmissions.className = 'btn btn-ghost btn-sm admin-tab';
+        tabMemories.className = 'btn btn-ghost btn-sm admin-tab';
+        if (tabFeedback) tabFeedback.className = 'btn btn-ghost btn-sm admin-tab';
 
         if (tabName === 'submissions') {
             submissionsTab.classList.remove('hidden');
-            memoriesTab.classList.add('hidden');
             tabSubmissions.className = 'btn btn-primary btn-sm admin-tab active';
-            tabMemories.className = 'btn btn-ghost btn-sm admin-tab';
-        } else {
-            submissionsTab.classList.add('hidden');
+        } else if (tabName === 'memories') {
             memoriesTab.classList.remove('hidden');
-            tabSubmissions.className = 'btn btn-ghost btn-sm admin-tab';
             tabMemories.className = 'btn btn-primary btn-sm admin-tab active';
             loadPendingMemories();
+        } else if (tabName === 'feedback') {
+            if (feedbackTab) feedbackTab.classList.remove('hidden');
+            if (tabFeedback) tabFeedback.className = 'btn btn-primary btn-sm admin-tab active';
+            loadFeedback();
         }
     }
 
@@ -481,6 +491,71 @@
     window.loadPending = loadPending;
     window.switchTab = switchTab;
     window.loadPendingMemories = loadPendingMemories;
+    window.loadFeedback = loadFeedback;
+
+    // ═══════════════════════════════════════════════════════════════════
+    // Feedback Messages
+    // ═══════════════════════════════════════════════════════════════════
+    const feedbackList = document.getElementById('feedback-list');
+    const feedbackLoadingEl = document.getElementById('feedback-loading');
+    const feedbackEmptyState = document.getElementById('feedback-empty-state');
+
+    async function loadFeedback() {
+        if (!feedbackList || !feedbackLoadingEl) return;
+        feedbackLoadingEl.classList.remove('hidden');
+        feedbackList.classList.add('hidden');
+        feedbackEmptyState.classList.add('hidden');
+
+        try {
+            const result = await apiRequest('/api/admin/feedback');
+            feedbackLoadingEl.classList.add('hidden');
+
+            if (result.success && result.data && result.data.length > 0) {
+                renderFeedback(result.data);
+                feedbackList.classList.remove('hidden');
+            } else {
+                feedbackEmptyState.classList.remove('hidden');
+            }
+        } catch (err) {
+            feedbackLoadingEl.classList.add('hidden');
+            feedbackEmptyState.classList.remove('hidden');
+        }
+    }
+
+    function renderFeedback(messages) {
+        feedbackList.innerHTML = '';
+        messages.forEach(msg => {
+            const card = document.createElement('div');
+            card.className = 'card';
+            card.style.cssText = 'padding:16px;margin-bottom:12px;border:1px solid var(--color-border);border-radius:12px;background:var(--color-surface);';
+
+            const header = document.createElement('div');
+            header.style.cssText = 'display:flex;justify-content:space-between;align-items:center;margin-bottom:8px;font-size:0.85rem;color:var(--color-text-muted);';
+
+            const nameSpan = document.createElement('span');
+            nameSpan.textContent = msg.name || 'مجهول';
+            header.appendChild(nameSpan);
+
+            const dateSpan = document.createElement('span');
+            dateSpan.textContent = formatDate(msg.created_at);
+            header.appendChild(dateSpan);
+            card.appendChild(header);
+
+            if (msg.email) {
+                const emailEl = document.createElement('p');
+                emailEl.style.cssText = 'font-size:0.8rem;color:var(--color-accent);margin-bottom:8px;direction:ltr;text-align:left;';
+                emailEl.textContent = msg.email;
+                card.appendChild(emailEl);
+            }
+
+            const body = document.createElement('p');
+            body.style.cssText = 'white-space:pre-wrap;line-height:1.8;';
+            body.textContent = msg.message;
+            card.appendChild(body);
+
+            feedbackList.appendChild(card);
+        });
+    }
 
     // ═══════════════════════════════════════════════════════════════════
     // Initialize
