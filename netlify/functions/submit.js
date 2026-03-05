@@ -40,19 +40,23 @@ export async function handler(event, context) {
         try {
             body = JSON.parse(event.body || '{}');
         } catch (e) {
+            logger.error('[submit] JSON parse error:', e.message);
             return error(400, 'طلب غير صالح', origin);
         }
 
         const { message, content_type, author_name } = body;
+        logger.info('[submit] Received:', { content_type, messageLength: message?.length, hasAuthor: !!author_name });
 
         // Validate content type
         if (!validateContentType(content_type)) {
+            logger.warn('[submit] Invalid content_type:', content_type);
             return error(400, 'نوع المحتوى غير صالح', origin);
         }
 
         // Sanitize message
         const messageResult = sanitizeMessage(message);
         if (!messageResult.isValid) {
+            logger.warn('[submit] Sanitize failed:', messageResult.error);
             return error(400, messageResult.error, origin);
         }
 
@@ -70,6 +74,8 @@ export async function handler(event, context) {
             .digest('hex')
             .substring(0, 32);
 
+        logger.info('[submit] Calling submit_post RPC...');
+
         // Call atomic check-and-insert RPC to prevent rate limit bypass race conditions
         const { data: result, error: rpcError } = await supabaseAdmin.rpc('submit_post', {
             p_message: messageResult.sanitized,
@@ -82,9 +88,11 @@ export async function handler(event, context) {
         });
 
         if (rpcError) {
-            logger.error('Submit RPC error:', rpcError.message);
-            return error(500, 'حدث خطأ. يرجى المحاولة لاحقًا.', origin);
+            logger.error('[submit] RPC error:', rpcError.message, '| details:', rpcError.details, '| hint:', rpcError.hint, '| code:', rpcError.code);
+            return error(500, 'حدث خطأ. يرجى المحاولة لاحقًا.', origin, `RPC: ${rpcError.message} | Code: ${rpcError.code}`);
         }
+
+        logger.info('[submit] RPC result:', JSON.stringify(result));
 
         if (!result.success) {
             if (result.reason === 'rate_limit_exceeded') {
@@ -96,7 +104,7 @@ export async function handler(event, context) {
         return success({ message: 'تم استلام مشاركتك. جزاك الله خيرًا.' }, origin);
 
     } catch (err) {
-        logger.error('Unexpected error:', err.message);
-        return error(500, 'حدث خطأ. يرجى المحاولة لاحقًا.', origin);
+        logger.error('[submit] Unexpected error:', err.message, err.stack);
+        return error(500, 'حدث خطأ. يرجى المحاولة لاحقًا.', origin, err.message);
     }
 }
