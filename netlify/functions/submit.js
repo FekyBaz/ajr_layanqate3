@@ -74,7 +74,7 @@ export async function handler(event, context) {
             .digest('hex')
             .substring(0, 32);
 
-        logger.info('[submit] Calling submit_post RPC...');
+        logger.info('[submit] Calling submit_post RPC...', { ipHash, clientIP, rateLimitMax: parseInt(process.env.RATE_LIMIT_MAX || '10', 10), rateLimitHours: parseInt(process.env.RATE_LIMIT_WINDOW || '24', 10) });
 
         // Call atomic check-and-insert RPC to prevent rate limit bypass race conditions
         const { data: result, error: rpcError } = await supabaseAdmin.rpc('submit_post', {
@@ -96,6 +96,7 @@ export async function handler(event, context) {
 
         if (!result.success) {
             if (result.reason === 'rate_limit_exceeded') {
+                logger.warn('[submit] Rate limited!', { ipHash, result: JSON.stringify(result) });
                 return error(429, 'تم تجاوز الحد المسموح من المشاركات. يرجى المحاولة لاحقًا.', origin);
             }
             // duplicate goes here, we return success
