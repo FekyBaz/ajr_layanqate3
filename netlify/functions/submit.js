@@ -35,14 +35,48 @@ export async function handler(event, context) {
     }
 
     try {
+        // Parse request body
+        let body;
+        try {
+            body = JSON.parse(event.body || '{}');
+        } catch (e) {
+            return error(400, 'طلب غير صالح', origin);
+        }
+
+        const { message, content_type, author_name } = body;
+
+        // Validate content type
+        if (!validateContentType(content_type)) {
+            return error(400, 'نوع المحتوى غير صالح', origin);
+        }
+
+        // Sanitize message
+        const messageResult = sanitizeMessage(message);
+        if (!messageResult.isValid) {
+            return error(400, messageResult.error, origin);
+        }
+
+        // Sanitize name (optional)
+        const sanitizedName = sanitizeName(author_name);
+
+        // Generate message hash for duplicate detection
+        const messageHash = generateMessageHash(messageResult.sanitized);
+
         // Get client IP and check rate limit
-        // Use atomic check-and-insert RPC to prevent rate limit bypass race conditions
+        const clientIP = getClientIP(event);
+        const ipHash = crypto
+            .createHash('sha256')
+            .update((clientIP || 'unknown') + (process.env.IP_SALT || ''))
+            .digest('hex')
+            .substring(0, 32);
+
+        // Call atomic check-and-insert RPC to prevent rate limit bypass race conditions
         const { data: result, error: rpcError } = await supabaseAdmin.rpc('submit_post', {
             p_message: messageResult.sanitized,
             p_message_hash: messageHash,
             p_content_type: content_type,
             p_author_name: sanitizedName,
-            p_ip_hash: crypto.createHash('sha256').update((clientIP || 'unknown') + (process.env.IP_SALT || '')).digest('hex').substring(0, 32),
+            p_ip_hash: ipHash,
             p_rate_limit_max: parseInt(process.env.RATE_LIMIT_MAX || '10', 10),
             p_rate_limit_hours: parseInt(process.env.RATE_LIMIT_WINDOW || '24', 10),
         });
