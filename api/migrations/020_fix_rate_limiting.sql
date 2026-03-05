@@ -1,13 +1,33 @@
 -- ═══════════════════════════════════════════════════════════════════════════
 -- أجر لا ينقطع — Migration 020
--- Fix rate limiting: Include count in response + cleanup stale entries
+-- Fix: Add proper UNIQUE constraint on message_hash for ON CONFLICT support
+-- ═══════════════════════════════════════════════════════════════════════════
+-- Root Cause: The submit_post RPC uses ON CONFLICT (message_hash) DO NOTHING,
+-- but the existing index (idx_submissions_message_hash) is a PARTIAL index
+-- with a WHERE clause. PostgreSQL requires a non-partial UNIQUE index/constraint
+-- for ON CONFLICT to work.
 -- ═══════════════════════════════════════════════════════════════════════════
 
--- 1. Clean ALL old rate_limit entries (reset the counter)
-DELETE FROM public.rate_limits
-WHERE created_at < now() - interval '24 hours';
+-- 1. Drop the old partial unique index
+DROP INDEX IF EXISTS idx_submissions_message_hash;
 
--- 2. Update submit_post RPC to include count in rate_limit_exceeded response
+-- 2. Ensure all rows have a message_hash (fill NULLs with md5)
+UPDATE submissions
+SET message_hash = md5(message)
+WHERE message_hash IS NULL;
+
+-- 3. Make message_hash NOT NULL going forward
+ALTER TABLE submissions
+ALTER COLUMN message_hash SET NOT NULL;
+
+-- 4. Create a proper (non-partial) UNIQUE constraint
+ALTER TABLE submissions
+ADD CONSTRAINT uq_submissions_message_hash UNIQUE (message_hash);
+
+-- 5. Clean up old rate limit entries
+DELETE FROM public.rate_limits;
+
+-- 6. Update submit_post RPC to include count in rate_limit_exceeded response
 CREATE OR REPLACE FUNCTION public.submit_post(
     p_message text,
     p_message_hash text,
@@ -32,7 +52,7 @@ BEGIN
     -- [SECURITY] 64-bit advisory lock to prevent race conditions
     PERFORM pg_advisory_xact_lock(hashtextextended('rate_limit_' || p_ip_hash, 0));
 
-    -- Check rate limit (transactional & locked)
+    -- Check rate limit
     SELECT count(*) INTO v_recent_count
     FROM rate_limits
     WHERE ip_hash = p_ip_hash
@@ -48,7 +68,7 @@ BEGIN
         );
     END IF;
 
-    -- [ATOMICITY] Use ON CONFLICT for duplicate handling
+    -- Insert with duplicate detection via the new UNIQUE constraint
     INSERT INTO submissions (message, message_hash, content_type, author_name)
     VALUES (p_message, p_message_hash, p_content_type, COALESCE(p_author_name, 'فاعل خير'))
     ON CONFLICT (message_hash) DO NOTHING
@@ -58,7 +78,7 @@ BEGIN
         RETURN jsonb_build_object('success', true, 'reason', 'duplicate_silent_success');
     END IF;
 
-    -- Record request for rate limiting (atomic with submission)
+    -- Record request for rate limiting
     INSERT INTO rate_limits (ip_hash) VALUES (p_ip_hash);
 
     RETURN jsonb_build_object('success', true, 'submission_id', v_submission_id);
