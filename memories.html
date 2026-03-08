@@ -1,0 +1,40 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>صفحات الذكرى | أجر لا ينقطع</title>
+    <meta name="description" content="تصفح جميع صفحات الصدقة الجارية المعتمدة والمنشورة.">
+    <link rel="stylesheet" href="styles.css?v=20260227">
+</head>
+
+<body class="community-body">
+    <main class="memories-page site-container">
+        <header class="community-header memories-page__header">
+            <nav class="community-nav">
+                <a href="/index.html" class="btn btn-ghost btn-sm">العودة للرئيسية</a>
+            </nav>
+            <div class="community-header__intro">
+                <h1>🕊 صفحات الذكرى</h1>
+                <p>هنا تجد جميع صفحات الصدقة الجارية المعتمدة، وليس عينة مختصرة فقط.</p>
+            </div>
+        </header>
+
+        <section id="memoriesState" class="state-message card card-outline">جارٍ تحميل الصفحات...</section>
+
+        <section id="memoriesList" class="recent-memories__list memories-page__list" hidden></section>
+
+        <nav id="memoriesPagination" class="pagination memories-page__pagination" hidden>
+            <button id="memoriesPrev" type="button">السابق</button>
+            <span id="memoriesPageInfo"></span>
+            <button id="memoriesNext" type="button">التالي</button>
+        </nav>
+
+        <a href="/create-memory" class="recent-memories__cta memories-page__cta">✍️ أنشئ صفحة صدقة جارية</a>
+    </main>
+
+    <script src="memories.js?v=20260227"></script>
+</body>
+
+</html>
