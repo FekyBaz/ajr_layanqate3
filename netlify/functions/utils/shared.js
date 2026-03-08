@@ -209,8 +209,9 @@ export async function validateAdminWithRateLimit(event) {
 
     // [SECURITY] We log EVERY attempt, including failures, to prevent brute-forcing.
     // This happens BEFORE we return 'valid: false' to ensure failed attempts are counted.
+    // Tagged as 'admin' source to avoid polluting user submission rate limits.
     try {
-        await recordRequest(clientIP);
+        await recordRequest(clientIP, 'admin');
     } catch (logLimitError) {
         logger.error('Admin attempt logging failed:', logLimitError.message);
     }
@@ -223,11 +224,12 @@ export async function validateAdminWithRateLimit(event) {
         const windowStart = new Date();
         windowStart.setHours(windowStart.getHours() - ADMIN_RATE_LIMIT_WINDOW_HOURS);
 
-        // Uses the composite index (ip_hash, created_at)
+        // Uses the composite index (ip_hash, source, created_at)
         const { count, error: countError } = await supabaseAdmin
             .from('rate_limits')
-            .select('id', { head: true })
+            .select('id', { head: true, count: 'exact' })
             .eq('ip_hash', ipHash)
+            .eq('source', 'admin')
             .gte('created_at', windowStart.toISOString());
 
         if (countError) {
@@ -338,7 +340,7 @@ export function generateMessageHash(message) {
 const RATE_LIMIT_WINDOW = parseInt(process.env.RATE_LIMIT_WINDOW || '24', 10); // hours
 const RATE_LIMIT_MAX = parseInt(process.env.RATE_LIMIT_MAX || '10', 10);
 
-export async function checkRateLimit(ip) {
+export async function checkRateLimit(ip, source = 'submit') {
     const windowStart = new Date();
     windowStart.setHours(windowStart.getHours() - RATE_LIMIT_WINDOW);
 
@@ -348,8 +350,9 @@ export async function checkRateLimit(ip) {
     try {
         const { count, error: countError } = await supabaseAdmin
             .from('rate_limits')
-            .select('id', { head: true })
+            .select('id', { head: true, count: 'exact' })
             .eq('ip_hash', ipHash)
+            .eq('source', source)
             .gte('created_at', windowStart.toISOString());
 
         if (countError) {
@@ -367,13 +370,13 @@ export async function checkRateLimit(ip) {
     }
 }
 
-export async function recordRequest(ip) {
+export async function recordRequest(ip, source = 'submit') {
     const ipHash = crypto.createHash('sha256').update(ip || 'unknown').digest('hex').substring(0, 32);
 
     try {
         await supabaseAdmin
             .from('rate_limits')
-            .insert({ ip_hash: ipHash });
+            .insert({ ip_hash: ipHash, source });
     } catch (err) {
         logger.error('Record request error:', err.message);
     }
