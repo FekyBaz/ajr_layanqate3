@@ -147,12 +147,6 @@ const submitLimiter = rateLimit({
 const VALID_CONTENT_TYPES = ['dhikr', 'dua', 'ayah', 'hadith', 'benefit'];
 
 /**
- * Content pattern: Arabic, English, numbers, common punctuation, whitespace, emojis
- * Security does NOT depend on this filter — HTML/script stripping + parameterized queries are the real gates.
- */
-const CONTENT_PATTERN = /^[\u0600-\u06FF\u0750-\u077F\uFB50-\uFDFF\uFE70-\uFEFF\u0660-\u0669a-zA-Z0-9\s.,،؛:؟?!()«»\[\]{}\/\-#_…@+=%&*~^\\\n\r🌿💚🤲🕌📖🌙"']+$/;
-
-/**
  * Sanitizes and validates the message content
  * @param {string} input - Raw message input
  * @returns {{ isValid: boolean, sanitized: string, error?: string }}
@@ -194,11 +188,6 @@ function sanitizeMessage(input) {
     // Check maximum length (1000 characters)
     if (sanitized.length > 1000) {
         return { isValid: false, sanitized: '', error: 'المحتوى طويل جدًا' };
-    }
-
-    // Content filter (defense-in-depth)
-    if (!CONTENT_PATTERN.test(sanitized)) {
-        return { isValid: false, sanitized: '', error: 'المحتوى يحتوي على رموز غير مسموحة' };
     }
 
     return { isValid: true, sanitized };
