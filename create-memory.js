@@ -1,7 +1,7 @@
 /**
  * ═══════════════════════════════════════════════════════════════════════════
  * أجر لا ينقطع - Create Memory Form Script (create-memory.js)
- * Handles memory creation: Arabic-only validation, character limits,
+ * Handles memory creation: character limits,
  * client-side rate limit indicator, form submission.
  * ═══════════════════════════════════════════════════════════════════════════
  */
@@ -17,8 +17,6 @@
         !window.location.hostname.includes('127.0.0.1');
     const API_BASE = isProduction ? PRODUCTION_API_URL : 'http://localhost:8888';
 
-    // Content pattern: Arabic, English, numbers, common punctuation (mirrors CONTENT_PATTERN from shared.js)
-    const CONTENT_PATTERN = /^[\u0600-\u06FF\u0750-\u077F\uFB50-\uFDFF\uFE70-\uFEFF\u0660-\u0669a-zA-Z0-9\s.,،؛:؟?!()«»\[\]{}\\/\-#_…@+=%&*~^\\\n\r🌿💚🤲🕌📖🌙"']+$/;
 
     const NAME_MAX_LENGTH = 100;
     const MESSAGE_MIN_LENGTH = 3;
@@ -182,7 +180,6 @@
         if (!trimmed) return required ? `${name} مطلوب` : null;
         if (trimmed.length < min) return `${name} قصير جدًا`;
         if (trimmed.length > max) return `${name} طويل جدًا (الحد ${max})`;
-        if (!CONTENT_PATTERN.test(trimmed)) return 'المحتوى يحتوي على رموز غير مسموحة';
         return null;
     }
 
