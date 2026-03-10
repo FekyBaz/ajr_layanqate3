@@ -250,10 +250,6 @@ export async function validateAdminWithRateLimit(event) {
 // Input Sanitization
 // ═══════════════════════════════════════════════════════════════════════════
 
-// Content pattern: Arabic, English, numbers, common punctuation, whitespace, emojis
-// Security does NOT depend on this filter — HTML/script stripping + parameterized RPCs are the real gates.
-const CONTENT_PATTERN = /^[\u0600-\u06FF\u0750-\u077F\uFB50-\uFDFF\uFE70-\uFEFF\u0660-\u0669a-zA-Z0-9\s.,،؛:؟?!()«»\[\]{}\/\-#_…@+=%&*~^\\\n\r🌿💚🤲🕌📖🌙"']+$/;
-
 export function sanitizeMessage(input) {
     if (typeof input !== 'string') {
         return { isValid: false, sanitized: '', error: 'المحتوى مطلوب' };
@@ -265,7 +261,7 @@ export function sanitizeMessage(input) {
         return { isValid: false, sanitized: '', error: 'المحتوى مطلوب' };
     }
 
-    // Defense-in-depth: strip HTML/script even though Arabic regex is the primary gate
+    // Defense-in-depth: strip HTML/script; security relies on sanitization + parameterized operations
     sanitized = sanitized.replace(/<[^>]*>/g, '');
     sanitized = sanitized.replace(/javascript:/gi, '');
     sanitized = sanitized.replace(/vbscript:/gi, '');
@@ -284,11 +280,6 @@ export function sanitizeMessage(input) {
 
     if (sanitized.length > 1000) {
         return { isValid: false, sanitized: '', error: 'المحتوى طويل جدًا' };
-    }
-
-    // Content filter (defense-in-depth, not the primary security gate)
-    if (!CONTENT_PATTERN.test(sanitized)) {
-        return { isValid: false, sanitized: '', error: 'المحتوى يحتوي على رموز غير مسموحة' };
     }
 
     return { isValid: true, sanitized };
@@ -449,10 +440,6 @@ export function sanitizeLegacyText(input, minLen, maxLen, isRequired) {
 
     if (sanitized.length > maxLen) {
         return { isValid: false, sanitized: null, error: `المحتوى طويل جدًا (الأقصى ${maxLen} حرف)` };
-    }
-
-    if (!CONTENT_PATTERN.test(sanitized)) {
-        return { isValid: false, sanitized: null, error: 'المحتوى يحتوي على رموز غير مسموحة' };
     }
 
     return { isValid: true, sanitized };
