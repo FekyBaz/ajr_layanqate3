@@ -40,15 +40,10 @@ function getColumnsCount(container) {
 }
 
 function buildShareUrl(martyrId) {
-  const url = new URL(window.location.href);
-  url.searchParams.set('id', martyrId);
-  return url.toString();
+  return `${window.location.origin}/martyrs?id=${encodeURIComponent(String(martyrId))}`;
 }
 
 function renderItem(martyr, { selectedId }) {
-  const shareUrl = buildShareUrl(martyr.id);
-  const shareText = encodeURIComponent('اللهم تقبل هذا الشهيد في جناتك');
-  const encodedUrl = encodeURIComponent(shareUrl);
   const isSelected = String(selectedId || '') === String(martyr.id);
 
   return `
@@ -59,9 +54,7 @@ function renderItem(martyr, { selectedId }) {
       <p class="martyr-birth-year">${getBirthYearLabel(martyr.birthYear)}</p>
       <div class="martyr-actions">
         <button class="dua-button" type="button" data-dua-id="${martyr.id}">🤲 ادعُ له</button>
-        <a class="share-link" href="https://wa.me/?text=${shareText}%20${encodedUrl}" target="_blank" rel="noopener noreferrer">واتساب</a>
-        <a class="share-link" href="https://twitter.com/intent/tweet?text=${shareText}&url=${encodedUrl}" target="_blank" rel="noopener noreferrer">تويتر</a>
-        <a class="share-link" href="https://www.facebook.com/sharer/sharer.php?u=${encodedUrl}&quote=${shareText}" target="_blank" rel="noopener noreferrer">فيسبوك</a>
+        <button class="share-link" type="button" data-share-id="${martyr.id}">🔗 مشاركة</button>
       </div>
       ${isSelected ? '<p class="martyr-details-panel">اللهم اجعل مثواه الجنة واربط على قلوب أهله.</p>' : ''}
     </li>
@@ -144,6 +137,14 @@ export function renderMartyrsList(container, martyrs, options = {}) {
       button.addEventListener('click', () => {
         if (typeof options.onDuaClick === 'function') {
           options.onDuaClick(button.dataset.duaId);
+        }
+      });
+    });
+
+    container.querySelectorAll('[data-share-id]').forEach((button) => {
+      button.addEventListener('click', () => {
+        if (typeof options.onShareClick === 'function') {
+          options.onShareClick(button.dataset.shareId, buildShareUrl(button.dataset.shareId));
         }
       });
     });
