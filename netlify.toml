@@ -38,6 +38,11 @@
   to = "/.netlify/functions/health"
   status = 200
 
+[[redirects]]
+  from = "/api/fatiha-counter"
+  to = "/.netlify/functions/fatiha-counter"
+  status = 200
+
 # Admin API
 [[redirects]]
   from = "/api/admin/pending"
