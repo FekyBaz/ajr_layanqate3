@@ -3,15 +3,24 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>شهداء غزة | أجر لا ينقطع</title>
+  <title>شهداء غزة | أسماء الشهداء وإحصائياتهم</title>
+  <meta name="description" content="صفحة تعرض أسماء شهداء غزة مع إحصائيات تفصيلية عن الأعمار والذكور والإناث.">
   <link rel="stylesheet" href="./base.css">
   <link rel="stylesheet" href="./martyrs.css">
 </head>
 <body>
   <main class="martyrs-page">
     <section class="hero-section">
-      <h1>شهداء غزة</h1>
-      <p id="hero-count">-</p>
+      <div>
+        <h1>شهداء غزة</h1>
+        <p id="hero-count">-</p>
+        <p class="hero-subtitle">يمكنك قراءة الفاتحة بنية الدعاء لهم جميعًا</p>
+      </div>
+
+      <div class="fatiha-box">
+        <button id="fatiha-button" class="fatiha-button" type="button">اقرأ الفاتحة</button>
+        <p id="fatiha-count" class="fatiha-count">تمت قراءة الفاتحة ٠ مرة</p>
+      </div>
     </section>
 
     <p id="loading-state" class="state loading">جاري تحميل بيانات الشهداء...</p>
@@ -19,6 +28,8 @@
 
     <div id="martyrs-app" hidden>
       <div id="stats-container"></div>
+      <div id="charts-container"></div>
+      <div id="controls-container"></div>
       <div id="list-container"></div>
       <div id="load-more-container" class="load-more-container"></div>
     </div>
