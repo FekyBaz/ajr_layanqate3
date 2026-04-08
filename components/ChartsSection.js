@@ -1,14 +1,26 @@
 let genderChart = null;
 let ageChart = null;
+let decadeChart = null;
 let lastSignature = '';
 
 function getStatsSignature(stats) {
-  return [stats.males, stats.females, stats.children, stats.adults, stats.elderly].join('-');
+  return [stats.males, stats.females, stats.children, stats.adults, stats.elderly, JSON.stringify(stats.byDecade || {})].join('-');
 }
 
 function getThemeColor(variableName, fallback) {
   const value = getComputedStyle(document.documentElement).getPropertyValue(variableName).trim();
   return value || fallback;
+}
+
+function getDecadeData(byDecade = {}) {
+  const sorted = Object.entries(byDecade)
+    .sort((a, b) => Number(a[0]) - Number(b[0]))
+    .slice(-7);
+
+  return {
+    labels: sorted.map(([decade]) => `${decade}s`),
+    values: sorted.map(([, count]) => count)
+  };
 }
 
 export function renderChartsSection(container, stats) {
@@ -35,14 +47,20 @@ export function renderChartsSection(container, stats) {
           </ul>
         </div>
       </article>
+      <article class="chart-card chart-card-wide">
+        <h3>التوزيع حسب عقد الميلاد</h3>
+        <canvas id="decade-chart" aria-label="توزيع الشهداء حسب عقود الميلاد" role="img"></canvas>
+      </article>
     </section>
   `;
 
   const genderCtx = container.querySelector('#gender-chart');
   const ageCtx = container.querySelector('#age-chart');
+  const decadeCtx = container.querySelector('#decade-chart');
 
   if (genderChart) genderChart.destroy();
   if (ageChart) ageChart.destroy();
+  if (decadeChart) decadeChart.destroy();
 
   const accentPrimary = getThemeColor('--color-accent-primary', '#8c6a35');
   const accentHover = getThemeColor('--color-accent-hover', '#74562b');
@@ -52,46 +70,37 @@ export function renderChartsSection(container, stats) {
     type: 'pie',
     data: {
       labels: ['الذكور', 'الإناث'],
-      datasets: [
-        {
-          data: [stats.males, stats.females],
-          backgroundColor: [accentPrimary, gold]
-        }
-      ]
+      datasets: [{ data: [stats.males, stats.females], backgroundColor: [accentPrimary, gold] }]
     },
-    options: {
-      responsive: true,
-      plugins: {
-        legend: {
-          position: 'bottom'
-        }
-      }
-    }
+    options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { position: 'bottom' } } }
   });
 
   ageChart = new Chart(ageCtx, {
     type: 'bar',
     data: {
       labels: ['الأطفال', 'البالغون', 'كبار السن'],
-      datasets: [
-        {
-          data: [stats.children, stats.adults, stats.elderly],
-          backgroundColor: [gold, accentPrimary, accentHover]
-        }
-      ]
+      datasets: [{ data: [stats.children, stats.adults, stats.elderly], backgroundColor: [gold, accentPrimary, accentHover] }]
     },
     options: {
       responsive: true,
-      plugins: {
-        legend: {
-          display: false
-        }
-      },
-      scales: {
-        y: {
-          beginAtZero: true
-        }
-      }
+      maintainAspectRatio: false,
+      plugins: { legend: { display: false } },
+      scales: { y: { beginAtZero: true } }
+    }
+  });
+
+  const decadeData = getDecadeData(stats.byDecade);
+  decadeChart = new Chart(decadeCtx, {
+    type: 'bar',
+    data: {
+      labels: decadeData.labels,
+      datasets: [{ data: decadeData.values, backgroundColor: accentPrimary, borderRadius: 6 }]
+    },
+    options: {
+      responsive: true,
+      maintainAspectRatio: false,
+      plugins: { legend: { display: false } },
+      scales: { y: { beginAtZero: true } }
     }
   });
 

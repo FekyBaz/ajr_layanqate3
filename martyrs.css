@@ -9,13 +9,8 @@
   --accent-soft: var(--color-accent-light, rgba(140, 106, 53, 0.14));
 }
 
-* {
-  box-sizing: border-box;
-}
-
-html {
-  scroll-behavior: smooth;
-}
+* { box-sizing: border-box; }
+html { scroll-behavior: smooth; }
 
 body {
   margin: 0;
@@ -25,11 +20,7 @@ body {
   line-height: 1.7;
 }
 
-.martyrs-page {
-  max-width: 1500px;
-  margin: 0 auto;
-  padding: 1rem;
-}
+.martyrs-page { max-width: 1500px; margin: 0 auto; padding: 1rem; }
 
 .hero-section {
   background: linear-gradient(135deg, var(--card), #f4eddf);
@@ -43,321 +34,109 @@ body {
   align-items: flex-start;
 }
 
-.hero-section h1 {
-  margin: 0;
-  font-size: clamp(1.4rem, 2.4vw, 2rem);
-}
+.hero-section h1 { margin: 0; font-size: clamp(1.4rem, 2.4vw, 2rem); }
+.hero-section #hero-count { margin: 0.5rem 0 0; color: var(--accent); font-size: clamp(1.05rem, 2vw, 1.3rem); font-weight: 700; }
+.hero-subtitle { margin: 0.3rem 0 0; color: var(--muted); font-size: 1rem; }
 
-.hero-section #hero-count {
-  margin: 0.5rem 0 0;
-  color: var(--accent);
-  font-size: clamp(1.05rem, 2vw, 1.3rem);
-  font-weight: 700;
-}
-
-.hero-subtitle {
-  margin: 0.3rem 0 0;
-  color: var(--muted);
-  font-size: 1rem;
-}
-
-.fatiha-box {
-  display: flex;
-  flex-direction: column;
-  gap: 0.4rem;
-}
-
+.fatiha-box { display: flex; flex-direction: column; gap: 0.4rem; }
 .fatiha-button {
-  border: 0;
-  background: var(--accent);
-  color: #fff;
-  border-radius: 999px;
-  padding: 0.55rem 1.1rem;
-  font-size: 1rem;
-  cursor: pointer;
-  transition: background-color 0.2s ease, opacity 0.2s ease, transform 0.2s ease;
+  border: 0; background: var(--accent); color: #fff; border-radius: 999px; padding: 0.55rem 1.1rem;
+  font-size: 1rem; cursor: pointer; transition: background-color .2s ease, opacity .2s ease, transform .2s ease;
 }
+.fatiha-button:hover { background: var(--accent-hover); }
+.fatiha-button:disabled { opacity: .72; cursor: not-allowed; }
+.fatiha-count { margin: 0; color: var(--muted); font-size: .96rem; }
+.fatiha-cooldown { margin: 0; min-height: 1.2rem; color: var(--accent-hover); font-size: .92rem; }
+.pulse { animation: pulse 500ms ease; }
+@keyframes pulse { 0% { transform: scale(1);} 50% {transform: scale(1.04);} 100% {transform: scale(1);} }
 
-.fatiha-button:hover {
-  background: var(--accent-hover);
-}
+.state { text-align: center; margin: 0.75rem 0 1.25rem; font-size: 1rem; }
+.error { color: #b91c1c; }
 
-.fatiha-button:disabled {
-  opacity: 0.72;
-  cursor: not-allowed;
-}
-
-.fatiha-count {
-  margin: 0;
-  color: var(--muted);
-  font-size: 0.96rem;
-}
-
-.state {
-  text-align: center;
-  margin: 0.75rem 0 1.25rem;
-  font-size: 1rem;
-}
-
-.error {
-  color: #b91c1c;
-}
-
-.stats-section {
-  display: grid;
-  grid-template-columns: 1fr;
-  gap: 0.75rem;
-  margin-bottom: 1rem;
-}
-
-.stat-card {
-  background: var(--card);
-  border: 1px solid var(--border);
-  border-radius: 12px;
-  padding: 0.9rem 1rem;
-  box-shadow: 0 4px 12px rgba(140, 106, 53, 0.08);
-}
-
-.stat-card h3 {
-  margin: 0;
-  color: var(--muted);
-  font-size: 0.95rem;
-}
-
-.stat-card p {
-  margin: 0.35rem 0 0;
-  font-size: 1.3rem;
-  font-weight: 700;
-}
-
-.charts-section {
-  display: grid;
-  gap: 0.75rem;
-  margin-bottom: 1rem;
-}
-
-.chart-card {
-  background: var(--card);
+.featured-martyr {
+  background: linear-gradient(135deg, #fbf5e7, var(--card));
   border: 1px solid var(--border);
   border-radius: 12px;
   padding: 1rem;
-}
-
-.age-categories-explanation {
-  margin-top: 0.8rem;
-  padding-top: 0.75rem;
-  border-top: 1px dashed var(--border);
-  color: var(--muted);
-  text-align: right;
-}
-
-.age-categories-explanation h4 {
-  margin: 0 0 0.35rem;
-  color: var(--text);
-  font-size: 0.98rem;
-}
-
-.age-categories-explanation ul {
-  margin: 0;
-  padding-inline-start: 1.1rem;
-}
-
-.age-categories-explanation li {
-  margin-bottom: 0.2rem;
-}
-
-.chart-card h3 {
-  margin: 0 0 0.75rem;
-  font-size: 1rem;
-}
-
-.controls-section {
   margin-bottom: 1rem;
 }
+.featured-martyr h2, .featured-martyr h3 { margin: 0 0 .35rem; }
+.featured-martyr p { margin: .25rem 0; color: var(--muted); }
+.featured-fatiha-button { margin-top: .5rem; }
 
-.search-input {
-  width: 100%;
-  border: 1px solid var(--border);
-  border-radius: 10px;
-  padding: 0.75rem 0.9rem;
-  font: inherit;
-  background: var(--card);
+.stats-section { display: grid; grid-template-columns: 1fr; gap: .75rem; margin-bottom: 1rem; }
+.stat-card { background: var(--card); border: 1px solid var(--border); border-radius: 12px; padding: .9rem 1rem; box-shadow: 0 4px 12px rgba(140, 106, 53, .08); }
+.stat-card h3 { margin: 0; color: var(--muted); font-size: .95rem; }
+.stat-card p { margin: .35rem 0 0; font-size: 1.3rem; font-weight: 700; }
+
+.charts-section { display: grid; gap: .75rem; margin-bottom: 1rem; }
+.chart-card { background: var(--card); border: 1px solid var(--border); border-radius: 12px; padding: 1rem; min-height: 320px; }
+.chart-card canvas { width: 100% !important; height: 240px !important; }
+.age-categories-explanation { margin-top: .8rem; padding-top: .75rem; border-top: 1px dashed var(--border); color: var(--muted); text-align: right; }
+.age-categories-explanation h4 { margin: 0 0 .35rem; color: var(--text); font-size: .98rem; }
+.age-categories-explanation ul { margin: 0; padding-inline-start: 1.1rem; }
+.age-categories-explanation li { margin-bottom: .2rem; }
+.chart-card h3 { margin: 0 0 .75rem; font-size: 1rem; }
+
+.controls-section { margin-bottom: 1rem; position: sticky; top: .5rem; z-index: 8; background: var(--bg); padding: .4rem 0; }
+.search-input { width: 100%; border: 1px solid var(--border); border-radius: 10px; padding: .75rem .9rem; font: inherit; background: var(--card); }
+.filter-buttons { margin-top: .75rem; display: flex; flex-wrap: wrap; gap: .5rem; }
+.filter-button { border: 1px solid var(--border); background: var(--card); color: var(--text); border-radius: 999px; padding: .42rem .9rem; cursor: pointer; font: inherit; }
+.filter-button.active { background: var(--accent); color: #fff; border-color: var(--accent); }
+
+#list-container { height: min(75vh, 980px); overflow: auto; padding-inline: .1rem; }
+.martyrs-list { list-style: none; padding: 0; margin: 0; display: grid; grid-template-columns: 1fr; gap: .75rem; }
+.virtual-spacer { width: 100%; }
+.martyr-item { background: var(--card); border: 1px solid var(--border); border-radius: 12px; padding: 1rem; transition: transform .2s ease, box-shadow .2s ease, border-color .2s ease; }
+.martyr-item.highlighted { border-color: var(--accent); box-shadow: 0 0 0 2px var(--accent-soft); }
+.martyr-name { margin: 0; font-size: 1.05rem; line-height: 1.8; }
+.martyr-meta, .martyr-age, .martyr-birth-year { margin: .3rem 0 0; color: var(--muted); font-size: .98rem; }
+.martyr-age { color: var(--text); font-weight: 600; }
+.martyr-actions { margin-top: .55rem; display: flex; flex-wrap: wrap; gap: .4rem; }
+.dua-button, .share-link {
+  border: 1px solid var(--border); background: #fff; color: var(--text); text-decoration: none;
+  border-radius: 999px; padding: .25rem .7rem; font-size: .84rem;
 }
+.dua-button { cursor: pointer; }
+.martyr-details-panel { margin: .55rem 0 0; background: var(--accent-soft); border-radius: 8px; padding: .45rem .65rem; color: var(--text); }
 
-.filter-buttons {
-  margin-top: 0.75rem;
-  display: flex;
-  flex-wrap: wrap;
-  gap: 0.5rem;
+.dua-toast {
+  position: fixed; left: 50%; bottom: 22px; transform: translateX(-50%);
+  background: var(--card); border: 1px solid var(--border); border-radius: 10px;
+  padding: .7rem .85rem; min-width: 260px; max-width: calc(100vw - 2rem);
+  display: flex; align-items: center; justify-content: space-between; gap: .7rem; z-index: 99;
+  box-shadow: 0 8px 20px rgba(0,0,0,.08);
 }
+.dua-toast p { margin: 0; }
+.dua-toast button { border: 0; background: transparent; cursor: pointer; color: var(--muted); }
 
-.filter-button {
-  border: 1px solid var(--border);
-  background: var(--card);
-  color: var(--text);
-  border-radius: 999px;
-  padding: 0.42rem 0.9rem;
-  cursor: pointer;
-  font: inherit;
-}
-
-.filter-button.active {
-  background: var(--accent);
-  color: #fff;
-  border-color: var(--accent);
-}
-
-.martyrs-list {
-  list-style: none;
-  padding: 0;
-  margin: 0;
-  display: grid;
-  grid-template-columns: 1fr;
-  gap: 0.75rem;
-}
-
-.martyr-item {
-  background: var(--card);
-  border: 1px solid var(--border);
-  border-radius: 12px;
-  padding: 1rem;
-  transition: transform 0.2s ease, box-shadow 0.2s ease, border-color 0.2s ease;
-}
-
-.martyr-name {
-  margin: 0;
-  font-size: 1.05rem;
-  line-height: 1.8;
-}
-
-.martyr-meta,
-.martyr-age,
-.martyr-birth-year {
-  margin: 0.3rem 0 0;
-  color: var(--muted);
-  font-size: 0.98rem;
-}
-
-.martyr-age {
-  color: var(--text);
-  font-weight: 600;
-}
-
-.empty-state {
-  margin: 0;
-  text-align: center;
-  background: var(--card);
-  border: 1px solid var(--border);
-  border-radius: 12px;
-  padding: 1rem;
-  color: var(--muted);
-}
-
-.load-more-container {
-  margin: 1rem 0 1.5rem;
-  text-align: center;
-}
-
-.load-more-button {
-  border: 0;
-  background: var(--accent);
-  color: #fff;
-  border-radius: 999px;
-  padding: 0.65rem 1.2rem;
-  font-size: 1rem;
-  cursor: pointer;
-  transition: transform 0.2s ease, opacity 0.2s ease;
-}
-
-.load-more-button:hover {
-  background: var(--accent-hover);
-  transform: translateY(-1px);
-}
-
-.load-more-button:disabled {
-  opacity: 0.6;
-  cursor: not-allowed;
-}
-
-.sr-only {
-  position: absolute;
-  width: 1px;
-  height: 1px;
-  padding: 0;
-  margin: -1px;
-  overflow: hidden;
-  clip: rect(0, 0, 0, 0);
-  border: 0;
-}
-
-.fade-in {
-  animation: fadeIn 180ms ease-out;
-}
-
-@keyframes fadeIn {
-  from {
-    opacity: 0;
-    transform: translateY(4px);
-  }
-
-  to {
-    opacity: 1;
-    transform: translateY(0);
-  }
-}
+.empty-state { margin: 0; text-align: center; background: var(--card); border: 1px solid var(--border); border-radius: 12px; padding: 1rem; color: var(--muted); }
+.load-more-container { margin: 1rem 0 1.5rem; text-align: center; }
+.load-more-button { border: 0; background: var(--accent); color: #fff; border-radius: 999px; padding: .65rem 1.2rem; font-size: 1rem; cursor: pointer; transition: transform .2s ease, opacity .2s ease; }
+.load-more-button:hover { background: var(--accent-hover); transform: translateY(-1px); }
+.load-more-button:disabled { opacity: .6; cursor: not-allowed; }
+.sr-only { position: absolute; width: 1px; height: 1px; padding: 0; margin: -1px; overflow: hidden; clip: rect(0,0,0,0); border: 0; }
 
 @media (min-width: 640px) {
-  .martyrs-page {
-    padding: 1.25rem;
-  }
-
-  .stats-section {
-    grid-template-columns: repeat(2, minmax(0, 1fr));
-  }
-
-  .charts-section {
-    grid-template-columns: repeat(2, minmax(0, 1fr));
-  }
-
-  .martyrs-list {
-    grid-template-columns: repeat(2, minmax(0, 1fr));
-  }
+  .martyrs-page { padding: 1.25rem; }
+  .stats-section { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  .charts-section { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  .chart-card-wide { grid-column: 1 / -1; }
+  .martyrs-list { grid-template-columns: repeat(2, minmax(0, 1fr)); }
 }
 
 @media (min-width: 1024px) {
-  .martyrs-page {
-    padding: 1.5rem;
-  }
-
-  .hero-section {
-    flex-direction: row;
-    align-items: center;
-    justify-content: space-between;
-  }
-
-  .stats-section {
-    grid-template-columns: repeat(3, minmax(0, 1fr));
-  }
-
-  .martyrs-list {
-    grid-template-columns: repeat(3, minmax(0, 1fr));
-  }
+  .martyrs-page { padding: 1.5rem; }
+  .hero-section { flex-direction: row; align-items: center; justify-content: space-between; }
+  .stats-section { grid-template-columns: repeat(3, minmax(0, 1fr)); }
+  .martyrs-list { grid-template-columns: repeat(3, minmax(0, 1fr)); }
 }
 
 @media (min-width: 1400px) {
-  .stats-section {
-    grid-template-columns: repeat(6, minmax(0, 1fr));
-  }
-
-  .martyrs-list {
-    grid-template-columns: repeat(4, minmax(0, 1fr));
-  }
+  .stats-section { grid-template-columns: repeat(6, minmax(0, 1fr)); }
+  .martyrs-list { grid-template-columns: repeat(4, minmax(0, 1fr)); }
 }
 
 @media (hover: hover) and (pointer: fine) {
-  .martyr-item:hover {
-    transform: translateY(-2px);
-    box-shadow: 0 12px 24px rgba(15, 23, 42, 0.06);
-    border-color: #d1d5db;
-  }
+  .martyr-item:hover { transform: translateY(-2px); box-shadow: 0 12px 24px rgba(15, 23, 42, 0.06); border-color: #d1d5db; }
 }
