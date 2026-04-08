@@ -98,6 +98,18 @@ body {
   border-radius: 999px; padding: .25rem .7rem; font-size: .84rem;
 }
 .dua-button { cursor: pointer; }
+.share-link {
+  cursor: pointer;
+  border-color: var(--color-border);
+  background: var(--accent-soft);
+  color: var(--color-accent-primary);
+  transition: transform .2s ease, box-shadow .2s ease, border-color .2s ease;
+}
+.share-link:hover {
+  transform: translateY(-1px);
+  border-color: var(--color-gold);
+  box-shadow: 0 6px 14px rgba(140, 106, 53, .18);
+}
 .martyr-details-panel { margin: .55rem 0 0; background: var(--accent-soft); border-radius: 8px; padding: .45rem .65rem; color: var(--text); }
 
 .dua-toast {
@@ -109,6 +121,16 @@ body {
 }
 .dua-toast p { margin: 0; }
 .dua-toast button { border: 0; background: transparent; cursor: pointer; color: var(--muted); }
+
+.share-toast {
+  position: fixed; left: 50%; bottom: 22px; transform: translateX(-50%);
+  background: var(--card); border: 1px solid var(--color-border); border-radius: 10px;
+  padding: .7rem .85rem; min-width: 260px; max-width: calc(100vw - 2rem);
+  display: flex; align-items: center; justify-content: space-between; gap: .7rem; z-index: 100;
+  box-shadow: 0 8px 20px rgba(0,0,0,.08);
+}
+.share-toast p { margin: 0; color: var(--color-accent-primary); }
+.share-toast button { border: 0; background: transparent; cursor: pointer; color: var(--muted); }
 
 .empty-state { margin: 0; text-align: center; background: var(--card); border: 1px solid var(--border); border-radius: 12px; padding: 1rem; color: var(--muted); }
 .load-more-container { margin: 1rem 0 1.5rem; text-align: center; }
