@@ -56,6 +56,7 @@ let currentFatihaCount = 0;
 let fatihaSyncTimer = null;
 let fatihaCooldownTimer = null;
 let isUpdatingFatiha = false;
+let shareToast = null;
 
 function showError(message) {
   error.textContent = message;
@@ -164,6 +165,48 @@ function closeDuaToast() {
   if (duaToast) {
     duaToast.remove();
     duaToast = null;
+  }
+}
+
+function closeShareToast() {
+  if (shareToast) {
+    shareToast.remove();
+    shareToast = null;
+  }
+}
+
+function showShareToast(message) {
+  closeShareToast();
+  shareToast = document.createElement('div');
+  shareToast.className = 'share-toast';
+  shareToast.innerHTML = `<p>${message}</p><button type="button" aria-label="إغلاق">✕</button>`;
+  document.body.appendChild(shareToast);
+  shareToast.querySelector('button')?.addEventListener('click', closeShareToast);
+  setTimeout(closeShareToast, 3200);
+}
+
+async function shareMartyr(_, shareUrl) {
+  const title = 'شهيد من غزة';
+  const text = 'اللهم تقبل هذا الشهيد في جناتك';
+  const url = shareUrl;
+
+  try {
+    if (typeof navigator.share === 'function') {
+      await navigator.share({ title, text, url });
+      return;
+    }
+
+    await navigator.clipboard.writeText(url);
+    showShareToast('تم نسخ الرابط للمشاركة');
+  } catch (shareError) {
+    if (shareError?.name === 'AbortError') return;
+
+    try {
+      await navigator.clipboard.writeText(url);
+      showShareToast('تم نسخ الرابط للمشاركة');
+    } catch (_) {
+      showError('تعذر فتح نافذة المشاركة أو نسخ الرابط.');
+    }
   }
 }
 
@@ -412,7 +455,8 @@ function renderPage() {
   renderMartyrsList(listContainer, visibleMartyrs, {
     selectedId: selectedMartyrId,
     scrollToId: shouldScrollToSelected ? selectedMartyrId : null,
-    onDuaClick: showDuaToast
+    onDuaClick: showDuaToast,
+    onShareClick: shareMartyr
   });
 
   shouldScrollToSelected = false;
