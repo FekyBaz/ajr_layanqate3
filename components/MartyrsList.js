@@ -21,23 +21,134 @@ function getBirthYearLabel(birthYear) {
   return `مواليد ${birthYear}`;
 }
 
-function renderItem(martyr) {
+const DEFAULT_ROW_HEIGHT = 186;
+const OVERSCAN_ROWS = 3;
+
+const virtualizationState = {
+  scrollTop: 0,
+  rowHeight: DEFAULT_ROW_HEIGHT,
+  resizeObserver: null,
+  boundContainer: null
+};
+
+function getColumnsCount(container) {
+  const width = container?.clientWidth || window.innerWidth;
+  if (width >= 1400) return 4;
+  if (width >= 1024) return 3;
+  if (width >= 640) return 2;
+  return 1;
+}
+
+function buildShareUrl(martyrId) {
+  const url = new URL(window.location.href);
+  url.searchParams.set('id', martyrId);
+  return url.toString();
+}
+
+function renderItem(martyr, { selectedId }) {
+  const shareUrl = buildShareUrl(martyr.id);
+  const shareText = encodeURIComponent('اللهم تقبل هذا الشهيد في جناتك');
+  const encodedUrl = encodeURIComponent(shareUrl);
+  const isSelected = String(selectedId || '') === String(martyr.id);
+
   return `
-    <li class="martyr-item" data-id="${martyr.id}">
+    <li class="martyr-item ${isSelected ? 'highlighted' : ''}" data-id="${martyr.id}">
       <h3 class="martyr-name">${martyr.arabicName}</h3>
       <p class="martyr-meta">${getGenderLabel(martyr.gender)} • ${getAgeCategory(martyr.age)}</p>
       <p class="martyr-age">${getAgeLabel(martyr.age)}</p>
       <p class="martyr-birth-year">${getBirthYearLabel(martyr.birthYear)}</p>
+      <div class="martyr-actions">
+        <button class="dua-button" type="button" data-dua-id="${martyr.id}">🤲 ادعُ له</button>
+        <a class="share-link" href="https://wa.me/?text=${shareText}%20${encodedUrl}" target="_blank" rel="noopener noreferrer">واتساب</a>
+        <a class="share-link" href="https://twitter.com/intent/tweet?text=${shareText}&url=${encodedUrl}" target="_blank" rel="noopener noreferrer">تويتر</a>
+        <a class="share-link" href="https://www.facebook.com/sharer/sharer.php?u=${encodedUrl}&quote=${shareText}" target="_blank" rel="noopener noreferrer">فيسبوك</a>
+      </div>
+      ${isSelected ? '<p class="martyr-details-panel">اللهم اجعل مثواه الجنة واربط على قلوب أهله.</p>' : ''}
     </li>
   `;
 }
 
-export function renderMartyrsList(container, martyrs) {
-  const listMarkup = martyrs.map(renderItem).join('');
+function bindVirtualScroll(container, martyrs, renderVirtualList, options) {
+  if (virtualizationState.boundContainer !== container) {
+    virtualizationState.boundContainer = container;
 
-  container.innerHTML = `
-    <section class="martyrs-list-section" aria-label="قائمة الشهداء">
-      ${martyrs.length ? `<ul class="martyrs-list">${listMarkup}</ul>` : '<p class="empty-state">لا توجد نتائج مطابقة.</p>'}
-    </section>
-  `;
+    container.addEventListener('scroll', () => {
+      virtualizationState.scrollTop = container.scrollTop;
+      renderVirtualList();
+    });
+
+    if (virtualizationState.resizeObserver) virtualizationState.resizeObserver.disconnect();
+    virtualizationState.resizeObserver = new ResizeObserver(() => {
+      renderVirtualList();
+    });
+    virtualizationState.resizeObserver.observe(container);
+  }
+
+  if (options.scrollToId) {
+    const index = martyrs.findIndex((martyr) => String(martyr.id) === String(options.scrollToId));
+    if (index >= 0) {
+      const columns = getColumnsCount(container);
+      const targetRow = Math.floor(index / columns);
+      const top = targetRow * virtualizationState.rowHeight;
+      container.scrollTo({ top: Math.max(0, top - virtualizationState.rowHeight), behavior: 'smooth' });
+      virtualizationState.scrollTop = container.scrollTop;
+    }
+  }
+}
+
+export function renderMartyrsList(container, martyrs, options = {}) {
+  const selectedId = options.selectedId || null;
+
+  if (!martyrs.length) {
+    container.innerHTML = `
+      <section class="martyrs-list-section" aria-label="قائمة الشهداء">
+        <p class="empty-state">لا توجد نتائج مطابقة.</p>
+      </section>
+    `;
+    return;
+  }
+
+  function renderVirtualList() {
+    const columns = getColumnsCount(container);
+    const rowHeight = virtualizationState.rowHeight;
+    const totalRows = Math.ceil(martyrs.length / columns);
+    const viewportHeight = Math.max(container.clientHeight || 560, 420);
+    const visibleRows = Math.ceil(viewportHeight / rowHeight);
+    const startRow = Math.max(0, Math.floor(virtualizationState.scrollTop / rowHeight) - OVERSCAN_ROWS);
+    const endRow = Math.min(totalRows, startRow + visibleRows + OVERSCAN_ROWS * 2);
+
+    const startIndex = startRow * columns;
+    const endIndex = Math.min(martyrs.length, endRow * columns);
+    const topPad = startRow * rowHeight;
+    const bottomPad = Math.max(0, (totalRows - endRow) * rowHeight);
+
+    const listMarkup = martyrs.slice(startIndex, endIndex).map((martyr) => renderItem(martyr, { selectedId })).join('');
+
+    container.innerHTML = `
+      <section class="martyrs-list-section" aria-label="قائمة الشهداء">
+        <div class="virtual-spacer" style="height:${topPad}px"></div>
+        <ul class="martyrs-list" data-virtualized="true">${listMarkup}</ul>
+        <div class="virtual-spacer" style="height:${bottomPad}px"></div>
+      </section>
+    `;
+
+    const firstItem = container.querySelector('.martyr-item');
+    if (firstItem) {
+      const measured = firstItem.getBoundingClientRect().height + 12;
+      if (Number.isFinite(measured) && measured > 80) {
+        virtualizationState.rowHeight = measured;
+      }
+    }
+
+    container.querySelectorAll('.dua-button').forEach((button) => {
+      button.addEventListener('click', () => {
+        if (typeof options.onDuaClick === 'function') {
+          options.onDuaClick(button.dataset.duaId);
+        }
+      });
+    });
+  }
+
+  bindVirtualScroll(container, martyrs, renderVirtualList, options);
+  renderVirtualList();
 }
