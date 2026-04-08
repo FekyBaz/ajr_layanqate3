@@ -1,7 +1,3 @@
-import { Chart, ArcElement, BarElement, CategoryScale, Legend, LinearScale, Tooltip } from 'https://cdn.jsdelivr.net/npm/chart.js@4.4.3/+esm';
-
-Chart.register(ArcElement, Tooltip, Legend, BarElement, CategoryScale, LinearScale);
-
 let genderChart = null;
 let ageChart = null;
 let lastSignature = '';
@@ -11,6 +7,8 @@ function getStatsSignature(stats) {
 }
 
 export function renderChartsSection(container, stats) {
+  if (!container || !stats || typeof Chart === 'undefined') return;
+
   const nextSignature = getStatsSignature(stats);
   if (lastSignature === nextSignature && container.childElementCount > 0) return;
 
