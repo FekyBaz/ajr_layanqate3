@@ -1,0 +1,159 @@
+:root {
+  --bg: #f8f9fb;
+  --card: #ffffff;
+  --text: #1f2937;
+  --muted: #6b7280;
+  --accent: #0f766e;
+  --border: #e5e7eb;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+html {
+  scroll-behavior: smooth;
+}
+
+body {
+  margin: 0;
+  font-family: "Tajawal", "Cairo", system-ui, sans-serif;
+  background: var(--bg);
+  color: var(--text);
+}
+
+.martyrs-page {
+  max-width: 960px;
+  margin: 0 auto;
+  padding: 1rem;
+}
+
+.hero-section {
+  background: var(--card);
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  padding: 1.25rem;
+  margin-bottom: 1rem;
+}
+
+.hero-section h1 {
+  margin: 0;
+  font-size: 1.6rem;
+}
+
+.hero-section p {
+  margin: 0.5rem 0 0;
+  color: var(--accent);
+  font-size: 1.2rem;
+  font-weight: 700;
+}
+
+.state {
+  text-align: center;
+  margin: 0.75rem 0 1.25rem;
+}
+
+.error {
+  color: #b91c1c;
+}
+
+.stats-section {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 0.75rem;
+  margin-bottom: 1rem;
+}
+
+.stat-card {
+  background: var(--card);
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  padding: 0.9rem;
+}
+
+.stat-card h3 {
+  margin: 0;
+  color: var(--muted);
+  font-size: 0.95rem;
+}
+
+.stat-card p {
+  margin: 0.35rem 0 0;
+  font-size: 1.3rem;
+  font-weight: 700;
+}
+
+.martyrs-list {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+}
+
+.martyr-item {
+  background: var(--card);
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  padding: 0.9rem;
+  margin-bottom: 0.65rem;
+}
+
+.martyr-item h3 {
+  margin: 0;
+  font-size: 1rem;
+  line-height: 1.5;
+}
+
+.martyr-item p {
+  margin: 0.35rem 0 0;
+  color: var(--muted);
+}
+
+.load-more-container {
+  margin: 1rem 0 1.5rem;
+  text-align: center;
+}
+
+.load-more-button {
+  border: 0;
+  background: var(--accent);
+  color: #fff;
+  border-radius: 999px;
+  padding: 0.65rem 1.2rem;
+  font-size: 1rem;
+  cursor: pointer;
+  transition: transform 0.2s ease, opacity 0.2s ease;
+}
+
+.load-more-button:hover {
+  transform: translateY(-1px);
+}
+
+.load-more-button:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+.fade-in {
+  animation: fadeIn 180ms ease-out;
+}
+
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(4px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@media (min-width: 768px) {
+  .martyrs-page {
+    padding: 1.5rem;
+  }
+
+  .stats-section {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+  }
+}
