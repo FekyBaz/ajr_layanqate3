@@ -8,7 +8,7 @@ import { renderLoadMoreButton } from '../components/LoadMoreButton.js';
 
 const INITIAL_BATCH = 100;
 const BATCH_SIZE = 100;
-const FATIHA_KEY = 'fatiha_read_count';
+const FATIHA_KEY = 'fatiha_count';
 
 const FILTERS = {
   all: 'الكل',
@@ -18,23 +18,23 @@ const FILTERS = {
   elderly: 'كبار السن'
 };
 
-const app = document.getElementById('martyrs-app');
-const heroCount = document.getElementById('hero-count');
-const loading = document.getElementById('loading-state');
-const error = document.getElementById('error-state');
-const statsContainer = document.getElementById('stats-container');
-const chartsContainer = document.getElementById('charts-container');
-const controlsContainer = document.getElementById('controls-container');
-const listContainer = document.getElementById('list-container');
-const loadMoreContainer = document.getElementById('load-more-container');
-const fatihaButton = document.getElementById('fatiha-button');
-const fatihaCount = document.getElementById('fatiha-count');
-
 let allMartyrs = [];
 let visibleCount = INITIAL_BATCH;
 let isLoadingMore = false;
 let activeFilter = 'all';
 let searchTerm = '';
+
+let app = null;
+let heroCount = null;
+let loading = null;
+let error = null;
+let statsContainer = null;
+let chartsContainer = null;
+let controlsContainer = null;
+let listContainer = null;
+let loadMoreContainer = null;
+let fatihaButton = null;
+let fatihaCount = null;
 
 function showError(message) {
   error.textContent = message;
@@ -155,6 +155,18 @@ function loadMore() {
 }
 
 async function initMartyrsPage() {
+  app = document.getElementById('martyrs-app');
+  heroCount = document.getElementById('hero-count');
+  loading = document.getElementById('loading-state');
+  error = document.getElementById('error-state');
+  statsContainer = document.getElementById('stats-container');
+  chartsContainer = document.getElementById('charts-container');
+  controlsContainer = document.getElementById('controls-container');
+  listContainer = document.getElementById('list-container');
+  loadMoreContainer = document.getElementById('load-more-container');
+  fatihaButton = document.getElementById('fatiha-button');
+  fatihaCount = document.getElementById('fatiha-count');
+
   toggleLoading(true);
   hideError();
 
@@ -164,12 +176,12 @@ async function initMartyrsPage() {
 
     const stats = calculateStats(allMartyrs);
     renderStatsSection(statsContainer, stats);
-    renderChartsSection(chartsContainer, stats);
+    if (stats) renderChartsSection(chartsContainer, stats);
 
     renderPage();
     initializeFatihaCounter();
 
-    app.hidden = false;
+    if (app) app.hidden = false;
   } catch (err) {
     showError(err.message || 'حدث خطأ غير متوقع أثناء تحميل البيانات.');
   } finally {
@@ -177,4 +189,6 @@ async function initMartyrsPage() {
   }
 }
 
-initMartyrsPage();
+document.addEventListener('DOMContentLoaded', () => {
+  initMartyrsPage();
+});
