@@ -1,10 +1,12 @@
 :root {
-  --bg: #f8f9fb;
-  --card: #ffffff;
-  --text: #1f2937;
-  --muted: #6b7280;
-  --accent: #0f766e;
-  --border: #e5e7eb;
+  --bg: var(--color-bg-primary, #f6f0e4);
+  --card: var(--color-surface, #fffaf1);
+  --text: var(--color-text-primary, #2f261b);
+  --muted: var(--color-text-muted, #8b7961);
+  --accent: var(--color-accent-primary, #8c6a35);
+  --accent-hover: var(--color-accent-hover, #74562b);
+  --border: var(--color-border, #d6c6ab);
+  --accent-soft: var(--color-accent-light, rgba(140, 106, 53, 0.14));
 }
 
 * {
@@ -30,7 +32,7 @@ body {
 }
 
 .hero-section {
-  background: var(--card);
+  background: linear-gradient(135deg, var(--card), #f4eddf);
   border: 1px solid var(--border);
   border-radius: 14px;
   padding: 1.25rem;
@@ -73,6 +75,16 @@ body {
   padding: 0.55rem 1.1rem;
   font-size: 1rem;
   cursor: pointer;
+  transition: background-color 0.2s ease, opacity 0.2s ease, transform 0.2s ease;
+}
+
+.fatiha-button:hover {
+  background: var(--accent-hover);
+}
+
+.fatiha-button:disabled {
+  opacity: 0.72;
+  cursor: not-allowed;
 }
 
 .fatiha-count {
@@ -103,6 +115,7 @@ body {
   border: 1px solid var(--border);
   border-radius: 12px;
   padding: 0.9rem 1rem;
+  box-shadow: 0 4px 12px rgba(140, 106, 53, 0.08);
 }
 
 .stat-card h3 {
@@ -128,6 +141,29 @@ body {
   border: 1px solid var(--border);
   border-radius: 12px;
   padding: 1rem;
+}
+
+.age-categories-explanation {
+  margin-top: 0.8rem;
+  padding-top: 0.75rem;
+  border-top: 1px dashed var(--border);
+  color: var(--muted);
+  text-align: right;
+}
+
+.age-categories-explanation h4 {
+  margin: 0 0 0.35rem;
+  color: var(--text);
+  font-size: 0.98rem;
+}
+
+.age-categories-explanation ul {
+  margin: 0;
+  padding-inline-start: 1.1rem;
+}
+
+.age-categories-explanation li {
+  margin-bottom: 0.2rem;
 }
 
 .chart-card h3 {
@@ -234,6 +270,7 @@ body {
 }
 
 .load-more-button:hover {
+  background: var(--accent-hover);
   transform: translateY(-1px);
 }
 

@@ -6,6 +6,11 @@ function getStatsSignature(stats) {
   return [stats.males, stats.females, stats.children, stats.adults, stats.elderly].join('-');
 }
 
+function getThemeColor(variableName, fallback) {
+  const value = getComputedStyle(document.documentElement).getPropertyValue(variableName).trim();
+  return value || fallback;
+}
+
 export function renderChartsSection(container, stats) {
   if (!container || !stats || typeof Chart === 'undefined') return;
 
@@ -21,6 +26,14 @@ export function renderChartsSection(container, stats) {
       <article class="chart-card">
         <h3>توزيع الشهداء حسب الفئة العمرية</h3>
         <canvas id="age-chart" aria-label="توزيع الأعمار" role="img"></canvas>
+        <div class="age-categories-explanation" aria-label="شرح الفئات العمرية">
+          <h4>الفئات العمرية:</h4>
+          <ul>
+            <li><strong>الأطفال:</strong> حتى 18 سنة</li>
+            <li><strong>البالغون:</strong> من 19 إلى 60 سنة</li>
+            <li><strong>كبار السن:</strong> أكثر من 60 سنة</li>
+          </ul>
+        </div>
       </article>
     </section>
   `;
@@ -31,6 +44,10 @@ export function renderChartsSection(container, stats) {
   if (genderChart) genderChart.destroy();
   if (ageChart) ageChart.destroy();
 
+  const accentPrimary = getThemeColor('--color-accent-primary', '#8c6a35');
+  const accentHover = getThemeColor('--color-accent-hover', '#74562b');
+  const gold = getThemeColor('--color-gold', '#c8a673');
+
   genderChart = new Chart(genderCtx, {
     type: 'pie',
     data: {
@@ -38,7 +55,7 @@ export function renderChartsSection(container, stats) {
       datasets: [
         {
           data: [stats.males, stats.females],
-          backgroundColor: ['#0f766e', '#14b8a6']
+          backgroundColor: [accentPrimary, gold]
         }
       ]
     },
@@ -59,7 +76,7 @@ export function renderChartsSection(container, stats) {
       datasets: [
         {
           data: [stats.children, stats.adults, stats.elderly],
-          backgroundColor: ['#14b8a6', '#0f766e', '#115e59']
+          backgroundColor: [gold, accentPrimary, accentHover]
         }
       ]
     },
