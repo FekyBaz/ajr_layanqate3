@@ -37,7 +37,7 @@ export function renderMartyrsList(container, martyrs) {
 
   container.innerHTML = `
     <section class="martyrs-list-section" aria-label="قائمة الشهداء">
-      <ul class="martyrs-list">${listMarkup}</ul>
+      ${martyrs.length ? `<ul class="martyrs-list">${listMarkup}</ul>` : '<p class="empty-state">لا توجد نتائج مطابقة.</p>'}
     </section>
   `;
 }
