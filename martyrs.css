@@ -35,6 +35,10 @@ body {
   border-radius: 14px;
   padding: 1.25rem;
   margin-bottom: 1rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+  align-items: flex-start;
 }
 
 .hero-section h1 {
@@ -42,11 +46,39 @@ body {
   font-size: clamp(1.4rem, 2.4vw, 2rem);
 }
 
-.hero-section p {
+.hero-section #hero-count {
   margin: 0.5rem 0 0;
   color: var(--accent);
   font-size: clamp(1.05rem, 2vw, 1.3rem);
   font-weight: 700;
+}
+
+.hero-subtitle {
+  margin: 0.3rem 0 0;
+  color: var(--muted);
+  font-size: 1rem;
+}
+
+.fatiha-box {
+  display: flex;
+  flex-direction: column;
+  gap: 0.4rem;
+}
+
+.fatiha-button {
+  border: 0;
+  background: var(--accent);
+  color: #fff;
+  border-radius: 999px;
+  padding: 0.55rem 1.1rem;
+  font-size: 1rem;
+  cursor: pointer;
+}
+
+.fatiha-count {
+  margin: 0;
+  color: var(--muted);
+  font-size: 0.96rem;
 }
 
 .state {
@@ -85,6 +117,60 @@ body {
   font-weight: 700;
 }
 
+.charts-section {
+  display: grid;
+  gap: 0.75rem;
+  margin-bottom: 1rem;
+}
+
+.chart-card {
+  background: var(--card);
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  padding: 1rem;
+}
+
+.chart-card h3 {
+  margin: 0 0 0.75rem;
+  font-size: 1rem;
+}
+
+.controls-section {
+  margin-bottom: 1rem;
+}
+
+.search-input {
+  width: 100%;
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  padding: 0.75rem 0.9rem;
+  font: inherit;
+  background: var(--card);
+}
+
+.filter-buttons {
+  margin-top: 0.75rem;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+}
+
+.filter-button {
+  border: 1px solid var(--border);
+  background: var(--card);
+  color: var(--text);
+  border-radius: 999px;
+  padding: 0.42rem 0.9rem;
+  cursor: pointer;
+  font: inherit;
+}
+
+.filter-button.active {
+  background: var(--accent);
+  color: #fff;
+  border-color: var(--accent);
+}
+
 .martyrs-list {
   list-style: none;
   padding: 0;
@@ -121,6 +207,16 @@ body {
   font-weight: 600;
 }
 
+.empty-state {
+  margin: 0;
+  text-align: center;
+  background: var(--card);
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  padding: 1rem;
+  color: var(--muted);
+}
+
 .load-more-container {
   margin: 1rem 0 1.5rem;
   text-align: center;
@@ -144,6 +240,17 @@ body {
 .load-more-button:disabled {
   opacity: 0.6;
   cursor: not-allowed;
+}
+
+.sr-only {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  border: 0;
 }
 
 .fade-in {
@@ -171,6 +278,10 @@ body {
     grid-template-columns: repeat(2, minmax(0, 1fr));
   }
 
+  .charts-section {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
   .martyrs-list {
     grid-template-columns: repeat(2, minmax(0, 1fr));
   }
@@ -179,6 +290,12 @@ body {
 @media (min-width: 1024px) {
   .martyrs-page {
     padding: 1.5rem;
+  }
+
+  .hero-section {
+    flex-direction: row;
+    align-items: center;
+    justify-content: space-between;
   }
 
   .stats-section {
