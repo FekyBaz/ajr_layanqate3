@@ -20,7 +20,7 @@ body {
   line-height: 1.7;
 }
 
-.martyrs-page { max-width: 1500px; margin: 0 auto; padding: 1rem; }
+.martyrs-page { max-width: 1200px; margin: 0 auto; padding: 0 16px; }
 
 .hero-section {
   background: linear-gradient(135deg, var(--card), #f4eddf);
@@ -69,7 +69,7 @@ body {
 .stat-card h3 { margin: 0; color: var(--muted); font-size: .95rem; }
 .stat-card p { margin: .35rem 0 0; font-size: 1.3rem; font-weight: 700; }
 
-.charts-section { display: grid; gap: .75rem; margin-bottom: 1rem; }
+.charts-section { display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: .75rem; margin-bottom: 1rem; }
 .chart-card { background: var(--card); border: 1px solid var(--border); border-radius: 12px; padding: 1rem; min-height: 320px; }
 .chart-card canvas { width: 100% !important; height: 240px !important; }
 .age-categories-explanation { margin-top: .8rem; padding-top: .75rem; border-top: 1px dashed var(--border); color: var(--muted); text-align: right; }
@@ -80,12 +80,12 @@ body {
 
 .controls-section { margin-bottom: 1rem; position: sticky; top: .5rem; z-index: 8; background: var(--bg); padding: .4rem 0; }
 .search-input { width: 100%; border: 1px solid var(--border); border-radius: 10px; padding: .75rem .9rem; font: inherit; background: var(--card); }
-.filter-buttons { margin-top: .75rem; display: flex; flex-wrap: wrap; gap: .5rem; }
+.filter-buttons { margin-top: .75rem; display: flex; flex-wrap: wrap; gap: 8px; }
 .filter-button { border: 1px solid var(--border); background: var(--card); color: var(--text); border-radius: 999px; padding: .42rem .9rem; cursor: pointer; font: inherit; }
 .filter-button.active { background: var(--accent); color: #fff; border-color: var(--accent); }
 
-#list-container { height: min(75vh, 980px); overflow: auto; padding-inline: .1rem; }
-.martyrs-list { list-style: none; padding: 0; margin: 0; display: grid; grid-template-columns: 1fr; gap: .75rem; }
+#list-container { width: 100%; display: block; position: relative; min-height: auto; height: auto; overflow: auto; padding-inline: .1rem; }
+.martyrs-list { list-style: none; padding: 0; margin: 0; display: grid; grid-template-columns: repeat(auto-fill, minmax(260px, 1fr)); gap: .75rem; }
 .virtual-spacer { width: 100%; }
 .martyr-item { background: var(--card); border: 1px solid var(--border); border-radius: 12px; padding: 1rem; transition: transform .2s ease, box-shadow .2s ease, border-color .2s ease; }
 .martyr-item.highlighted { border-color: var(--accent); box-shadow: 0 0 0 2px var(--accent-soft); }
@@ -142,21 +142,20 @@ body {
 @media (min-width: 640px) {
   .martyrs-page { padding: 1.25rem; }
   .stats-section { grid-template-columns: repeat(2, minmax(0, 1fr)); }
-  .charts-section { grid-template-columns: repeat(2, minmax(0, 1fr)); }
   .chart-card-wide { grid-column: 1 / -1; }
-  .martyrs-list { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  .martyrs-list { grid-template-columns: repeat(2, minmax(260px, 1fr)); }
 }
 
 @media (min-width: 1024px) {
   .martyrs-page { padding: 1.5rem; }
   .hero-section { flex-direction: row; align-items: center; justify-content: space-between; }
   .stats-section { grid-template-columns: repeat(3, minmax(0, 1fr)); }
-  .martyrs-list { grid-template-columns: repeat(3, minmax(0, 1fr)); }
+  .martyrs-list { grid-template-columns: repeat(3, minmax(260px, 1fr)); }
 }
 
 @media (min-width: 1400px) {
   .stats-section { grid-template-columns: repeat(6, minmax(0, 1fr)); }
-  .martyrs-list { grid-template-columns: repeat(4, minmax(0, 1fr)); }
+  .martyrs-list { grid-template-columns: repeat(4, minmax(260px, 1fr)); }
 }
 
 @media (hover: hover) and (pointer: fine) {
