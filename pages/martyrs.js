@@ -8,9 +8,7 @@ import { renderLoadMoreButton } from '../components/LoadMoreButton.js';
 
 const INITIAL_BATCH = 100;
 const BATCH_SIZE = 100;
-const SUPABASE_URL = 'https://buwwoyhnyqwrhjskwmkz.supabase.co';
-const FATIHA_TABLE = 'fatiha_counter';
-const FATIHA_ROW_ID = 1;
+const FATIHA_COUNTER_ENDPOINT = '/.netlify/functions/fatiha-counter';
 const FATIHA_SYNC_INTERVAL_MS = 15000;
 
 const FILTERS = {
@@ -107,76 +105,33 @@ function renderControls() {
   });
 }
 
-function getSupabaseHeaders() {
-  const anonKey = getSupabaseAnonKey();
-  return {
-    apikey: anonKey,
-    Authorization: `Bearer ${anonKey}`,
-    'Content-Type': 'application/json'
-  };
-}
-
-function getSupabaseAnonKey() {
-  return (
-    window.__SUPABASE_ANON_KEY__ ||
-    document.querySelector('meta[name="supabase-anon-key"]')?.content ||
-    ''
-  );
-}
-
 function renderFatihaCount(count = currentFatihaCount) {
   currentFatihaCount = Number.isFinite(count) && count >= 0 ? count : 0;
   fatihaCount.textContent = `تمت قراءة الفاتحة ${currentFatihaCount.toLocaleString('ar-EG')} مرة`;
 }
 
-function isSupabaseReady() {
-  return Boolean(SUPABASE_URL && getSupabaseAnonKey());
-}
-
 async function fetchGlobalFatihaCount() {
-  if (!isSupabaseReady()) {
-    throw new Error('لم يتم ضبط إعدادات Supabase للعداد العام.');
-  }
-
-  const response = await fetch(
-    `${SUPABASE_URL}/rest/v1/${FATIHA_TABLE}?select=count&id=eq.${FATIHA_ROW_ID}&limit=1`,
-    {
-      headers: getSupabaseHeaders(),
-      cache: 'no-store'
-    }
-  );
+  const response = await fetch(FATIHA_COUNTER_ENDPOINT, { cache: 'no-store' });
 
   if (!response.ok) {
     throw new Error('تعذر تحميل عداد الفاتحة العام.');
   }
 
-  const [row] = await response.json();
-  return Number(row?.count) || 0;
+  const payload = await response.json();
+  return Number(payload?.count) || 0;
 }
 
 async function incrementGlobalFatihaCount() {
-  if (!isSupabaseReady()) {
-    throw new Error('لم يتم ضبط إعدادات Supabase للعداد العام.');
-  }
-
-  const response = await fetch(
-    `${SUPABASE_URL}/rest/v1/${FATIHA_TABLE}?id=eq.${FATIHA_ROW_ID}`,
-    {
-      method: 'PATCH',
-      headers: {
-        ...getSupabaseHeaders(),
-        Prefer: 'return=representation'
-      },
-      body: JSON.stringify({ count: currentFatihaCount + 1 })
-    }
-  );
+  const response = await fetch(FATIHA_COUNTER_ENDPOINT, {
+    method: 'POST'
+  });
 
   if (!response.ok) {
     throw new Error('تعذر تحديث عداد الفاتحة العام.');
   }
 
-  const [row] = await response.json();
-  return Number(row?.count) || currentFatihaCount;
+  const payload = await response.json();
+  return Number(payload?.count) || currentFatihaCount;
 }
 
 async function syncGlobalFatihaCount({ silent = true } = {}) {
@@ -190,12 +145,6 @@ async function syncGlobalFatihaCount({ silent = true } = {}) {
 
 function initializeFatihaCounter() {
   renderFatihaCount(0);
-  if (!isSupabaseReady()) {
-    fatihaButton.disabled = true;
-    fatihaCount.textContent = 'عداد الفاتحة العام غير متاح حاليًا.';
-    return;
-  }
-
   syncGlobalFatihaCount({ silent: false });
 
   if (fatihaSyncTimer) clearInterval(fatihaSyncTimer);
