@@ -4,7 +4,7 @@
    ═══════════════════════════════════════════════════════════════════════════ */
 
 :root {
-    --container-width: 1000px;
+    --container-width: 1200px;
     --space-xs: 0.25rem;
     --space-sm: 0.5rem;
     --space-md: 1rem;
@@ -85,9 +85,10 @@ html {
 
 body {
     font-family: var(--font-primary);
-    font-size: var(--font-size-md);
+    font-size: clamp(14px, 3vw, 18px);
     line-height: var(--line-height-normal);
     color: var(--color-text-primary);
+    overflow-x: hidden;
     background-color: var(--color-bg-primary);
     direction: rtl;
     text-align: right;
@@ -133,6 +134,10 @@ body {
 main>section {
     padding: 80px 0;
     position: relative;
+}
+
+h1 {
+    font-size: clamp(24px, 5vw, 36px);
 }
 
 h1,
@@ -318,12 +323,31 @@ p {
         left: 0;
         background: #f7f4e9;
         border-bottom: 1px solid var(--color-border);
-        padding: var(--space-md);
-        display: none;
+        padding: 0 var(--space-md);
+        display: flex;
         flex-direction: column;
+        max-height: 0;
+        overflow: hidden;
+        opacity: 0;
+        visibility: hidden;
+        transition: max-height var(--transition-normal), opacity var(--transition-normal), padding var(--transition-normal), visibility 0s var(--transition-normal);
+    }
+
+    .site-nav a {
+        display: block;
+        padding: var(--space-md) 0;
+        border-bottom: 1px dashed rgba(0,0,0,0.05);
+    }
+    
+    .site-nav a:last-child {
+        border-bottom: none;
     }
 
     .site-nav.is-open {
-        display: flex;
+        max-height: 500px;
+        opacity: 1;
+        visibility: visible;
+        padding: var(--space-md);
+        transition: max-height var(--transition-normal), opacity var(--transition-normal), padding var(--transition-normal), visibility 0s;
     }
 }
