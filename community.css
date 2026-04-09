@@ -87,7 +87,7 @@
 /* Submissions Grid */
 .submissions-grid {
     display: grid;
-    grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+    grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
     gap: var(--space-lg);
 }
 
@@ -143,7 +143,7 @@
 
 .community-saved__grid {
     display: grid;
-    grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
+    grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
     gap: var(--space-md);
 }
 
@@ -156,10 +156,6 @@ body.community-focus-mode .pagination {
 }
 
 @media (max-width: 768px) {
-    .submissions-grid {
-        grid-template-columns: 1fr;
-    }
-
     .community-controls {
         flex-direction: column;
         align-items: stretch;
