@@ -56,12 +56,13 @@
     function getDailyDateLine() {
         const now = new Date();
         const formatted = new Intl.DateTimeFormat('ar-EG', { day: 'numeric', month: 'long', year: 'numeric' }).format(now);
-        return `اليوم: ${formatted}`;
+        const hijri = new Intl.DateTimeFormat('ar-SA-u-ca-islamic', { day: 'numeric', month: 'long', year: 'numeric' }).format(now);
+        return `اليوم:<br>${formatted}<br><br>الموافق:<br>${hijri}`;
     }
 
     function renderDailyFeature(dailyFeature) {
         if (elements.dailyChangeLine) {
-            elements.dailyChangeLine.textContent = getDailyDateLine();
+            elements.dailyChangeLine.innerHTML = getDailyDateLine();
         }
 
         const submission = dailyFeature?.submission;
