@@ -339,7 +339,7 @@
     const azkar = [
         { id: 1, text: "سبحان الله", target: 33 },
         { id: 2, text: "الحمد لله", target: 33 },
-        { id: 3, text: "الله أكبر", target: 34 },
+        { id: 3, text: "الله أكبر", target: 33 },
     ];
 
     function initDhikrSection(memory) {
@@ -424,9 +424,9 @@
                     countBtn.disabled = true;
                     btnText.textContent = 'تمت';
                     btnIcon.textContent = '✓';
-                    
+
                     if (navigator.vibrate) {
-                        try { navigator.vibrate([50, 50, 50]); } catch (err) {}
+                        try { navigator.vibrate([50, 50, 50]); } catch (err) { }
                     }
                     showToast(`تقبل الله! أتممت تسبيح "${item.text}"`);
 
@@ -438,7 +438,7 @@
                                 btnTasbeehCount.textContent = formatNumber(res.tasbeeh_count);
                             }
                         }
-                    }).catch(() => {});
+                    }).catch(() => { });
                 }
             });
 
