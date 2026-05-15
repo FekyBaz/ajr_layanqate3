@@ -284,6 +284,7 @@
         { id: 1, text: "سبحان الله", target: 33 },
         { id: 2, text: "الحمد لله", target: 33 },
         { id: 3, text: "الله أكبر", target: 33 },
+        { id: 4, text: "لا إله إلا الله", target: 33 },
     ];
 
     function initDhikrSection(memory) {
