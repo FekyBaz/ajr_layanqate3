@@ -714,9 +714,9 @@
 }
 
 .dhikr-card.completed {
-    background: linear-gradient(145deg, #fefbf5, #f7f0e1);
-    border-color: #38a169;
-    box-shadow: 0 0 15px rgba(56, 161, 105, 0.15);
+    background: #fffdf9;
+    border-color: rgba(47, 133, 90, 0.35);
+    box-shadow: 0 4px 20px rgba(47, 133, 90, 0.08);
 }
 
 /* Card Header */
@@ -787,6 +787,7 @@
     border-radius: 999px;
     overflow: hidden;
     margin-bottom: 24px;
+    position: relative;
 }
 
 .dhikr-card__bar {
@@ -794,11 +795,27 @@
     width: 0%;
     background: linear-gradient(90deg, var(--color-gold, #c9aa71), var(--color-accent, #8c6a35));
     border-radius: 999px;
-    transition: width 0.3s ease-out;
+    transition: width 0.4s cubic-bezier(0.4, 0, 0.2, 1), background 0.5s ease;
+    position: relative;
+    overflow: hidden;
 }
 
 .dhikr-card.completed .dhikr-card__bar {
-    background: linear-gradient(90deg, #48bb78, #2f855a);
+    background: linear-gradient(90deg, #38a169, #276749);
+}
+
+.dhikr-card.completed .dhikr-card__bar::after {
+    content: '';
+    position: absolute;
+    top: 0; left: -100%;
+    width: 100%; height: 100%;
+    background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.35), transparent);
+    animation: barSubtleShine 2.5s infinite ease-in-out;
+}
+
+@keyframes barSubtleShine {
+    0% { left: -100%; }
+    100% { left: 100%; }
 }
 
 /* Button Row */
@@ -816,7 +833,7 @@
     font-size: 15px;
     font-weight: 600;
     cursor: pointer;
-    transition: all 0.2s ease;
+    transition: all 0.25s ease;
     border: none;
     user-select: none;
     touch-action: manipulation;
@@ -833,6 +850,7 @@
     color: #ffffff;
     gap: 8px;
     box-shadow: 0 4px 12px rgba(140, 106, 53, 0.25);
+    border: 1px solid transparent;
 }
 
 .dhikr-btn--tasbeeh:hover:not(:disabled) {
@@ -847,10 +865,12 @@
 }
 
 .dhikr-btn--tasbeeh:disabled {
-    background: #2f855a;
+    background: #276749;
     color: #ffffff;
     cursor: default;
-    box-shadow: 0 4px 12px rgba(47, 133, 90, 0.25);
+    box-shadow: 0 0 12px rgba(39, 103, 73, 0.25);
+    border-color: rgba(72, 187, 120, 0.3);
+    animation: btnSubtlePulse 3s infinite ease-in-out;
 }
 
 .dhikr-btn--reset {
@@ -871,14 +891,20 @@
 }
 
 /* Animations */
-@keyframes cardPulse {
-    0% { transform: scale(1); box-shadow: 0 0 0 0 rgba(56, 161, 105, 0.4); }
-    50% { transform: scale(1.02); box-shadow: 0 0 0 15px rgba(56, 161, 105, 0); }
-    100% { transform: scale(1); box-shadow: 0 0 0 0 rgba(56, 161, 105, 0); }
+@keyframes btnSubtlePulse {
+    0% { box-shadow: 0 0 6px rgba(39, 103, 73, 0.2); }
+    50% { box-shadow: 0 0 16px rgba(39, 103, 73, 0.45); }
+    100% { box-shadow: 0 0 6px rgba(39, 103, 73, 0.2); }
+}
+
+@keyframes cardSubtleCelebrate {
+    0% { border-color: rgba(212, 195, 163, 0.5); box-shadow: 0 2px 10px rgba(115, 90, 50, 0.04); }
+    50% { border-color: rgba(56, 161, 105, 0.6); box-shadow: 0 4px 25px rgba(56, 161, 105, 0.2); }
+    100% { border-color: rgba(47, 133, 90, 0.35); box-shadow: 0 4px 20px rgba(47, 133, 90, 0.08); }
 }
 
 .dhikr-card.celebrate {
-    animation: cardPulse 0.6s cubic-bezier(0.16, 1, 0.3, 1);
+    animation: cardSubtleCelebrate 0.8s ease-out;
 }
 
 /* Responsive grid adjustments */

@@ -382,7 +382,7 @@
                 
                 <div class="dhikr-card__buttons">
                     <button class="dhikr-btn dhikr-btn--tasbeeh" id="dhikr-btn-${item.id}" ${isCompleted ? 'disabled' : ''} type="button">
-                        <span class="dhikr-btn__icon" aria-hidden="true">📿</span>
+                        <span class="dhikr-btn__icon" id="dhikr-btn-icon-${item.id}" aria-hidden="true">${isCompleted ? '✓' : '📿'}</span>
                         <span class="dhikr-btn__text" id="dhikr-btn-text-${item.id}">${isCompleted ? 'تمت' : 'تسبيحة'}</span>
                     </button>
                     <button class="dhikr-btn dhikr-btn--reset" id="dhikr-reset-${item.id}" title="إعادة العداد للصفر" type="button">
@@ -398,6 +398,7 @@
             const numEl = card.querySelector(`#dhikr-num-${item.id}`);
             const barEl = card.querySelector(`#dhikr-bar-${item.id}`);
             const btnText = card.querySelector(`#dhikr-btn-text-${item.id}`);
+            const btnIcon = card.querySelector(`#dhikr-btn-icon-${item.id}`);
 
             let isThrottled = false;
 
@@ -422,6 +423,7 @@
                     card.classList.add('completed', 'celebrate');
                     countBtn.disabled = true;
                     btnText.textContent = 'تمت';
+                    btnIcon.textContent = '✓';
                     
                     if (navigator.vibrate) {
                         try { navigator.vibrate([50, 50, 50]); } catch (err) {}
@@ -447,6 +449,7 @@
                 card.classList.remove('completed', 'celebrate');
                 countBtn.disabled = false;
                 btnText.textContent = 'تسبيحة';
+                btnIcon.textContent = '📿';
 
                 numEl.textContent = '0';
                 barEl.style.width = '0%';
