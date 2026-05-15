@@ -194,6 +194,9 @@
         // Show card, hide loading
         loadingEl.classList.add('hidden');
         cardEl.classList.remove('hidden');
+
+        // Initialize Dhikr Cards
+        initDhikrSection(memory);
     }
 
     function showError(message) {
@@ -329,6 +332,129 @@
             cooldowns[type] = false;
         }, INTERACTION_COOLDOWN_MS);
     });
+
+    // ═══════════════════════════════════════════════════════════════════
+    // Dedicate Dhikr (Tasbeeh) Section
+    // ═══════════════════════════════════════════════════════════════════
+    const azkar = [
+        { id: 1, text: "سبحان الله", target: 33 },
+        { id: 2, text: "الحمد لله", target: 33 },
+        { id: 3, text: "الله أكبر", target: 34 },
+    ];
+
+    function initDhikrSection(memory) {
+        const sectionDhikr = document.getElementById('section-dhikr');
+        const container = document.getElementById('dhikr-cards-container');
+        if (!sectionDhikr || !container) return;
+
+        sectionDhikr.classList.remove('hidden');
+        container.innerHTML = '';
+
+        const slugKey = memory.slug || memory.id;
+
+        azkar.forEach(item => {
+            const storageKey = `ajr_dhikr_${slugKey}_${item.id}`;
+            let currentVal = parseInt(localStorage.getItem(storageKey), 10) || 0;
+            if (currentVal > item.target) currentVal = item.target;
+
+            const isCompleted = currentVal >= item.target;
+            const progressPercent = Math.min(100, Math.round((currentVal / item.target) * 100));
+
+            const card = document.createElement('div');
+            card.className = `dhikr-card ${isCompleted ? 'completed' : ''}`;
+            card.dataset.id = item.id;
+
+            card.innerHTML = `
+                <div class="dhikr-card__header">
+                    <span class="dhikr-card__name">${item.text}</span>
+                    <span class="dhikr-card__target">الهدف: ${item.target}</span>
+                </div>
+                
+                <div class="dhikr-card__progress-container">
+                    <div class="dhikr-card__progress-bar" id="dhikr-prog-${item.id}" style="width: ${progressPercent}%;"></div>
+                </div>
+                
+                <div class="dhikr-card__counter-area">
+                    <span class="dhikr-card__current" id="dhikr-val-${item.id}">${currentVal}</span>
+                    <span class="dhikr-card__slash">/</span>
+                    <span class="dhikr-card__max">${item.target}</span>
+                </div>
+                
+                <div class="dhikr-card__actions">
+                    <button class="dhikr-card__btn dhikr-card__btn--count" id="dhikr-btn-${item.id}" ${isCompleted ? 'disabled' : ''} type="button">
+                        <span aria-hidden="true">📿</span>
+                        <span class="dhikr-btn-text">${isCompleted ? '✓ اكتملت' : 'تسبيحة'}</span>
+                    </button>
+                    <button class="dhikr-card__btn dhikr-card__btn--reset" id="dhikr-reset-${item.id}" title="إعادة العداد للصفر" type="button">
+                        ↺
+                    </button>
+                </div>
+            `;
+
+            container.appendChild(card);
+
+            const countBtn = card.querySelector(`#dhikr-btn-${item.id}`);
+            const resetBtn = card.querySelector(`#dhikr-reset-${item.id}`);
+            const valEl = card.querySelector(`#dhikr-val-${item.id}`);
+            const progEl = card.querySelector(`#dhikr-prog-${item.id}`);
+            const btnText = card.querySelector('.dhikr-btn-text');
+
+            let isThrottled = false;
+
+            countBtn.addEventListener('click', (e) => {
+                if (isThrottled || currentVal >= item.target) return;
+                isThrottled = true;
+                setTimeout(() => { isThrottled = false; }, 80); // Debounce extremely rapid clicks
+
+                createRipple(countBtn, e);
+
+                currentVal++;
+                localStorage.setItem(storageKey, currentVal);
+
+                valEl.textContent = currentVal;
+                valEl.style.transform = 'scale(1.2)';
+                setTimeout(() => { valEl.style.transform = 'scale(1)'; }, 150);
+
+                const newPct = Math.min(100, Math.round((currentVal / item.target) * 100));
+                progEl.style.width = `${newPct}%`;
+
+                if (currentVal >= item.target) {
+                    card.classList.add('completed', 'celebrate');
+                    countBtn.disabled = true;
+                    btnText.textContent = '✓ اكتملت';
+                    
+                    // Trigger vibration if supported
+                    if (navigator.vibrate) {
+                        try { navigator.vibrate([50, 50, 50]); } catch (err) {}
+                    }
+                    showToast(`تقبل الله! أتممت تسبيح "${item.text}"`);
+
+                    // Also increment global tasbeeh count on server
+                    sendInteraction(memory.id, 'tasbeeh').then(res => {
+                        if (res.success && res.total_interactions) {
+                            bumpCounter(res.total_interactions);
+                            const btnTasbeehCount = document.getElementById('count-tasbeeh');
+                            if (btnTasbeehCount && res.tasbeeh_count) {
+                                btnTasbeehCount.textContent = formatNumber(res.tasbeeh_count);
+                            }
+                        }
+                    }).catch(() => {});
+                }
+            });
+
+            resetBtn.addEventListener('click', () => {
+                currentVal = 0;
+                localStorage.setItem(storageKey, 0);
+
+                card.classList.remove('completed', 'celebrate');
+                countBtn.disabled = false;
+                btnText.textContent = 'تسبيحة';
+
+                valEl.textContent = '0';
+                progEl.style.width = '0%';
+            });
+        });
+    }
 
     // ═══════════════════════════════════════════════════════════════════
     // Initialization
