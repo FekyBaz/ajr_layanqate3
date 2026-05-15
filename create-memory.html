@@ -5,114 +5,145 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>إنشاء صفحة صدقة جارية | أجر لا ينقطع</title>
-    <meta name="description" content="أنشئ صفحة صدقة جارية على روح متوفى — أجر لا ينقطع">
+    <meta name="description" content="أنشئ صفحة صدقة جارية مخصصة للقرآن الكريم والأذكار والأدعية على روح من تحب لتكون صدقة جارية مستمرة.">
 
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link
-        href="https://fonts.googleapis.com/css2?family=Noto+Naskh+Arabic:wght@400;500;600;700&family=Cairo:wght@400;600;700&display=swap"
-        rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Naskh+Arabic:wght@400;500;600;700&family=Cairo:wght@400;600;700&display=swap" rel="stylesheet">
 
-    <link rel="stylesheet" href="/base.css">
-    <link rel="stylesheet" href="/memory.css">
+    <link rel="stylesheet" href="/styles.css?v=20260516">
+    <link rel="stylesheet" href="/memory.css?v=20260516">
 </head>
 
-<body>
-    <main class="create-memory-page">
-        <div class="create-memory-form-card">
-            <div class="memory-ornament" aria-hidden="true" style="text-align:center;">﷽</div>
-            <h1 class="create-memory-title">إنشاء صفحة صدقة جارية</h1>
+<body class="community-body">
+    <main class="create-memory-page site-container">
+        <!-- Top Header & Navigation -->
+        <header class="community-header create-memory-header">
+            <nav class="community-nav">
+                <a href="/index.html" class="btn btn-ghost btn-sm">
+                    <span aria-hidden="true">➔</span> العودة للرئيسية
+                </a>
+                <a href="/memories" class="btn btn-secondary btn-sm">
+                    <span aria-hidden="true">📚</span> تصفح الصفحات
+                </a>
+            </nav>
+            <div class="community-header__intro">
+                <div class="create-memory__badge">🕊️ صدقة جارية ومغفرة</div>
+                <div class="memory-ornament create-memory__bismillah" aria-hidden="true">﷽</div>
+                <h1>إنشاء صفحة صدقة جارية</h1>
+                <p class="create-memory__desc">
+                    أنشئ صفحة مباركة مخصصة لقراءة القرآن الكريم، وتلاوة الأذكار، ورفع الدعوات على روح من تحب لتكون صدقة جارية لا ينقطع ثوابها بحول الله.
+                </p>
+            </div>
+        </header>
 
+        <div class="create-memory-form-card">
             <form id="create-memory-form" novalidate>
                 <!-- Section 1: Basic Info -->
                 <fieldset class="form-section">
-                    <legend>البيانات الأساسية</legend>
+                    <legend>
+                        <span class="section-step">1</span> البيانات الأساسية
+                    </legend>
                     <div class="form-group">
-                        <label for="deceased-name">اسم المتوفى / المتوفاة *</label>
-                        <input type="text" id="deceased-name" maxlength="100" required placeholder="مثال: أحمد بن محمد"
-                            autocomplete="off">
-                        <div class="char-count" id="name-char-count">0 / 100</div>
+                        <label for="deceased-name">اسم المتوفى / المتوفاة <span class="required-asterisk">*</span></label>
+                        <input type="text" id="deceased-name" maxlength="100" required placeholder="مثال: المغفور له بإذن الله / أحمد بن محمد" autocomplete="off">
+                        <div class="form-group__footer">
+                            <div class="form-hint">يُفضل كتابة الاسم الكامل بالشكل الذي ترغب بظهوره في عنوان الصفحة.</div>
+                            <div class="char-count" id="name-char-count">0 / 100</div>
+                        </div>
                         <div class="field-error" id="name-error"></div>
                     </div>
 
                     <div class="form-group">
                         <label for="relation">صلة القرابة (اختياري)</label>
-                        <input type="text" id="relation" maxlength="50" placeholder="مثال: والدي، جدتي، صديقي"
-                            autocomplete="off">
-                        <div class="form-hint">مَن هو المتوفى بالنسبة لك؟</div>
+                        <input type="text" id="relation" maxlength="50" placeholder="مثال: والدي، جدتي، أخي، صديقي" autocomplete="off">
+                        <div class="form-hint">مَن هو المتوفى بالنسبة لك؟ (لا يظهر للعموم، يساعدنا في التوثيق).</div>
                     </div>
                 </fieldset>
 
                 <!-- Section 2: About Them -->
                 <fieldset class="form-section">
-                    <legend>عن المتوفى</legend>
+                    <legend>
+                        <span class="section-step">2</span> السيرة والأثر الطيب
+                    </legend>
                     <div class="form-group">
-                        <label for="biography">نبذة تعريفية (اختياري)</label>
-                        <textarea id="biography" maxlength="1000"
-                            placeholder="من هو المتوفى، وما أثره الطيب في حياته..."></textarea>
-                        <div class="form-hint">تعريف موجز ليذكره زوار الصفحة بالخير والدعاء.</div>
-                        <div class="char-count" id="bio-char-count">0 / 1000</div>
+                        <label for="biography">نبذة تعريفية عن المتوفى (اختياري)</label>
+                        <textarea id="biography" maxlength="1000" placeholder="اكتب نبذة موجزة عن حياته ومحبته للخير والأثر الطيب الذي تركه في نفوس من حوله..."></textarea>
+                        <div class="form-group__footer">
+                            <div class="form-hint">كلمات طيبة تُلهم زوار الصفحة وتدفعهم للدعاء له بالرحمة والمغفرة.</div>
+                            <div class="char-count" id="bio-char-count">0 / 1000</div>
+                        </div>
                         <div class="field-error" id="bio-error"></div>
                     </div>
 
                     <div class="form-group">
-                        <label for="good-traits">صفات حميدة للمتوفى (اختياري)</label>
-                        <textarea id="good-traits" maxlength="500"
-                            placeholder="مثال: كان باراً بوالديه، ومحباً للصدقة..."></textarea>
-                        <div class="form-hint">صفات لتكون أسوة حسنة لمن يقرأ.</div>
-                        <div class="char-count" id="traits-char-count">0 / 500</div>
+                        <label for="good-traits">أبرز الصفات الحميدة (اختياري)</label>
+                        <textarea id="good-traits" maxlength="500" placeholder="مثال: كان باراً بوالديه، واصلاً للرحم، محباً للمساكين، وابتسامته لا تفارقه..."></textarea>
+                        <div class="form-group__footer">
+                            <div class="form-hint">صفات ومآثر لتكون أسوة حسنة وذكرى خالدة.</div>
+                            <div class="char-count" id="traits-char-count">0 / 500</div>
+                        </div>
                         <div class="field-error" id="traits-error"></div>
                     </div>
                 </fieldset>
 
                 <!-- Section 3: Ongoing Charity -->
                 <fieldset class="form-section">
-                    <legend>الصدقة الجارية</legend>
+                    <legend>
+                        <span class="section-step">3</span> الصدقة الجارية ومشاريع الوقف
+                    </legend>
                     <div class="form-group">
-                        <label for="ongoing-charity">وصف للصدقة الجارية الحالية (اختياري)</label>
-                        <textarea id="ongoing-charity" maxlength="1000"
-                            placeholder="هل هناك وقف أو مشروع خيري تم إقامته عن المتوفى؟"></textarea>
-                        <div class="form-hint">بناء مسجد، حفر بئر، طباعة مصحف...</div>
-                        <div class="char-count" id="charity-char-count">0 / 1000</div>
+                        <label for="ongoing-charity">وصف للصدقة الجارية (اختياري)</label>
+                        <textarea id="ongoing-charity" maxlength="1000" placeholder="هل هناك مشروع خيري (حفر بئر، بناء مسجد، طباعة مصاحف، كفالة أيتام) مخصص عن روح المتوفى؟"></textarea>
+                        <div class="form-group__footer">
+                            <div class="form-hint">اذكر تفاصيل المشروع الخيري ليشارك الزوار في ثوابه.</div>
+                            <div class="char-count" id="charity-char-count">0 / 1000</div>
+                        </div>
                         <div class="field-error" id="charity-error"></div>
                     </div>
 
-                    <div class="form-group">
-                        <label>روابط للصدقة الجارية (اختياري - حتى 5 روابط)</label>
+                    <div class="form-group links-group">
+                        <label>روابط التبرع للصدقة الجارية (اختياري - حتى 5 روابط)</label>
                         <div id="links-container" class="links-container">
                             <!-- Dynamic link fields will go here -->
                         </div>
-                        <button type="button" id="add-link-btn" class="add-link-btn">+ إضافة رابط جديد</button>
-                        <div class="form-hint">روابط موثوقة لمؤسسات خيرية للمساهمة عن المتوفى.</div>
+                        <button type="button" id="add-link-btn" class="add-link-btn">
+                            <span aria-hidden="true">+</span> إضافة رابط تبرع جديد
+                        </button>
+                        <div class="form-hint">روابط رسمية وموثوقة (مثل منصة إحسان، الجمعيات المعتمدة) للمساهمة عن المتوفى.</div>
                         <div class="field-error" id="links-error"></div>
                     </div>
                 </fieldset>
 
                 <!-- Section 4: Optional Story -->
                 <fieldset class="form-section">
-                    <legend>قصة أو مواقف (اختياري)</legend>
+                    <legend>
+                        <span class="section-step">4</span> مواقف خالدة (اختياري)
+                    </legend>
                     <div class="form-group">
-                        <label for="story">مواقف مؤثرة عن المتوفى</label>
-                        <textarea id="story" maxlength="2000"
-                            placeholder="قصة أثرت فيك، نصيحة خالدة، أو موقف يعبر عن نبله..."></textarea>
-                        <div class="form-hint">مساحة أوسع لتدوين الذكريات الجميلة.</div>
-                        <div class="char-count" id="story-char-count">0 / 2000</div>
+                        <label for="story">مواقف مؤثرة أو نصيحة لا تُنسى</label>
+                        <textarea id="story" maxlength="2000" placeholder="موقف نبيل، وصية طيبة، أو قصة تعكس حسن خلقه وطيب معشره..."></textarea>
+                        <div class="form-group__footer">
+                            <div class="form-hint">مساحة حرة لتدوين الذكريات الجميلة والمؤثرة.</div>
+                            <div class="char-count" id="story-char-count">0 / 2000</div>
+                        </div>
                         <div class="field-error" id="story-error"></div>
                     </div>
                 </fieldset>
 
-                <button type="submit" class="create-memory-submit" id="submit-btn">
-                    إنشاء صفحة صدقة جارية
-                </button>
-
-                <div class="form-status" id="form-status"></div>
+                <!-- Submit Button -->
+                <div class="form-actions">
+                    <button type="submit" class="create-memory-submit btn btn-primary btn-lg" id="submit-btn">
+                        <span>إنشاء صفحة الصدقة الجارية</span>
+                        <span aria-hidden="true">✨</span>
+                    </button>
+                    <div class="form-status" id="form-status" role="alert" aria-live="assertive"></div>
+                </div>
             </form>
         </div>
-
-        <a href="/" class="back-link">← العودة للرئيسية</a>
     </main>
 
-    <script src="/create-memory.js"></script>
+    <script src="/create-memory.js?v=20260516"></script>
 </body>
 
 </html>
