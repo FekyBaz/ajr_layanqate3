@@ -184,6 +184,9 @@
 
         // Initialize Dhikr Cards
         initDhikrSection(memory);
+
+        // Initialize Surah Yaseen Modal
+        initYaseenModal(memory);
     }
 
     function showError(message) {
@@ -388,6 +391,62 @@
                 barEl.style.width = '0%';
             });
         });
+    }
+
+    // ═══════════════════════════════════════════════════════════════════
+    // Quran Dedication (Surah Yaseen Modal)
+    // ═══════════════════════════════════════════════════════════════════
+    function initYaseenModal(memory) {
+        const btnOpen = document.getElementById('btn-open-yaseen');
+        const modal = document.getElementById('yaseen-modal');
+        const btnClose = document.getElementById('btn-close-yaseen');
+        const backdrop = modal ? modal.querySelector('.yaseen-modal__backdrop') : null;
+        const btnComplete = document.getElementById('btn-complete-yaseen');
+
+        if (!btnOpen || !modal) return;
+
+        function openModal() {
+            modal.classList.remove('hidden');
+            document.body.style.overflow = 'hidden';
+            // Reset scroll position to top of Surah Yaseen when opened
+            const bodyEl = modal.querySelector('.yaseen-modal__body');
+            if (bodyEl) bodyEl.scrollTop = 0;
+        }
+
+        function closeModal() {
+            modal.classList.add('hidden');
+            document.body.style.overflow = '';
+        }
+
+        btnOpen.addEventListener('click', function(e) {
+            createRipple(btnOpen, e);
+            openModal();
+        });
+
+        if (btnClose) {
+            btnClose.addEventListener('click', closeModal);
+        }
+
+        if (backdrop) {
+            backdrop.addEventListener('click', closeModal);
+        }
+
+        document.addEventListener('keydown', function(e) {
+            if (e.key === 'Escape' && !modal.classList.contains('hidden')) {
+                closeModal();
+            }
+        });
+
+        if (btnComplete) {
+            btnComplete.addEventListener('click', function(e) {
+                createRipple(btnComplete, e);
+                closeModal();
+                showToast('تقبل الله منكم قراءة سورة يس وإهداء ثوابها للمتوفى');
+                if (memory) {
+                    sendInteraction(memory.id, 'yaseen').catch(() => {});
+                }
+            });
+        }
     }
 
     // ═══════════════════════════════════════════════════════════════════

@@ -1077,3 +1077,310 @@
 .share-bottom-btn__icon {
     font-size: 22px;
 }
+
+/* ═══════════════════════════════════════════════════════════════════════════
+   Quran Dedication Section (Surah Yaseen)
+   ═══════════════════════════════════════════════════════════════════════════ */
+.quran-section {
+    width: 100%;
+    margin-bottom: var(--space-2xl, 36px);
+}
+
+.quran-card {
+    background: linear-gradient(135deg, var(--color-surface, #fffdf9), #fffaf0);
+    border: 1px solid rgba(201, 170, 113, 0.35);
+    border-radius: var(--radius-lg, 16px);
+    padding: var(--space-xl, 28px);
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 20px;
+    box-shadow: 0 8px 32px rgba(140, 106, 53, 0.08);
+    position: relative;
+    overflow: hidden;
+    transition: all 0.3s ease;
+}
+
+.quran-card::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    right: 0;
+    bottom: 0;
+    width: 6px;
+    background: linear-gradient(to bottom, var(--color-gold, #c8a673), var(--color-accent, #8c6a35));
+}
+
+.quran-card:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 12px 40px rgba(140, 106, 53, 0.12);
+}
+
+.quran-card__content {
+    display: flex;
+    align-items: center;
+    gap: 20px;
+    text-align: right;
+}
+
+.quran-card__icon {
+    font-size: 36px;
+    background: rgba(200, 166, 115, 0.15);
+    width: 64px;
+    height: 64px;
+    border-radius: 16px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+    border: 1px solid rgba(200, 166, 115, 0.3);
+}
+
+.quran-card__info {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+}
+
+.quran-card__title {
+    font-family: var(--font-display, inherit);
+    font-size: 20px;
+    font-weight: 700;
+    color: var(--color-text-primary, #2d2419);
+    margin: 0;
+}
+
+.quran-card__desc {
+    font-size: 14px;
+    color: var(--color-text-secondary, #665745);
+    margin: 0;
+    line-height: 1.6;
+}
+
+.quran-btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 10px;
+    background: linear-gradient(135deg, var(--color-accent, #8c6a35), #74562b);
+    color: #ffffff;
+    padding: 14px 28px;
+    border-radius: 999px;
+    font-family: var(--font-primary, inherit);
+    font-size: 16px;
+    font-weight: 700;
+    border: none;
+    cursor: pointer;
+    box-shadow: 0 6px 20px rgba(140, 106, 53, 0.2);
+    transition: all 0.3s ease;
+    user-select: none;
+    -webkit-tap-highlight-color: transparent;
+    flex-shrink: 0;
+    position: relative;
+    overflow: hidden;
+}
+
+.quran-btn:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 8px 28px rgba(140, 106, 53, 0.3);
+    background: linear-gradient(135deg, #9a7442, var(--color-accent, #8c6a35));
+}
+
+.quran-btn:active {
+    transform: translateY(0);
+    box-shadow: 0 4px 16px rgba(140, 106, 53, 0.2);
+}
+
+@media (max-width: 640px) {
+    .quran-card {
+        flex-direction: column;
+        align-items: stretch;
+        text-align: center;
+        padding: 24px 20px;
+    }
+    .quran-card__content {
+        flex-direction: column;
+        text-align: center;
+    }
+    .quran-btn {
+        width: 100%;
+        justify-content: center;
+    }
+}
+
+/* ═══════════════════════════════════════════════════════════════════════════
+   Surah Yaseen Modal
+   ═══════════════════════════════════════════════════════════════════════════ */
+.yaseen-modal {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    z-index: 100000;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 20px;
+    transition: opacity 0.3s ease, visibility 0.3s ease;
+}
+
+.yaseen-modal.hidden {
+    opacity: 0;
+    visibility: hidden;
+    pointer-events: none;
+}
+
+.yaseen-modal__backdrop {
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: rgba(25, 20, 14, 0.65);
+    backdrop-filter: blur(6px);
+    -webkit-backdrop-filter: blur(6px);
+}
+
+.yaseen-modal__container {
+    position: relative;
+    width: 100%;
+    max-width: 720px;
+    max-height: 88vh;
+    background: #fffefb;
+    border: 1px solid var(--color-gold, #c8a673);
+    border-radius: 24px;
+    box-shadow: 0 24px 64px rgba(25, 20, 14, 0.35);
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+    transform: scale(1) translateY(0);
+    transition: transform 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.yaseen-modal.hidden .yaseen-modal__container {
+    transform: scale(0.96) translateY(20px);
+}
+
+.yaseen-modal__header {
+    padding: 20px 28px;
+    background: linear-gradient(135deg, rgba(200, 166, 115, 0.12), rgba(200, 166, 115, 0.03));
+    border-bottom: 1px solid rgba(200, 166, 115, 0.25);
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    direction: rtl;
+}
+
+.yaseen-modal__title-group {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+}
+
+.yaseen-modal__title {
+    font-family: var(--font-display, inherit);
+    font-size: 24px;
+    font-weight: 700;
+    color: var(--color-accent, #8c6a35);
+    margin: 0;
+}
+
+.yaseen-modal__bismillah {
+    font-family: var(--font-primary, inherit);
+    font-size: 16px;
+    color: var(--color-text-secondary, #665745);
+    font-weight: 600;
+}
+
+.yaseen-modal__close {
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    background: rgba(140, 106, 53, 0.1);
+    color: var(--color-accent, #8c6a35);
+    border: none;
+    font-size: 24px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    -webkit-tap-highlight-color: transparent;
+}
+
+.yaseen-modal__close:hover {
+    background: rgba(140, 106, 53, 0.2);
+    transform: rotate(90deg);
+}
+
+.yaseen-modal__body {
+    padding: 32px 36px;
+    overflow-y: auto;
+    direction: rtl;
+}
+
+.yaseen-text {
+    font-family: 'Amiri', 'Traditional Arabic', serif;
+    font-size: 24px;
+    line-height: 2.3;
+    color: #2d2419;
+    text-align: justify;
+    text-align-last: center;
+    white-space: pre-wrap;
+    user-select: text;
+}
+
+@media (max-width: 640px) {
+    .yaseen-modal__body {
+        padding: 24px 20px;
+    }
+    .yaseen-text {
+        font-size: 21px;
+        line-height: 2.2;
+    }
+}
+
+.yaseen-modal__footer {
+    padding: 20px 28px;
+    background: #ffffff;
+    border-top: 1px solid rgba(200, 166, 115, 0.2);
+    display: flex;
+    justify-content: center;
+}
+
+.yaseen-modal__complete-btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 10px;
+    background: linear-gradient(135deg, #276749, #2f855a);
+    color: #ffffff;
+    padding: 14px 36px;
+    border-radius: 999px;
+    font-family: var(--font-primary, inherit);
+    font-size: 18px;
+    font-weight: 700;
+    border: none;
+    cursor: pointer;
+    box-shadow: 0 8px 24px rgba(39, 103, 73, 0.25);
+    transition: all 0.3s ease;
+    -webkit-tap-highlight-color: transparent;
+    position: relative;
+    overflow: hidden;
+}
+
+.yaseen-modal__complete-btn:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 12px 32px rgba(39, 103, 73, 0.35);
+    background: linear-gradient(135deg, #2f855a, #38a169);
+}
+
+.yaseen-modal__complete-btn:active {
+    transform: translateY(0);
+    box-shadow: 0 4px 16px rgba(39, 103, 73, 0.2);
+}
+
+.yaseen-modal__btn-icon {
+    font-size: 20px;
+}
