@@ -411,6 +411,11 @@ export function getClientIP(event) {
         'unknown';
 }
 
+export function hashIP(ip) {
+    return crypto.createHash('sha256').update(ip || 'unknown').digest('hex');
+}
+
+
 // ═══════════════════════════════════════════════════════════════════════════
 // Phase 3: Legacy Hub Helpers
 // ═══════════════════════════════════════════════════════════════════════════
