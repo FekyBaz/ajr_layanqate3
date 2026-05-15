@@ -333,7 +333,9 @@
 /* Ripple animation on click */
 .memory-btn .ripple,
 .dhikr-btn .ripple,
-.share-bottom-btn .ripple {
+.share-bottom-btn .ripple,
+.quran-btn .ripple,
+.yaseen-modal__complete-btn .ripple {
     position: absolute;
     border-radius: 50%;
     background: rgba(255, 255, 255, 0.35);
