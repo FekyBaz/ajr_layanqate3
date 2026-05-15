@@ -50,7 +50,7 @@ export async function handler(event, context) {
         }
 
         // Validate structured text fields
-        const bioResult = sanitizeLegacyText(biography, 3, 1000, true);
+        const bioResult = sanitizeLegacyText(biography, 3, 1000, false);
         if (!bioResult.isValid) return error(400, `نبذة عن المتوفى: ${bioResult.error}`, origin);
 
         const traitsResult = sanitizeLegacyText(good_traits, 3, 500, false);
