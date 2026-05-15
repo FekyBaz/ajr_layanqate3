@@ -366,27 +366,27 @@
 
             card.innerHTML = `
                 <div class="dhikr-card__header">
-                    <span class="dhikr-card__name">${item.text}</span>
-                    <span class="dhikr-card__target">الهدف: ${item.target}</span>
+                    <span class="dhikr-card__title">${item.text}</span>
+                    <span class="dhikr-card__badge">الهدف ${item.target}</span>
                 </div>
                 
-                <div class="dhikr-card__progress-container">
-                    <div class="dhikr-card__progress-bar" id="dhikr-prog-${item.id}" style="width: ${progressPercent}%;"></div>
+                <div class="dhikr-card__counter">
+                    <span class="dhikr-card__number" id="dhikr-num-${item.id}">${currentVal}</span>
+                    <span class="dhikr-card__divider">/</span>
+                    <span class="dhikr-card__total">${item.target}</span>
                 </div>
                 
-                <div class="dhikr-card__counter-area">
-                    <span class="dhikr-card__current" id="dhikr-val-${item.id}">${currentVal}</span>
-                    <span class="dhikr-card__slash">/</span>
-                    <span class="dhikr-card__max">${item.target}</span>
+                <div class="dhikr-card__track">
+                    <div class="dhikr-card__bar" id="dhikr-bar-${item.id}" style="width: ${progressPercent}%;"></div>
                 </div>
                 
-                <div class="dhikr-card__actions">
-                    <button class="dhikr-card__btn dhikr-card__btn--count" id="dhikr-btn-${item.id}" ${isCompleted ? 'disabled' : ''} type="button">
-                        <span aria-hidden="true">📿</span>
-                        <span class="dhikr-btn-text">${isCompleted ? '✓ اكتملت' : 'تسبيحة'}</span>
+                <div class="dhikr-card__buttons">
+                    <button class="dhikr-btn dhikr-btn--tasbeeh" id="dhikr-btn-${item.id}" ${isCompleted ? 'disabled' : ''} type="button">
+                        <span class="dhikr-btn__icon" aria-hidden="true">📿</span>
+                        <span class="dhikr-btn__text" id="dhikr-btn-text-${item.id}">${isCompleted ? 'تمت' : 'تسبيحة'}</span>
                     </button>
-                    <button class="dhikr-card__btn dhikr-card__btn--reset" id="dhikr-reset-${item.id}" title="إعادة العداد للصفر" type="button">
-                        ↺
+                    <button class="dhikr-btn dhikr-btn--reset" id="dhikr-reset-${item.id}" title="إعادة العداد للصفر" type="button">
+                        <span aria-hidden="true">↺</span>
                     </button>
                 </div>
             `;
@@ -395,41 +395,39 @@
 
             const countBtn = card.querySelector(`#dhikr-btn-${item.id}`);
             const resetBtn = card.querySelector(`#dhikr-reset-${item.id}`);
-            const valEl = card.querySelector(`#dhikr-val-${item.id}`);
-            const progEl = card.querySelector(`#dhikr-prog-${item.id}`);
-            const btnText = card.querySelector('.dhikr-btn-text');
+            const numEl = card.querySelector(`#dhikr-num-${item.id}`);
+            const barEl = card.querySelector(`#dhikr-bar-${item.id}`);
+            const btnText = card.querySelector(`#dhikr-btn-text-${item.id}`);
 
             let isThrottled = false;
 
             countBtn.addEventListener('click', (e) => {
                 if (isThrottled || currentVal >= item.target) return;
                 isThrottled = true;
-                setTimeout(() => { isThrottled = false; }, 80); // Debounce extremely rapid clicks
+                setTimeout(() => { isThrottled = false; }, 80);
 
                 createRipple(countBtn, e);
 
                 currentVal++;
                 localStorage.setItem(storageKey, currentVal);
 
-                valEl.textContent = currentVal;
-                valEl.style.transform = 'scale(1.2)';
-                setTimeout(() => { valEl.style.transform = 'scale(1)'; }, 150);
+                numEl.textContent = currentVal;
+                numEl.style.transform = 'scale(1.25)';
+                setTimeout(() => { numEl.style.transform = 'scale(1)'; }, 150);
 
                 const newPct = Math.min(100, Math.round((currentVal / item.target) * 100));
-                progEl.style.width = `${newPct}%`;
+                barEl.style.width = `${newPct}%`;
 
                 if (currentVal >= item.target) {
                     card.classList.add('completed', 'celebrate');
                     countBtn.disabled = true;
-                    btnText.textContent = '✓ اكتملت';
+                    btnText.textContent = 'تمت';
                     
-                    // Trigger vibration if supported
                     if (navigator.vibrate) {
                         try { navigator.vibrate([50, 50, 50]); } catch (err) {}
                     }
                     showToast(`تقبل الله! أتممت تسبيح "${item.text}"`);
 
-                    // Also increment global tasbeeh count on server
                     sendInteraction(memory.id, 'tasbeeh').then(res => {
                         if (res.success && res.total_interactions) {
                             bumpCounter(res.total_interactions);
@@ -450,8 +448,8 @@
                 countBtn.disabled = false;
                 btnText.textContent = 'تسبيحة';
 
-                valEl.textContent = '0';
-                progEl.style.width = '0%';
+                numEl.textContent = '0';
+                barEl.style.width = '0%';
             });
         });
     }

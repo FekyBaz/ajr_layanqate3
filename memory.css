@@ -657,145 +657,166 @@
 }
 
 /* ═══════════════════════════════════════════════════════════════════════════
-   Dedicate Dhikr (Tasbeeh) Section
+   Dedicate Dhikr (Tasbeeh) Section - Redesigned Minimal Islamic Elegant
    ═══════════════════════════════════════════════════════════════════════════ */
 .dhikr-section {
-    background: var(--color-surface);
-    border: 1px solid var(--color-border);
-    border-radius: var(--radius-lg);
-    padding: var(--space-xl);
-    margin-bottom: var(--space-2xl);
+    background: var(--color-surface, #fffdf9);
+    border: 1px solid rgba(201, 170, 113, 0.25);
+    border-radius: var(--radius-lg, 16px);
+    padding: var(--space-xl, 28px);
+    margin-bottom: var(--space-2xl, 36px);
     text-align: right;
-    box-shadow: var(--shadow-subtle);
+    box-shadow: 0 4px 20px rgba(140, 106, 53, 0.05);
+}
+
+.dhikr-section__header {
+    margin-bottom: var(--space-xl, 24px);
+}
+
+.dhikr-section__title {
+    font-family: var(--font-display, inherit);
+    font-size: var(--font-size-xl, 22px);
+    font-weight: 700;
+    color: var(--color-text-primary, #2d2419);
+    margin-bottom: var(--space-xs, 6px);
 }
 
 .dhikr-section__subtitle {
-    font-size: var(--font-size-sm);
-    color: var(--color-text-secondary);
-    margin-bottom: var(--space-lg);
+    font-size: var(--font-size-sm, 14px);
+    color: var(--color-text-secondary, #665745);
+    margin: 0;
 }
 
 .dhikr-cards {
     display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
-    gap: var(--space-md);
+    grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+    gap: var(--space-lg, 20px);
+    align-items: start; /* Prevents cards from stretching vertically to match tallest */
 }
 
+/* Single Card Styling */
 .dhikr-card {
-    background: #fff;
-    border: 1px solid var(--color-border);
-    border-radius: var(--radius-md);
-    padding: var(--space-md);
+    background: #ffffff;
+    border: 1px solid rgba(212, 195, 163, 0.5);
+    border-radius: 18px;
+    padding: 22px;
     display: flex;
     flex-direction: column;
     position: relative;
-    overflow: hidden;
-    transition: all var(--transition-normal);
-    box-shadow: 0 4px 12px rgba(77, 55, 26, 0.04);
+    transition: all 0.3s ease;
+    box-shadow: 0 2px 10px rgba(115, 90, 50, 0.04);
 }
 
 .dhikr-card:hover {
     transform: translateY(-2px);
-    box-shadow: var(--shadow-soft);
-    border-color: var(--color-accent);
+    box-shadow: 0 8px 24px rgba(115, 90, 50, 0.08);
+    border-color: var(--color-accent, #8c6a35);
 }
 
 .dhikr-card.completed {
-    background: linear-gradient(135deg, #fffaf1, #f7ecd5);
-    border-color: var(--color-gold);
+    background: linear-gradient(145deg, #fefbf5, #f7f0e1);
+    border-color: #38a169;
+    box-shadow: 0 0 15px rgba(56, 161, 105, 0.15);
 }
 
+/* Card Header */
 .dhikr-card__header {
     display: flex;
     justify-content: space-between;
     align-items: center;
-    margin-bottom: var(--space-sm);
+    margin-bottom: 20px;
 }
 
-.dhikr-card__name {
-    font-family: var(--font-display);
-    font-size: var(--font-size-md);
+.dhikr-card__title {
+    font-family: var(--font-display, inherit);
+    font-size: 17px;
     font-weight: 700;
-    color: var(--color-text-primary);
+    color: var(--color-text-primary, #2d2419);
 }
 
-.dhikr-card__target {
-    font-size: var(--font-size-xs);
-    color: var(--color-text-muted);
-    background: rgba(140, 106, 53, 0.1);
-    padding: 2px 8px;
+.dhikr-card__badge {
+    font-size: 12px;
+    color: var(--color-text-secondary, #665745);
+    background: #f5efe6;
+    padding: 4px 10px;
     border-radius: 999px;
     font-weight: 600;
+    border: 1px solid rgba(201, 170, 113, 0.2);
 }
 
-.dhikr-card__progress-container {
-    width: 100%;
-    height: 8px;
-    background: var(--color-border);
-    border-radius: 999px;
-    overflow: hidden;
-    margin-bottom: var(--space-md);
-    position: relative;
-}
-
-.dhikr-card__progress-bar {
-    height: 100%;
-    width: 0%;
-    background: linear-gradient(to left, var(--color-accent), var(--color-gold));
-    border-radius: 999px;
-    transition: width 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-}
-
-.dhikr-card.completed .dhikr-card__progress-bar {
-    background: linear-gradient(to left, #27ae60, #2ecc71);
-}
-
-.dhikr-card__counter-area {
+/* Card Counter (Middle) */
+.dhikr-card__counter {
     display: flex;
     justify-content: center;
     align-items: baseline;
-    margin-bottom: var(--space-md);
-    gap: 4px;
+    gap: 6px;
+    margin-bottom: 18px;
 }
 
-.dhikr-card__current {
-    font-family: var(--font-display);
-    font-size: 2.5rem;
+.dhikr-card__number {
+    font-family: var(--font-display, inherit);
+    font-size: 34px;
     font-weight: 700;
-    color: var(--color-accent);
+    color: var(--color-accent, #8c6a35);
     line-height: 1;
-    transition: transform 0.15s ease-out;
+    transition: transform 0.15s cubic-bezier(0.18, 0.89, 0.32, 1.28);
+    display: inline-block;
 }
 
-.dhikr-card.completed .dhikr-card__current {
-    color: #27ae60;
+.dhikr-card.completed .dhikr-card__number {
+    color: #276749;
 }
 
-.dhikr-card__slash {
-    font-size: 1.25rem;
-    color: var(--color-text-muted);
+.dhikr-card__divider {
+    font-size: 18px;
+    color: #a39581;
+    font-weight: 400;
 }
 
-.dhikr-card__max {
-    font-size: 1.25rem;
-    color: var(--color-text-muted);
+.dhikr-card__total {
+    font-size: 18px;
+    color: #7a6e5d;
     font-weight: 600;
 }
 
-.dhikr-card__actions {
+/* Track / Progress Bar */
+.dhikr-card__track {
+    width: 100%;
+    height: 6px;
+    background: #eae3d5;
+    border-radius: 999px;
+    overflow: hidden;
+    margin-bottom: 24px;
+}
+
+.dhikr-card__bar {
+    height: 100%;
+    width: 0%;
+    background: linear-gradient(90deg, var(--color-gold, #c9aa71), var(--color-accent, #8c6a35));
+    border-radius: 999px;
+    transition: width 0.3s ease-out;
+}
+
+.dhikr-card.completed .dhikr-card__bar {
+    background: linear-gradient(90deg, #48bb78, #2f855a);
+}
+
+/* Button Row */
+.dhikr-card__buttons {
     display: flex;
-    gap: var(--space-xs);
+    align-items: center;
+    gap: 12px;
     margin-top: auto;
 }
 
-.dhikr-card__btn {
-    padding: 10px 16px;
+.dhikr-btn {
+    height: 44px;
     border-radius: 999px;
-    font-family: var(--font-primary);
-    font-size: var(--font-size-sm);
+    font-family: var(--font-primary, inherit);
+    font-size: 15px;
     font-weight: 600;
     cursor: pointer;
-    transition: all 0.2s;
+    transition: all 0.2s ease;
     border: none;
     user-select: none;
     touch-action: manipulation;
@@ -803,68 +824,72 @@
     display: flex;
     align-items: center;
     justify-content: center;
-    gap: 6px;
-    position: relative;
-    overflow: hidden;
+    box-sizing: border-box;
 }
 
-.dhikr-card__btn--count {
+.dhikr-btn--tasbeeh {
     flex: 1;
-    background: var(--color-accent);
-    color: white;
-    box-shadow: 0 4px 12px rgba(140, 106, 53, 0.2);
+    background: var(--color-accent, #8c6a35);
+    color: #ffffff;
+    gap: 8px;
+    box-shadow: 0 4px 12px rgba(140, 106, 53, 0.25);
 }
 
-.dhikr-card__btn--count:hover:not(:disabled) {
-    background: #74562b;
+.dhikr-btn--tasbeeh:hover:not(:disabled) {
+    background: #75582c;
     transform: translateY(-1px);
+    box-shadow: 0 6px 16px rgba(140, 106, 53, 0.35);
 }
 
-.dhikr-card__btn--count:active:not(:disabled) {
+.dhikr-btn--tasbeeh:active:not(:disabled) {
     transform: translateY(0);
+    box-shadow: 0 2px 6px rgba(140, 106, 53, 0.2);
 }
 
-.dhikr-card__btn--count:disabled {
-    background: #27ae60;
-    color: white;
+.dhikr-btn--tasbeeh:disabled {
+    background: #2f855a;
+    color: #ffffff;
     cursor: default;
-    box-shadow: 0 4px 12px rgba(39, 174, 96, 0.2);
+    box-shadow: 0 4px 12px rgba(47, 133, 90, 0.25);
 }
 
-.dhikr-card__btn--reset {
-    flex: 0 0 auto;
-    width: 42px;
-    background: var(--color-surface);
-    border: 1px solid var(--color-border);
-    color: var(--color-text-secondary);
+.dhikr-btn--reset {
+    flex: 0 0 44px;
+    width: 44px;
+    background: #f7f3ec;
+    border: 1px solid rgba(201, 170, 113, 0.3);
+    color: var(--color-text-secondary, #665745);
+    font-size: 18px;
     padding: 0;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    font-size: 1.1rem;
 }
 
-.dhikr-card__btn--reset:hover {
-    background: #e74c3c;
-    color: white;
-    border-color: #e74c3c;
+.dhikr-btn--reset:hover {
+    background: #fee2e2;
+    color: #dc2626;
+    border-color: #f87171;
+    transform: rotate(-30deg);
 }
 
-/* Completion Glow Animation */
-@keyframes completeGlow {
-    0% { box-shadow: 0 0 0 0 rgba(39, 174, 96, 0.4); }
-    70% { box-shadow: 0 0 0 15px rgba(39, 174, 96, 0); }
-    100% { box-shadow: 0 0 0 0 rgba(39, 174, 96, 0); }
-}
-
-@keyframes shakeCard {
-    0%, 100% { transform: translateX(0); }
-    20%, 60% { transform: translateX(-4px); }
-    40%, 80% { transform: translateX(4px); }
+/* Animations */
+@keyframes cardPulse {
+    0% { transform: scale(1); box-shadow: 0 0 0 0 rgba(56, 161, 105, 0.4); }
+    50% { transform: scale(1.02); box-shadow: 0 0 0 15px rgba(56, 161, 105, 0); }
+    100% { transform: scale(1); box-shadow: 0 0 0 0 rgba(56, 161, 105, 0); }
 }
 
 .dhikr-card.celebrate {
-    animation: completeGlow 1s ease-out, shakeCard 0.4s ease-in-out;
+    animation: cardPulse 0.6s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+/* Responsive grid adjustments */
+@media (max-width: 640px) {
+    .dhikr-cards {
+        grid-template-columns: 1fr; /* 1 card per row on mobile exactly as requested */
+        gap: 16px;
+    }
+    .dhikr-section {
+        padding: 20px 16px;
+    }
 }
 
 /* ═══════════════════════════════════════════════════════════════════════════
