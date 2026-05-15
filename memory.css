@@ -15,12 +15,12 @@
 
 .memory-card {
     width: 100%;
-    max-width: 560px;
-    background: var(--color-surface);
-    border-radius: var(--radius-lg);
-    box-shadow: var(--shadow-soft);
-    border: 1px solid var(--color-border);
-    padding: var(--space-3xl) var(--space-xl);
+    max-width: 720px;
+    background: #fffcf7;
+    border-radius: 24px;
+    box-shadow: 0 20px 60px rgba(80, 55, 25, 0.08);
+    border: 1px solid rgba(200, 166, 115, 0.35);
+    padding: 3.5rem 2.8rem;
     text-align: center;
     position: relative;
     overflow: hidden;
@@ -32,8 +32,8 @@
     top: 0;
     left: 0;
     right: 0;
-    height: 6px;
-    background: linear-gradient(to left, var(--color-accent), var(--color-gold), var(--color-accent));
+    height: 8px;
+    background: linear-gradient(to left, #8c6a35, #e6ca98, #8c6a35);
 }
 
 /* ── Islamic Ornament ──────────────────────────────────────────────────── */
@@ -110,9 +110,10 @@
 /* ── Deceased Name ─────────────────────────────────────────────────────── */
 .memory-name {
     font-family: var(--font-display);
-    font-size: var(--font-size-2xl);
+    font-size: 2.4rem;
     font-weight: 700;
-    color: var(--color-text-primary);
+    color: #2a2015;
+    text-shadow: 0 2px 4px rgba(140, 106, 53, 0.08);
     margin-bottom: var(--space-xs);
     line-height: var(--line-height-tight);
 }
@@ -142,10 +143,19 @@
 .memory-section {
     margin-bottom: var(--space-2xl);
     text-align: right;
-    background: #fafafa;
-    border-radius: var(--radius-md);
-    padding: var(--space-xl);
-    border: 1px solid var(--color-border);
+    background: #ffffff;
+    border-radius: 20px;
+    padding: 2.2rem 2.5rem;
+    box-shadow: 0 4px 24px rgba(140, 106, 53, 0.04);
+    border: 1px solid rgba(200, 166, 115, 0.25);
+}
+
+.memory-section.quran-section {
+    padding: 0;
+    border: none;
+    background: transparent;
+    box-shadow: none;
+    margin-bottom: var(--space-2xl);
 }
 
 .memory-section-title {
@@ -1087,18 +1097,18 @@
 }
 
 .quran-card {
-    background: linear-gradient(135deg, var(--color-surface, #fffdf9), #fffaf0);
-    border: 1px solid rgba(201, 170, 113, 0.35);
-    border-radius: var(--radius-lg, 16px);
-    padding: var(--space-xl, 28px);
+    background: linear-gradient(135deg, #ffffff, #fffaf0);
+    border: 1px solid rgba(201, 170, 113, 0.45);
+    border-radius: 22px;
+    padding: 32px 36px;
     display: flex;
     align-items: center;
     justify-content: space-between;
-    gap: 20px;
-    box-shadow: 0 8px 32px rgba(140, 106, 53, 0.08);
+    gap: 28px;
+    box-shadow: 0 12px 36px rgba(140, 106, 53, 0.08);
     position: relative;
     overflow: hidden;
-    transition: all 0.3s ease;
+    transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
 }
 
 .quran-card::before {
@@ -1107,52 +1117,55 @@
     top: 0;
     right: 0;
     bottom: 0;
-    width: 6px;
+    width: 8px;
     background: linear-gradient(to bottom, var(--color-gold, #c8a673), var(--color-accent, #8c6a35));
 }
 
 .quran-card:hover {
-    transform: translateY(-2px);
-    box-shadow: 0 12px 40px rgba(140, 106, 53, 0.12);
+    transform: translateY(-4px);
+    box-shadow: 0 20px 48px rgba(140, 106, 53, 0.14);
+    border-color: var(--color-accent, #8c6a35);
 }
 
 .quran-card__content {
     display: flex;
     align-items: center;
-    gap: 20px;
+    gap: 24px;
     text-align: right;
+    flex: 1;
 }
 
 .quran-card__icon {
-    font-size: 36px;
-    background: rgba(200, 166, 115, 0.15);
-    width: 64px;
-    height: 64px;
-    border-radius: 16px;
+    font-size: 38px;
+    background: linear-gradient(135deg, rgba(200, 166, 115, 0.2), rgba(200, 166, 115, 0.08));
+    width: 76px;
+    height: 76px;
+    border-radius: 20px;
     display: flex;
     align-items: center;
     justify-content: center;
     flex-shrink: 0;
-    border: 1px solid rgba(200, 166, 115, 0.3);
+    border: 1px solid rgba(200, 166, 115, 0.4);
+    box-shadow: inset 0 2px 4px rgba(255, 255, 255, 0.7);
 }
 
 .quran-card__info {
     display: flex;
     flex-direction: column;
-    gap: 4px;
+    gap: 6px;
 }
 
 .quran-card__title {
     font-family: var(--font-display, inherit);
-    font-size: 20px;
+    font-size: 22px;
     font-weight: 700;
     color: var(--color-text-primary, #2d2419);
     margin: 0;
 }
 
 .quran-card__desc {
-    font-size: 14px;
-    color: var(--color-text-secondary, #665745);
+    font-size: 15px;
+    color: var(--color-text-secondary, #5c4d3b);
     margin: 0;
     line-height: 1.6;
 }
@@ -1161,18 +1174,18 @@
     display: inline-flex;
     align-items: center;
     justify-content: center;
-    gap: 10px;
-    background: linear-gradient(135deg, var(--color-accent, #8c6a35), #74562b);
+    gap: 12px;
+    background: linear-gradient(135deg, var(--color-accent, #8c6a35), #6a4e25);
     color: #ffffff;
-    padding: 14px 28px;
+    padding: 16px 32px;
     border-radius: 999px;
     font-family: var(--font-primary, inherit);
-    font-size: 16px;
+    font-size: 17px;
     font-weight: 700;
     border: none;
     cursor: pointer;
-    box-shadow: 0 6px 20px rgba(140, 106, 53, 0.2);
-    transition: all 0.3s ease;
+    box-shadow: 0 8px 24px rgba(140, 106, 53, 0.25);
+    transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
     user-select: none;
     -webkit-tap-highlight-color: transparent;
     flex-shrink: 0;
@@ -1182,8 +1195,12 @@
 
 .quran-btn:hover {
     transform: translateY(-2px);
-    box-shadow: 0 8px 28px rgba(140, 106, 53, 0.3);
+    box-shadow: 0 12px 32px rgba(140, 106, 53, 0.35);
     background: linear-gradient(135deg, #9a7442, var(--color-accent, #8c6a35));
+}
+
+.quran-btn:hover .quran-btn__icon {
+    transform: translateX(-4px);
 }
 
 .quran-btn:active {
@@ -1191,16 +1208,29 @@
     box-shadow: 0 4px 16px rgba(140, 106, 53, 0.2);
 }
 
+.quran-btn__icon {
+    transition: transform 0.2s ease;
+}
+
 @media (max-width: 640px) {
+    .memory-card {
+        padding: 2.5rem 1.5rem;
+        border-radius: 20px;
+    }
+    .memory-section {
+        padding: 1.8rem 1.5rem;
+    }
     .quran-card {
         flex-direction: column;
         align-items: stretch;
         text-align: center;
-        padding: 24px 20px;
+        padding: 28px 20px;
+        gap: 24px;
     }
     .quran-card__content {
         flex-direction: column;
         text-align: center;
+        gap: 16px;
     }
     .quran-btn {
         width: 100%;
