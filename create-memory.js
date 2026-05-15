@@ -204,7 +204,7 @@
         const nameErr = validateInput(nameInput.value, 'الاسم', 3, 100, true);
         if (nameErr) { showFieldError(elements.name.error, nameErr); hasError = true; }
 
-        const bioErr = validateInput(bioInput.value, 'النبذة', 3, 1000, true);
+        const bioErr = validateInput(bioInput.value, 'النبذة', 3, 1000, false);
         if (bioErr) { showFieldError(elements.bio.error, bioErr); hasError = true; }
 
         const traitsErr = validateInput(traitsInput.value, 'الصفات', 3, 500, false);
@@ -235,7 +235,7 @@
                 body: JSON.stringify({
                     deceased_name: nameInput.value.trim(),
                     relation: relationInput.value.trim() || null,
-                    biography: bioInput.value.trim(),
+                    biography: bioInput.value.trim() || null,
                     good_traits: traitsInput.value.trim() || null,
                     ongoing_charity: charityInput.value.trim() || null,
                     external_links: linkResult.links,

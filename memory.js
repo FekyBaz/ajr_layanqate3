@@ -121,9 +121,14 @@
         let hasStructuredContent = false;
 
         // About Section
-        if (memory.biography) {
+        if (memory.biography || memory.good_traits) {
             hasStructuredContent = true;
-            bioEl.textContent = memory.biography;
+            if (memory.biography) {
+                bioEl.textContent = memory.biography;
+                bioEl.classList.remove('hidden');
+            } else {
+                bioEl.classList.add('hidden');
+            }
             if (memory.good_traits) {
                 traitsEl.textContent = memory.good_traits;
                 traitsContainer.classList.remove('hidden');

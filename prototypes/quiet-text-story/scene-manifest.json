@@ -1,0 +1,38 @@
+{
+  "id": "quiet-text-story-v1",
+  "project": "أجر لا ينقطع",
+  "scene_name": "Quiet Text Story Prototype",
+  "duration_seconds": 17.5,
+  "aspect_ratio": "9:16",
+  "dimensions": {
+    "width": 1080,
+    "height": 1920
+  },
+  "text_lines": [
+    "أحيانًا نحتاج مكانًا هادئًا",
+    "لنكتب ذكرًا فقط",
+    "بدون ضجيج",
+    "بدون استعجال",
+    "بينك وبين الله"
+  ],
+  "beats": [
+    { "start": 0.0, "end": 1.2, "label": "Empty calm screen" },
+    { "start": 1.2, "end": 4.8, "label": "First line types in" },
+    { "start": 4.8, "end": 6.2, "label": "Pause" },
+    { "start": 6.2, "end": 9.4, "label": "Second line types in" },
+    { "start": 9.4, "end": 11.3, "label": "Two short reflective lines appear" },
+    { "start": 11.3, "end": 14.2, "label": "Tiny UI glimpse" },
+    { "start": 14.2, "end": 16.6, "label": "Final line types in" },
+    { "start": 16.6, "end": 17.5, "label": "Quiet ending hold" }
+  ],
+  "audio": {
+    "included": false,
+    "notes": "Designed to work silently. Optional later layer: soft room tone only, with one restrained cursor or tap texture."
+  },
+  "validation_rules": [
+    "Must still feel sincere when muted",
+    "Must not read like ad copy",
+    "Must feel typographic, not cinematic",
+    "Must leave visual breathing room"
+  ]
+}
