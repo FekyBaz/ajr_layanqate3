@@ -127,7 +127,7 @@
         <div class="site-container">
             <p class="hero__badge">☪️ منصة دعوية بنية الأجر</p>
             <h1 class="hero__title">
-                اكتب ذكرًا… لعلّ الله يكتب لك به أجرًا لا ينقطع ✨
+                اكتب ذكرًا… لعلّ الله يكتب لك به أجرًا لا ينقطع
             </h1>
             <p class="hero__bismillah">بِسْمِ اللَّهِ الرَّحْمَنِ الرَّحِيمِ</p>
             <p class="hero__subtitle">
@@ -284,16 +284,21 @@
 
         <section class="martyrs-preview" aria-labelledby="martyrs-preview-title" style="margin-bottom: 2rem;">
             <div class="site-container">
-                <div class="card card-soft" style="display: flex; flex-direction: column; gap: 1rem; text-align: right;">
-                    <h2 id="martyrs-preview-title" style="margin: 0; font-size: 1.5rem; color: var(--color-primary, #6b4c3a);">🕊 شهداء غزة</h2>
+                <div class="card card-soft"
+                    style="display: flex; flex-direction: column; gap: 1rem; text-align: right;">
+                    <h2 id="martyrs-preview-title"
+                        style="margin: 0; font-size: 1.5rem; color: var(--color-primary, #6b4c3a);">🕊 شهداء غزة</h2>
                     <p style="margin: 0; font-size: 1.1rem; line-height: 1.6;">
                         أكثر من 60,000 شهيد تم توثيقهم.<br>
                         يمكنك تصفح الأسماء وقراءة الفاتحة والدعاء لهم.
                     </p>
-                    <a href="/martyrs" class="btn btn-primary" style="align-self: flex-start; margin-top: 0.5rem;">عرض الشهداء</a>
+                    <a href="/martyrs" class="btn btn-primary" style="align-self: flex-start; margin-top: 0.5rem;">عرض
+                        الشهداء</a>
 
-                    <div style="margin-top: 1rem; padding-top: 1.5rem; border-top: 1px dashed rgba(0,0,0,0.1); display: flex; flex-direction: column; gap: 0.75rem;">
-                        <h3 style="margin: 0; font-size: 1.25rem; color: var(--color-text, #333);">📿 اقرأ الفاتحة للشهداء</h3>
+                    <div
+                        style="margin-top: 1rem; padding-top: 1.5rem; border-top: 1px dashed rgba(0,0,0,0.1); display: flex; flex-direction: column; gap: 0.75rem;">
+                        <h3 style="margin: 0; font-size: 1.25rem; color: var(--color-text, #333);">📿 اقرأ الفاتحة
+                            للشهداء</h3>
                         <p id="homepageGlobalFatihaCounter" style="margin: 0; font-size: 0.95rem; opacity: 0.8;"></p>
                         <a href="/martyrs" class="btn btn-secondary" style="align-self: flex-start;">اقرأ الفاتحة</a>
                     </div>
@@ -340,7 +345,7 @@
     <footer class="footer" role="contentinfo">
         <div class="site-container">
             <p class="footer__text">تابع الذكر اليومي من هنا ✨</p>
-            
+
             <nav class="footer__links" aria-label="روابط الموقع">
                 <a href="/index.html" style="color: inherit; text-decoration: none;">الرئيسية</a>
                 <a href="/adhkar.html" style="color: inherit; text-decoration: none;">الأذكار</a>
@@ -392,24 +397,24 @@
     <script src="share-project.js?v=20260227"></script>
     <script src="script.js?v=20260227"></script>
     <script>
-      (async function() {
-        try {
-          const res = await fetch('/.netlify/functions/fatiha-counter');
-          if (res.ok) {
-            const data = await res.json();
-            const count = data.data && data.data.total_fatihas ? data.data.total_fatihas : 0;
-            const countEl = document.getElementById('homepageGlobalFatihaCounter');
-            if (countEl && count > 0) {
-              countEl.textContent = `قُرِئَت الفاتحة ${count.toLocaleString('ar-EG')} مرة للشهداء`;
-            } else if (countEl) {
-              countEl.hidden = true;
+        (async function () {
+            try {
+                const res = await fetch('/.netlify/functions/fatiha-counter');
+                if (res.ok) {
+                    const data = await res.json();
+                    const count = data.data && data.data.total_fatihas ? data.data.total_fatihas : 0;
+                    const countEl = document.getElementById('homepageGlobalFatihaCounter');
+                    if (countEl && count > 0) {
+                        countEl.textContent = `قُرِئَت الفاتحة ${count.toLocaleString('ar-EG')} مرة للشهداء`;
+                    } else if (countEl) {
+                        countEl.hidden = true;
+                    }
+                }
+            } catch (e) {
+                const countEl = document.getElementById('homepageGlobalFatihaCounter');
+                if (countEl) countEl.hidden = true;
             }
-          }
-        } catch(e) {
-          const countEl = document.getElementById('homepageGlobalFatihaCounter');
-          if(countEl) countEl.hidden = true;
-        }
-      })();
+        })();
     </script>
 </body>
 
