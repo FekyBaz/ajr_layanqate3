@@ -30,6 +30,7 @@ export async function handler(event, context) {
     try {
         const rawPage = Number.parseInt(event.queryStringParameters?.page || '1', 10);
         const rawPageSize = Number.parseInt(event.queryStringParameters?.pageSize || `${DEFAULT_PAGE_SIZE}`, 10);
+        const searchQuery = event.queryStringParameters?.search?.trim() || '';
 
         const page = Number.isNaN(rawPage) || rawPage < 1 ? 1 : rawPage;
         const pageSize = Number.isNaN(rawPageSize) || rawPageSize < 1
@@ -40,11 +41,16 @@ export async function handler(event, context) {
         const to = from + pageSize - 1;
 
         // RLS enforces status = 'Approved' rows for public client
-        const { data, count, error: queryError } = await supabasePublic
+        let query = supabasePublic
             .from('memories')
             .select('id, deceased_name, slug, approved_at', { count: 'exact' })
-            .order('approved_at', { ascending: false })
-            .range(from, to);
+            .order('approved_at', { ascending: false });
+
+        if (searchQuery) {
+            query = query.ilike('deceased_name', `%${searchQuery}%`);
+        }
+
+        const { data, count, error: queryError } = await query.range(from, to);
 
         if (queryError) {
             logger.error('memories-all query error:', queryError.message);
