@@ -78,33 +78,6 @@
 
             <hr class="memory-separator">
 
-            <!-- Counter -->
-            <div class="memory-counter-section">
-                <div class="memory-counter">
-                    <span class="memory-counter-value" id="memory-counter-value">0</span>
-                    <span class="memory-counter-label">تفاعل</span>
-                </div>
-            </div>
-
-            <!-- Interaction Buttons -->
-            <div class="memory-actions" id="memory-actions">
-                <button class="memory-btn" id="btn-tasbeeh" data-type="tasbeeh" type="button">
-                    <span class="memory-btn__icon" aria-hidden="true">📿</span>
-                    <span class="memory-btn__label">تسبيح</span>
-                    <span class="memory-btn__count" id="count-tasbeeh">0</span>
-                </button>
-                <button class="memory-btn" id="btn-dua" data-type="dua" type="button">
-                    <span class="memory-btn__icon" aria-hidden="true">🤲</span>
-                    <span class="memory-btn__label">دعاء</span>
-                    <span class="memory-btn__count" id="count-dua">0</span>
-                </button>
-                <button class="memory-btn" id="btn-share" data-type="share" type="button">
-                    <span class="memory-btn__icon" aria-hidden="true">🔗</span>
-                    <span class="memory-btn__label">مشاركة</span>
-                    <span class="memory-btn__count" id="count-share">0</span>
-                </button>
-            </div>
-
             <!-- Section: Dedicate Dhikr (Tasbeeh) -->
             <div class="memory-section dhikr-section hidden" id="section-dhikr">
                 <div class="dhikr-section__header">
@@ -113,6 +86,28 @@
                 </div>
                 <div class="dhikr-cards" id="dhikr-cards-container">
                     <!-- Dynamic cards injected via JS -->
+                </div>
+            </div>
+
+            <!-- Section: Fixed Duas for the Deceased -->
+            <div class="memory-section dua-section" id="section-fixed-duas">
+                <div class="dua-section__header">
+                    <h2 class="dua-section__title">أدعية للمتوفى</h2>
+                    <p class="dua-section__subtitle">ادعُ للمتوفى بهذه الأدعية المأثورة الجامعة</p>
+                </div>
+                <div class="dua-cards">
+                    <div class="dua-card">
+                        <p class="dua-card__text">"اللهم اغفر له وارحمه، وعافه واعف عنه، وأكرم نزله، ووسّع مدخله، واغسله بالماء والثلج والبرد، ونقّه من الخطايا كما يُنقى الثوب الأبيض من الدنس."</p>
+                    </div>
+                    <div class="dua-card">
+                        <p class="dua-card__text">"اللهم أبدله داراً خيراً من داره، وأهلاً خيراً من أهله، وأدخله الجنة، وأعذه من عذاب القبر ومن عذاب النار."</p>
+                    </div>
+                    <div class="dua-card">
+                        <p class="dua-card__text">"اللهم إن كان محسناً فزد في حسناته، وإن كان مسيئاً فتجاوز عن سيئاته، اللهم آنسه في وحدته وفي وحشته وفي غربته."</p>
+                    </div>
+                    <div class="dua-card">
+                        <p class="dua-card__text">"اللهم أنزله منازل الصديقين والشهداء والصالحين، وحسن أولئك رفيقاً، واجعل قبره روضة من رياض الجنة."</p>
+                    </div>
                 </div>
             </div>
 
@@ -125,6 +120,14 @@
                     <li class="spiritual-guidance__item">تصدّق ولو بالقليل بنية أن يكون الأجر له.</li>
                     <li class="spiritual-guidance__item">شارك هذه الصفحة مع من يعرفه.</li>
                 </ul>
+            </div>
+
+            <!-- Share Page Bottom Button -->
+            <div class="share-bottom-section">
+                <button class="share-bottom-btn" id="btn-share-page" type="button">
+                    <span class="share-bottom-btn__icon" aria-hidden="true">🔗</span>
+                    <span class="share-bottom-btn__label">مشاركة الصفحة واحتساب الأجر</span>
+                </button>
             </div>
 
             <!-- Footer -->

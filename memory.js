@@ -50,13 +50,11 @@
     // Legacy fallback
     const messageEl = document.getElementById('memory-message');
 
-    // Counters/Actions
-    const counterEl = document.getElementById('memory-counter-value');
-    const actionsEl = document.getElementById('memory-actions');
+    // Share Button
+    const btnSharePage = document.getElementById('btn-share-page');
 
     // State
     let memoryData = null;
-    const cooldowns = {};
 
     // ═══════════════════════════════════════════════════════════════════
     // Slug Extraction
@@ -177,17 +175,6 @@
             messageEl.classList.remove('hidden');
         }
 
-        // --- Counters ---
-        counterEl.textContent = formatNumber(memory.total_interactions || 0);
-
-        // Update specific counts on buttons
-        const btnTasbeeh = document.getElementById('count-tasbeeh');
-        const btnDua = document.getElementById('count-dua');
-        const btnShare = document.getElementById('count-share');
-        if (btnTasbeeh) btnTasbeeh.textContent = formatNumber(memory.tasbeeh_count || 0);
-        if (btnDua) btnDua.textContent = formatNumber(memory.dua_count || 0);
-        if (btnShare) btnShare.textContent = formatNumber(memory.share_count || 0);
-
         // Update page title
         document.title = `صدقة جارية على روح ${memory.deceased_name} | أجر لا ينقطع`;
 
@@ -203,21 +190,6 @@
         errorTextEl.textContent = message;
         loadingEl.classList.add('hidden');
         errorEl.classList.remove('hidden');
-    }
-
-    function formatNumber(n) {
-        if (n >= 1000000) return (n / 1000000).toFixed(1).replace(/\.0$/, '') + 'M';
-        if (n >= 1000) return (n / 1000).toFixed(1).replace(/\.0$/, '') + 'K';
-        return String(n);
-    }
-
-    // ═══════════════════════════════════════════════════════════════════
-    // Counter Animation
-    // ═══════════════════════════════════════════════════════════════════
-    function bumpCounter(newTotal) {
-        counterEl.textContent = formatNumber(newTotal);
-        counterEl.classList.add('bumped');
-        setTimeout(() => counterEl.classList.remove('bumped'), 200);
     }
 
     // ═══════════════════════════════════════════════════════════════════
@@ -291,47 +263,16 @@
     }
 
     // ═══════════════════════════════════════════════════════════════════
-    // Interaction Handler (Event Delegation)
+    // Share Button Handler
     // ═══════════════════════════════════════════════════════════════════
-    actionsEl.addEventListener('click', async function (e) {
-        const btn = e.target.closest('.memory-btn');
-        if (!btn || !memoryData) return;
-
-        const type = btn.dataset.type;
-        if (!type) return;
-
-        // Share has special handling
-        if (type === 'share') {
-            createRipple(btn, e);
+    if (btnSharePage) {
+        btnSharePage.addEventListener('click', function (e) {
+            if (!memoryData) return;
+            createRipple(btnSharePage, e);
             handleShare();
-            // Also record the share interaction
             sendInteraction(memoryData.id, 'share').catch(() => { });
-            return;
-        }
-
-        // Client-side cooldown (UX only)
-        if (cooldowns[type]) return;
-
-        // Visual feedback
-        createRipple(btn, e);
-        btn.classList.add('cooldown');
-        cooldowns[type] = true;
-
-        try {
-            const result = await sendInteraction(memoryData.id, type);
-            if (result.success && result.total_interactions) {
-                bumpCounter(result.total_interactions);
-            }
-        } catch (err) {
-            // Silent fail — don't disrupt UX
-        }
-
-        // Cooldown timer
-        setTimeout(() => {
-            btn.classList.remove('cooldown');
-            cooldowns[type] = false;
-        }, INTERACTION_COOLDOWN_MS);
-    });
+        });
+    }
 
     // ═══════════════════════════════════════════════════════════════════
     // Dedicate Dhikr (Tasbeeh) Section
@@ -430,15 +371,7 @@
                     }
                     showToast(`تقبل الله! أتممت تسبيح "${item.text}"`);
 
-                    sendInteraction(memory.id, 'tasbeeh').then(res => {
-                        if (res.success && res.total_interactions) {
-                            bumpCounter(res.total_interactions);
-                            const btnTasbeehCount = document.getElementById('count-tasbeeh');
-                            if (btnTasbeehCount && res.tasbeeh_count) {
-                                btnTasbeehCount.textContent = formatNumber(res.tasbeeh_count);
-                            }
-                        }
-                    }).catch(() => { });
+                    sendInteraction(memory.id, 'tasbeeh').catch(() => { });
                 }
             });
 

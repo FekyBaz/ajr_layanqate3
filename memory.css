@@ -322,7 +322,8 @@
 
 /* Ripple animation on click */
 .memory-btn .ripple,
-.dhikr-btn .ripple {
+.dhikr-btn .ripple,
+.share-bottom-btn .ripple {
     position: absolute;
     border-radius: 50%;
     background: rgba(255, 255, 255, 0.35);
@@ -967,4 +968,112 @@
     right: 0;
     color: var(--color-gold);
     font-weight: 700;
+}
+
+/* ═══════════════════════════════════════════════════════════════════════════
+   Fixed Duas for Deceased Section
+   ═══════════════════════════════════════════════════════════════════════════ */
+.dua-section {
+    background: var(--color-surface, #fffdf9);
+    border: 1px solid rgba(201, 170, 113, 0.25);
+    border-radius: var(--radius-lg, 16px);
+    padding: var(--space-xl, 28px);
+    margin-bottom: var(--space-2xl, 36px);
+    text-align: right;
+    box-shadow: 0 4px 20px rgba(140, 106, 53, 0.05);
+}
+
+.dua-section__header {
+    margin-bottom: var(--space-xl, 24px);
+}
+
+.dua-section__title {
+    font-family: var(--font-display, inherit);
+    font-size: var(--font-size-xl, 22px);
+    font-weight: 700;
+    color: var(--color-text-primary, #2d2419);
+    margin-bottom: var(--space-xs, 6px);
+}
+
+.dua-section__subtitle {
+    font-size: var(--font-size-sm, 14px);
+    color: var(--color-text-secondary, #665745);
+    margin: 0;
+}
+
+.dua-cards {
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: 16px;
+}
+
+.dua-card {
+    background: #ffffff;
+    border: 1px solid rgba(212, 195, 163, 0.5);
+    border-radius: 14px;
+    padding: 20px 24px;
+    position: relative;
+    transition: all 0.3s ease;
+    box-shadow: 0 2px 10px rgba(115, 90, 50, 0.03);
+    border-right: 4px solid var(--color-accent, #8c6a35);
+}
+
+.dua-card:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 6px 20px rgba(115, 90, 50, 0.08);
+}
+
+.dua-card__text {
+    font-family: var(--font-primary, inherit);
+    font-size: 16px;
+    line-height: 1.8;
+    color: var(--color-text-primary, #2d2419);
+    margin: 0;
+    font-weight: 500;
+}
+
+/* ═══════════════════════════════════════════════════════════════════════════
+   Share Bottom Section
+   ═══════════════════════════════════════════════════════════════════════════ */
+.share-bottom-section {
+    margin: var(--space-2xl) auto var(--space-xl);
+    text-align: center;
+    display: flex;
+    justify-content: center;
+}
+
+.share-bottom-btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 12px;
+    background: linear-gradient(135deg, var(--color-accent, #8c6a35), #a68143);
+    color: #ffffff;
+    padding: 16px 36px;
+    border-radius: 999px;
+    font-family: var(--font-primary, inherit);
+    font-size: 18px;
+    font-weight: 700;
+    border: none;
+    cursor: pointer;
+    box-shadow: 0 8px 24px rgba(140, 106, 53, 0.25);
+    transition: all 0.3s ease;
+    user-select: none;
+    -webkit-tap-highlight-color: transparent;
+    position: relative;
+    overflow: hidden;
+}
+
+.share-bottom-btn:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 12px 32px rgba(140, 106, 53, 0.35);
+}
+
+.share-bottom-btn:active {
+    transform: translateY(0);
+    box-shadow: 0 4px 16px rgba(140, 106, 53, 0.2);
+}
+
+.share-bottom-btn__icon {
+    font-size: 22px;
 }
