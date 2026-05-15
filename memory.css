@@ -657,6 +657,217 @@
 }
 
 /* ═══════════════════════════════════════════════════════════════════════════
+   Dedicate Dhikr (Tasbeeh) Section
+   ═══════════════════════════════════════════════════════════════════════════ */
+.dhikr-section {
+    background: var(--color-surface);
+    border: 1px solid var(--color-border);
+    border-radius: var(--radius-lg);
+    padding: var(--space-xl);
+    margin-bottom: var(--space-2xl);
+    text-align: right;
+    box-shadow: var(--shadow-subtle);
+}
+
+.dhikr-section__subtitle {
+    font-size: var(--font-size-sm);
+    color: var(--color-text-secondary);
+    margin-bottom: var(--space-lg);
+}
+
+.dhikr-cards {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+    gap: var(--space-md);
+}
+
+.dhikr-card {
+    background: #fff;
+    border: 1px solid var(--color-border);
+    border-radius: var(--radius-md);
+    padding: var(--space-md);
+    display: flex;
+    flex-direction: column;
+    position: relative;
+    overflow: hidden;
+    transition: all var(--transition-normal);
+    box-shadow: 0 4px 12px rgba(77, 55, 26, 0.04);
+}
+
+.dhikr-card:hover {
+    transform: translateY(-2px);
+    box-shadow: var(--shadow-soft);
+    border-color: var(--color-accent);
+}
+
+.dhikr-card.completed {
+    background: linear-gradient(135deg, #fffaf1, #f7ecd5);
+    border-color: var(--color-gold);
+}
+
+.dhikr-card__header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: var(--space-sm);
+}
+
+.dhikr-card__name {
+    font-family: var(--font-display);
+    font-size: var(--font-size-md);
+    font-weight: 700;
+    color: var(--color-text-primary);
+}
+
+.dhikr-card__target {
+    font-size: var(--font-size-xs);
+    color: var(--color-text-muted);
+    background: rgba(140, 106, 53, 0.1);
+    padding: 2px 8px;
+    border-radius: 999px;
+    font-weight: 600;
+}
+
+.dhikr-card__progress-container {
+    width: 100%;
+    height: 8px;
+    background: var(--color-border);
+    border-radius: 999px;
+    overflow: hidden;
+    margin-bottom: var(--space-md);
+    position: relative;
+}
+
+.dhikr-card__progress-bar {
+    height: 100%;
+    width: 0%;
+    background: linear-gradient(to left, var(--color-accent), var(--color-gold));
+    border-radius: 999px;
+    transition: width 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.dhikr-card.completed .dhikr-card__progress-bar {
+    background: linear-gradient(to left, #27ae60, #2ecc71);
+}
+
+.dhikr-card__counter-area {
+    display: flex;
+    justify-content: center;
+    align-items: baseline;
+    margin-bottom: var(--space-md);
+    gap: 4px;
+}
+
+.dhikr-card__current {
+    font-family: var(--font-display);
+    font-size: 2.5rem;
+    font-weight: 700;
+    color: var(--color-accent);
+    line-height: 1;
+    transition: transform 0.15s ease-out;
+}
+
+.dhikr-card.completed .dhikr-card__current {
+    color: #27ae60;
+}
+
+.dhikr-card__slash {
+    font-size: 1.25rem;
+    color: var(--color-text-muted);
+}
+
+.dhikr-card__max {
+    font-size: 1.25rem;
+    color: var(--color-text-muted);
+    font-weight: 600;
+}
+
+.dhikr-card__actions {
+    display: flex;
+    gap: var(--space-xs);
+    margin-top: auto;
+}
+
+.dhikr-card__btn {
+    padding: 10px 16px;
+    border-radius: 999px;
+    font-family: var(--font-primary);
+    font-size: var(--font-size-sm);
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.2s;
+    border: none;
+    user-select: none;
+    touch-action: manipulation;
+    -webkit-tap-highlight-color: transparent;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 6px;
+    position: relative;
+    overflow: hidden;
+}
+
+.dhikr-card__btn--count {
+    flex: 1;
+    background: var(--color-accent);
+    color: white;
+    box-shadow: 0 4px 12px rgba(140, 106, 53, 0.2);
+}
+
+.dhikr-card__btn--count:hover:not(:disabled) {
+    background: #74562b;
+    transform: translateY(-1px);
+}
+
+.dhikr-card__btn--count:active:not(:disabled) {
+    transform: translateY(0);
+}
+
+.dhikr-card__btn--count:disabled {
+    background: #27ae60;
+    color: white;
+    cursor: default;
+    box-shadow: 0 4px 12px rgba(39, 174, 96, 0.2);
+}
+
+.dhikr-card__btn--reset {
+    flex: 0 0 auto;
+    width: 42px;
+    background: var(--color-surface);
+    border: 1px solid var(--color-border);
+    color: var(--color-text-secondary);
+    padding: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1.1rem;
+}
+
+.dhikr-card__btn--reset:hover {
+    background: #e74c3c;
+    color: white;
+    border-color: #e74c3c;
+}
+
+/* Completion Glow Animation */
+@keyframes completeGlow {
+    0% { box-shadow: 0 0 0 0 rgba(39, 174, 96, 0.4); }
+    70% { box-shadow: 0 0 0 15px rgba(39, 174, 96, 0); }
+    100% { box-shadow: 0 0 0 0 rgba(39, 174, 96, 0); }
+}
+
+@keyframes shakeCard {
+    0%, 100% { transform: translateX(0); }
+    20%, 60% { transform: translateX(-4px); }
+    40%, 80% { transform: translateX(4px); }
+}
+
+.dhikr-card.celebrate {
+    animation: completeGlow 1s ease-out, shakeCard 0.4s ease-in-out;
+}
+
+/* ═══════════════════════════════════════════════════════════════════════════
    Spiritual Guidance Section
    "How to benefit the deceased" — calm, respectful, static
    ═══════════════════════════════════════════════════════════════════════════ */
