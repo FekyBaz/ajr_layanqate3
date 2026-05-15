@@ -321,10 +321,11 @@
 }
 
 /* Ripple animation on click */
-.memory-btn .ripple {
+.memory-btn .ripple,
+.dhikr-btn .ripple {
     position: absolute;
     border-radius: 50%;
-    background: rgba(140, 106, 53, 0.2);
+    background: rgba(255, 255, 255, 0.35);
     transform: scale(0);
     animation: rippleEffect 0.5s ease-out;
     pointer-events: none;
@@ -842,6 +843,8 @@
     align-items: center;
     justify-content: center;
     box-sizing: border-box;
+    position: relative;
+    overflow: hidden;
 }
 
 .dhikr-btn--tasbeeh {
