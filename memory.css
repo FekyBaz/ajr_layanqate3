@@ -467,6 +467,19 @@
     position: relative;
 }
 
+@media (max-width: 576px) {
+    .create-memory-form-card {
+        padding: var(--space-lg) var(--space-md);
+        border-radius: var(--radius-lg);
+    }
+    .form-section {
+        padding: var(--space-lg) var(--space-md) var(--space-sm);
+    }
+    .create-memory-page {
+        padding-top: var(--space-lg);
+    }
+}
+
 /* Form Sections */
 .form-section {
     border: 1px solid rgba(201, 170, 113, 0.25);
