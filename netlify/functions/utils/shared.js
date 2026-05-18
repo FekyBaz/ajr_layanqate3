@@ -61,11 +61,15 @@ export const supabaseAdmin = createClient(
 /**
  * Public client — uses anon key, respects RLS policies.
  * Use for public-facing reads where RLS should be the security boundary.
- * Falls back to service_role key if SUPABASE_ANON_KEY is not set.
+ * SUPABASE_ANON_KEY must be set in production.
  */
+const PUBLIC_KEY = process.env.SUPABASE_ANON_KEY;
+if (!PUBLIC_KEY) {
+    logger.warn('[shared] SUPABASE_ANON_KEY is not set. Public reads will bypass RLS.');
+}
 export const supabasePublic = createClient(
     SUPABASE_URL,
-    process.env.SUPABASE_ANON_KEY || process.env.SUPABASE_SERVICE_ROLE_KEY,
+    PUBLIC_KEY || process.env.SUPABASE_SERVICE_ROLE_KEY,
     CLIENT_OPTIONS,
 );
 
@@ -104,7 +108,10 @@ export function getCorsHeaders(origin) {
     const isAllowed = ALLOWED_ORIGINS.includes(origin) ||
         (DEPLOY_PREVIEW_REGEX && DEPLOY_PREVIEW_REGEX.test(origin));
 
-    const allowOrigin = isAllowed ? origin : ALLOWED_ORIGINS[0];
+    // Safe fallback: never return empty string as Access-Control-Allow-Origin
+    const allowOrigin = isAllowed && origin
+        ? origin
+        : (ALLOWED_ORIGINS.find(Boolean) || 'null');
 
     return {
         ...SECURITY_HEADERS,
