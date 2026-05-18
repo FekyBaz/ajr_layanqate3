@@ -44,10 +44,14 @@ cd netlify/functions && npm install && cd ../..
 ```env
 SUPABASE_URL=https://your-project.supabase.co
 SUPABASE_SERVICE_ROLE_KEY=your-service-role-key
+SUPABASE_ANON_KEY=your-anon-key
 ADMIN_API_KEY=your-admin-key
 FRONTEND_URL=http://localhost:8888
 RATE_LIMIT_WINDOW=24
 RATE_LIMIT_MAX=10
+MEMORY_RATE_LIMIT_MAX=3
+MEMORY_RATE_LIMIT_HOURS=24
+IP_SALT=random-salt-for-ip-hashing
 ```
 
 ### 3. Run the database migrations
@@ -99,10 +103,14 @@ In Netlify: **Site settings** → **Environment variables**
 |----------|-------|
 | `SUPABASE_URL` | Your Supabase project URL |
 | `SUPABASE_SERVICE_ROLE_KEY` | Service role key (NOT anon) |
+| `SUPABASE_ANON_KEY` | Anon/public key (required for RLS) |
 | `ADMIN_API_KEY` | A secure random string |
 | `FRONTEND_URL` | Your Netlify URL (e.g., `https://ajr-la-yanqati.netlify.app`) |
 | `RATE_LIMIT_WINDOW` | `24` |
 | `RATE_LIMIT_MAX` | `10` |
+| `MEMORY_RATE_LIMIT_MAX` | `3` |
+| `MEMORY_RATE_LIMIT_HOURS` | `24` |
+| `IP_SALT` | Random salt string for IP hashing |
 
 ### Step 4: Trigger Redeploy
 

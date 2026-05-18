@@ -19,7 +19,7 @@
         !window.location.hostname.includes('127.0.0.1');
     const API_BASE = isProduction ? PRODUCTION_API_URL : 'http://localhost:8888';
 
-    let adminKey = localStorage.getItem('adminKey') || '';
+    let adminKey = sessionStorage.getItem('adminKey') || '';
 
     // ═══════════════════════════════════════════════════════════════════
     // DOM Elements
@@ -71,7 +71,7 @@
             const result = await apiRequest('/api/admin/stats');
 
             if (result.success) {
-                localStorage.setItem('adminKey', adminKey);
+                sessionStorage.setItem('adminKey', adminKey);
                 showAdminPanel();
             } else {
                 showLoginError('مفتاح API غير صحيح');
@@ -96,7 +96,7 @@
 
     function logout() {
         adminKey = '';
-        localStorage.removeItem('adminKey');
+        sessionStorage.removeItem('adminKey');
         loginSection.classList.remove('hidden');
         adminSection.classList.add('hidden');
         apiKeyInput.value = '';
@@ -204,9 +204,6 @@
                 </div>
             </div>
         `).join('');
-
-        // Use event delegation instead of inline onclick
-        submissionsList.addEventListener('click', handleCardAction);
     }
 
     function handleCardAction(e) {
@@ -412,9 +409,6 @@
                 </div>
             `;
         }).join('');
-
-        // Event delegation for memory actions
-        memoriesList.addEventListener('click', handleMemoryAction);
     }
 
     function handleMemoryAction(e) {
@@ -705,6 +699,18 @@
     // ═══════════════════════════════════════════════════════════════════
     // Initialize
     // ═══════════════════════════════════════════════════════════════════
+
+    // Register delegated event listeners once (prevent memory leaks)
+    if (submissionsList) {
+        submissionsList.addEventListener('click', handleCardAction);
+    }
+    if (memoriesList) {
+        memoriesList.addEventListener('click', handleMemoryAction);
+    }
+    if (feedbackFilter) {
+        feedbackFilter.addEventListener('change', loadFeedback);
+    }
+
     if (adminKey) {
         apiRequest('/api/admin/stats')
             .then(result => {

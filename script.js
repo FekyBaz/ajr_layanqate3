@@ -103,18 +103,16 @@
     function sanitizeInput(input) {
         if (typeof input !== 'string') return '';
 
-        // Create a temporary element to decode HTML entities
-        const temp = document.createElement('div');
-        temp.textContent = input;
-        let sanitized = temp.innerHTML;
+        let sanitized = input.trim();
 
-        // Remove any HTML tags
+        // Strip HTML tags
         sanitized = sanitized.replace(/<[^>]*>/g, '');
 
-        // Remove potential script injections
+        // Remove dangerous URL schemes
         sanitized = sanitized.replace(/javascript:/gi, '');
-        sanitized = sanitized.replace(/on\w+\s*=/gi, '');
+        sanitized = sanitized.replace(/vbscript:/gi, '');
         sanitized = sanitized.replace(/data:/gi, '');
+        sanitized = sanitized.replace(/on\w+\s*=/gi, '');
 
         // Normalize whitespace (keep newlines for readability)
         sanitized = sanitized.replace(/[ \t]+/g, ' ');
@@ -450,7 +448,6 @@
     // Character counting
     if (content) {
         content.addEventListener('input', updateCharCount);
-        console.log('Character counter initialized for textarea');
     }
 
     // Real-time validation on blur
@@ -495,9 +492,7 @@
 
     // ═══════════════════════════════════════════════════════════════════════
     // Console message for developers
-    // ═══════════════════════════════════════════════════════════════════════
-    console.log('%c🤍 أجر لا ينقطع', 'font-size: 20px; font-weight: bold;');
+    console.log('%cأجر لا ينقطع', 'font-size: 20px; font-weight: bold;');
     console.log('%cEndless Reward - Sadaqah Jariyah Platform', 'font-size: 14px; color: #27ae60;');
-    console.log('%cAPI Endpoint: ' + CONFIG.API_BASE_URL + CONFIG.API_ENDPOINT, 'font-size: 12px; color: #636e72;');
 
 })();
