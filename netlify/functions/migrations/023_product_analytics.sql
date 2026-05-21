@@ -57,8 +57,9 @@ CREATE INDEX IF NOT EXISTS idx_analytics_events_country ON analytics_events(coun
 CREATE INDEX IF NOT EXISTS idx_analytics_events_device ON analytics_events(device_type);
 
 -- Composite indexes for dashboard queries
-CREATE INDEX IF NOT EXISTS idx_analytics_events_date_type ON analytics_events(created_at::date, event_type);
-CREATE INDEX IF NOT EXISTS idx_analytics_events_date_session ON analytics_events(created_at::date, session_id);
+-- Note: Expression indexes require double parentheses in PostgreSQL
+CREATE INDEX IF NOT EXISTS idx_analytics_events_date_type ON analytics_events(((created_at)::date), event_type);
+CREATE INDEX IF NOT EXISTS idx_analytics_events_date_session ON analytics_events(((created_at)::date), session_id);
 
 -- Daily aggregates table (for fast dashboard queries)
 CREATE TABLE IF NOT EXISTS analytics_daily_stats (
