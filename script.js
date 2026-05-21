@@ -367,17 +367,29 @@
             const result = await submitToAPI(apiData);
 
             if (result.success) {
+                // Track successful submission
+                if (window.AjrAnalytics) {
+                    window.AjrAnalytics.trackFormSubmit('dhikr', true);
+                }
                 // Update client-side rate limiting
                 updateRateLimit();
                 sessionStorage.setItem('ajr_submission_pending_review', '1');
                 await new Promise(resolve => setTimeout(resolve, 500));
                 window.location.href = '/community.html?submitted=1';
             } else {
+                // Track failed submission
+                if (window.AjrAnalytics) {
+                    window.AjrAnalytics.trackFormSubmit('dhikr', false);
+                }
                 // Show error message from server
                 showError(null, contentError, result.message || ERRORS.submissionFailed);
             }
 
         } catch (error) {
+            // Track submission error
+            if (window.AjrAnalytics) {
+                window.AjrAnalytics.trackFormSubmit('dhikr', false);
+            }
             console.error('Submission error:', error.message);
 
             // Handle specific error types
