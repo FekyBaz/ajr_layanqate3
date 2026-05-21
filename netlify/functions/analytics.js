@@ -84,7 +84,7 @@ export async function handler(event, context) {
         // Process each event
         const inserted = [];
         for (const evt of events) {
-            const result = await processEvent(evt, clientIP, userAgent);
+            const result = await processEvent(evt, clientIP, userAgent, event);
             if (result) inserted.push(result);
         }
 
@@ -96,7 +96,7 @@ export async function handler(event, context) {
     }
 }
 
-async function processEvent(evt, clientIP, userAgent) {
+async function processEvent(evt, clientIP, userAgent, reqEvent) {
     // Validate event type
     if (!evt.type || !VALID_EVENT_TYPES.has(evt.type)) {
         logger.warn('[analytics] Invalid event type:', evt.type);
@@ -144,7 +144,7 @@ async function processEvent(evt, clientIP, userAgent) {
     const language = sanitizeString(evt.language, 20);
 
     // Geographic (from headers if available)
-    const country = sanitizeString(evt.country || event.headers['cf-ipcountry'] || event.headers['x-vercel-ip-country'], 2);
+    const country = sanitizeString(evt.country || reqEvent.headers['cf-ipcountry'] || reqEvent.headers['x-vercel-ip-country'], 2);
     const region = sanitizeString(evt.region, 100);
 
     // Performance metrics
