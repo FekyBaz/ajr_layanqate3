@@ -8,6 +8,27 @@ import { createClient } from '@supabase/supabase-js';
 import crypto from 'crypto';
 
 // ═══════════════════════════════════════════════════════════════════════════
+// Environment Validation (fail-fast on startup)
+// ═══════════════════════════════════════════════════════════════════════════
+
+const REQUIRED_ENV = ['SUPABASE_URL', 'SUPABASE_SERVICE_ROLE_KEY'];
+const MISSING_ENV = REQUIRED_ENV.filter(key => !process.env[key]);
+
+if (MISSING_ENV.length > 0) {
+    throw new Error(
+        `[shared] Missing required environment variables: ${MISSING_ENV.join(', ')}. ` +
+        'These must be set in Netlify dashboard or .env for local development.'
+    );
+}
+
+// Warn on missing optional-but-recommended vars
+const RECOMMENDED_ENV = ['SUPABASE_ANON_KEY', 'ADMIN_API_KEY', 'IP_SALT'];
+const MISSING_RECOMMENDED = RECOMMENDED_ENV.filter(key => !process.env[key]);
+if (MISSING_RECOMMENDED.length > 0) {
+    console.warn(`[shared] Missing recommended environment variables: ${MISSING_RECOMMENDED.join(', ')}`);
+}
+
+// ═══════════════════════════════════════════════════════════════════════════
 // Shared Constants (Single Source of Truth)
 // ═══════════════════════════════════════════════════════════════════════════
 
@@ -61,15 +82,17 @@ export const supabaseAdmin = createClient(
 /**
  * Public client — uses anon key, respects RLS policies.
  * Use for public-facing reads where RLS should be the security boundary.
- * SUPABASE_ANON_KEY must be set in production.
+ * SUPABASE_ANON_KEY MUST be set. If missing, the client is initialized
+ * with an invalid key so that any use will fail with an auth error
+ * rather than silently bypassing RLS with service_role credentials.
  */
 const PUBLIC_KEY = process.env.SUPABASE_ANON_KEY;
 if (!PUBLIC_KEY) {
-    logger.warn('[shared] SUPABASE_ANON_KEY is not set. Public reads will bypass RLS.');
+    logger.error('[shared] SUPABASE_ANON_KEY is not set. Public client will fail auth.');
 }
 export const supabasePublic = createClient(
     SUPABASE_URL,
-    PUBLIC_KEY || process.env.SUPABASE_SERVICE_ROLE_KEY,
+    PUBLIC_KEY || 'SUPABASE_ANON_KEY_NOT_CONFIGURED',
     CLIENT_OPTIONS,
 );
 
