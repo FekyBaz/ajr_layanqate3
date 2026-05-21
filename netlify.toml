@@ -151,10 +151,19 @@
 
 # ═══════════════════════════════════════════════════════════════════════════
 # Security Headers - Applied to all pages
-# Fixes:
-#   - Removed deprecated X-XSS-Protection (S-7)
-#   - Removed 'unsafe-inline' from script-src (S-6)
-#   - Added base-uri, form-action, upgrade-insecure-requests to CSP
+# ═══════════════════════════════════════════════════════════════════════════
+# CSP directives:
+#   default-src 'self'           — all resources default to same origin
+#   script-src 'self' cdn.jsdelivr.net — only our JS + Chart.js (martyrs page)
+#   style-src 'self' fonts.googleapis.com — our CSS + Google Fonts stylesheet
+#   font-src 'self' fonts.gstatic.com — Google Fonts webfonts
+#   img-src 'self' data:         — images from same origin or inline data URIs
+#   connect-src 'self' *.supabase.co data.techforpalestine.org — API calls
+#   object-src 'none'            — no Flash/Java/object embeddings
+#   frame-ancestors 'none'       — no embedding in iframes (redundant with X-Frame-Options)
+#   base-uri 'self'              — <base> tag restricted to same origin
+#   form-action 'self'           — forms can only submit to same origin
+#   upgrade-insecure-requests    — auto-upgrade http:// to https://
 # ═══════════════════════════════════════════════════════════════════════════
 [[headers]]
   for = "/*"
@@ -162,8 +171,11 @@
     X-Frame-Options = "DENY"
     X-Content-Type-Options = "nosniff"
     Referrer-Policy = "strict-origin-when-cross-origin"
-    Permissions-Policy = "geolocation=(), microphone=(), camera=()"
-    Content-Security-Policy = "default-src 'self'; script-src 'self' https://cdn.jsdelivr.net; style-src 'self' https://fonts.googleapis.com; font-src 'self' https://fonts.gstatic.com; img-src 'self' data:; connect-src 'self' https://*.supabase.co https://data.techforpalestine.org; base-uri 'self'; form-action 'self'; upgrade-insecure-requests;"
+    Strict-Transport-Security = "max-age=63072000; includeSubDomains; preload"
+    Cross-Origin-Opener-Policy = "same-origin"
+    Cross-Origin-Resource-Policy = "same-origin"
+    Permissions-Policy = "geolocation=(), microphone=(), camera=(), payment=(), usb=(), magnetometer=(), gyroscope=(), accelerometer=()"
+    Content-Security-Policy = "default-src 'self'; script-src 'self' https://cdn.jsdelivr.net; style-src 'self' https://fonts.googleapis.com; font-src 'self' https://fonts.gstatic.com; img-src 'self' data:; connect-src 'self' https://*.supabase.co https://data.techforpalestine.org; object-src 'none'; frame-ancestors 'none'; base-uri 'self'; form-action 'self'; upgrade-insecure-requests;"
 
 # ═══════════════════════════════════════════════════════════════════════════
 # Cache Control
