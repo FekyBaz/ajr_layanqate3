@@ -6,6 +6,12 @@ import { renderChartsSection } from '../components/ChartsSection.js';
 import { renderMartyrsList } from '../components/MartyrsList.js';
 import { renderLoadMoreButton } from '../components/LoadMoreButton.js';
 
+function escapeHtml(text) {
+  const div = document.createElement('div');
+  div.textContent = String(text ?? '');
+  return div.innerHTML;
+}
+
 const INITIAL_BATCH = 100;
 const BATCH_SIZE = 100;
 const FATIHA_COUNTER_ENDPOINT = '/.netlify/functions/fatiha-counter';
@@ -381,11 +387,14 @@ function getMartyrOfDay(martyrs) {
 function renderMartyrOfDay() {
   const martyr = getMartyrOfDay(allMartyrs);
   if (!martyr || !featuredContainer) return;
+  const safeName = escapeHtml(martyr.arabicName);
+  const safeAge = typeof martyr.age === 'number' ? `${martyr.age} سنة` : 'العمر غير متوفر';
+  const safeGender = martyr.gender === 'f' ? 'أنثى' : 'ذكر';
   featuredContainer.innerHTML = `
     <section class="featured-martyr" aria-label="شهيد اليوم">
       <h2>🕊 شهيد اليوم</h2>
-      <h3>${martyr.arabicName}</h3>
-      <p>${typeof martyr.age === 'number' ? `${martyr.age} سنة` : 'العمر غير متوفر'} • ${martyr.gender === 'f' ? 'أنثى' : 'ذكر'}</p>
+      <h3>${safeName}</h3>
+      <p>${safeAge} • ${safeGender}</p>
       <p>اللهم اجعل مثواه الجنة واربط على قلوب أهله.</p>
       <button class="fatiha-button featured-fatiha-button" type="button">اقرأ له الفاتحة</button>
     </section>
