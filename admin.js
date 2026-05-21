@@ -8,18 +8,39 @@
     // ═══════════════════════════════════════════════════════════════════
     // Configuration
     // ═══════════════════════════════════════════════════════════════════
-    /**
-     * ⚠️ PRODUCTION API URL
-     * Change this to your production backend URL (e.g., Railway, Render, Vercel)
-     * Leave empty if frontend and backend are on the same domain.
-     */
     const PRODUCTION_API_URL = '';
 
     const isProduction = !window.location.hostname.includes('localhost') &&
         !window.location.hostname.includes('127.0.0.1');
     const API_BASE = isProduction ? PRODUCTION_API_URL : 'http://localhost:8888';
 
-    let adminKey = sessionStorage.getItem('adminKey') || '';
+    // Auth security settings
+    const AUTH_TIMEOUT_MS = 30 * 60 * 1000; // 30 minutes of inactivity
+    const MAX_FAILED_ATTEMPTS = 5;
+    const LOCKOUT_BASE_MS = 2000; // starts at 2s, doubles each lockout
+
+    // Memory-only auth state (never persisted to disk)
+    let adminKey = '';
+    let authExpiresAt = 0;
+    let failedAttempts = 0;
+    let lockoutUntil = 0;
+
+    // Restore session from sessionStorage (token only, not the key)
+    const sessionToken = sessionStorage.getItem('adminSession');
+    if (sessionToken) {
+        try {
+            const parsed = JSON.parse(sessionToken);
+            if (parsed.expiresAt && Date.now() < parsed.expiresAt) {
+                // Session still valid — key must be re-entered
+                // We only keep the expiry to show remaining time
+                authExpiresAt = parsed.expiresAt;
+            } else {
+                sessionStorage.removeItem('adminSession');
+            }
+        } catch {
+            sessionStorage.removeItem('adminSession');
+        }
+    }
 
     // ═══════════════════════════════════════════════════════════════════
     // DOM Elements
@@ -38,6 +59,16 @@
     // API Helpers
     // ═══════════════════════════════════════════════════════════════════
     async function apiRequest(endpoint, method = 'GET', body = null) {
+        if (!adminKey) {
+            logout();
+            throw new Error('Not authenticated');
+        }
+        if (isSessionExpired()) {
+            logout();
+            throw new Error('Session expired');
+        }
+        refreshSessionTimer();
+
         const options = {
             method,
             headers: {
@@ -57,27 +88,80 @@
     // ═══════════════════════════════════════════════════════════════════
     // Authentication
     // ═══════════════════════════════════════════════════════════════════
+
+    function isLockedOut() {
+        if (Date.now() < lockoutUntil) {
+            const remaining = Math.ceil((lockoutUntil - Date.now()) / 1000);
+            return remaining;
+        }
+        lockoutUntil = 0;
+        return 0;
+    }
+
+    function recordFailedAttempt() {
+        failedAttempts++;
+        if (failedAttempts >= MAX_FAILED_ATTEMPTS) {
+            const lockoutMs = LOCKOUT_BASE_MS * Math.pow(2, failedAttempts - MAX_FAILED_ATTEMPTS);
+            lockoutUntil = Date.now() + Math.min(lockoutMs, 300000); // max 5 min
+            return Math.ceil(lockoutUntil - Date.now() / 1000);
+        }
+        return 0;
+    }
+
+    function recordSuccessfulAuth() {
+        failedAttempts = 0;
+        lockoutUntil = 0;
+        authExpiresAt = Date.now() + AUTH_TIMEOUT_MS;
+        sessionStorage.setItem('adminSession', JSON.stringify({ expiresAt: authExpiresAt }));
+    }
+
+    function isSessionExpired() {
+        return Date.now() >= authExpiresAt;
+    }
+
+    function refreshSessionTimer() {
+        if (adminKey && authExpiresAt) {
+            authExpiresAt = Date.now() + AUTH_TIMEOUT_MS;
+            sessionStorage.setItem('adminSession', JSON.stringify({ expiresAt: authExpiresAt }));
+        }
+    }
+
     loginForm.addEventListener('submit', async (e) => {
         e.preventDefault();
 
-        adminKey = apiKeyInput.value.trim();
+        const lockedSeconds = isLockedOut();
+        if (lockedSeconds > 0) {
+            showLoginError(`محاولات كثيرة جدًا. انتظر ${lockedSeconds} ثانية.`);
+            return;
+        }
 
-        if (!adminKey) {
+        const attemptedKey = apiKeyInput.value.trim();
+        if (!attemptedKey) {
             showLoginError('يرجى إدخال مفتاح API');
             return;
         }
+
+        adminKey = attemptedKey;
 
         try {
             const result = await apiRequest('/api/admin/stats');
 
             if (result.success) {
-                sessionStorage.setItem('adminKey', adminKey);
+                recordSuccessfulAuth();
                 showAdminPanel();
             } else {
-                showLoginError('مفتاح API غير صحيح');
+                recordFailedAttempt();
+                const remaining = isLockedOut();
+                if (remaining > 0) {
+                    showLoginError(`مفتاح غير صحيح. مقفل لمدة ${remaining} ثانية.`);
+                } else {
+                    showLoginError('مفتاح API غير صحيح');
+                }
+                adminKey = '';
             }
         } catch (error) {
             showLoginError('فشل الاتصال بالخادم');
+            adminKey = '';
         }
     });
 
@@ -96,7 +180,10 @@
 
     function logout() {
         adminKey = '';
-        sessionStorage.removeItem('adminKey');
+        authExpiresAt = 0;
+        failedAttempts = 0;
+        lockoutUntil = 0;
+        sessionStorage.removeItem('adminSession');
         loginSection.classList.remove('hidden');
         adminSection.classList.add('hidden');
         apiKeyInput.value = '';
@@ -711,16 +798,7 @@
         feedbackFilter.addEventListener('change', loadFeedback);
     }
 
-    if (adminKey) {
-        apiRequest('/api/admin/stats')
-            .then(result => {
-                if (result.success) {
-                    showAdminPanel();
-                } else {
-                    logout();
-                }
-            })
-            .catch(() => logout());
-    }
+    // Auth key is memory-only — user must re-authenticate on each page load.
+    // Session expiry is tracked but does not auto-restore credentials.
 })();
 
