@@ -116,7 +116,7 @@
     }
 
     function isSessionExpired() {
-        return Date.now() >= authExpiresAt;
+        return authExpiresAt > 0 && Date.now() >= authExpiresAt;
     }
 
     function refreshSessionTimer() {
