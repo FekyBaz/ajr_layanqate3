@@ -12,24 +12,7 @@
     <link href="https://fonts.googleapis.com/css2?family=Noto+Naskh+Arabic:wght@400;500;600;700&display=swap"
         rel="stylesheet">
 
-    <link rel="stylesheet" href="admin.css?v=20260227">
-    <style>
-        .badge-new {
-            position: absolute;
-            top: -4px;
-            right: -4px;
-            width: 10px;
-            height: 10px;
-            background-color: #e74c3c;
-            border-radius: 50%;
-            border: 2px solid white;
-            display: inline-block;
-        }
-
-        .hidden {
-            display: none !important;
-        }
-    </style>
+    <link rel="stylesheet" href="admin.css?v=20260521">
 </head>
 
 <body>
@@ -75,19 +58,19 @@
                         <div class="stat-label">ذكريات معلقة</div>
                     </div>
                 </div>
-                <div class="mt-1" style="display:flex;gap:8px;flex-wrap:wrap;">
-                    <a href="/analytics" class="btn" style="background:var(--color-accent);color:white;text-decoration:none;padding:8px 16px;border-radius:8px;font-size:0.9rem;">📊 التحليلات</a>
+                <div class="header-actions">
+                    <a href="/analytics" class="btn-analytics">📊 التحليلات</a>
                     <button class="logout-btn" onclick="logout()">تسجيل الخروج</button>
                 </div>
             </header>
 
             <!-- Tab Navigation -->
-            <div class="admin-tabs" style="display:flex;gap:8px;margin-bottom:16px;">
+            <div class="admin-tabs">
                 <button class="btn btn-primary btn-sm admin-tab active" id="tab-submissions"
                     onclick="switchTab('submissions')">المشاركات</button>
                 <button class="btn btn-ghost btn-sm admin-tab" id="tab-memories" onclick="switchTab('memories')">صفحات
                     الذكرى</button>
-                <button class="btn btn-ghost btn-sm admin-tab" id="tab-feedback" style="position:relative;"
+                <button class="btn btn-ghost btn-sm admin-tab" id="tab-feedback"
                     onclick="switchTab('feedback')">
                     الرسائل
                     <span id="feedback-badge" class="badge-new hidden"></span>
@@ -126,10 +109,8 @@
 
             <!-- Feedback Tab -->
             <div id="feedback-tab" class="hidden">
-                <div style="display:flex;gap:8px;align-items:center;margin-bottom:12px;flex-wrap:wrap;">
-                    <select id="feedback-filter" class="form-select"
-                        style="width:auto;min-width:140px;padding:8px 12px;font-size:0.85rem;border-radius:8px;"
-                        onchange="loadFeedback()">
+                <div class="feedback-filter-bar">
+                    <select id="feedback-filter" class="feedback-filter" onchange="loadFeedback()">
                         <option value="">الكل</option>
                         <option value="New" selected>جديدة</option>
                         <option value="In Progress">قيد المعالجة</option>
@@ -137,8 +118,7 @@
                         <option value="Archived">مؤرشفة</option>
                     </select>
                     <button class="btn refresh-btn" onclick="loadFeedback()">🔄 تحديث</button>
-                    <span id="feedback-total"
-                        style="font-size:0.8rem;color:var(--color-text-muted);margin-right:auto;"></span>
+                    <span id="feedback-total" class="feedback-total"></span>
                 </div>
 
                 <div id="feedback-loading" class="loading hidden">جاري التحميل...</div>
@@ -151,10 +131,7 @@
             </div>
 
             <!-- Toast Notification -->
-            <div id="feedback-toast"
-                style="display:none;position:fixed;bottom:24px;left:50%;transform:translateX(-50%);background:#27ae60;color:white;padding:10px 24px;border-radius:999px;font-size:0.9rem;z-index:9999;box-shadow:0 4px 16px rgba(0,0,0,0.2);transition:opacity 0.3s ease;">
-                تم تحديث الحالة بنجاح
-            </div>
+            <div id="feedback-toast" class="toast-notification">تم تحديث الحالة بنجاح</div>
         </section>
     </div>
 
