@@ -168,4 +168,66 @@ Admin endpoints require `Authorization: Bearer <ADMIN_API_KEY>` header.
 
 ---
 
+## 📊 Product Analytics
+
+This project includes a privacy-first, self-hosted analytics system.
+
+### Setup
+
+1. Run the analytics migration in Supabase SQL Editor:
+   - `netlify/functions/migrations/023_product_analytics.sql`
+
+2. No additional environment variables needed — uses existing Supabase connection.
+
+3. Access the dashboard:
+   - Login to admin panel at `/admin`
+   - Click "📊 التحليلات" or go to `/analytics`
+
+### What We Track
+
+| Category | Metrics |
+|---|---|
+| Traffic | Page views, unique visitors, returning visitors, sessions |
+| Sources | Direct, social, search, UTM campaigns, referrer domains |
+| Behavior | Scroll depth, CTA clicks, form interactions, share actions |
+| Devices | Mobile/tablet/desktop, browser, OS, screen size |
+| Geography | Country (2-letter code only, no precise location) |
+| Funnels | Landing → Interaction → Submission conversion rates |
+| Retention | Returning visitor rate, repeat session frequency |
+
+### Event Taxonomy
+
+| Event Type | Description |
+|---|---|
+| `page_view` | Page load (automatic) |
+| `scroll` | Scroll depth: 25%, 50%, 75%, 100% (automatic) |
+| `outbound_click` | Click on external link (automatic) |
+| `share` | Share button click (automatic) |
+| `cta_click` | CTA button with `data-analytics-cta` attribute |
+| `form_start` | Form submission started |
+| `submit` | Form submission succeeded |
+| `form_abandon` | Form submission failed |
+| `error` | JavaScript error (same-origin only) |
+
+### Privacy
+
+- **No IP addresses stored** — session IDs are random, not derived from IP
+- **No personal data** — no names, emails, or identifiers
+- **No cookies for tracking** — uses sessionStorage (cleared on tab close)
+- **Returning visitor detection** uses a simple cookie with no personal data
+- **Referrer stored as origin only** — no full URLs or query parameters
+- **Data auto-deleted after 90 days** via cleanup function
+- **No third-party analytics SDKs** — fully self-hosted
+
+### Adding New Events
+
+```js
+// In any page script:
+if (window.AjrAnalytics) {
+    window.AjrAnalytics.track('event_type', 'event_name', { key: 'value' });
+}
+```
+
+---
+
 صدقة جارية • لا حقوق محفوظة 🤍
