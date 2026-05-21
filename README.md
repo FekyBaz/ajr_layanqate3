@@ -228,6 +228,76 @@ if (window.AjrAnalytics) {
 }
 ```
 
+### Adding New Events
+
+```js
+// In any page script:
+if (window.AjrAnalytics) {
+    window.AjrAnalytics.track('event_type', 'event_name', { key: 'value' });
+}
+```
+
+---
+
+## 🔀 Hybrid Analytics Architecture
+
+This project uses a **dual-analytics** approach for production-grade visibility while respecting privacy.
+
+### Why both?
+
+| | Custom Analytics | Google Analytics 4 |
+|---|---|---|
+| **Purpose** | Business events, observability | Traffic acquisition, SEO, benchmarking |
+| **Tracking** | Custom events (adhkar, memories, etc.) | Page views, sessions, sources, geography |
+| **Privacy** | Zero PII, no IPs, 90-day auto-delete | Anonymized IPs, standard GA4 privacy controls |
+| **Cost** | $0 (Supabase + Netlify) | $0 (GA4 free tier) |
+| **Data ownership** | Full control | Google infrastructure |
+
+### How It Works
+
+1. **Custom analytics** (`lib/analytics.js`) sends events to `/api/analytics` → Supabase. Always active.
+2. **GA4** (`lib/ga4.js`) loads only when `GA_MEASUREMENT_ID` env var is set in production.
+3. The GA4 loader fetches `/api/ga-config` on first visit, caches the ID in sessionStorage, then dynamically injects `gtag.js` from Google.
+
+### GA4 Setup
+
+1. Create a GA4 property in [Google Analytics](https://analytics.google.com/)
+2. Copy the **Measurement ID** (format: `G-XXXXXXXXXX`)
+3. Set it as a Netlify environment variable:
+
+```bash
+# Netlify dashboard → Site settings → Environment variables
+GA_MEASUREMENT_ID = "G-XXXXXXXXXX"
+```
+
+4. Deploy — the site detects the env var and loads GA4 automatically.
+5. Verify in GA4 Realtime report after a few page views.
+
+### Adding GA4 Events (Optional)
+
+GA4 auto-tracks `page_view` on every page load. For additional custom GA4 events:
+
+```js
+if (window.gtag) {
+    window.gtag('event', 'custom_event', { key: 'value' });
+}
+```
+
+### CSP Notes
+
+The Content Security Policy has been updated to allow:
+- `script-src`: `https://www.googletagmanager.com` (gtag.js loader)
+- `connect-src`: `https://www.google-analytics.com` + `https://*.google-analytics.com` (GA4 collection endpoint)
+- `img-src`: `https://www.google-analytics.com` (GA4 tracking pixel fallback)
+
+### Files
+
+| File | Role |
+|---|---|
+| `lib/ga4.js` | Client-side GA4 loader (fetches config, injects gtag.js) |
+| `netlify/functions/ga-config.js` | Serverless config endpoint (returns measurement ID from env var) |
+| `netlify.toml` (CSP + redirect) | Allows Google domains in CSP; proxies `/api/ga-config` |
+
 ---
 
 صدقة جارية • لا حقوق محفوظة 🤍
