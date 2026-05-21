@@ -394,3 +394,40 @@ header h1 {
     opacity: 1 !important;
     pointer-events: auto !important;
 }
+
+/* ═══════════════════════════════════════════════════════════════════════════
+   Analytics Dashboard styles (analytics.html)
+   ═══════════════════════════════════════════════════════════════════════════ */
+
+.analytics-page { padding: var(--space-xl); max-width: 1200px; margin: 0 auto; }
+.analytics-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: var(--space-xl); flex-wrap: wrap; gap: var(--space-md); }
+.analytics-title { font-size: var(--font-size-2xl); font-weight: 700; }
+.period-selector { display: flex; gap: var(--space-xs); }
+.period-btn { padding: var(--space-xs) var(--space-md); border: 1px solid var(--color-border); border-radius: var(--radius-md); background: var(--color-surface); cursor: pointer; font-family: var(--font-primary); font-size: var(--font-size-sm); }
+.period-btn.active { background: var(--color-accent); color: white; border-color: var(--color-accent); }
+.stats-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: var(--space-lg); margin-bottom: var(--space-xl); }
+.stat-card { background: var(--color-surface); border: 1px solid var(--color-border); border-radius: var(--radius-lg); padding: var(--space-lg); text-align: center; }
+.stat-value { font-size: var(--font-size-3xl); font-weight: 700; color: var(--color-accent); }
+.stat-label { font-size: var(--font-size-sm); color: var(--color-text-muted); margin-top: var(--space-xs); }
+.section { background: var(--color-surface); border: 1px solid var(--color-border); border-radius: var(--radius-lg); padding: var(--space-lg); margin-bottom: var(--space-lg); }
+.section-title { font-size: var(--font-size-lg); font-weight: 600; margin-bottom: var(--space-md); }
+.data-table { width: 100%; border-collapse: collapse; }
+.data-table th, .data-table td { padding: var(--space-sm) var(--space-md); text-align: right; border-bottom: 1px solid var(--color-border); font-size: var(--font-size-sm); }
+.data-table th { font-weight: 600; color: var(--color-text-muted); }
+.bar-chart { display: flex; flex-direction: column; gap: var(--space-xs); }
+.bar-row { display: flex; align-items: center; gap: var(--space-sm); }
+.bar-label { min-width: 120px; font-size: var(--font-size-sm); text-align: right; }
+.bar-track { flex: 1; height: 24px; background: var(--color-border); border-radius: var(--radius-sm); overflow: hidden; }
+.bar-fill { height: 100%; background: var(--color-accent); border-radius: var(--radius-sm); transition: width 0.3s ease; }
+.bar-value { min-width: 50px; font-size: var(--font-size-sm); font-weight: 600; }
+.funnel { display: flex; flex-direction: column; gap: var(--space-sm); }
+.funnel-step { display: flex; align-items: center; gap: var(--space-md); padding: var(--space-md); background: rgba(140,106,53,0.05); border-radius: var(--radius-md); }
+.funnel-step-name { flex: 1; font-weight: 500; }
+.funnel-step-count { font-weight: 700; color: var(--color-accent); }
+.funnel-step-rate { font-size: var(--font-size-sm); color: var(--color-text-muted); }
+.loading { text-align: center; padding: var(--space-3xl); color: var(--color-text-muted); }
+.empty { text-align: center; padding: var(--space-3xl); color: var(--color-text-muted); }
+.back-link { color: var(--color-accent); text-decoration: none; font-size: var(--font-size-sm); }
+.back-link:hover { text-decoration: underline; }
+.table-path { direction: ltr; text-align: left; font-size: 0.8rem; }
+.device-section-title { margin: var(--space-md) 0 var(--space-sm); font-size: var(--font-size-md); }

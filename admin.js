@@ -113,6 +113,7 @@
         lockoutUntil = 0;
         authExpiresAt = Date.now() + AUTH_TIMEOUT_MS;
         sessionStorage.setItem('adminSession', JSON.stringify({ expiresAt: authExpiresAt }));
+        sessionStorage.setItem('adminKey', adminKey);
     }
 
     function isSessionExpired() {
@@ -184,6 +185,7 @@
         failedAttempts = 0;
         lockoutUntil = 0;
         sessionStorage.removeItem('adminSession');
+        sessionStorage.removeItem('adminKey');
         loginSection.classList.remove('hidden');
         adminSection.classList.add('hidden');
         apiKeyInput.value = '';
