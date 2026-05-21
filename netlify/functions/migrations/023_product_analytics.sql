@@ -56,10 +56,11 @@ CREATE INDEX IF NOT EXISTS idx_analytics_events_referrer ON analytics_events(ref
 CREATE INDEX IF NOT EXISTS idx_analytics_events_country ON analytics_events(country);
 CREATE INDEX IF NOT EXISTS idx_analytics_events_device ON analytics_events(device_type);
 
--- Composite indexes for dashboard queries
--- Note: Expression indexes require double parentheses in PostgreSQL
-CREATE INDEX IF NOT EXISTS idx_analytics_events_date_type ON analytics_events(((created_at)::date), event_type);
-CREATE INDEX IF NOT EXISTS idx_analytics_events_date_session ON analytics_events(((created_at)::date), session_id);
+-- Composite indexes for dashboard queries (not using expression indexes
+-- because created_at::date is not IMMUTABLE in PostgreSQL, causing
+-- "functions in index expression must be marked IMMUTABLE" error)
+-- Queries should use range filtering instead:
+--   WHERE created_at >= '2024-01-01' AND created_at < '2024-01-02'
 
 -- Daily aggregates table (for fast dashboard queries)
 CREATE TABLE IF NOT EXISTS analytics_daily_stats (
@@ -112,7 +113,7 @@ BEGIN
         COUNT(*)
     INTO v_page_views, v_unique_visitors, v_returning, v_sessions, v_total_events
     FROM analytics_events
-    WHERE created_at::date = target_date;
+    WHERE created_at >= target_date AND created_at < target_date + 1;
 
     -- Upsert daily stats
     INSERT INTO analytics_daily_stats (
