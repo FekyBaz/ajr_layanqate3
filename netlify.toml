@@ -122,10 +122,26 @@
   to = "/.netlify/functions/admin-feedback-update"
   status = 200
 
+# Analytics API
+[[redirects]]
+  from = "/api/analytics"
+  to = "/.netlify/functions/analytics"
+  status = 200
+
+[[redirects]]
+  from = "/api/analytics/dashboard"
+  to = "/.netlify/functions/analytics-dashboard"
+  status = 200
+
 # Clean URLs for pages
 [[redirects]]
   from = "/admin"
   to = "/admin.html"
+  status = 200
+
+[[redirects]]
+  from = "/analytics"
+  to = "/analytics.html"
   status = 200
 
 [[redirects]]
