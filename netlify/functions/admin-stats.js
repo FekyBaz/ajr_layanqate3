@@ -38,11 +38,29 @@ export async function handler(event, context) {
     }
 
     try {
-        // Use the aggregation RPC defined in 014 migration
-        // Replaces 3 separate expensive count:'exact' queries
+        // Use the aggregation RPC if available (defined in old api/migrations/014_phase2_engagement.sql)
+        // Fall back to individual count queries if RPC doesn't exist
         const { data: stats, error: rpcError } = await supabaseAdmin.rpc('get_submission_stats');
 
         if (rpcError) {
+            if (rpcError.code === 'PGRST202' || rpcError.message?.includes('not found') || rpcError.message?.includes('does not exist') || rpcError.message?.includes('function')) {
+                // RPC function doesn't exist — fall back to direct queries
+                logger.warn('[admin-stats] get_submission_stats RPC not found, falling back to direct counts');
+
+                const [{ count: pending }, { count: approved }, { count: rejected }] = await Promise.all([
+                    supabaseAdmin.from('submissions').select('id', { head: true, count: 'exact', })
+                        .eq('status', STATUS.PENDING),
+                    supabaseAdmin.from('submissions').select('id', { head: true, count: 'exact', })
+                        .eq('status', STATUS.APPROVED),
+                    supabaseAdmin.from('submissions').select('id', { head: true, count: 'exact', })
+                        .eq('status', STATUS.REJECTED),
+                ]);
+
+                return success({
+                    stats: { pending: pending || 0, approved: approved || 0, rejected: rejected || 0 },
+                }, origin);
+            }
+
             logger.error('admin-stats RPC error:', rpcError.message, rpcError.code);
             return error(500, 'فشل الاتصال بقاعدة البيانات', origin, rpcError.message);
         }

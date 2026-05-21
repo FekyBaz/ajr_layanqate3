@@ -7,14 +7,28 @@ function getDayOffset(dateKey, total) {
 }
 
 async function selectCandidateSubmission(dateKey) {
+    let count = 0;
+
     const { data: stats, error: rpcError } = await supabaseAdmin.rpc('get_submission_stats');
 
-    if (rpcError) {
+    if (rpcError && (rpcError.code === 'PGRST202' || rpcError.message?.includes('not found') || rpcError.message?.includes('does not exist') || rpcError.message?.includes('function'))) {
+        // RPC function doesn't exist — fall back to direct count
+        logger.warn('[daily-feature] get_submission_stats RPC not found, falling back to direct count');
+        const { count: directCount, error: countError } = await supabaseAdmin
+            .from('submissions')
+            .select('id', { head: true, count: 'exact' })
+            .eq('status', 'Approved');
+        if (countError) {
+            logger.error('Daily feature count error:', countError.message);
+            throw countError;
+        }
+        count = directCount || 0;
+    } else if (rpcError) {
         logger.error('Daily feature stats error:', rpcError.message);
         throw rpcError;
+    } else {
+        count = (stats.approved || 0);
     }
-
-    const count = (stats.approved || 0);
 
     if (!count) {
         return null;
