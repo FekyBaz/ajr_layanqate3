@@ -1,3 +1,9 @@
+function escapeHtml(text) {
+  const div = document.createElement('div');
+  div.textContent = String(text ?? '');
+  return div.innerHTML;
+}
+
 function getGenderLabel(gender) {
   if (gender === 'm') return 'ذكر';
   if (gender === 'f') return 'أنثى';
@@ -45,16 +51,18 @@ function buildShareUrl(martyrId) {
 
 function renderItem(martyr, { selectedId }) {
   const isSelected = String(selectedId || '') === String(martyr.id);
+  const safeName = escapeHtml(martyr.arabicName);
+  const safeId = escapeHtml(String(martyr.id));
 
   return `
-    <li class="martyr-item ${isSelected ? 'highlighted' : ''}" data-id="${martyr.id}">
-      <h3 class="martyr-name">${martyr.arabicName}</h3>
+    <li class="martyr-item ${isSelected ? 'highlighted' : ''}" data-id="${safeId}">
+      <h3 class="martyr-name">${safeName}</h3>
       <p class="martyr-meta">${getGenderLabel(martyr.gender)} • ${getAgeCategory(martyr.age)}</p>
       <p class="martyr-age">${getAgeLabel(martyr.age)}</p>
       <p class="martyr-birth-year">${getBirthYearLabel(martyr.birthYear)}</p>
       <div class="martyr-actions">
-        <button class="dua-button" type="button" data-dua-id="${martyr.id}">🤲 ادعُ له</button>
-        <button class="share-link" type="button" data-share-id="${martyr.id}">🔗 مشاركة</button>
+        <button class="dua-button" type="button" data-dua-id="${safeId}">🤲 ادعُ له</button>
+        <button class="share-link" type="button" data-share-id="${safeId}">🔗 مشاركة</button>
       </div>
       ${isSelected ? '<p class="martyr-details-panel">اللهم اجعل مثواه الجنة واربط على قلوب أهله.</p>' : ''}
     </li>
