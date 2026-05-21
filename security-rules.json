@@ -1,0 +1,46 @@
+{
+  "rules": [
+    {
+      "id": "no-eval",
+      "pattern": "eval(",
+      "message": "Avoid eval() — use safer alternatives",
+      "severity": "error"
+    },
+    {
+      "id": "no-innerHTML-user-data",
+      "pattern": "\\.innerHTML\\s*=.*\\$\\{",
+      "message": "Avoid innerHTML with template literals containing variables — use textContent or createElement",
+      "severity": "warn"
+    },
+    {
+      "id": "no-document-write",
+      "pattern": "document\\.write",
+      "message": "Avoid document.write() — use DOM manipulation methods",
+      "severity": "error"
+    },
+    {
+      "id": "no-execCommand",
+      "pattern": "execCommand",
+      "message": "execCommand is deprecated — use modern Clipboard API",
+      "severity": "warn"
+    },
+    {
+      "id": "no-localStorage-secrets",
+      "pattern": "localStorage\\.setItem.*[Kk]ey|[Tt]oken|[Ss]ecret|[Pp]assword",
+      "message": "Do not store secrets in localStorage — use sessionStorage or memory-only",
+      "severity": "error"
+    },
+    {
+      "id": "no-console-secrets",
+      "pattern": "console\\.(log|debug|info|warn).*[Kk]ey|[Tt]oken|[Ss]ecret|[Pp]assword|[Aa]pi",
+      "message": "Do not log sensitive values to console",
+      "severity": "error"
+    },
+    {
+      "id": "no-inline-event-handlers",
+      "pattern": "on(load|click|error|submit)\\s*=",
+      "message": "Avoid inline event handlers — use addEventListener",
+      "severity": "warn"
+    }
+  ]
+}

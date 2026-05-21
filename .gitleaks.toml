@@ -1,0 +1,36 @@
+title = "gitleaks config"
+
+[extend]
+path = ""
+
+[[rules]]
+id = "supabase-service-role"
+description = "Supabase Service Role Key"
+regex = '''eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9\.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6'''
+secretGroup = 0
+keywords = ["supabase"]
+
+[[rules]]
+id = "supabase-url"
+description = "Supabase Project URL"
+regex = '''https://[a-z]{20}\.supabase\.co'''
+keywords = ["supabase.co"]
+
+[[rules]]
+id = "admin-api-key"
+description = "Admin API Key Assignment"
+regex = '''ADMIN_API_KEY\s*=\s*["'][^"']+["']'''
+keywords = ["ADMIN_API_KEY"]
+
+[[rules]]
+id = "generic-secret"
+description = "Generic Secret Assignment"
+regex = '''(SECRET|PRIVATE_KEY|SERVICE_ROLE)\s*=\s*["'][^"']+["']'''
+keywords = ["SECRET", "PRIVATE_KEY", "SERVICE_ROLE"]
+
+[allowlist]
+description = "Allow listed files"
+paths = [
+    '''README\.md''',
+    '''\.example$''',
+]
