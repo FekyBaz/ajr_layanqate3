@@ -604,11 +604,9 @@
     function showToast(message) {
         if (!feedbackToast) return;
         feedbackToast.textContent = message;
-        feedbackToast.style.display = 'block';
-        feedbackToast.style.opacity = '1';
+        feedbackToast.classList.add('toast-visible');
         setTimeout(() => {
-            feedbackToast.style.opacity = '0';
-            setTimeout(() => { feedbackToast.style.display = 'none'; }, 300);
+            feedbackToast.classList.remove('toast-visible');
         }, 2500);
     }
 
