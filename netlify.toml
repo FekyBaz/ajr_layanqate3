@@ -133,6 +133,11 @@
   to = "/.netlify/functions/analytics-dashboard"
   status = 200
 
+[[redirects]]
+  from = "/api/ga-config"
+  to = "/.netlify/functions/ga-config"
+  status = 200
+
 # Clean URLs for pages
 [[redirects]]
   from = "/admin"
@@ -170,11 +175,11 @@
 # ═══════════════════════════════════════════════════════════════════════════
 # CSP directives:
 #   default-src 'self'           — all resources default to same origin
-#   script-src 'self' cdn.jsdelivr.net — only our JS + Chart.js (martyrs page)
+#   script-src 'self' cdn.jsdelivr.net www.googletagmanager.com — our JS + Chart.js + GA4 gtag.js
 #   style-src 'self' fonts.googleapis.com — our CSS + Google Fonts stylesheet
 #   font-src 'self' fonts.gstatic.com — Google Fonts webfonts
-#   img-src 'self' data:         — images from same origin or inline data URIs
-#   connect-src 'self' *.supabase.co data.techforpalestine.org — API calls
+#   img-src 'self' data: www.google-analytics.com — images + GA4 tracking pixel
+#   connect-src 'self' *.supabase.co data.techforpalestine.org www.google-analytics.com *.google-analytics.com — API calls + GA4 collection
 #   object-src 'none'            — no Flash/Java/object embeddings
 #   frame-ancestors 'none'       — no embedding in iframes (redundant with X-Frame-Options)
 #   base-uri 'self'              — <base> tag restricted to same origin
@@ -191,7 +196,7 @@
     Cross-Origin-Opener-Policy = "same-origin"
     Cross-Origin-Resource-Policy = "same-origin"
     Permissions-Policy = "geolocation=(), microphone=(), camera=(), payment=(), usb=(), magnetometer=(), gyroscope=(), accelerometer=()"
-    Content-Security-Policy = "default-src 'self'; script-src 'self' https://cdn.jsdelivr.net; style-src 'self' https://fonts.googleapis.com; font-src 'self' https://fonts.gstatic.com; img-src 'self' data:; connect-src 'self' https://*.supabase.co https://data.techforpalestine.org; object-src 'none'; frame-ancestors 'none'; base-uri 'self'; form-action 'self'; upgrade-insecure-requests;"
+    Content-Security-Policy = "default-src 'self'; script-src 'self' https://cdn.jsdelivr.net https://www.googletagmanager.com; style-src 'self' https://fonts.googleapis.com; font-src 'self' https://fonts.gstatic.com; img-src 'self' data: https://www.google-analytics.com; connect-src 'self' https://*.supabase.co https://data.techforpalestine.org https://www.google-analytics.com https://*.google-analytics.com; object-src 'none'; frame-ancestors 'none'; base-uri 'self'; form-action 'self'; upgrade-insecure-requests;"
 
 # ═══════════════════════════════════════════════════════════════════════════
 # Cache Control
