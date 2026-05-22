@@ -253,6 +253,15 @@ export class PosterEngine {
             const cssHeight = this.canvasViewport.clientHeight;
 
             if (cssWidth > 0 && cssHeight > 0) {
+                // Real-time canvas resolution sync with the viewport container (handles transitions smoothly!)
+                const dpr = window.devicePixelRatio || 1;
+                if (this.previewCanvas.width !== cssWidth * dpr || this.previewCanvas.height !== cssHeight * dpr) {
+                    this.previewCanvas.width = cssWidth * dpr;
+                    this.previewCanvas.height = cssHeight * dpr;
+                    this.previewCtx.resetTransform();
+                    this.previewCtx.scale(dpr, dpr);
+                }
+
                 // Renders the background, dawn lights, mountains, balanced text, vignettes, borders, watermarks
                 ExportEngine.renderStaticLayout(this.previewCtx, theme, this.text, cssWidth, cssHeight, this.fontSizeSliderValue, time, false);
                 
