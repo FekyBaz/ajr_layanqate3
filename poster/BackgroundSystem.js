@@ -56,36 +56,48 @@ export class BackgroundSystem {
 
         // 1. Draw base theme background gradient
         if (theme.id === 'night-spiritual') {
-            // Celestial radial deep indigo sky
-            const baseGrad = ctx.createRadialGradient(
-                width * 0.5, height * 0.35, 10 * scale,
-                width * 0.5, height * 0.5, Math.max(width, height) * 0.8
-            );
-            baseGrad.addColorStop(0, '#111e30'); // Deep glowing indigo
-            baseGrad.addColorStop(0.4, '#080d15'); // Night abyss
-            baseGrad.addColorStop(1, '#030508'); // Absolute void
-            ctx.fillStyle = baseGrad;
-            ctx.fillRect(0, 0, width, height);
+            // Try loading/drawing the beautiful watercolor night background image
+            const bgImg = BackgroundSystem.getThemeImage('poster/night-serenity-bg.png');
+            if (bgImg.isLoaded) {
+                BackgroundSystem.drawImageCover(ctx, bgImg, width, height);
+            } else {
+                // Celestial radial deep indigo sky
+                const baseGrad = ctx.createRadialGradient(
+                    width * 0.5, height * 0.35, 10 * scale,
+                    width * 0.5, height * 0.5, Math.max(width, height) * 0.8
+                );
+                baseGrad.addColorStop(0, '#111e30'); // Deep glowing indigo
+                baseGrad.addColorStop(0.4, '#080d15'); // Night abyss
+                baseGrad.addColorStop(1, '#030508'); // Absolute void
+                ctx.fillStyle = baseGrad;
+                ctx.fillRect(0, 0, width, height);
+            }
 
         } else if (theme.id === 'nature-serenity') {
-            // Misty morning forest gradient
-            const baseGrad = ctx.createLinearGradient(0, 0, 0, height);
-            baseGrad.addColorStop(0, '#0c1a13'); // Deep teal green
-            baseGrad.addColorStop(0.5, '#070f0b'); // Forest night
-            baseGrad.addColorStop(1, '#030604'); // Ground dark green
-            ctx.fillStyle = baseGrad;
-            ctx.fillRect(0, 0, width, height);
+            // Try loading/drawing the beautiful watercolor morning forest background image
+            const bgImg = BackgroundSystem.getThemeImage('poster/nature-serenity-bg.png');
+            if (bgImg.isLoaded) {
+                BackgroundSystem.drawImageCover(ctx, bgImg, width, height);
+            } else {
+                // Misty morning forest gradient
+                const baseGrad = ctx.createLinearGradient(0, 0, 0, height);
+                baseGrad.addColorStop(0, '#0c1a13'); // Deep teal green
+                baseGrad.addColorStop(0.5, '#070f0b'); // Forest night
+                baseGrad.addColorStop(1, '#030604'); // Ground dark green
+                ctx.fillStyle = baseGrad;
+                ctx.fillRect(0, 0, width, height);
 
-            // Soft peach/gold dawn horizon radial glow at the bottom
-            const horizonGrad = ctx.createRadialGradient(
-                width * 0.5, height * 0.95, 20 * scale,
-                width * 0.5, height * 0.95, width * 0.7
-            );
-            horizonGrad.addColorStop(0, 'rgba(235, 195, 160, 0.12)'); // Peach horizon light
-            horizonGrad.addColorStop(0.4, 'rgba(168, 211, 180, 0.04)'); // Soft mint glow
-            horizonGrad.addColorStop(1, 'rgba(0, 0, 0, 0)');
-            ctx.fillStyle = horizonGrad;
-            ctx.fillRect(0, 0, width, height);
+                // Soft peach/gold dawn horizon radial glow at the bottom
+                const horizonGrad = ctx.createRadialGradient(
+                    width * 0.5, height * 0.95, 20 * scale,
+                    width * 0.5, height * 0.95, width * 0.7
+                );
+                horizonGrad.addColorStop(0, 'rgba(235, 195, 160, 0.12)'); // Peach horizon light
+                horizonGrad.addColorStop(0.4, 'rgba(168, 211, 180, 0.04)'); // Soft mint glow
+                horizonGrad.addColorStop(1, 'rgba(0, 0, 0, 0)');
+                ctx.fillStyle = horizonGrad;
+                ctx.fillRect(0, 0, width, height);
+            }
 
         } else if (theme.id === 'minimal-noor') {
             // Ultra-calming warm ivory / pristine sand radial gradient
@@ -100,16 +112,22 @@ export class BackgroundSystem {
             ctx.fillRect(0, 0, width, height);
 
         } else if (theme.id === 'premium-gold') {
-            // Deep obsidian velvet black
-            const baseGrad = ctx.createRadialGradient(
-                width * 0.5, height * 0.5, 10 * scale,
-                width * 0.5, height * 0.5, Math.max(width, height) * 0.7
-            );
-            baseGrad.addColorStop(0, '#1c1c1f'); // Charcoal center warmth
-            baseGrad.addColorStop(0.5, '#0e0e10'); // Dark velvet obsidian
-            baseGrad.addColorStop(1, '#050506'); // Infinite black
-            ctx.fillStyle = baseGrad;
-            ctx.fillRect(0, 0, width, height);
+            // Try loading/drawing the beautiful dark gold abstract background image
+            const bgImg = BackgroundSystem.getThemeImage('poster/premium-gold-bg.png');
+            if (bgImg.isLoaded) {
+                BackgroundSystem.drawImageCover(ctx, bgImg, width, height);
+            } else {
+                // Deep obsidian velvet black
+                const baseGrad = ctx.createRadialGradient(
+                    width * 0.5, height * 0.5, 10 * scale,
+                    width * 0.5, height * 0.5, Math.max(width, height) * 0.7
+                );
+                baseGrad.addColorStop(0, '#1c1c1f'); // Charcoal center warmth
+                baseGrad.addColorStop(0.5, '#0e0e10'); // Dark velvet obsidian
+                baseGrad.addColorStop(1, '#050506'); // Infinite black
+                ctx.fillStyle = baseGrad;
+                ctx.fillRect(0, 0, width, height);
+            }
 
         } else if (theme.id === 'paradise-spring') {
             // Try loading/drawing the beautiful watercolor background image
@@ -204,8 +222,12 @@ export class BackgroundSystem {
             this.drawMistBand(ctx, width, height, height * 0.72, 'rgba(140, 170, 200, 0.008)', -time * 0.08);
 
         } else if (theme.id === 'nature-serenity') {
-            // Draw overlapping misty mountains silhouette in the bottom background
-            this.drawMountainSilhouettes(ctx, width, height, scale, time);
+            // Draw overlapping misty mountains silhouette in the bottom background (only as fallback if image is not loaded)
+            const bgImg = BackgroundSystem.imageCache['poster/nature-serenity-bg.png'];
+            const isImgLoaded = bgImg && bgImg.isLoaded;
+            if (!isImgLoaded) {
+                this.drawMountainSilhouettes(ctx, width, height, scale, time);
+            }
 
             // Draw a central breathing light column halo
             const haloGrad = ctx.createRadialGradient(

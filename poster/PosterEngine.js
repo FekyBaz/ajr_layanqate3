@@ -15,6 +15,9 @@ export class PosterEngine {
     constructor() {
         // Pre-cache premium background images in the background
         BackgroundSystem.getThemeImage('poster/paradise-spring-bg.jpg');
+        BackgroundSystem.getThemeImage('poster/night-serenity-bg.png');
+        BackgroundSystem.getThemeImage('poster/nature-serenity-bg.png');
+        BackgroundSystem.getThemeImage('poster/premium-gold-bg.png');
 
         // 1. Initialize State Parameters
         this.activeThemeId = 'night-spiritual';
