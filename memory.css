@@ -1558,11 +1558,13 @@
     align-items: center;
     justify-content: center;
     gap: 8px;
+    font-family: var(--font-display, inherit);
     font-size: 0.85rem;
     font-weight: 600;
     padding: 8px 18px;
     height: 36px;
     min-height: auto; /* Override .btn's min-height */
+    line-height: 1;
     border: 1px solid rgba(201, 170, 113, 0.4);
     border-radius: 100px;
     background: rgba(201, 170, 113, 0.05);
@@ -1572,6 +1574,14 @@
     transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
     backdrop-filter: blur(4px);
     -webkit-backdrop-filter: blur(4px);
+}
+
+#btn-open-edit span {
+    font-size: 1rem;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    margin-top: -1px; /* Visual alignment fine-tuning */
 }
 
 #btn-open-edit:hover {
