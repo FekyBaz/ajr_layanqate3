@@ -11,6 +11,7 @@ import {
     error,
     handleOptions,
     logger,
+    STATUS,
 } from './utils/shared.js';
 
 export async function handler(event, context) {
@@ -26,9 +27,11 @@ export async function handler(event, context) {
 
     try {
         // RLS enforces status = 'Approved' — no sensitive fields returned
+        // Explicitly filter by approved status as defense-in-depth security measure
         const { data, error: queryError } = await supabasePublic
             .from('memories')
             .select('id, deceased_name, slug, approved_at')
+            .eq('status', STATUS.APPROVED)
             .order('approved_at', { ascending: false })
             .limit(3);
 

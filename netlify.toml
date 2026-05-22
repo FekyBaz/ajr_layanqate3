@@ -138,6 +138,27 @@
   to = "/.netlify/functions/ga-config"
   status = 200
 
+# GA4 Data API (admin-authenticated)
+[[redirects]]
+  from = "/api/ga/overview"
+  to = "/.netlify/functions/ga-overview"
+  status = 200
+
+[[redirects]]
+  from = "/api/ga/realtime"
+  to = "/.netlify/functions/ga-realtime"
+  status = 200
+
+[[redirects]]
+  from = "/api/ga/content"
+  to = "/.netlify/functions/ga-content"
+  status = 200
+
+[[redirects]]
+  from = "/api/ga/acquisition"
+  to = "/.netlify/functions/ga-acquisition"
+  status = 200
+
 # Clean URLs for pages
 [[redirects]]
   from = "/admin"
