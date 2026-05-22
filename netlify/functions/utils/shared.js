@@ -198,7 +198,7 @@ export function handleOptions(origin) {
 // ═══════════════════════════════════════════════════════════════════════════
 
 const ADMIN_RATE_LIMIT_WINDOW_HOURS = 1;
-const ADMIN_RATE_LIMIT_MAX = 60;
+const ADMIN_RATE_LIMIT_MAX = parseInt(process.env.ADMIN_RATE_LIMIT_MAX) || 300;
 
 export function validateAdmin(event) {
     const authHeader = event.headers.authorization || event.headers.Authorization || '';
