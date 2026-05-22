@@ -528,7 +528,9 @@ function incrementLocalShareMetrics(submissionId) {
     });
 
     state.stats.totalPostCount = Math.max(Number(state.stats.totalPostCount) || 0, 0) + 1;
-    elements.totalSharesCount.textContent = `📿 ${formatNumber(state.stats.totalPostCount)} مرة تم نشر الأذكار`;
+    if (elements.totalSharesCount) {
+        elements.totalSharesCount.textContent = `📿 ${formatNumber(state.stats.totalPostCount)} مرة تم نشر الأذكار`;
+    }
 
     state.goal.currentProgress = Math.max(Number(state.goal.currentProgress) || 0, 0) + 1;
     renderGoal(state.goal);
@@ -786,10 +788,18 @@ function renderStats(stats = {}, pagination = {}) {
     state.stats.totalApproved = totalApproved;
     state.stats.totalPostCount = totalShares;
 
-    elements.approvedCount.textContent = `${formatNumber(totalApproved)} مشاركة معتمدة`;
-    elements.totalSharesCount.textContent = `📿 ${formatNumber(totalShares)} مرة تم نشر الأذكار`;
-    elements.mobileApprovedCount.textContent = `${formatNumber(totalApproved)} مشاركة`;
-    elements.mobileStatsBar.hidden = false;
+    if (elements.approvedCount) {
+        elements.approvedCount.textContent = `${formatNumber(totalApproved)} مشاركة معتمدة`;
+    }
+    if (elements.totalSharesCount) {
+        elements.totalSharesCount.textContent = `📿 ${formatNumber(totalShares)} مرة تم نشر الأذكار`;
+    }
+    if (elements.mobileApprovedCount) {
+        elements.mobileApprovedCount.textContent = `${formatNumber(totalApproved)} مشاركة`;
+    }
+    if (elements.mobileStatsBar) {
+        elements.mobileStatsBar.hidden = false;
+    }
 }
 
 function cacheSubmissions(submissions = []) {
