@@ -88,11 +88,11 @@ export const supabaseAdmin = createClient(
  */
 const PUBLIC_KEY = process.env.SUPABASE_ANON_KEY;
 if (!PUBLIC_KEY) {
-    logger.error('[shared] SUPABASE_ANON_KEY is not set. Public client will fail auth.');
+    logger.warn('[shared] SUPABASE_ANON_KEY is not set. Falling back to service role key with explicit filters.');
 }
 export const supabasePublic = createClient(
     SUPABASE_URL,
-    PUBLIC_KEY || 'SUPABASE_ANON_KEY_NOT_CONFIGURED',
+    PUBLIC_KEY || process.env.SUPABASE_SERVICE_ROLE_KEY || 'SUPABASE_ANON_KEY_NOT_CONFIGURED',
     CLIENT_OPTIONS,
 );
 

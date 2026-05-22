@@ -11,6 +11,7 @@ import {
     error,
     handleOptions,
     logger,
+    STATUS,
 } from './utils/shared.js';
 
 const MAX_PAGE_SIZE = 60;
@@ -41,9 +42,11 @@ export async function handler(event, context) {
         const to = from + pageSize - 1;
 
         // RLS enforces status = 'Approved' rows for public client
+        // Explicitly filter by approved status as defense-in-depth security measure
         let query = supabasePublic
             .from('memories')
             .select('id, deceased_name, slug, approved_at', { count: 'exact' })
+            .eq('status', STATUS.APPROVED)
             .order('approved_at', { ascending: false });
 
         if (searchQuery) {
