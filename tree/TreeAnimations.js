@@ -256,7 +256,7 @@ export class TreeAnimations {
             leafNodes.push({
                 x: x + (endX - x) * 0.35,
                 y: y + (endY - y) * 0.35,
-                angle: adjustedAngle + (nextSplitRand() - 0.5) * 0.2,
+                angle: adjustedAngle + (nextLocalRand() - 0.5) * 0.2,
                 seed: (localSeed + 7777) | 0,
                 isInner: true
             });
@@ -273,7 +273,7 @@ export class TreeAnimations {
                 leafNodes.push({
                     x: x + (endX - x) * 0.75,
                     y: y + (endY - y) * 0.75,
-                    angle: adjustedAngle + (nextSplitRand() - 0.5) * 0.4,
+                    angle: adjustedAngle + (nextLocalRand() - 0.5) * 0.4,
                     seed: (localSeed + 1111) | 0,
                     isInner: true
                 });
