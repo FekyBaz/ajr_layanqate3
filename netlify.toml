@@ -106,6 +106,27 @@
   to = "/.netlify/functions/admin-memory-reject"
   status = 200
 
+# Memory Collaborative Updates API
+[[redirects]]
+  from = "/api/memory/update-propose"
+  to = "/.netlify/functions/memory-update-propose"
+  status = 200
+
+[[redirects]]
+  from = "/api/admin/memory-updates/pending"
+  to = "/.netlify/functions/admin-memory-updates-pending"
+  status = 200
+
+[[redirects]]
+  from = "/api/admin/memory-update/approve"
+  to = "/.netlify/functions/admin-memory-update-approve"
+  status = 200
+
+[[redirects]]
+  from = "/api/admin/memory-update/reject"
+  to = "/.netlify/functions/admin-memory-update-reject"
+  status = 200
+
 # Feedback / Contact API
 [[redirects]]
   from = "/api/contact"

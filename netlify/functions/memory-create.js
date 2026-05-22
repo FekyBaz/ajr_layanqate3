@@ -19,6 +19,54 @@ import {
     logger,
 } from './utils/shared.js';
 
+// Phonetic Arabic to English Transliteration Helper for Option A URL slugs
+function transliterateArabicToEnglish(text) {
+    if (!text) return '';
+    const charMap = {
+        'أ': 'a', 'إ': 'a', 'آ': 'a', 'ا': 'a', 'ى': 'a',
+        'ب': 'b',
+        'ت': 't', 'ة': 'h',
+        'ث': 'th',
+        'ج': 'j',
+        'ح': 'h',
+        'خ': 'kh',
+        'د': 'd',
+        'ذ': 'dh',
+        'ر': 'r',
+        'ز': 'z',
+        'س': 's',
+        'ش': 'sh',
+        'ص': 's',
+        'ض': 'd',
+        'ط': 't',
+        'ظ': 'z',
+        'ع': 'a',
+        'غ': 'gh',
+        'ف': 'f',
+        'ق': 'q',
+        'ك': 'k',
+        'ل': 'l',
+        'م': 'm',
+        'ن': 'n',
+        'ه': 'h',
+        'و': 'w', 'ؤ': 'w',
+        'ي': 'y', 'ئ': 'y', 'ء': 'a'
+    };
+
+    let result = '';
+    const cleanText = text.trim().toLowerCase();
+    for (let char of cleanText) {
+        if (charMap[char] !== undefined) {
+            result += charMap[char];
+        } else if (/[a-z0-9]/.test(char)) {
+            result += char;
+        } else if (/\s+/.test(char) || char === '-') {
+            result += '-';
+        }
+    }
+    return result.replace(/-+/g, '-').replace(/^-+|-+$/g, '') || 'memory';
+}
+
 export async function handler(event, context) {
     const origin = event.headers.origin || '';
 
@@ -79,6 +127,9 @@ export async function handler(event, context) {
             .digest('hex')
             .substring(0, 32);
 
+        // Generate transliterated Latin slug prefix
+        const slugPrefix = transliterateArabicToEnglish(nameResult);
+
         // Call atomic RPC
         const { data: result, error: rpcError } = await supabaseAdmin.rpc('create_memory', {
             p_deceased_name: nameResult,
@@ -91,6 +142,7 @@ export async function handler(event, context) {
             p_ip_hash: ipHash,
             p_rate_limit_max: parseInt(process.env.MEMORY_RATE_LIMIT_MAX || '3', 10),
             p_rate_limit_hours: parseInt(process.env.MEMORY_RATE_LIMIT_HOURS || '24', 10),
+            p_slug_prefix: slugPrefix,
         });
 
         if (rpcError) {

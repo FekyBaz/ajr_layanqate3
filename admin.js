@@ -54,6 +54,13 @@
     const loadingEl = document.getElementById('loading');
     const emptyState = document.getElementById('empty-state');
     const notification = document.getElementById('notification');
+    
+    // Memory Updates Tab Elements
+    const memoryUpdatesTab = document.getElementById('memory-updates-tab');
+    const memoryUpdatesList = document.getElementById('memory-updates-list');
+    const memoryUpdatesLoadingEl = document.getElementById('memory-updates-loading');
+    const memoryUpdatesEmptyState = document.getElementById('memory-updates-empty-state');
+    const memoryUpdatesNotification = document.getElementById('memory-updates-notification');
 
     // ═══════════════════════════════════════════════════════════════════
     // API Helpers
@@ -390,14 +397,17 @@
         const tabSubmissions = document.getElementById('tab-submissions');
         const tabMemories = document.getElementById('tab-memories');
         const tabFeedback = document.getElementById('tab-feedback');
+        const tabMemoryUpdates = document.getElementById('tab-memory-updates');
 
         // Hide all tabs
         submissionsTab.classList.add('hidden');
         memoriesTab.classList.add('hidden');
         if (feedbackTab) feedbackTab.classList.add('hidden');
+        if (memoryUpdatesTab) memoryUpdatesTab.classList.add('hidden');
         tabSubmissions.className = 'btn btn-ghost btn-sm admin-tab';
         tabMemories.className = 'btn btn-ghost btn-sm admin-tab';
         if (tabFeedback) tabFeedback.className = 'btn btn-ghost btn-sm admin-tab';
+        if (tabMemoryUpdates) tabMemoryUpdates.className = 'btn btn-ghost btn-sm admin-tab';
 
         if (tabName === 'submissions') {
             submissionsTab.classList.remove('hidden');
@@ -410,6 +420,10 @@
             if (feedbackTab) feedbackTab.classList.remove('hidden');
             if (tabFeedback) tabFeedback.className = 'btn btn-primary btn-sm admin-tab active';
             loadFeedback();
+        } else if (tabName === 'memory-updates') {
+            if (memoryUpdatesTab) memoryUpdatesTab.classList.remove('hidden');
+            if (tabMemoryUpdates) tabMemoryUpdates.className = 'btn btn-primary btn-sm admin-tab active';
+            loadPendingMemoryUpdates();
         }
     }
 
@@ -569,12 +583,365 @@
     }
 
     // ═══════════════════════════════════════════════════════════════════
+    // Proposed Edits Moderation (طلبات التعديل)
+    // ═══════════════════════════════════════════════════════════════════
+    async function loadPendingMemoryUpdates() {
+        if (!memoryUpdatesList || !memoryUpdatesLoadingEl) return;
+        memoryUpdatesLoadingEl.classList.remove('hidden');
+        memoryUpdatesList.classList.add('hidden');
+        memoryUpdatesEmptyState.classList.add('hidden');
+
+        try {
+            const result = await apiRequest('/api/admin/memory-updates/pending');
+            memoryUpdatesLoadingEl.classList.add('hidden');
+
+            if (result.success && result.data && result.data.length > 0) {
+                renderMemoryUpdates(result.data);
+                memoryUpdatesList.classList.remove('hidden');
+            } else {
+                memoryUpdatesEmptyState.classList.remove('hidden');
+            }
+        } catch (error) {
+            memoryUpdatesLoadingEl.classList.add('hidden');
+            showMemoryUpdateNotification('فشل تحميل طلبات التعديل', 'error');
+        }
+    }
+
+    function renderMemoryUpdates(proposals) {
+        memoryUpdatesList.innerHTML = proposals.map(prop => {
+            const memory = prop.memories || {};
+            const deceasedName = memory.deceased_name || 'غير معروف';
+            const slug = memory.slug || '';
+            const pageUrl = `/memory/${slug}`;
+            
+            // Helper to see if fields have changed
+            const isBioChanged = prop.biography !== null && prop.biography !== memory.biography;
+            const isTraitsChanged = prop.good_traits !== null && prop.good_traits !== memory.good_traits;
+            const isCharityChanged = prop.ongoing_charity !== null && prop.ongoing_charity !== memory.ongoing_charity;
+            const isStoryChanged = prop.story !== null && prop.story !== memory.story;
+            
+            const currentLinksStr = JSON.stringify(memory.external_links || []);
+            const proposedLinksStr = JSON.stringify(prop.external_links || []);
+            const isLinksChanged = prop.external_links !== null && proposedLinksStr !== currentLinksStr;
+            
+            // Generate link inputs for editing
+            const linksList = Array.isArray(prop.external_links) ? prop.external_links : [];
+            let linksEditHtml = '';
+            for (let i = 0; i < 5; i++) {
+                const link = linksList[i] || { title: '', url: '' };
+                linksEditHtml += `
+                    <div class="edit-link-row" style="display: flex; gap: 8px; margin-bottom: 6px;">
+                        <input type="text" 
+                               class="update-link-title" 
+                               placeholder="عنوان الرابط (مثال: صدقة جارية)" 
+                               value="${escapeHtml(link.title || '')}" 
+                               style="flex: 1; padding: 6px; font-size: 0.85rem; border: 1px solid #ddd; border-radius: 6px;" />
+                        <input type="url" 
+                               class="update-link-url" 
+                               placeholder="https://..." 
+                               value="${escapeHtml(link.url || '')}" 
+                               style="flex: 2; padding: 6px; font-size: 0.85rem; border: 1px solid #ddd; border-radius: 6px; direction: ltr;" />
+                    </div>
+                `;
+            }
+
+            return `
+                <div class="submission-card memory-update-card" data-proposal-id="${escapeHtml(String(prop.id))}" style="border: 1px solid rgba(200, 166, 115, 0.25); border-radius: 16px; padding: 20px; background: var(--color-surface, #fff); box-shadow: 0 4px 20px rgba(0,0,0,0.02); margin-bottom: 20px; display: flex; flex-direction: column; gap: 16px;">
+                    <div class="submission-meta" style="display: flex; justify-content: space-between; font-size: 0.85rem; color: #8c6a35; border-bottom: 1px solid rgba(200, 166, 115, 0.1); padding-bottom: 10px;">
+                        <span class="content-type-badge" style="background: rgba(200, 166, 115, 0.1); color: #8c6a35; padding: 2px 10px; border-radius: 50px; font-weight: bold; border: 1px solid rgba(200, 166, 115, 0.15);">طلب تعديل صفحة</span>
+                        <span>${formatDate(prop.created_at)}</span>
+                    </div>
+                    
+                    <div>
+                        <div style="font-size: 1.1rem; font-weight: bold; margin-bottom: 4px; color: var(--color-text-primary);">
+                            الصفحة المستهدفة: <a href="${pageUrl}" target="_blank" rel="noopener noreferrer" style="color: #8c6a35; text-decoration: underline;">${escapeHtml(deceasedName)} ↗</a>
+                        </div>
+                        <div style="font-size: 0.85rem; color: #666; display: flex; gap: 12px;">
+                            <span>مقدم التعديل: <strong>${escapeHtml(prop.proposed_by_name)}</strong></span>
+                            <span>صلة القرابة: <strong>${escapeHtml(prop.proposed_by_relation)}</strong></span>
+                        </div>
+                    </div>
+
+                    <!-- Comparison Section -->
+                    <div style="display: flex; flex-direction: column; gap: 16px; margin-top: 8px;">
+                        
+                        <!-- Biography Diff -->
+                        <div class="diff-section" style="border: 1px solid ${isBioChanged ? 'rgba(200,166,115,0.3)' : '#eee'}; border-radius: 12px; overflow: hidden; background: ${isBioChanged ? 'rgba(200,166,115,0.02)' : '#fafafa'};">
+                            <div style="padding: 8px 14px; font-weight: bold; font-size: 0.9rem; background: ${isBioChanged ? 'rgba(200,166,115,0.08)' : '#eee'}; display: flex; justify-content: space-between; align-items: center; color: ${isBioChanged ? '#8c6a35' : '#555'};">
+                                <span>عن المتوفى وسيرته (نبذة تعريفية)</span>
+                                <span style="font-size: 0.75rem; font-weight: normal; background: ${isBioChanged ? '#c8a673' : '#bbb'}; color: white; padding: 2px 8px; border-radius: 50px;">
+                                    ${isBioChanged ? 'معدّل 📝' : 'لم يتغير'}
+                                </span>
+                            </div>
+                            <div style="padding: 14px; display: flex; flex-direction: column; gap: 10px;">
+                                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 12px;">
+                                    <div>
+                                        <div style="font-size: 0.75rem; color: #888; margin-bottom: 4px;">النسخة الحالية:</div>
+                                        <div style="background: #f5f5f5; padding: 8px 12px; border-radius: 8px; font-size: 0.85rem; min-height: 40px; color: #777; border-right: 3px solid #ccc; white-space: pre-wrap;">${escapeHtml(memory.biography || 'لا يوجد')}</div>
+                                    </div>
+                                    <div>
+                                        <div style="font-size: 0.75rem; color: #8c6a35; margin-bottom: 4px;">النسخة المقترحة:</div>
+                                        <div style="background: #fffdf5; padding: 8px 12px; border-radius: 8px; font-size: 0.85rem; min-height: 40px; color: #5c4a35; border-right: 3px solid #c8a673; white-space: pre-wrap;">${escapeHtml(prop.biography || 'لا يوجد')}</div>
+                                    </div>
+                                </div>
+                                <div style="margin-top: 6px;">
+                                    <label style="font-size: 0.78rem; font-weight: bold; display: block; margin-bottom: 4px; color: #666;">التعديل النهائي (تعديل واعتماد):</label>
+                                    <textarea class="update-biography" style="width: 100%; padding: 8px; font-size: 0.85rem; border: 1px solid #c8a673; border-radius: 8px; box-sizing: border-box; resize: vertical;" rows="2" placeholder="تعديل النبذة قبل الاعتماد...">${escapeHtml(prop.biography || '')}</textarea>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Traits Diff -->
+                        <div class="diff-section" style="border: 1px solid ${isTraitsChanged ? 'rgba(200,166,115,0.3)' : '#eee'}; border-radius: 12px; overflow: hidden; background: ${isTraitsChanged ? 'rgba(200,166,115,0.02)' : '#fafafa'};">
+                            <div style="padding: 8px 14px; font-weight: bold; font-size: 0.9rem; background: ${isTraitsChanged ? 'rgba(200,166,115,0.08)' : '#eee'}; display: flex; justify-content: space-between; align-items: center; color: ${isTraitsChanged ? '#8c6a35' : '#555'};">
+                                <span>من صفاته الحميدة</span>
+                                <span style="font-size: 0.75rem; font-weight: normal; background: ${isTraitsChanged ? '#c8a673' : '#bbb'}; color: white; padding: 2px 8px; border-radius: 50px;">
+                                    ${isTraitsChanged ? 'معدّل 📝' : 'لم يتغير'}
+                                </span>
+                            </div>
+                            <div style="padding: 14px; display: flex; flex-direction: column; gap: 10px;">
+                                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 12px;">
+                                    <div>
+                                        <div style="font-size: 0.75rem; color: #888; margin-bottom: 4px;">النسخة الحالية:</div>
+                                        <div style="background: #f5f5f5; padding: 8px 12px; border-radius: 8px; font-size: 0.85rem; min-height: 40px; color: #777; border-right: 3px solid #ccc; white-space: pre-wrap;">${escapeHtml(memory.good_traits || 'لا يوجد')}</div>
+                                    </div>
+                                    <div>
+                                        <div style="font-size: 0.75rem; color: #8c6a35; margin-bottom: 4px;">النسخة المقترحة:</div>
+                                        <div style="background: #fffdf5; padding: 8px 12px; border-radius: 8px; font-size: 0.85rem; min-height: 40px; color: #5c4a35; border-right: 3px solid #c8a673; white-space: pre-wrap;">${escapeHtml(prop.good_traits || 'لا يوجد')}</div>
+                                    </div>
+                                </div>
+                                <div style="margin-top: 6px;">
+                                    <label style="font-size: 0.78rem; font-weight: bold; display: block; margin-bottom: 4px; color: #666;">التعديل النهائي (تعديل واعتماد):</label>
+                                    <textarea class="update-good-traits" style="width: 100%; padding: 8px; font-size: 0.85rem; border: 1px solid #c8a673; border-radius: 8px; box-sizing: border-box; resize: vertical;" rows="2" placeholder="تعديل الصفات قبل الاعتماد...">${escapeHtml(prop.good_traits || '')}</textarea>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Charity Diff -->
+                        <div class="diff-section" style="border: 1px solid ${isCharityChanged ? 'rgba(200,166,115,0.3)' : '#eee'}; border-radius: 12px; overflow: hidden; background: ${isCharityChanged ? 'rgba(200,166,115,0.02)' : '#fafafa'};">
+                            <div style="padding: 8px 14px; font-weight: bold; font-size: 0.9rem; background: ${isCharityChanged ? 'rgba(200,166,115,0.08)' : '#eee'}; display: flex; justify-content: space-between; align-items: center; color: ${isCharityChanged ? '#8c6a35' : '#555'};">
+                                <span>الصدقة الجارية والوقف</span>
+                                <span style="font-size: 0.75rem; font-weight: normal; background: ${isCharityChanged ? '#c8a673' : '#bbb'}; color: white; padding: 2px 8px; border-radius: 50px;">
+                                    ${isCharityChanged ? 'معدّل 📝' : 'لم يتغير'}
+                                </span>
+                            </div>
+                            <div style="padding: 14px; display: flex; flex-direction: column; gap: 10px;">
+                                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 12px;">
+                                    <div>
+                                        <div style="font-size: 0.75rem; color: #888; margin-bottom: 4px;">النسخة الحالية:</div>
+                                        <div style="background: #f5f5f5; padding: 8px 12px; border-radius: 8px; font-size: 0.85rem; min-height: 40px; color: #777; border-right: 3px solid #ccc; white-space: pre-wrap;">${escapeHtml(memory.ongoing_charity || 'لا يوجد')}</div>
+                                    </div>
+                                    <div>
+                                        <div style="font-size: 0.75rem; color: #8c6a35; margin-bottom: 4px;">النسخة المقترحة:</div>
+                                        <div style="background: #fffdf5; padding: 8px 12px; border-radius: 8px; font-size: 0.85rem; min-height: 40px; color: #5c4a35; border-right: 3px solid #c8a673; white-space: pre-wrap;">${escapeHtml(prop.ongoing_charity || 'لا يوجد')}</div>
+                                    </div>
+                                </div>
+                                <div style="margin-top: 6px;">
+                                    <label style="font-size: 0.78rem; font-weight: bold; display: block; margin-bottom: 4px; color: #666;">التعديل النهائي (تعديل واعتماد):</label>
+                                    <textarea class="update-ongoing-charity" style="width: 100%; padding: 8px; font-size: 0.85rem; border: 1px solid #c8a673; border-radius: 8px; box-sizing: border-box; resize: vertical;" rows="2" placeholder="تعديل الصدقة قبل الاعتماد...">${escapeHtml(prop.ongoing_charity || '')}</textarea>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Links Diff -->
+                        <div class="diff-section" style="border: 1px solid ${isLinksChanged ? 'rgba(200,166,115,0.3)' : '#eee'}; border-radius: 12px; overflow: hidden; background: ${isLinksChanged ? 'rgba(200,166,115,0.02)' : '#fafafa'};">
+                            <div style="padding: 8px 14px; font-weight: bold; font-size: 0.9rem; background: ${isLinksChanged ? 'rgba(200,166,115,0.08)' : '#eee'}; display: flex; justify-content: space-between; align-items: center; color: ${isLinksChanged ? '#8c6a35' : '#555'};">
+                                <span>روابط الصدقة والمشاريع (حتى 5 روابط)</span>
+                                <span style="font-size: 0.75rem; font-weight: normal; background: ${isLinksChanged ? '#c8a673' : '#bbb'}; color: white; padding: 2px 8px; border-radius: 50px;">
+                                    ${isLinksChanged ? 'معدّل 📝' : 'لم يتغير'}
+                                </span>
+                            </div>
+                            <div style="padding: 14px; display: flex; flex-direction: column; gap: 12px;">
+                                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 12px;">
+                                    <div>
+                                        <div style="font-size: 0.75rem; color: #888; margin-bottom: 4px;">النسخة الحالية:</div>
+                                        <div style="background: #f5f5f5; padding: 8px; border-radius: 8px; font-size: 0.8rem; min-height: 40px; color: #777; border-right: 3px solid #ccc;">
+                                            <ul style="margin: 0; padding-right: 18px;">
+                                                ${(memory.external_links || []).length > 0 
+                                                    ? memory.external_links.map(l => `<li><a href="${escapeHtml(l.url)}" target="_blank" style="color: #666; text-decoration: underline;">${escapeHtml(l.title || l.url)}</a></li>`).join('') 
+                                                    : 'لا يوجد روابط'
+                                                }
+                                            </ul>
+                                        </div>
+                                    </div>
+                                    <div>
+                                        <div style="font-size: 0.75rem; color: #8c6a35; margin-bottom: 4px;">النسخة المقترحة:</div>
+                                        <div style="background: #fffdf5; padding: 8px; border-radius: 8px; font-size: 0.8rem; min-height: 40px; color: #5c4a35; border-right: 3px solid #c8a673;">
+                                            <ul style="margin: 0; padding-right: 18px;">
+                                                ${(prop.external_links || []).length > 0 
+                                                    ? prop.external_links.map(l => `<li><a href="${escapeHtml(l.url)}" target="_blank" style="color: #8c6a35; text-decoration: underline;">${escapeHtml(l.title || l.url)}</a></li>`).join('') 
+                                                    : 'لا يوجد روابط'
+                                                }
+                                            </ul>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div style="margin-top: 6px;">
+                                    <label style="font-size: 0.78rem; font-weight: bold; display: block; margin-bottom: 6px; color: #666;">التعديل النهائي للروابط (تعديل واعتماد):</label>
+                                    <div class="update-links-container" style="display: flex; flex-direction: column; gap: 6px;">
+                                        ${linksEditHtml}
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Story Diff -->
+                        <div class="diff-section" style="border: 1px solid ${isStoryChanged ? 'rgba(200,166,115,0.3)' : '#eee'}; border-radius: 12px; overflow: hidden; background: ${isStoryChanged ? 'rgba(200,166,115,0.02)' : '#fafafa'};">
+                            <div style="padding: 8px 14px; font-weight: bold; font-size: 0.9rem; background: ${isStoryChanged ? 'rgba(200,166,115,0.08)' : '#eee'}; display: flex; justify-content: space-between; align-items: center; color: ${isStoryChanged ? '#8c6a35' : '#555'};">
+                                <span>مواقف وذكريات خالدة (قصص)</span>
+                                <span style="font-size: 0.75rem; font-weight: normal; background: ${isStoryChanged ? '#c8a673' : '#bbb'}; color: white; padding: 2px 8px; border-radius: 50px;">
+                                    ${isStoryChanged ? 'معدّل 📝' : 'لم يتغير'}
+                                </span>
+                            </div>
+                            <div style="padding: 14px; display: flex; flex-direction: column; gap: 10px;">
+                                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 12px;">
+                                    <div>
+                                        <div style="font-size: 0.75rem; color: #888; margin-bottom: 4px;">النسخة الحالية:</div>
+                                        <div style="background: #f5f5f5; padding: 8px 12px; border-radius: 8px; font-size: 0.85rem; min-height: 40px; color: #777; border-right: 3px solid #ccc; white-space: pre-wrap;">${escapeHtml(memory.story || 'لا يوجد')}</div>
+                                    </div>
+                                    <div>
+                                        <div style="font-size: 0.75rem; color: #8c6a35; margin-bottom: 4px;">النسخة المقترحة:</div>
+                                        <div style="background: #fffdf5; padding: 8px 12px; border-radius: 8px; font-size: 0.85rem; min-height: 40px; color: #5c4a35; border-right: 3px solid #c8a673; white-space: pre-wrap;">${escapeHtml(prop.story || 'لا يوجد')}</div>
+                                    </div>
+                                </div>
+                                <div style="margin-top: 6px;">
+                                    <label style="font-size: 0.78rem; font-weight: bold; display: block; margin-bottom: 4px; color: #666;">التعديل النهائي (تعديل واعتماد):</label>
+                                    <textarea class="update-story" style="width: 100%; padding: 8px; font-size: 0.85rem; border: 1px solid #c8a673; border-radius: 8px; box-sizing: border-box; resize: vertical;" rows="3" placeholder="تعديل قصة الذكرى قبل الاعتماد...">${escapeHtml(prop.story || '')}</textarea>
+                                </div>
+                            </div>
+                        </div>
+
+                    </div>
+
+                    <div class="actions" style="margin-top: 10px; display: flex; gap: 10px; justify-content: flex-end; border-top: 1px solid #eee; padding-top: 14px;">
+                        <button class="btn btn-success btn-md" data-update-action="approve" data-proposal-id="${escapeHtml(String(prop.id))}" style="background: var(--color-accent, #8c6a35); color: white; padding: 8px 24px; border: none; border-radius: 8px; font-size: 0.9rem; font-weight: bold; cursor: pointer; display: flex; align-items: center; gap: 6px;">
+                            ✓ اعتماد التعديلات والتدميج ✨
+                        </button>
+                        <button class="btn btn-danger btn-md" data-update-action="reject" data-proposal-id="${escapeHtml(String(prop.id))}" style="background: #fff; color: #d9534f; padding: 8px 20px; border: 1px solid #d9534f; border-radius: 8px; font-size: 0.9rem; cursor: pointer;">
+                            ✗ رفض التعديل
+                        </button>
+                    </div>
+                </div>
+            `;
+        }).join('');
+    }
+
+    function handleMemoryUpdateAction(e) {
+        const btn = e.target.closest('[data-update-action]');
+        if (!btn) return;
+
+        const action = btn.dataset.updateAction;
+        const id = btn.dataset.proposalId;
+
+        if (action === 'approve') approveMemoryUpdate(id);
+        if (action === 'reject') rejectMemoryUpdate(id);
+    }
+
+    async function approveMemoryUpdate(id) {
+        const card = document.querySelector(`.memory-update-card[data-proposal-id="${id}"]`);
+        if (!card) return;
+
+        // Disable buttons to prevent double-submit
+        const btns = card.querySelectorAll('button');
+        btns.forEach(b => b.disabled = true);
+
+        // Gather all values from the card's textareas and inputs
+        const biography = card.querySelector('.update-biography').value.trim();
+        const good_traits = card.querySelector('.update-good-traits').value.trim();
+        const ongoing_charity = card.querySelector('.update-ongoing-charity').value.trim();
+        const story = card.querySelector('.update-story').value.trim();
+
+        // Gather links
+        const linkRows = card.querySelectorAll('.edit-link-row');
+        const external_links = [];
+        linkRows.forEach(row => {
+            const title = row.querySelector('.update-link-title').value.trim();
+            const url = row.querySelector('.update-link-url').value.trim();
+            if (url) {
+                external_links.push({ title: title || url, url });
+            }
+        });
+
+        const body = {
+            id,
+            biography,
+            good_traits,
+            ongoing_charity,
+            story,
+            external_links
+        };
+
+        try {
+            const result = await apiRequest('/api/admin/memory-update/approve', 'POST', body);
+
+            if (result.success) {
+                showMemoryUpdateNotification('تم دمج واعتماد التعديلات المقترحة بنجاح ✨', 'success');
+                card.remove();
+                loadStats();
+                if (memoryUpdatesList.children.length === 0) {
+                    memoryUpdatesList.classList.add('hidden');
+                    memoryUpdatesEmptyState.classList.remove('hidden');
+                }
+            } else {
+                showMemoryUpdateNotification(result.message || 'حدث خطأ في معالجة الطلب', 'error');
+                btns.forEach(b => b.disabled = false);
+            }
+        } catch (error) {
+            showMemoryUpdateNotification('فشل الاتصال بالخادم', 'error');
+            btns.forEach(b => b.disabled = false);
+        }
+    }
+
+    async function rejectMemoryUpdate(id) {
+        if (!confirm('هل أنت متأكد من رفض هذا التعديل المقترح بالكامل؟')) return;
+
+        const card = document.querySelector(`.memory-update-card[data-proposal-id="${id}"]`);
+        if (!card) return;
+
+        // Disable buttons
+        const btns = card.querySelectorAll('button');
+        btns.forEach(b => b.disabled = true);
+
+        try {
+            const result = await apiRequest('/api/admin/memory-update/reject', 'POST', { id });
+
+            if (result.success) {
+                showMemoryUpdateNotification('تم رفض الاقتراح وحذفه بنجاح', 'success');
+                card.remove();
+                loadStats();
+                if (memoryUpdatesList.children.length === 0) {
+                    memoryUpdatesList.classList.add('hidden');
+                    memoryUpdatesEmptyState.classList.remove('hidden');
+                }
+            } else {
+                showMemoryUpdateNotification(result.message || 'حدث خطأ في معالجة الطلب', 'error');
+                btns.forEach(b => b.disabled = false);
+            }
+        } catch (error) {
+            showMemoryUpdateNotification('فشل الاتصال بالخادم', 'error');
+            btns.forEach(b => b.disabled = false);
+        }
+    }
+
+    function showMemoryUpdateNotification(message, type) {
+        if (!memoryUpdatesNotification) return;
+        memoryUpdatesNotification.textContent = message;
+        memoryUpdatesNotification.className = type === 'error' ? 'error-message' : 'success-message';
+        memoryUpdatesNotification.classList.remove('hidden');
+
+        setTimeout(() => {
+            memoryUpdatesNotification.classList.add('hidden');
+        }, 3500);
+    }
+
+    // ═══════════════════════════════════════════════════════════════════
     // Expose functions needed by inline handlers
     // ═══════════════════════════════════════════════════════════════════
     window.logout = logout;
     window.loadPending = loadPending;
     window.switchTab = switchTab;
     window.loadPendingMemories = loadPendingMemories;
+    window.loadPendingMemoryUpdates = loadPendingMemoryUpdates;
     window.loadFeedback = loadFeedback;
     window.updateFeedbackStatus = updateFeedbackStatus;
 
@@ -793,6 +1160,9 @@
     }
     if (memoriesList) {
         memoriesList.addEventListener('click', handleMemoryAction);
+    }
+    if (memoryUpdatesList) {
+        memoryUpdatesList.addEventListener('click', handleMemoryUpdateAction);
     }
     if (feedbackFilter) {
         feedbackFilter.addEventListener('change', loadFeedback);
