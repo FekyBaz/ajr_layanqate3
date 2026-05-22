@@ -147,12 +147,19 @@ export class TreeAnimations {
     /**
      * Recursive branching algorithm supporting fractional recursion depth limits (smooth bough sprouting)
      */
-    branch(ctx, x, y, length, angle, thickness, depth, targetDepth, windSensitivity, physics, lengthFactor, leafNodes) {
+    branch(ctx, x, y, length, angle, thickness, depth, targetDepth, windSensitivity, physics, lengthFactor, leafNodes, seed = 997) {
         // Enforce fractional recursion boundary
         const intTargetDepth = Math.floor(targetDepth);
         const fraction = targetDepth - intTargetDepth;
 
         let drawScale = 1.0;
+
+        // Initialize a deterministic branch local generator based on this branch's unique seed
+        let localSeed = seed;
+        const nextLocalRand = () => {
+            localSeed = (localSeed * 9301 + 49297) % 233280;
+            return localSeed / 233280;
+        };
 
         if (depth > intTargetDepth) {
             // If this is the next level during fractional growth, scale the branch down smoothly
@@ -160,14 +167,14 @@ export class TreeAnimations {
                 drawScale = fraction;
             } else {
                 // Growth node coordinate
-                leafNodes.push({ x, y, angle });
+                leafNodes.push({ x, y, angle, seed: localSeed });
                 return;
             }
         }
 
         // Apply wind physics to branch angle
         const heightFraction = depth / 7;
-        const windSway = physics.getWindSway(heightFraction, windSensitivity);
+        const windSway = physics.getWindSway(heightFraction, windSensitivity, seed);
         const adjustedAngle = angle + windSway;
 
         // Apply fractional length/thickness scaling
@@ -179,7 +186,7 @@ export class TreeAnimations {
         const endY = y + Math.sin(adjustedAngle) * branchLength;
 
         // Curved spline control points
-        const curveOffset = (this.nextRandom() - 0.5) * (14 / (depth + 1));
+        const curveOffset = (nextLocalRand() - 0.5) * (14 / (depth + 1));
         const ctrlX = x + Math.cos(adjustedAngle) * (branchLength * 0.5) + Math.cos(adjustedAngle + Math.PI / 2) * curveOffset;
         const ctrlY = y + Math.sin(adjustedAngle) * (branchLength * 0.5) + Math.sin(adjustedAngle + Math.PI / 2) * curveOffset;
 
@@ -230,9 +237,27 @@ export class TreeAnimations {
 
         ctx.restore();
 
+        // Push internal foliage cluster nodes for canopy center fill
+        if (depth >= 3) {
+            leafNodes.push({
+                x: ctrlX,
+                y: ctrlY,
+                angle: adjustedAngle + 0.35,
+                seed: (localSeed + 1234) | 0,
+                isInner: true
+            });
+            leafNodes.push({
+                x: ctrlX,
+                y: ctrlY,
+                angle: adjustedAngle - 0.35,
+                seed: (localSeed + 5678) | 0,
+                isInner: true
+            });
+        }
+
         // Halt recursion if this was the final fractional sprouting layer
         if (drawScale < 1.0) {
-            leafNodes.push({ x: endX, y: endY, angle: adjustedAngle });
+            leafNodes.push({ x: endX, y: endY, angle: adjustedAngle, seed: localSeed });
             return;
         }
 
@@ -241,19 +266,27 @@ export class TreeAnimations {
         
         for (let i = 0; i < numSplits; i++) {
             let nextAngle;
+            const childSeed = (seed * 31 + i + 1) | 0;
+
+            let splitSeed = childSeed;
+            const nextSplitRand = () => {
+                splitSeed = (splitSeed * 9301 + 49297) % 233280;
+                return splitSeed / 233280;
+            };
+
             if (numSplits === 3) {
                 // Majestic 3-way primary bough layout
                 const boughAngles = [-0.44, 0.02, 0.46];
-                nextAngle = adjustedAngle + boughAngles[i] + (this.nextRandom() - 0.5) * 0.14;
+                nextAngle = adjustedAngle + boughAngles[i] + (nextSplitRand() - 0.5) * 0.14;
             } else {
                 // Elegant fluid 2-way asymmetrical branching
                 const angleOffsets = [-0.36, 0.38];
-                const asymmetricSkew = (this.nextRandom() - 0.5) * 0.1; // organic asymmetry
+                const asymmetricSkew = (nextSplitRand() - 0.5) * 0.1; // organic asymmetry
                 nextAngle = adjustedAngle + angleOffsets[i] + asymmetricSkew;
             }
 
             // Interpolated length reduction factor from TreeState
-            const lengthReduction = lengthFactor + (this.nextRandom() * 0.07);
+            const lengthReduction = lengthFactor + (nextSplitRand() * 0.07);
             
             this.branch(
                 ctx,
@@ -267,7 +300,8 @@ export class TreeAnimations {
                 windSensitivity,
                 physics,
                 lengthFactor,
-                leafNodes
+                leafNodes,
+                childSeed
             );
         }
     }

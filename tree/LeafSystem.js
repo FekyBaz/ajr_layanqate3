@@ -143,23 +143,31 @@ export class LeafSystem {
     /**
      * Pre-rendered drawing of leaves with slow breathing sway
      */
-    drawLeaf(ctx, x, y, angle, size, seed, breathingFactor) {
+    drawLeaf(ctx, x, y, angle, size, seed, breathingFactor, isInner = false) {
         ctx.save();
         ctx.translate(x, y);
-        // Combine branch wind angle and leaf organic breathing sway
-        const sway = Math.sin(breathingFactor + seed) * 0.08;
+        
+        // Dynamic, seed-derived unique phase shift for leaf breathing & swaying
+        const leafPhase = (seed % 100) * 0.43;
+        
+        // Gentle organic independent swaying
+        const sway = Math.sin(breathingFactor * 0.6 + leafPhase) * 0.05;
         ctx.rotate(angle + sway);
 
-        // Subtly animate leaf size using the breathing factor
-        const breathScale = 0.95 + Math.sin(breathingFactor + seed * 1.5) * 0.05;
+        // Subtly animate leaf size using breathing factor with unique phase
+        const breathScale = 0.97 + Math.sin(breathingFactor * 0.8 + leafPhase * 1.2) * 0.03;
         const finalScale = (size / 22) * breathScale;
         ctx.scale(finalScale, finalScale);
 
         // Pick between Sage or Emerald sprite texture based on seed
         const sprite = (seed % 2 === 0) ? this.sprites.leafEmerald : this.sprites.leafSage;
 
-        // Semi-translucent layered rendering for organic depth
-        ctx.globalAlpha = 0.72 + (seed % 4) * 0.04;
+        // Semi-transparent leaf layering to construct stunning 3D cinematic depth
+        if (isInner) {
+            ctx.globalAlpha = 0.30 + (seed % 3) * 0.06; // softer, background depth layer
+        } else {
+            ctx.globalAlpha = 0.68 + (seed % 4) * 0.04; // standard foliage layer
+        }
         
         ctx.drawImage(
             this.spriteCanvas,
