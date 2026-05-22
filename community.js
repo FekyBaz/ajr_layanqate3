@@ -43,11 +43,6 @@ const state = {
         totalPostCount: 0,
         totalApproved: 0,
     },
-    goal: {
-        dailyTarget: 1,
-        currentProgress: 0,
-        hint: '',
-    },
     hashTargetSubmissionId: null,
     hasHandledHashTarget: false,
 };
@@ -65,11 +60,6 @@ const elements = {
     nextPage: document.getElementById('nextPage'),
     filterTabs: document.getElementById('filterTabs'),
     sortSelect: document.getElementById('sortSelect'),
-    goalSection: document.getElementById('goalSection'),
-    goalTarget: document.getElementById('goalTarget'),
-    goalProgress: document.getElementById('goalProgress'),
-    goalBarFill: document.getElementById('goalBarFill'),
-    goalHint: document.getElementById('goalHint'),
     shareToast: document.getElementById('shareToast'),
     joinPopup: document.getElementById('joinPopup'),
     joinPopupClose: document.getElementById('joinPopupClose'),
@@ -532,9 +522,6 @@ function incrementLocalShareMetrics(submissionId) {
         elements.totalSharesCount.textContent = `📿 ${formatNumber(state.stats.totalPostCount)} مرة تم نشر الأذكار`;
     }
 
-    state.goal.currentProgress = Math.max(Number(state.goal.currentProgress) || 0, 0) + 1;
-    renderGoal(state.goal);
-
     // Trigger dynamic Tree of Goodness growth + shooting particle effect
     if (window.GlobalTreeOfGoodness) {
         window.GlobalTreeOfGoodness.triggerShareEffect(window.activeShareClickEvent);
@@ -763,29 +750,6 @@ async function fetchSubmissions() {
     }
 }
 
-function renderGoal(goal = {}) {
-    if (!elements.goalSection || !elements.goalTarget || !elements.goalProgress || !elements.goalBarFill) return;
-
-    const dailyTarget = Math.max(Number(goal.dailyTarget) || 0, 1);
-    const currentProgress = Math.max(Number(goal.currentProgress) || 0, 0);
-    const percent = Math.min(Math.round((currentProgress / dailyTarget) * 100), 100);
-
-    state.goal = {
-        dailyTarget,
-        currentProgress,
-        hint: goal.hint || 'هدف اليوم يتجدد كل صباح ✨',
-    };
-
-    elements.goalTarget.textContent = `🎯 هدف اليوم: ${formatNumber(dailyTarget)} ذكر`;
-    elements.goalProgress.textContent = `تم تحقيق: ${formatNumber(currentProgress)}`;
-    elements.goalBarFill.style.width = `${percent}%`;
-    if (elements.goalHint) {
-        elements.goalHint.textContent = state.goal.hint;
-    }
-    elements.goalSection.querySelector('.community-goal__bar')?.setAttribute('aria-valuenow', String(percent));
-    elements.goalSection.hidden = false;
-}
-
 function renderStats(stats = {}, pagination = {}) {
     const totalApproved = stats.totalApproved || pagination.total || 0;
     const totalShares = stats.totalPostCount || 0;
@@ -832,7 +796,6 @@ function renderResponse(result) {
 
     cacheSubmissions(visibleSubmissions);
     renderStats(stats, pagination);
-    renderGoal(stats?.goal || {});
 
     if (!visibleSubmissions.length && !shouldInjectInvite) {
         if (state.total === 0) {
@@ -976,11 +939,128 @@ if (elements.focusModeToggle) {
     });
 }
 
+// --- Suggestions / Feedback Form Handler ---
+function checkFeedbackRateLimit() {
+    const now = Date.now();
+    const lastSubmit = Number(safeStorageGet('ajr_last_feedback_time') || '0');
+    if (now - lastSubmit < 60_000) {
+        const remaining = Math.ceil((60_000 - (now - lastSubmit)) / 1000);
+        return { limited: true, reason: `من فضلك انتظر ${formatNumber(remaining)} ثانية قبل إرسال مقترح آخر.` };
+    }
+    
+    const today = getTodayKey();
+    const storedDay = safeStorageGet('ajr_feedback_date');
+    let dailyCount = Number(safeStorageGet('ajr_feedback_count') || '0');
+    if (storedDay !== today) {
+        dailyCount = 0;
+    }
+    
+    if (dailyCount >= 3) {
+        return { limited: true, reason: 'لقد وصلت للحد الأقصى للمقترحات اليوم (٣ مقترحات). شكر الله سعيكم!' };
+    }
+    
+    return { limited: false };
+}
+
+function recordFeedbackSubmission() {
+    const today = getTodayKey();
+    const storedDay = safeStorageGet('ajr_feedback_date');
+    let dailyCount = Number(safeStorageGet('ajr_feedback_count') || '0');
+    if (storedDay !== today) {
+        dailyCount = 0;
+    }
+    
+    safeStorageSet('ajr_last_feedback_time', String(Date.now()));
+    safeStorageSet('ajr_feedback_date', today);
+    safeStorageSet('ajr_feedback_count', String(dailyCount + 1));
+}
+
+function setupFeedbackForm() {
+    const form = document.getElementById('feedbackForm');
+    const successMsg = document.getElementById('feedbackSuccess');
+    const errorText = document.getElementById('feedbackMessageError');
+    const submitBtn = document.getElementById('feedbackSubmitBtn');
+    
+    if (!form || !successMsg || !errorText || !submitBtn) return;
+    
+    form.addEventListener('submit', async (e) => {
+        e.preventDefault();
+        
+        // Dynamic spiritual start toast
+        const spiritualStarts = [
+            'جاري إرسال مقترحكم... نسأل الله القبول والتوفيق ✨',
+            'في طريق الإرسال... شكر الله سعيكم الطيب 🤍',
+            'يرسل الآن... نسأل الله النفع واليسر 🌿'
+        ];
+        const randomStart = spiritualStarts[Math.floor(Math.random() * spiritualStarts.length)];
+        
+        // Reset validation error state
+        errorText.hidden = true;
+        
+        const messageVal = form.message.value.trim();
+        const nameVal = form.name.value.trim();
+        const emailVal = form.email.value.trim();
+        
+        if (messageVal.length < 10) {
+            errorText.hidden = false;
+            elements.shareToast.textContent = 'فضلاً، اكتب مقترحًا نافعًا لا يقل عن ١٠ أحرف لتعم الفائدة.';
+            showToast();
+            return;
+        }
+        
+        // Rate limiting check
+        const limitCheck = checkFeedbackRateLimit();
+        if (limitCheck.limited) {
+            elements.shareToast.textContent = limitCheck.reason;
+            showToast();
+            return;
+        }
+        
+        submitBtn.disabled = true;
+        elements.shareToast.textContent = randomStart;
+        showToast();
+        
+        try {
+            const response = await fetch('/.netlify/functions/contact', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({
+                    name: nameVal || 'فاعل خير',
+                    email: emailVal || null,
+                    message: messageVal
+                }),
+            });
+            
+            if (!response.ok) {
+                throw new Error('Server error');
+            }
+            
+            recordFeedbackSubmission();
+            
+            // Swap display to success message
+            form.hidden = true;
+            successMsg.hidden = false;
+            
+            elements.shareToast.textContent = 'تم استلام مقترحكم بنجاح! شكر الله سعيكم ✨';
+            showToast();
+        } catch (err) {
+            console.error('[Feedback] failed to send', err);
+            submitBtn.disabled = false;
+            
+            elements.shareToast.textContent = 'حدث خطأ غير متوقع أثناء الإرسال، نسأل الله التيسير.';
+            showToast();
+        }
+    });
+}
+
 state.refSource = initializeRefSource();
 state.savedIds = loadSavedIds();
 state.hashTargetSubmissionId = getSubmissionIdFromHash();
 initializeFocusMode();
 initializeLastFilter();
 initializeReturnMemory();
+setupFeedbackForm();
 showSubmissionReviewToastIfNeeded();
 fetchSubmissions();
