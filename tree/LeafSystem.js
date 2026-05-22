@@ -8,18 +8,19 @@ export class LeafSystem {
     constructor() {
         this.leafHues = [138, 145, 152, 160]; // emerald, mint, sage, and forest green
         
-        // Set up offscreen canvas cache (512x128 sprite sheet for high-DPI quality with no clipping)
+        // Set up offscreen canvas cache (768x128 sprite sheet for high-DPI quality with no clipping)
         this.spriteCanvas = document.createElement('canvas');
-        this.spriteCanvas.width = 512;
+        this.spriteCanvas.width = 768;
         this.spriteCanvas.height = 128;
         this.sCtx = this.spriteCanvas.getContext('2d');
         
         // Define coordinates on our upscaled sprite sheet (128x128 bounds)
         this.sprites = {
-            leafSage:    { x: 0,   y: 0, w: 128, h: 128 },
-            leafEmerald: { x: 128,  y: 0, w: 128, h: 128 },
-            starGold:    { x: 256, y: 0, w: 128, h: 128 },
-            flowerWhite: { x: 384, y: 0, w: 128, h: 128 }
+            leafBack:    { x: 0,   y: 0, w: 128, h: 128 },
+            leafMid:     { x: 128, y: 0, w: 128, h: 128 },
+            leafFront:   { x: 256, y: 0, w: 128, h: 128 },
+            starGold:    { x: 384, y: 0, w: 128, h: 128 },
+            flowerWhite: { x: 512, y: 0, w: 128, h: 128 }
         };
 
         this.preRenderSprites();
@@ -30,88 +31,188 @@ export class LeafSystem {
      */
     preRenderSprites() {
         const ctx = this.sCtx;
-        ctx.clearRect(0, 0, 512, 128);
+        ctx.clearRect(0, 0, 768, 128);
 
-        // --- 1. RENDER LEAF SAGE ---
+        // --- 1. RENDER LEAF BACK ---
         ctx.save();
         ctx.translate(64, 64);
-        this.drawVectorLeaf(ctx, 142, 42, 55); // Sage green, high-DPI size 55
+        this.drawVectorLeafBack(ctx, 55); // Sage green, size 55
         ctx.restore();
 
-        // --- 2. RENDER LEAF EMERALD ---
+        // --- 2. RENDER LEAF MID ---
         ctx.save();
         ctx.translate(192, 64);
-        this.drawVectorLeaf(ctx, 155, 36, 55); // Vibrant emerald green, high-DPI size 55
+        this.drawVectorLeafMid(ctx, 55); // Rich green sage, size 55
         ctx.restore();
 
-        // --- 3. RENDER GOLD DIAMOND STAR ---
+        // --- 3. RENDER LEAF FRONT ---
         ctx.save();
         ctx.translate(320, 64);
+        this.drawVectorLeafFront(ctx, 55); // Vibrant emerald green, size 55
+        ctx.restore();
+
+        // --- 4. RENDER GOLD DIAMOND STAR ---
+        ctx.save();
+        ctx.translate(448, 64);
         this.drawVectorStar(ctx, 25); // Diamond flare, size 25
         ctx.restore();
 
-        // --- 4. RENDER WHITE FLOWER BLOSSOM ---
+        // --- 5. RENDER WHITE FLOWER BLOSSOM ---
         ctx.save();
-        ctx.translate(448, 64);
+        ctx.translate(576, 64);
         this.drawVectorFlower(ctx, 22); // Jasmine blossom, size 22
         ctx.restore();
     }
 
     /**
-     * Draws vector leaf path using advanced Bezier curves, radial halos, gradients, and veins
+     * BACK LAYER LEAF: Dark, desaturated, soft dark border, no glow, thin center vein, no lateral veins
      */
-    drawVectorLeaf(ctx, hue, lightness, size) {
-        // 1. Soft radial background glow (backplate shadow) - blends emerald and twilight gold
-        const glowGrad = ctx.createRadialGradient(size * 0.5, 0, 2, size * 0.5, 0, size * 0.95);
-        glowGrad.addColorStop(0, `hsla(${hue + 10}, 85%, 60%, 0.32)`); // Glowing core
-        glowGrad.addColorStop(0.4, `hsla(${hue}, 75%, 45%, 0.14)`);   // Ambient emerald halo
-        glowGrad.addColorStop(0.8, `rgba(200, 166, 115, 0.08)`);       // Soft twilight gold bleeding
-        glowGrad.addColorStop(1, 'rgba(0,0,0,0)');
-        ctx.fillStyle = glowGrad;
+    drawVectorLeafBack(ctx, size) {
+        const hue = 138;
+        const saturation = "28%";
+        const lightness = 28;
+
+        // Silhouette using Bezier Curves
         ctx.beginPath();
-        ctx.arc(size * 0.5, 0, size * 0.95, 0, Math.PI * 2);
+        ctx.moveTo(0, 0);
+        ctx.bezierCurveTo(size * 0.18, -size * 0.50, size * 0.72, -size * 0.43, size, 0);
+        ctx.bezierCurveTo(size * 0.72, size * 0.43, size * 0.18, size * 0.50, 0, 0);
+        ctx.closePath();
+
+        const grad = ctx.createLinearGradient(0, 0, size, 0);
+        grad.addColorStop(0, `hsl(${hue - 4}, ${saturation}, ${lightness - 6}%)`); // Very dark base
+        grad.addColorStop(0.5, `hsl(${hue}, ${saturation}, ${lightness}%)`);
+        grad.addColorStop(1, `hsl(${hue + 6}, ${saturation}, ${lightness + 4}%)`);
+
+        ctx.fillStyle = grad;
         ctx.fill();
 
-        // 2. Main Leaf Silhouette using Dual Bezier Curves - plumper organic shape
+        // Single thin dark border (no glowing aura!)
+        ctx.strokeStyle = `hsla(${hue}, ${saturation}, ${lightness - 10}%, 0.65)`;
+        ctx.lineWidth = 1.0;
+        ctx.stroke();
+
+        // Very thin, translucent center vein
+        ctx.beginPath();
+        ctx.moveTo(0, 0);
+        ctx.quadraticCurveTo(size * 0.5, -size * 0.01, size * 0.90, 0);
+        ctx.strokeStyle = `hsla(${hue + 10}, 30%, ${lightness + 12}%, 0.45)`;
+        ctx.lineWidth = size * 0.02;
+        ctx.stroke();
+    }
+
+    /**
+     * MID LAYER LEAF: Standard balanced sage/emerald, sharp boundaries, extremely subtle soft edge outline
+     */
+    drawVectorLeafMid(ctx, size) {
+        const hue = 145; // balanced sage green
+        const saturation = "58%";
+        const lightness = 38;
+
+        // Silhouette
         ctx.beginPath();
         ctx.moveTo(0, 0);
         ctx.bezierCurveTo(size * 0.18, -size * 0.52, size * 0.72, -size * 0.45, size, 0);
         ctx.bezierCurveTo(size * 0.72, size * 0.45, size * 0.18, size * 0.52, 0, 0);
         ctx.closePath();
 
-        // Volumetric base-to-tip HSL gradient with rich color progression
         const grad = ctx.createLinearGradient(0, 0, size, 0);
-        grad.addColorStop(0, `hsl(${hue - 4}, 78%, ${lightness - 8}%)`); // Deep base
-        grad.addColorStop(0.35, `hsl(${hue}, 70%, ${lightness}%)`);   // Rich green body
-        grad.addColorStop(0.7, `hsl(${hue + 8}, 75%, ${lightness + 5}%)`); // Mid glow
-        grad.addColorStop(1, `hsl(${hue + 16}, 90%, ${lightness + 12}%)`); // Radiant translucent tip
+        grad.addColorStop(0, `hsl(${hue - 4}, ${saturation}, ${lightness - 6}%)`);
+        grad.addColorStop(0.4, `hsl(${hue}, ${saturation}, ${lightness}%)`);
+        grad.addColorStop(1, `hsl(${hue + 10}, ${saturation}, ${lightness + 8}%)`);
 
         ctx.fillStyle = grad;
         ctx.fill();
 
-        // Stroke Layer 1: Soft outer glowing edge aura (wider, softer)
-        ctx.strokeStyle = `hsla(${hue + 15}, 90%, 68%, 0.30)`;
-        ctx.lineWidth = size * 0.08;
-        ctx.stroke();
-
-        // Stroke Layer 2: Soft, organic semi-translucent boundary outline
-        ctx.strokeStyle = `hsla(${hue}, 75%, ${lightness - 10}%, 0.85)`;
-        ctx.lineWidth = 0.95;
-        ctx.stroke();
-
-        // 3. Delicate translucent center vein
-        ctx.beginPath();
-        ctx.moveTo(0, 0);
-        ctx.quadraticCurveTo(size * 0.5, -size * 0.02, size * 0.92, 0);
-        ctx.strokeStyle = `hsla(${hue + 18}, 90%, ${lightness + 24}%, 0.65)`;
+        // Stroke Layer 1: Extremely faint soft edge aura (reduced to 0.05 opacity)
+        ctx.strokeStyle = `hsla(${hue + 12}, 70%, 55%, 0.05)`;
         ctx.lineWidth = size * 0.03;
         ctx.stroke();
 
-        // 4. Fine lateral veins branching from center (very soft and subtle, organic angles)
-        ctx.strokeStyle = `hsla(${hue + 18}, 85%, ${lightness + 20}%, 0.38)`;
-        ctx.lineWidth = size * 0.016;
+        // Stroke Layer 2: standard crisp boundary outline
+        ctx.strokeStyle = `hsla(${hue}, 60%, ${lightness - 10}%, 0.75)`;
+        ctx.lineWidth = 0.95;
+        ctx.stroke();
+
+        // Translucent center vein
+        ctx.beginPath();
+        ctx.moveTo(0, 0);
+        ctx.quadraticCurveTo(size * 0.5, -size * 0.02, size * 0.92, 0);
+        ctx.strokeStyle = `hsla(${hue + 15}, 70%, ${lightness + 18}%, 0.5)`;
+        ctx.lineWidth = size * 0.025;
+        ctx.stroke();
+
+        // Soft lateral veins
+        ctx.strokeStyle = `hsla(${hue + 15}, 60%, ${lightness + 15}%, 0.25)`;
+        ctx.lineWidth = size * 0.015;
         
-        // Lateral pair 1 (early branch)
+        ctx.beginPath();
+        ctx.moveTo(size * 0.25, -size * 0.01);
+        ctx.quadraticCurveTo(size * 0.38, -size * 0.15, size * 0.48, -size * 0.22);
+        ctx.stroke();
+
+        ctx.beginPath();
+        ctx.moveTo(size * 0.25, size * 0.01);
+        ctx.quadraticCurveTo(size * 0.38, size * 0.15, size * 0.48, size * 0.22);
+        ctx.stroke();
+
+        ctx.beginPath();
+        ctx.moveTo(size * 0.55, 0);
+        ctx.quadraticCurveTo(size * 0.68, -size * 0.10, size * 0.78, -size * 0.18);
+        ctx.stroke();
+
+        ctx.beginPath();
+        ctx.moveTo(size * 0.55, 0);
+        ctx.quadraticCurveTo(size * 0.68, size * 0.10, size * 0.78, size * 0.18);
+        ctx.stroke();
+    }
+
+    /**
+     * FRONT LAYER LEAF: Plump, vibrant emerald, crisp details, slightly larger, very soft subtle highlight
+     */
+    drawVectorLeafFront(ctx, size) {
+        const hue = 152; // rich vibrant emerald
+        const saturation = "82%";
+        const lightness = 45;
+
+        // Silhouette using Bezier Curves - plumper organic shape
+        ctx.beginPath();
+        ctx.moveTo(0, 0);
+        ctx.bezierCurveTo(size * 0.18, -size * 0.54, size * 0.72, -size * 0.47, size, 0);
+        ctx.bezierCurveTo(size * 0.72, size * 0.47, size * 0.18, size * 0.54, 0, 0);
+        ctx.closePath();
+
+        const grad = ctx.createLinearGradient(0, 0, size, 0);
+        grad.addColorStop(0, `hsl(${hue - 4}, ${saturation}, ${lightness - 8}%)`);
+        grad.addColorStop(0.35, `hsl(${hue}, ${saturation}, ${lightness}%)`);
+        grad.addColorStop(0.7, `hsl(${hue + 6}, ${saturation}, ${lightness + 4}%)`);
+        grad.addColorStop(1, `hsl(${hue + 12}, 95%, ${lightness + 10}%)`); // glowing tip
+
+        ctx.fillStyle = grad;
+        ctx.fill();
+
+        // Stroke Layer 1: extremely narrow/subtle highlight rim (reduced to 0.03 opacity)
+        ctx.strokeStyle = `hsla(${hue + 15}, 90%, 68%, 0.03)`;
+        ctx.lineWidth = size * 0.02;
+        ctx.stroke();
+
+        // Stroke Layer 2: standard crisp boundary outline
+        ctx.strokeStyle = `hsla(${hue}, 80%, ${lightness - 12}%, 0.85)`;
+        ctx.lineWidth = 0.95;
+        ctx.stroke();
+
+        // Translucent center vein
+        ctx.beginPath();
+        ctx.moveTo(0, 0);
+        ctx.quadraticCurveTo(size * 0.5, -size * 0.02, size * 0.92, 0);
+        ctx.strokeStyle = `hsla(${hue + 18}, 90%, ${lightness + 22}%, 0.65)`;
+        ctx.lineWidth = size * 0.03;
+        ctx.stroke();
+
+        // Crisp lateral veins
+        ctx.strokeStyle = `hsla(${hue + 18}, 80%, ${lightness + 18}%, 0.38)`;
+        ctx.lineWidth = size * 0.016;
+
         ctx.beginPath();
         ctx.moveTo(size * 0.22, -size * 0.01);
         ctx.quadraticCurveTo(size * 0.36, -size * 0.16, size * 0.46, -size * 0.25);
@@ -122,7 +223,6 @@ export class LeafSystem {
         ctx.quadraticCurveTo(size * 0.36, size * 0.16, size * 0.46, size * 0.25);
         ctx.stroke();
 
-        // Lateral pair 2 (mid branch)
         ctx.beginPath();
         ctx.moveTo(size * 0.52, 0);
         ctx.quadraticCurveTo(size * 0.66, -size * 0.12, size * 0.76, -size * 0.20);
@@ -193,9 +293,9 @@ export class LeafSystem {
     }
 
     /**
-     * Pre-rendered drawing of leaves with slow breathing sway
+     * Pre-rendered drawing of leaves with slow breathing sway and layer selection
      */
-    drawLeaf(ctx, x, y, angle, size, seed, breathingFactor, isInner = false, opacityScale = 1.0) {
+    drawLeaf(ctx, x, y, angle, size, seed, breathingFactor, layerName = 'mid', opacityScale = 1.0) {
         ctx.save();
         ctx.translate(x, y);
         
@@ -204,22 +304,34 @@ export class LeafSystem {
         
         // Gentle organic independent swaying
         const sway = Math.sin(breathingFactor * 0.6 + leafPhase) * 0.05;
-        ctx.rotate(angle + sway);
+        
+        // permanent random rotation to differentiate leaf silhouettes
+        const randomRotation = ((seed % 13) / 13 - 0.5) * 0.45;
+        ctx.rotate(angle + sway + randomRotation);
 
         // Subtly animate leaf size using breathing factor with unique phase
         const breathScale = 0.97 + Math.sin(breathingFactor * 0.8 + leafPhase * 1.2) * 0.03;
-        const finalScale = (size / 55) * breathScale; // 55 is the high-DPI pre-rendered reference size
+        
+        // permanent random scale based on seed for organic variety
+        const randomScale = 0.88 + (seed % 7) * 0.04;
+        const finalScale = (size / 55) * breathScale * randomScale; // 55 is the high-DPI pre-rendered reference size
         ctx.scale(finalScale, finalScale);
 
-        // Pick between Sage or Emerald sprite texture based on seed
-        const sprite = (seed % 2 === 0) ? this.sprites.leafEmerald : this.sprites.leafSage;
-
-        // Semi-transparent leaf layering to construct stunning 3D cinematic depth
-        if (isInner) {
-            ctx.globalAlpha = (0.28 + (seed % 3) * 0.05) * opacityScale; // softer, background depth layer
+        // Pick sprite texture and target opacity based on layerName
+        let sprite;
+        let layerOpacity;
+        if (layerName === 'back') {
+            sprite = this.sprites.leafBack;
+            layerOpacity = (0.22 + (seed % 3) * 0.04) * opacityScale;
+        } else if (layerName === 'front') {
+            sprite = this.sprites.leafFront;
+            layerOpacity = (0.78 + (seed % 3) * 0.05) * opacityScale;
         } else {
-            ctx.globalAlpha = (0.76 + (seed % 4) * 0.04) * opacityScale; // standard foliage layer
+            sprite = this.sprites.leafMid;
+            layerOpacity = (0.55 + (seed % 4) * 0.05) * opacityScale;
         }
+        
+        ctx.globalAlpha = layerOpacity;
         
         ctx.drawImage(
             this.spriteCanvas,
@@ -242,18 +354,18 @@ export class LeafSystem {
 
         const sprite = this.sprites.starGold;
         
-        // Twinkling shimmers (highly dimmed to keep stars as soft accent highlights)
-        const twinkleOpacity = (0.15 + Math.sin(seed + pulse * 1.4) * 0.04) * opacityScale;
+        // Twinkling shimmers (quiet but clearly visible golden sparkles)
+        const twinkleOpacity = (0.58 + Math.sin(seed + pulse * 1.4) * 0.15) * opacityScale;
         ctx.globalAlpha = twinkleOpacity;
 
         // Draw extremely soft gold/bronze backing glow natively (quiet twilight accents)
-        const radialGlow = ctx.createRadialGradient(0, 0, 0, 0, 0, 20);
-        radialGlow.addColorStop(0, 'rgba(200, 166, 115, 0.06)'); // Muted gold backing (halved)
-        radialGlow.addColorStop(0.5, 'rgba(212, 175, 55, 0.015)');
+        const radialGlow = ctx.createRadialGradient(0, 0, 0, 0, 0, 25);
+        radialGlow.addColorStop(0, 'rgba(200, 166, 115, 0.12)'); // Muted gold backing
+        radialGlow.addColorStop(0.5, 'rgba(212, 175, 55, 0.04)');
         radialGlow.addColorStop(1, 'rgba(0,0,0,0)');
         ctx.fillStyle = radialGlow;
         ctx.beginPath();
-        ctx.arc(0, 0, 20, 0, Math.PI * 2);
+        ctx.arc(0, 0, 25, 0, Math.PI * 2);
         ctx.fill();
 
         ctx.drawImage(

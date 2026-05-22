@@ -145,9 +145,10 @@ export class TreeAnimations {
     }
 
     /**
-     * Recursive branching algorithm supporting fractional recursion depth limits (smooth bough sprouting)
+     * Recursive branching algorithm supporting fractional recursion depth limits (smooth bough sprouting).
+     * Collects branchSegments and leafNodes to isolate calculation from visual canvas rendering layers.
      */
-    branch(ctx, x, y, length, angle, thickness, depth, targetDepth, windSensitivity, physics, lengthFactor, leafNodes, seed = 997) {
+    branch(ctx, x, y, length, angle, thickness, depth, targetDepth, windSensitivity, physics, lengthFactor, leafNodes, branchSegments, seed = 997) {
         // Enforce fractional recursion boundary
         const intTargetDepth = Math.floor(targetDepth);
         const fraction = targetDepth - intTargetDepth;
@@ -190,52 +191,18 @@ export class TreeAnimations {
         const ctrlX = x + Math.cos(adjustedAngle) * (branchLength * 0.5) + Math.cos(adjustedAngle + Math.PI / 2) * curveOffset;
         const ctrlY = y + Math.sin(adjustedAngle) * (branchLength * 0.5) + Math.sin(adjustedAngle + Math.PI / 2) * curveOffset;
 
-        // RENDER STEP: 3-LAYER VOLUMETRIC BARK (التجسيم الخشبي الفاخر)
-        ctx.save();
-        ctx.lineCap = 'round';
-
-        // --- LAYER 1: Main Dark Bark Base ---
-        ctx.beginPath();
-        ctx.moveTo(x, y);
-        ctx.quadraticCurveTo(ctrlX, ctrlY, endX, endY);
-
-        const barkGrad = ctx.createLinearGradient(x, y, endX, endY);
-        barkGrad.addColorStop(0, '#2e1e0f'); // Deep cosmic wood base
-        barkGrad.addColorStop(0.5, '#3e2c1a'); // Shaded bark
-        barkGrad.addColorStop(1, '#4f3b26'); // Soft branch tip
-
-        ctx.strokeStyle = barkGrad;
-        ctx.lineWidth = branchThickness;
-        ctx.stroke();
-
-        // --- LAYER 2: Volumetric Contour Shadow (Interior Bark Textures) ---
-        if (branchThickness > 1.8) {
-            ctx.beginPath();
-            ctx.moveTo(x, y);
-            ctx.quadraticCurveTo(ctrlX, ctrlY, endX, endY);
-            
-            ctx.strokeStyle = 'rgba(12, 6, 2, 0.35)'; // Organic shaded core
-            ctx.lineWidth = branchThickness * 0.65;
-            ctx.stroke();
-        }
-
-        // --- LAYER 3: Golden Celestial Specular Edge Highlight ---
-        if (branchThickness > 1.2) {
-            ctx.beginPath();
-            ctx.moveTo(x, y);
-            ctx.quadraticCurveTo(ctrlX, ctrlY, endX, endY);
-            
-            // Simulates background celestial light hitting the branch edge
-            const highlightGrad = ctx.createLinearGradient(x, y, endX, endY);
-            highlightGrad.addColorStop(0, 'rgba(200, 166, 115, 0.28)'); // Warm soft gold aura
-            highlightGrad.addColorStop(1, 'rgba(251, 242, 216, 0.05)');
-
-            ctx.strokeStyle = highlightGrad;
-            ctx.lineWidth = branchThickness * 0.25;
-            ctx.stroke();
-        }
-
-        ctx.restore();
+        // Cache the branch segment properties for layered rendering
+        branchSegments.push({
+            x,
+            y,
+            ctrlX,
+            ctrlY,
+            endX,
+            endY,
+            thickness: branchThickness,
+            depth,
+            seed: localSeed
+        });
 
         // Push internal foliage cluster nodes for canopy center fill (starts earlier for lush density)
         if (depth >= 1 && depth < targetDepth) {
@@ -326,8 +293,62 @@ export class TreeAnimations {
                 physics,
                 lengthFactor,
                 leafNodes,
+                branchSegments,
                 childSeed
             );
         }
+    }
+
+    /**
+     * Executes the volumetric rendering of a single branch segment on a specified layer.
+     */
+    drawBranchSegment(ctx, segment) {
+        const { x, y, ctrlX, ctrlY, endX, endY, thickness } = segment;
+
+        ctx.save();
+        ctx.lineCap = 'round';
+
+        // --- LAYER 1: Main Dark Bark Base ---
+        ctx.beginPath();
+        ctx.moveTo(x, y);
+        ctx.quadraticCurveTo(ctrlX, ctrlY, endX, endY);
+
+        const barkGrad = ctx.createLinearGradient(x, y, endX, endY);
+        barkGrad.addColorStop(0, '#2e1e0f'); // Deep cosmic wood base
+        barkGrad.addColorStop(0.5, '#3e2c1a'); // Shaded bark
+        barkGrad.addColorStop(1, '#4f3b26'); // Soft branch tip
+
+        ctx.strokeStyle = barkGrad;
+        ctx.lineWidth = thickness;
+        ctx.stroke();
+
+        // --- LAYER 2: Volumetric Contour Shadow (Interior Bark Textures) ---
+        if (thickness > 1.8) {
+            ctx.beginPath();
+            ctx.moveTo(x, y);
+            ctx.quadraticCurveTo(ctrlX, ctrlY, endX, endY);
+            
+            ctx.strokeStyle = 'rgba(12, 6, 2, 0.35)'; // Organic shaded core
+            ctx.lineWidth = thickness * 0.65;
+            ctx.stroke();
+        }
+
+        // --- LAYER 3: Golden Celestial Specular Edge Highlight ---
+        if (thickness > 1.2) {
+            ctx.beginPath();
+            ctx.moveTo(x, y);
+            ctx.quadraticCurveTo(ctrlX, ctrlY, endX, endY);
+            
+            // Simulates background celestial light hitting the branch edge
+            const highlightGrad = ctx.createLinearGradient(x, y, endX, endY);
+            highlightGrad.addColorStop(0, 'rgba(212, 175, 55, 0.48)'); // Warm soft gold highlight
+            highlightGrad.addColorStop(1, 'rgba(251, 242, 216, 0.15)'); // Halolight glow
+
+            ctx.strokeStyle = highlightGrad;
+            ctx.lineWidth = thickness * 0.3; // slightly wider highlight to catch light
+            ctx.stroke();
+        }
+
+        ctx.restore();
     }
 }

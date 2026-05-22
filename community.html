@@ -24,6 +24,7 @@
             <div class="community-header__stats-wrap">
                 <h2 class="community-header__stats-title">لمحة المجتمع</h2>
                 <div class="community-stats" aria-label="إحصاءات المجتمع">
+                    <p id="approvedCount">✨ ... مشاركة معتمدة</p>
                     <p id="totalSharesCount">📿 ... مرة تم نشر الأذكار</p>
                 </div>
             </div>
@@ -98,6 +99,37 @@
             <p id="savedTasteMessage" class="community-saved__taste" hidden>يبدو أن لك ذوقًا خاصًا ✨</p>
             <div id="savedItems" class="community-saved__grid"></div>
             <p id="savedEmptyMessage" class="community-saved__empty">لم تحفظ شيئًا بعد</p>
+        </section>
+
+        <section class="feedback-section card card-soft" aria-labelledby="feedback-title">
+            <h2 id="feedback-title" class="feedback-title">💡 مقترحاتكم لتطوير أجر لا ينقطع</h2>
+            <p class="feedback-text">مساهمتكم برأيكم أو فكرة جديدة تسعدنا وتساعدنا في تطوير المنصة لتكون أفضل صدقة جارية.</p>
+            
+            <form id="feedbackForm" class="feedback-form" novalidate>
+                <div class="form-row">
+                    <div class="form-group">
+                        <label for="feedbackName">الاسم (اختياري)</label>
+                        <input type="text" id="feedbackName" name="name" placeholder="مثال: فاعل خير">
+                    </div>
+                    <div class="form-group">
+                        <label for="feedbackEmail">البريد الإلكتروني (اختياري)</label>
+                        <input type="email" id="feedbackEmail" name="email" placeholder="example@domain.com">
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label for="feedbackMessage">رسالتك أو مقترحك *</label>
+                    <textarea id="feedbackMessage" name="message" rows="4" required placeholder="اكتب هنا رأيك أو مقترحك بكل وضوح (10 أحرف على الأقل)..."></textarea>
+                    <span class="error-text" id="feedbackMessageError" hidden>فضلاً، اكتب مقترحًا لا يقل عن 10 أحرف.</span>
+                </div>
+                <button type="submit" id="feedbackSubmitBtn" class="btn btn-primary feedback-submit-btn">
+                    <span>إرسال المقترح</span>
+                </button>
+            </form>
+            <div id="feedbackSuccess" class="feedback-success-message" hidden>
+                <span class="success-icon">✨</span>
+                <h3>شكر الله سعيكم وتقبل منكم!</h3>
+                <p>تم استلام مقترحكم بنجاح. نسأل الله أن يكتب لنا ولكم الأجر والمثوبة.</p>
+            </div>
         </section>
 
         <section class="project-share card card-soft" aria-labelledby="project-share-title">
