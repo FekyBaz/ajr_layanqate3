@@ -69,14 +69,20 @@ export class LeafSystem {
      */
     drawVectorLeafBack(ctx, size) {
         const hue = 138;
-        const saturation = "28%";
-        const lightness = 28;
+        const saturation = "18%"; // desaturated
+        const lightness = 22;     // darkened for depth haze
 
-        // Silhouette using Bezier Curves
+        // Pre-render soft drop shadow for depth atmospheric blending
+        ctx.shadowColor = 'rgba(11, 20, 36, 0.45)';
+        ctx.shadowBlur = 6;
+        ctx.shadowOffsetX = 1;
+        ctx.shadowOffsetY = 2;
+
+        // Silhouette using Bezier Curves - thinner profile (reduced roundness)
         ctx.beginPath();
         ctx.moveTo(0, 0);
-        ctx.bezierCurveTo(size * 0.18, -size * 0.50, size * 0.72, -size * 0.43, size, 0);
-        ctx.bezierCurveTo(size * 0.72, size * 0.43, size * 0.18, size * 0.50, 0, 0);
+        ctx.bezierCurveTo(size * 0.18, -size * 0.42, size * 0.72, -size * 0.35, size, 0);
+        ctx.bezierCurveTo(size * 0.72, size * 0.35, size * 0.18, size * 0.42, 0, 0);
         ctx.closePath();
 
         const grad = ctx.createLinearGradient(0, 0, size, 0);
@@ -102,24 +108,31 @@ export class LeafSystem {
     }
 
     /**
-     * MID LAYER LEAF: Standard balanced sage/emerald, sharp boundaries, extremely subtle soft edge outline
+     * MID LAYER LEAF: Standard balanced sage/emerald, thin profile, catch moonlight on upper edge
      */
     drawVectorLeafMid(ctx, size) {
         const hue = 145; // balanced sage green
-        const saturation = "58%";
-        const lightness = 38;
+        const saturation = "52%";
+        const lightness = 35;
 
-        // Silhouette
+        // Pre-render soft drop shadow for depth blending
+        ctx.shadowColor = 'rgba(8, 14, 25, 0.35)';
+        ctx.shadowBlur = 4;
+        ctx.shadowOffsetX = 1;
+        ctx.shadowOffsetY = 1.5;
+
+        // Silhouette - thinner profile
         ctx.beginPath();
         ctx.moveTo(0, 0);
-        ctx.bezierCurveTo(size * 0.18, -size * 0.52, size * 0.72, -size * 0.45, size, 0);
-        ctx.bezierCurveTo(size * 0.72, size * 0.45, size * 0.18, size * 0.52, 0, 0);
+        ctx.bezierCurveTo(size * 0.18, -size * 0.44, size * 0.72, -size * 0.37, size, 0);
+        ctx.bezierCurveTo(size * 0.72, size * 0.37, size * 0.18, size * 0.44, 0, 0);
         ctx.closePath();
 
-        const grad = ctx.createLinearGradient(0, 0, size, 0);
-        grad.addColorStop(0, `hsl(${hue - 4}, ${saturation}, ${lightness - 6}%)`);
+        // Diagonal gradient catching moonlight on upper left (0, -0.18) to shaded lower right (size, 0.22)
+        const grad = ctx.createLinearGradient(0, -size * 0.18, size, size * 0.22);
+        grad.addColorStop(0, `hsl(42, 45%, 62%)`); // Cream-gold moonlight specular catch on upper edge
         grad.addColorStop(0.4, `hsl(${hue}, ${saturation}, ${lightness}%)`);
-        grad.addColorStop(1, `hsl(${hue + 10}, ${saturation}, ${lightness + 8}%)`);
+        grad.addColorStop(1, `hsl(${hue - 4}, ${saturation - 10}%, ${lightness - 6}%)`); // Shaded lower side
 
         ctx.fillStyle = grad;
         ctx.fill();
@@ -168,25 +181,32 @@ export class LeafSystem {
     }
 
     /**
-     * FRONT LAYER LEAF: Plump, vibrant emerald, crisp details, slightly larger, very soft subtle highlight
+     * FRONT LAYER LEAF: Plump yet sleek, vibrant emerald, crisp details, catching specular moonlight
      */
     drawVectorLeafFront(ctx, size) {
         const hue = 152; // rich vibrant emerald
-        const saturation = "82%";
-        const lightness = 45;
+        const saturation = "78%";
+        const lightness = 42;
 
-        // Silhouette using Bezier Curves - plumper organic shape
+        // Pre-render soft drop shadow for depth blending
+        ctx.shadowColor = 'rgba(6, 10, 20, 0.30)';
+        ctx.shadowBlur = 3;
+        ctx.shadowOffsetX = 0.5;
+        ctx.shadowOffsetY = 1;
+
+        // Silhouette using Bezier Curves - elegant thin organic shape (reduced roundness)
         ctx.beginPath();
         ctx.moveTo(0, 0);
-        ctx.bezierCurveTo(size * 0.18, -size * 0.54, size * 0.72, -size * 0.47, size, 0);
-        ctx.bezierCurveTo(size * 0.72, size * 0.47, size * 0.18, size * 0.54, 0, 0);
+        ctx.bezierCurveTo(size * 0.18, -size * 0.45, size * 0.72, -size * 0.38, size, 0);
+        ctx.bezierCurveTo(size * 0.72, size * 0.38, size * 0.18, size * 0.45, 0, 0);
         ctx.closePath();
 
-        const grad = ctx.createLinearGradient(0, 0, size, 0);
-        grad.addColorStop(0, `hsl(${hue - 4}, ${saturation}, ${lightness - 8}%)`);
-        grad.addColorStop(0.35, `hsl(${hue}, ${saturation}, ${lightness}%)`);
-        grad.addColorStop(0.7, `hsl(${hue + 6}, ${saturation}, ${lightness + 4}%)`);
-        grad.addColorStop(1, `hsl(${hue + 12}, 95%, ${lightness + 10}%)`); // glowing tip
+        // Diagonal gradient catching warm specular cream-gold moonlight highlight
+        const grad = ctx.createLinearGradient(0, -size * 0.2, size, size * 0.25);
+        grad.addColorStop(0, `hsl(42, 60%, 72%)`); // Specular cream-gold upper highlight
+        grad.addColorStop(0.3, `hsl(${hue}, ${saturation}, ${lightness}%)`);
+        grad.addColorStop(0.8, `hsl(${hue - 4}, ${saturation}, ${lightness - 8}%)`);
+        grad.addColorStop(1, `hsl(${hue - 8}, ${saturation - 10}%, ${lightness - 12}%)`); // Shaded lower side
 
         ctx.fillStyle = grad;
         ctx.fill();
@@ -343,7 +363,7 @@ export class LeafSystem {
     }
 
     /**
-     * Pre-rendered drawing of glittering golden stars
+     * Pre-rendered drawing of glittering golden stars (firefly shimmers)
      */
     drawStar(ctx, x, y, size, pulse, seed, opacityScale = 1.0) {
         ctx.save();
@@ -354,14 +374,16 @@ export class LeafSystem {
 
         const sprite = this.sprites.starGold;
         
-        // Twinkling shimmers (quiet but clearly visible golden sparkles)
-        const twinkleOpacity = (0.58 + Math.sin(seed + pulse * 1.4) * 0.15) * opacityScale;
+        // Twinkling shimmers (quiet but clearly visible golden sparkles) - Asynchronous, irregular frequency
+        const speedFactor = 0.0007 + (seed % 9) * 0.0002;
+        const starTime = Date.now() * speedFactor;
+        const twinkleOpacity = (0.42 + Math.sin(starTime + (seed * 1.7)) * 0.18) * opacityScale;
         ctx.globalAlpha = twinkleOpacity;
 
-        // Draw extremely soft gold/bronze backing glow natively (quiet twilight accents)
+        // Draw extremely soft gold/bronze backing glow natively (quiet twilight accents, reduced glare)
         const radialGlow = ctx.createRadialGradient(0, 0, 0, 0, 0, 25);
-        radialGlow.addColorStop(0, 'rgba(200, 166, 115, 0.12)'); // Muted gold backing
-        radialGlow.addColorStop(0.5, 'rgba(212, 175, 55, 0.04)');
+        radialGlow.addColorStop(0, 'rgba(200, 166, 115, 0.08)'); // Muted gold backing (quieter)
+        radialGlow.addColorStop(0.5, 'rgba(212, 175, 55, 0.02)');
         radialGlow.addColorStop(1, 'rgba(0,0,0,0)');
         ctx.fillStyle = radialGlow;
         ctx.beginPath();
