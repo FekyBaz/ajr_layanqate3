@@ -35,16 +35,16 @@ export const THEMES = {
     'minimal-noor': {
         id: 'minimal-noor',
         name: 'نور هادئ',
-        fontColor: '#2C2823',
-        accentColor: '#BCA374',
-        secondaryColor: '#8C7A5B',
-        shadowColor: 'rgba(0, 0, 0, 0.04)',
-        particleColor: 'rgba(200, 166, 115, 0.15)',
-        particleCount: 10,
-        fontFamily: 'IBM Plex Sans Arabic',
-        lineHeight: 1.55,
-        glowIntensity: 0.08,
-        defaultFontSize: 35
+        fontColor: '#2E251B',
+        accentColor: '#D1B48C',
+        secondaryColor: '#9C8468',
+        shadowColor: 'rgba(156, 132, 104, 0.12)',
+        particleColor: 'rgba(218, 185, 139, 0.42)',
+        particleCount: 18,
+        fontFamily: 'Amiri',
+        lineHeight: 1.6,
+        glowIntensity: 0.14,
+        defaultFontSize: 38
     },
     'premium-gold': {
         id: 'premium-gold',
