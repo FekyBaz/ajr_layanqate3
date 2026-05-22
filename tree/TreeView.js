@@ -119,8 +119,8 @@ export class TreeView {
         // 2. RENDER steps
         this.ctx.clearRect(0, 0, this.logicalWidth, this.logicalHeight);
 
-        // A. Draw twilight sky, radial золотой halo, and horizontal mist layers
-        this.glowEffects.drawBackgroundAtmosphere(this.ctx, this.logicalWidth, this.logicalHeight);
+        // A. Draw twilight sky, radial golden halo, and horizontal mist layers
+        this.glowEffects.drawBackgroundAtmosphere(this.ctx, this.logicalWidth, this.logicalHeight, this.state);
 
         // B. Procedurally draw organic wood trunk & branching boughs
         const treeBaseX = this.logicalWidth / 2;
@@ -150,40 +150,81 @@ export class TreeView {
         // Store these coordinates on the instance so the RealtimeEngine can reference them
         this.activeLeafNodes = frameLeafNodes;
 
+        // Separate outer branch tips from inner canopy fill coordinates
+        const outerNodes = frameLeafNodes.filter(node => !node.isInner);
+        const innerNodes = frameLeafNodes.filter(node => node.isInner);
+
+        // Spawn a falling leaf occasionally (approx every 12-15 seconds)
+        if (outerNodes.length > 0 && Math.random() < 0.0012) {
+            const randomNode = outerNodes[Math.floor(Math.random() * outerNodes.length)];
+            this.physics.spawnFallingLeaf(randomNode.x, randomNode.y, randomNode.seed);
+        }
+
         // C. Draw Foliage on top of cached branch coordinate nodes
         const breathingFactor = Date.now() * 0.0009;
         
-        // C1. Draw Green Leaves (Dhikr)
-        const leafCount = Math.min(frameLeafNodes.length, Math.round(this.state.visualStats.leaves));
+        // C0. Draw Inner Leaves (Canopy Fill with higher transparency)
+        const innerLeafCount = Math.min(innerNodes.length, Math.round(this.state.visualStats.leaves * 0.65));
+        for (let i = 0; i < innerLeafCount; i++) {
+            const node = innerNodes[i % innerNodes.length];
+            const size = 7 + (node.seed % 4);
+            this.leafSystem.drawLeaf(this.ctx, node.x, node.y, node.angle, size, node.seed, breathingFactor, true);
+        }
+
+        // C1. Draw Green Leaves (Dhikr on outer canopy tips)
+        const leafCount = Math.min(outerNodes.length, Math.round(this.state.visualStats.leaves));
         for (let i = 0; i < leafCount; i++) {
-            const node = frameLeafNodes[i % frameLeafNodes.length];
-            const size = 9 + (i % 5);
-            this.leafSystem.drawLeaf(this.ctx, node.x, node.y, node.angle, size, i, breathingFactor);
+            const node = outerNodes[i % outerNodes.length];
+            const size = 9 + (node.seed % 5);
+            this.leafSystem.drawLeaf(this.ctx, node.x, node.y, node.angle, size, node.seed, breathingFactor, false);
         }
 
         // C2. Draw blossoms (Milestones)
-        const flowerCount = Math.min(frameLeafNodes.length, Math.round(this.state.visualStats.flowers));
+        const flowerCount = Math.min(outerNodes.length, Math.round(this.state.visualStats.flowers));
         for (let i = 0; i < flowerCount; i++) {
-            const node = frameLeafNodes[(i * 9 + 4) % frameLeafNodes.length];
-            const size = 8 + (i % 4);
-            const rotation = (i * 1.5) % (Math.PI * 2);
-            this.leafSystem.drawFlower(this.ctx, node.x, node.y, size, rotation, breathingFactor, i);
+            const node = outerNodes[(i * 9 + 4) % outerNodes.length];
+            const size = 8 + (node.seed % 4);
+            const rotation = (node.seed * 1.5) % (Math.PI * 2);
+            this.leafSystem.drawFlower(this.ctx, node.x, node.y, size, rotation, breathingFactor, node.seed);
         }
 
         // C3. Draw golden diamond stars (Shares)
-        const starCount = Math.min(frameLeafNodes.length, Math.round(this.state.visualStats.stars));
+        const starCount = Math.min(outerNodes.length, Math.round(this.state.visualStats.stars));
         const timeFactor = Date.now() * 0.0022;
         for (let i = 0; i < starCount; i++) {
-            const node = frameLeafNodes[(i * 17 + 7) % frameLeafNodes.length];
-            const size = 6 + (i % 5);
-            const pulse = 1.0 + Math.sin(timeFactor + i) * 0.16;
+            const node = outerNodes[(i * 17 + 7) % outerNodes.length];
+            const size = 6 + (node.seed % 5);
+            const pulse = 1.0 + Math.sin(timeFactor + node.seed) * 0.16;
             
-            const offsetDist = 5 + (i % 6);
+            const offsetDist = 5 + (node.seed % 6);
             const ox = Math.cos(node.angle) * offsetDist;
             const oy = Math.sin(node.angle) * offsetDist;
             
-            this.leafSystem.drawStar(this.ctx, node.x + ox, node.y + oy, size, pulse, i);
+            this.leafSystem.drawStar(this.ctx, node.x + ox, node.y + oy, size, pulse, node.seed);
         }
+
+        // C4. Draw occasional falling leaves
+        this.physics.fallingLeaves.forEach(leaf => {
+            this.ctx.save();
+            this.ctx.translate(leaf.x, leaf.y);
+            this.ctx.rotate(leaf.rotation);
+            
+            // Draw a soft glowing leaf texture
+            this.ctx.globalAlpha = leaf.currentAlpha * 0.65;
+            
+            // Draw leaf sprite (Sage or Emerald leaf texture)
+            const sprite = (leaf.seed % 2 === 0) ? this.leafSystem.sprites.leafEmerald : this.leafSystem.sprites.leafSage;
+            const finalScale = leaf.size / 22;
+            this.ctx.scale(finalScale, finalScale);
+            
+            this.ctx.drawImage(
+                this.leafSystem.spriteCanvas,
+                sprite.x, sprite.y, sprite.w, sprite.h,
+                -32, -32, 64, 64 // center drawn
+            );
+            
+            this.ctx.restore();
+        });
 
         // D. Render ambient fireflies & floating light dust (glow blending)
         this.glowEffects.enableGlowMode(this.ctx);

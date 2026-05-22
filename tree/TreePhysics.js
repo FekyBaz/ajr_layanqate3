@@ -13,9 +13,11 @@ export class TreePhysics {
         // Active particles collections
         this.ambientParticles = [];
         this.shootingParticles = [];
+        this.fallingLeaves = []; // Sparse falling leaf particles
 
         // Capacity and pooling systems (prevents GC frame drops)
         this.maxAmbient = 45;
+        this.maxFallingLeaves = 4; // Serene, very occasional leaf drifting
         this.particlePool = []; // Recycled particle storage
     }
 
@@ -55,6 +57,9 @@ export class TreePhysics {
 
         // Update active shooting particles
         this.updateShooting();
+
+        // Update active falling leaves with slow feather sway physics
+        this.updateFallingLeaves(width, height);
     }
 
     /**
@@ -62,13 +67,18 @@ export class TreePhysics {
      * @param {number} heightFraction - [0 at base, 1 at top]
      * @param {number} windSensitivity - factor from TreeState
      */
-    getWindSway(heightFraction, windSensitivity) {
-        const heightMultiplier = Math.pow(heightFraction, 2.0); // exponential sway
+    getWindSway(heightFraction, windSensitivity, seed = 997) {
+        // Exponential sway multiplier for absolute stability at base and graceful flexibility at top
+        const heightMultiplier = Math.pow(heightFraction, 2.2);
         
-        // Cascading time delay (phase shift) makes the branches wave organically
-        const phaseShift = Math.sin(this.time * 0.0018 - heightFraction * 4.5) * 0.012;
+        // Very gentle global wind sway
+        const globalSway = this.currentWind * windSensitivity * 1.5;
         
-        return (this.currentWind * windSensitivity * 15 + phaseShift) * heightMultiplier;
+        // Independent micro-sway phase shift per branch derived from seed
+        const branchPhase = (seed % 1000) * 0.123;
+        const branchSway = Math.sin(this.time * 0.0012 + branchPhase) * 0.018;
+        
+        return (globalSway + branchSway) * heightMultiplier;
     }
 
     /**
@@ -190,6 +200,65 @@ export class TreePhysics {
             const mt = 1 - t;
             p.x = mt * mt * p.startX + 2 * mt * t * p.controlX + t * t * p.targetX;
             p.y = mt * mt * p.startY + 2 * mt * t * p.controlY + t * t * p.targetY;
+        }
+    }
+
+    /**
+     * Spawns a slow, gracefully drifting falling leaf
+     */
+    spawnFallingLeaf(startX, startY, seed) {
+        if (this.fallingLeaves.length >= this.maxFallingLeaves) return;
+
+        const leaf = this.getParticleFromPool();
+        leaf.type = 'falling_leaf';
+        leaf.x = startX;
+        leaf.y = startY;
+        leaf.seed = seed;
+        leaf.birth = this.time;
+        // Longer lifetime for slower, extremely serene drifting
+        leaf.life = 10000 + Math.random() * 6000; // 10 to 16 seconds
+        leaf.phase = Math.random() * Math.PI * 2;
+        
+        // Slower vertical descent rate for calm night-breeze feel
+        leaf.vy = 0.25 + Math.random() * 0.15;
+        
+        // Horizontal zig-zag glide settings
+        leaf.swayFreq = 0.0012 + Math.random() * 0.0008;
+        leaf.swayAmp = 0.4 + Math.random() * 0.3;
+        
+        leaf.size = 6 + (seed % 4);
+        leaf.rotation = Math.random() * Math.PI * 2;
+        leaf.rotationSpeed = (Math.random() - 0.5) * 0.012;
+        leaf.currentAlpha = 1.0;
+
+        this.fallingLeaves.push(leaf);
+    }
+
+    /**
+     * Simulated aerodynamics of active falling leaves
+     */
+    updateFallingLeaves(width, height) {
+        for (let i = this.fallingLeaves.length - 1; i >= 0; i--) {
+            const leaf = this.fallingLeaves[i];
+            const age = this.time - leaf.birth;
+
+            // Fade out and recycle leaf when its lifespan ends or it drifts offscreen
+            if (age >= leaf.life || leaf.y > height + 20) {
+                this.fallingLeaves.splice(i, 1);
+                this.releaseToPool(leaf);
+                continue;
+            }
+
+            // Beautiful feather-like gliding: slow vertical fall + horizontal zig-zag waving
+            leaf.x += Math.sin(age * leaf.swayFreq + leaf.phase) * leaf.swayAmp;
+            leaf.y += leaf.vy;
+
+            // Extremely gentle spinning
+            leaf.rotation += leaf.rotationSpeed;
+
+            // Calm cinematic fade-out towards death
+            const lifeFraction = age / leaf.life;
+            leaf.currentAlpha = Math.max(0, 1.0 - lifeFraction);
         }
     }
 }
