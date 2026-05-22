@@ -68,6 +68,7 @@ export class PosterEngine {
         
         this.downloadBtn = document.getElementById('downloadBtn');
         this.shareBtn = document.getElementById('shareBtn');
+        this.publishBtn = document.getElementById('publishBtn');
         this.toast = document.getElementById('posterToast');
     }
 
@@ -206,6 +207,11 @@ export class PosterEngine {
             }
         });
 
+        // Publish to Community Gallery
+        if (this.publishBtn) {
+            this.publishBtn.addEventListener('click', () => this.publishPoster());
+        }
+
         // Handle page resizing and high-DPI re-computation
         window.addEventListener('resize', () => this.resizePreviewCanvas());
 
@@ -298,6 +304,57 @@ export class PosterEngine {
         };
 
         requestAnimationFrame(loop);
+    }
+
+    /**
+     * Captures the current poster as a compressed thumbnail and saves it
+     * to localStorage for display in the Community Poster Gallery.
+     */
+    publishPoster() {
+        const text = this.text.trim();
+        if (!text) {
+            this.showToast('اكتب ذكرًا أو دعاءً أولاً قبل النشر 🌿');
+            return;
+        }
+
+        try {
+            // Create a small offscreen canvas for a fast compressed thumbnail
+            const thumbSize = 480;
+            const thumbCanvas = document.createElement('canvas');
+            thumbCanvas.width = thumbSize;
+            thumbCanvas.height = thumbSize;
+            const thumbCtx = thumbCanvas.getContext('2d');
+
+            const theme = this.getCombinedTheme();
+            ExportEngine.renderStaticLayout(thumbCtx, theme, text, thumbSize, thumbSize, this.fontSizeSliderValue, 0, true);
+
+            // Compress to JPEG ~60% quality — keeps each card under ~30KB
+            const dataUrl = thumbCanvas.toDataURL('image/jpeg', 0.6);
+
+            // Load existing gallery or create fresh
+            let gallery = [];
+            try {
+                const raw = localStorage.getItem('ajr_community_posters');
+                if (raw) gallery = JSON.parse(raw);
+                if (!Array.isArray(gallery)) gallery = [];
+            } catch { gallery = []; }
+
+            // Prepend newest entry and enforce 12-card cap
+            gallery.unshift({
+                id: `poster_${Date.now()}`,
+                dataUrl,
+                text: text.slice(0, 200),
+                theme: theme.id,
+                timestamp: new Date().toISOString()
+            });
+            gallery = gallery.slice(0, 12);
+
+            localStorage.setItem('ajr_community_posters', JSON.stringify(gallery));
+            this.showToast('تم النشر في معرض المجتمع بنجاح! ✨');
+        } catch (err) {
+            console.error('[PosterEngine] publish failed', err);
+            this.showToast('تعذر النشر، حاول مرة أخرى 😢');
+        }
     }
 
     setLoadingState(isLoading, message = '') {

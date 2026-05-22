@@ -85,10 +85,9 @@
         rel="stylesheet">
 
     <!-- ═══════════════════════════════════════════════════════════════════
-         Favicon (placeholder - replace with actual favicon)
+         Favicon
          ═══════════════════════════════════════════════════════════════════ -->
-    <link rel="icon" type="image/svg+xml"
-        href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🤍</text></svg>">
+    <link rel="icon" type="image/png" href="poster/favicon-home.png">
 
     <!-- ═══════════════════════════════════════════════════════════════════
          Stylesheet
@@ -114,6 +113,7 @@
                 <a href="/memories">🕊 صفحات الذكرى</a>
                 <a href="/index.html#form">شارك بذكر</a>
                 <a href="/martyrs">شهداء غزة</a>
+                <a href="/poster.html">🎨 مصمم البطاقات</a>
             </nav>
         </div>
     </header>
@@ -270,6 +270,22 @@
             </div>
         </section>
 
+        <!-- ═══════════════════════════════════════════════════════════════════
+             Poster Gallery Preview
+             ═══════════════════════════════════════════════════════════════════ -->
+        <section id="homePostersSection" aria-labelledby="home-posters-title" style="padding: 2rem 0;">
+            <div class="site-container">
+                <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:1.25rem;flex-wrap:wrap;gap:0.75rem;">
+                    <div>
+                        <h2 id="home-posters-title" style="font-size:1.35rem;font-weight:700;color:var(--color-primary,#3E7B5C);margin:0;">🎨 معرض بطاقات الأذكار</h2>
+                        <p style="margin:0.25rem 0 0;font-size:0.88rem;color:#666;">بطاقات روحانية فنية من قلب المجتمع</p>
+                    </div>
+                    <a href="/poster.html" style="font-size:0.88rem;color:var(--color-primary,#3E7B5C);font-weight:600;text-decoration:none;">✨ صمّم بطاقتك →</a>
+                </div>
+                <div id="homePostersGrid" style="display:grid;grid-template-columns:repeat(auto-fill,minmax(180px,1fr));gap:1rem;"></div>
+            </div>
+        </section>
+
         <section class="adhkar-callout" aria-labelledby="adhkar-callout-title">
             <div class="site-container">
                 <div class="adhkar-callout__card">
@@ -396,6 +412,7 @@
     <script src="/lib/ga4.js" async></script>
     <script src="home-memories-preview.js?v=20260302"></script>
     <script src="home-community-preview.js?v=20260227"></script>
+    <script src="community-posters.js?v=20260523"></script>
     <script src="share-project.js?v=20260227"></script>
     <script src="script.js?v=20260227"></script>
     <script src="fatiha-counter-init.js?v=20260518"></script>

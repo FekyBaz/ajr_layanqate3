@@ -6,7 +6,88 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>مساهمات المجتمع | أجر لا ينقطع</title>
     <meta name="description" content="تصفح المساهمات المعتمدة من المجتمع: أذكار، أدعية، آيات وأحاديث.">
+    <link rel="icon" type="image/png" href="poster/favicon-community.png">
     <link rel="stylesheet" href="styles.css?v=20260227">
+    <style>
+        .community-posters-section {
+            padding: 2rem 0;
+        }
+        .community-posters-section__header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            margin-bottom: 1.25rem;
+            flex-wrap: wrap;
+            gap: 0.75rem;
+        }
+        .community-posters-section__title {
+            font-size: 1.4rem;
+            font-weight: 700;
+            color: var(--color-primary, #3E7B5C);
+            margin: 0;
+        }
+        .community-posters__grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+            gap: 1rem;
+        }
+        .community-poster-card {
+            border-radius: 14px;
+            overflow: hidden;
+            box-shadow: 0 4px 18px rgba(0,0,0,0.10);
+            transition: transform 0.22s cubic-bezier(0.16,1,0.3,1), box-shadow 0.22s ease;
+            cursor: pointer;
+            background: #f5f0ea;
+            position: relative;
+        }
+        .community-poster-card:hover {
+            transform: translateY(-4px) scale(1.02);
+            box-shadow: 0 10px 36px rgba(0,0,0,0.16);
+        }
+        .community-poster-card img {
+            width: 100%;
+            aspect-ratio: 1 / 1;
+            object-fit: cover;
+            display: block;
+        }
+        .community-poster-card__caption {
+            padding: 0.55rem 0.7rem;
+            font-size: 0.78rem;
+            color: #444;
+            line-height: 1.4;
+            background: rgba(255,255,255,0.88);
+            display: -webkit-box;
+            -webkit-line-clamp: 2;
+            -webkit-box-orient: vertical;
+            overflow: hidden;
+        }
+        .community-poster-card__badge {
+            position: absolute;
+            top: 8px;
+            right: 8px;
+            background: rgba(62,123,92,0.85);
+            color: #fff;
+            font-size: 0.68rem;
+            padding: 2px 8px;
+            border-radius: 20px;
+            backdrop-filter: blur(4px);
+        }
+        .community-posters__empty {
+            text-align: center;
+            padding: 2rem;
+            color: #888;
+            font-size: 0.95rem;
+        }
+        .community-posters__cta-link {
+            font-size: 0.88rem;
+            color: var(--color-primary, #3E7B5C);
+            text-decoration: none;
+            font-weight: 600;
+            opacity: 0.85;
+            transition: opacity 0.2s;
+        }
+        .community-posters__cta-link:hover { opacity: 1; }
+    </style>
 </head>
 
 <body class="community-body community-page-root">
@@ -42,6 +123,20 @@
                 <span><span class="dot dot-dhikr"></span> أذكار غُرست (أوراق خضراء)</span>
                 <span><span class="dot dot-share"></span> مشاركات أينعت (نجوم ذهبية)</span>
             </div>
+        </section>
+
+        <hr class="community-divider" aria-hidden="true">
+
+        <!-- 🎨 Community Poster Gallery -->
+        <section id="communityPostersSection" class="community-posters-section" aria-labelledby="postersGalleryTitle">
+            <div class="community-posters-section__header">
+                <h2 id="postersGalleryTitle" class="community-posters-section__title">🎨 معرض بطاقات الأذكار</h2>
+                <a href="poster.html" class="community-posters__cta-link">✨ صمّم بطاقتك الآن →</a>
+            </div>
+            <div id="communityPostersGrid" class="community-posters__grid">
+                <!-- Dynamically populated by community-posters.js -->
+            </div>
+            <p id="communityPostersEmpty" class="community-posters__empty" hidden>لم يتم نشر أي بطاقة بعد — كن أول من ينشر! ✨</p>
         </section>
 
         <hr class="community-divider" aria-hidden="true">
@@ -155,6 +250,7 @@
     <script src="lib/analytics.js?v=20260521"></script>
     <script src="/lib/ga4.js" async></script>
     <script src="community.js?v=20260227"></script>
+    <script src="community-posters.js?v=20260523"></script>
     <script type="module" src="tree/TreeView.js?v=20260523"></script>
     <script src="share-project.js?v=20260227"></script>
 </body>
