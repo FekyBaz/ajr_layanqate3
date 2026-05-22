@@ -69,8 +69,8 @@ export class LeafSystem {
      */
     drawVectorLeafBack(ctx, size) {
         const hue = 138;
-        const saturation = "18%"; // desaturated
-        const lightness = 22;     // darkened for depth haze
+        const saturation = 18; // numeric (desaturated)
+        const lightness = 22;  // darkened for depth haze
 
         // Pre-render soft drop shadow for depth atmospheric blending
         ctx.shadowColor = 'rgba(11, 20, 36, 0.45)';
@@ -86,15 +86,15 @@ export class LeafSystem {
         ctx.closePath();
 
         const grad = ctx.createLinearGradient(0, 0, size, 0);
-        grad.addColorStop(0, `hsl(${hue - 4}, ${saturation}, ${lightness - 6}%)`); // Very dark base
-        grad.addColorStop(0.5, `hsl(${hue}, ${saturation}, ${lightness}%)`);
-        grad.addColorStop(1, `hsl(${hue + 6}, ${saturation}, ${lightness + 4}%)`);
+        grad.addColorStop(0, `hsl(${hue - 4}, ${saturation}%, ${lightness - 6}%)`); // Very dark base
+        grad.addColorStop(0.5, `hsl(${hue}, ${saturation}%, ${lightness}%)`);
+        grad.addColorStop(1, `hsl(${hue + 6}, ${saturation}%, ${lightness + 4}%)`);
 
         ctx.fillStyle = grad;
         ctx.fill();
 
         // Single thin dark border (no glowing aura!)
-        ctx.strokeStyle = `hsla(${hue}, ${saturation}, ${lightness - 10}%, 0.65)`;
+        ctx.strokeStyle = `hsla(${hue}, ${saturation}%, ${lightness - 10}%, 0.65)`;
         ctx.lineWidth = 1.0;
         ctx.stroke();
 
@@ -112,7 +112,7 @@ export class LeafSystem {
      */
     drawVectorLeafMid(ctx, size) {
         const hue = 145; // balanced sage green
-        const saturation = "52%";
+        const saturation = 52; // numeric
         const lightness = 35;
 
         // Pre-render soft drop shadow for depth blending
@@ -131,7 +131,7 @@ export class LeafSystem {
         // Diagonal gradient catching moonlight on upper left (0, -0.18) to shaded lower right (size, 0.22)
         const grad = ctx.createLinearGradient(0, -size * 0.18, size, size * 0.22);
         grad.addColorStop(0, `hsl(42, 45%, 62%)`); // Cream-gold moonlight specular catch on upper edge
-        grad.addColorStop(0.4, `hsl(${hue}, ${saturation}, ${lightness}%)`);
+        grad.addColorStop(0.4, `hsl(${hue}, ${saturation}%, ${lightness}%)`);
         grad.addColorStop(1, `hsl(${hue - 4}, ${saturation - 10}%, ${lightness - 6}%)`); // Shaded lower side
 
         ctx.fillStyle = grad;
@@ -185,7 +185,7 @@ export class LeafSystem {
      */
     drawVectorLeafFront(ctx, size) {
         const hue = 152; // rich vibrant emerald
-        const saturation = "78%";
+        const saturation = 78; // numeric
         const lightness = 42;
 
         // Pre-render soft drop shadow for depth blending
@@ -204,8 +204,8 @@ export class LeafSystem {
         // Diagonal gradient catching warm specular cream-gold moonlight highlight
         const grad = ctx.createLinearGradient(0, -size * 0.2, size, size * 0.25);
         grad.addColorStop(0, `hsl(42, 60%, 72%)`); // Specular cream-gold upper highlight
-        grad.addColorStop(0.3, `hsl(${hue}, ${saturation}, ${lightness}%)`);
-        grad.addColorStop(0.8, `hsl(${hue - 4}, ${saturation}, ${lightness - 8}%)`);
+        grad.addColorStop(0.3, `hsl(${hue}, ${saturation}%, ${lightness}%)`);
+        grad.addColorStop(0.8, `hsl(${hue - 4}, ${saturation}%, ${lightness - 8}%)`);
         grad.addColorStop(1, `hsl(${hue - 8}, ${saturation - 10}%, ${lightness - 12}%)`); // Shaded lower side
 
         ctx.fillStyle = grad;
