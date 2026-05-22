@@ -220,15 +220,15 @@ export class TreePhysics {
         leaf.phase = Math.random() * Math.PI * 2;
         
         // Slower vertical descent rate for calm night-breeze feel
-        leaf.vy = 0.25 + Math.random() * 0.15;
+        leaf.vy = 0.16 + Math.random() * 0.10;
         
         // Horizontal zig-zag glide settings
         leaf.swayFreq = 0.0012 + Math.random() * 0.0008;
-        leaf.swayAmp = 0.4 + Math.random() * 0.3;
+        leaf.swayAmp = 0.22 + Math.random() * 0.15; // Lighter sways
         
-        leaf.size = 6 + (seed % 4);
+        leaf.size = 4.5 + (seed % 3); // Reduced size to match refined canopy
         leaf.rotation = Math.random() * Math.PI * 2;
-        leaf.rotationSpeed = (Math.random() - 0.5) * 0.012;
+        leaf.rotationSpeed = (Math.random() - 0.5) * 0.007; // Gentler spin
         leaf.currentAlpha = 1.0;
 
         this.fallingLeaves.push(leaf);
