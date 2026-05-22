@@ -4,12 +4,12 @@
  * horizontal mist layer triggers, vignette layers, and caching of branch growth coordinates.
  */
 
-import { TreeState } from './TreeState.js';
-import { TreePhysics } from './TreePhysics.js';
-import { LeafSystem } from './LeafSystem.js';
-import { GlowEffects } from './GlowEffects.js';
-import { TreeAnimations } from './TreeAnimations.js';
-import { RealtimeEngine } from './RealtimeEngine.js';
+import { TreeState } from './TreeState.js?v=20260523';
+import { TreePhysics } from './TreePhysics.js?v=20260523';
+import { LeafSystem } from './LeafSystem.js?v=20260523';
+import { GlowEffects } from './GlowEffects.js?v=20260523';
+import { TreeAnimations } from './TreeAnimations.js?v=20260523';
+import { RealtimeEngine } from './RealtimeEngine.js?v=20260523';
 
 export class TreeView {
     constructor(canvasId) {
