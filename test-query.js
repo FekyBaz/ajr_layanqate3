@@ -24,13 +24,8 @@ envContent.split('\n').forEach(line => {
 
 const supabaseUrl = env.SUPABASE_URL;
 const serviceRoleKey = env.SUPABASE_SERVICE_ROLE_KEY;
-// Wait, is there a SUPABASE_ANON_KEY in .env? Let's check.
-const anonKey = env.SUPABASE_ANON_KEY || serviceRoleKey; // Use serviceRoleKey or fallback
 
-console.log('Supabase URL:', supabaseUrl);
-console.log('Using key type:', env.SUPABASE_ANON_KEY ? 'Anon' : 'Service Role');
-
-const supabase = createClient(supabaseUrl, anonKey, {
+const supabase = createClient(supabaseUrl, serviceRoleKey, {
     auth: {
         autoRefreshToken: false,
         persistSession: false,
@@ -39,17 +34,31 @@ const supabase = createClient(supabaseUrl, anonKey, {
 
 async function run() {
     try {
-        console.log('Testing select on memories table...');
-        const { data, error, count } = await supabase
-            .from('memories')
-            .select('id, deceased_name, slug, approved_at', { count: 'exact' })
-            .limit(5);
+        console.log('--- Checking community_stats ---');
+        const { data: statsData, error: statsError } = await supabase
+            .from('community_stats')
+            .select('*');
 
-        if (error) {
-            console.error('Query error:', error);
+        if (statsError) {
+            console.error('Stats error:', statsError);
         } else {
-            console.log('Query success! Count:', count);
-            console.log('Data:', data);
+            console.log('Stats data:', statsData);
+        }
+
+        console.log('\n--- Checking sum from submissions ---');
+        const { data: sumData, error: sumError } = await supabase
+            .from('submissions')
+            .select('post_count, status');
+
+        if (sumError) {
+            console.error('Sum error:', sumError);
+        } else {
+            const count = sumData.length;
+            const totalShares = sumData.reduce((acc, curr) => acc + (curr.post_count || 0), 0);
+            const approved = sumData.filter(s => s.status === 'Approved' || s.status === 'Posted');
+            console.log(`Total submissions: ${count}`);
+            console.log(`Approved/Posted submissions: ${approved.length}`);
+            console.log(`Total shares in submissions table: ${totalShares}`);
         }
     } catch (err) {
         console.error('Unexpected error:', err);

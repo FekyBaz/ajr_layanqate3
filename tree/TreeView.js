@@ -126,8 +126,9 @@ export class TreeView {
         const treeBaseX = this.logicalWidth / 2;
         const treeBaseY = this.logicalHeight - 12; // offset from bottom edge
 
-        // Temporary array to hold coordinates calculated during this frame's tree drawing
+        // Temporary arrays to hold coordinates calculated during this frame's tree drawing
         const frameLeafNodes = [];
+        const frameBranchSegments = [];
         
         ctxSaveAndRun(this.ctx, () => {
             // Draw tree branches procedurally and cache active foliage coordinates
@@ -143,16 +144,53 @@ export class TreeView {
                 this.state.visualStats.windSwaySensitivity,
                 this.physics,
                 this.state.visualStats.branchLengthFactor,
-                frameLeafNodes
+                frameLeafNodes,
+                frameBranchSegments
             );
         });
 
         // Store these coordinates on the instance so the RealtimeEngine can reference them
         this.activeLeafNodes = frameLeafNodes;
 
+        // Categorize leaves into Front, Mid, and Back layers while applying deterministic breathing gaps
+        const backNodes = [];
+        const midNodes = [];
+        const frontNodes = [];
+
+        frameLeafNodes.forEach(node => {
+            const seed = node.seed;
+            
+            if (node.isInner) {
+                // Breathing gaps: skip 40% of inner canopy coordinates for airy pocket design
+                if (seed % 10 < 4) return;
+
+                // Depth classification
+                const depthSeed = seed % 10;
+                if (depthSeed < 4) {
+                    backNodes.push(node);  // 40% background
+                } else if (depthSeed < 8) {
+                    midNodes.push(node);   // 40% midground
+                } else {
+                    frontNodes.push(node);  // 20% foreground
+                }
+            } else {
+                // Breathing gaps: skip 15% of outer canopy tips for lighter natural branch tips
+                if (seed % 20 < 3) return;
+
+                // Depth classification
+                const depthSeed = seed % 10;
+                if (depthSeed < 3) {
+                    backNodes.push(node);  // 30% background
+                } else if (depthSeed < 7) {
+                    midNodes.push(node);   // 40% midground
+                } else {
+                    frontNodes.push(node);  // 30% foreground
+                }
+            }
+        });
+
         // Separate outer branch tips from inner canopy fill coordinates
         const outerNodes = frameLeafNodes.filter(node => !node.isInner);
-        const innerNodes = frameLeafNodes.filter(node => node.isInner);
 
         // Spawn a falling leaf occasionally (approx every 12-15 seconds)
         if (outerNodes.length > 0 && Math.random() < 0.0012) {
@@ -160,47 +198,104 @@ export class TreeView {
             this.physics.spawnFallingLeaf(randomNode.x, randomNode.y, randomNode.seed);
         }
 
-        // C. Draw Foliage on top of cached branch coordinate nodes
+        // C. Draw Foliage in isolated depth layers interleaved with branch structures
         const breathingFactor = Date.now() * 0.0009;
+        const totalTargetLeaves = this.state.visualStats.leaves;
         
-        // C0. Draw Inner Leaves (Canopy Fill with higher transparency)
-        const innerLeafCount = Math.min(innerNodes.length, Math.round(this.state.visualStats.leaves * 1.45));
-        for (let i = 0; i < innerLeafCount; i++) {
-            const node = innerNodes[i % innerNodes.length];
-            const size = 14 + (node.seed % 6); // Enlarged ~27% for volumetric density (from 11 -> 14)
-            this.leafSystem.drawLeaf(this.ctx, node.x, node.y, node.angle, size, node.seed, breathingFactor, true, 1.0);
+        // Target leaf count for each layer based on organic cinematic ratios
+        const backTarget = Math.round(totalTargetLeaves * 0.35);
+        const midTarget = Math.round(totalTargetLeaves * 0.45);
+        const frontTarget = Math.round(totalTargetLeaves * 0.20);
+        
+        // C0. DRAW BACK LAYER LEAVES (Background volume - dark, desaturated, translucent, single leaves drawn behind branches)
+        const backCount = Math.min(backNodes.length, backTarget);
+        const backStep = backCount > 0 ? backNodes.length / backCount : 1;
+        for (let i = 0; i < backCount; i++) {
+            const nodeIndex = Math.floor(i * backStep);
+            const node = backNodes[nodeIndex % backNodes.length];
+            const size = 12 + (node.seed % 4);
+            this.leafSystem.drawLeaf(this.ctx, node.x, node.y, node.angle, size, node.seed, breathingFactor, 'back', 1.0);
         }
 
-        // C1. Draw Green Leaves (Dhikr on outer canopy tips with organic 3-leaf clusters)
-        const leafCount = Math.min(outerNodes.length, Math.round(this.state.visualStats.leaves));
-        for (let i = 0; i < leafCount; i++) {
-            const node = outerNodes[i % outerNodes.length];
-            const size = 20 + (node.seed % 8); // Enlarged by ~33% (from 15 -> 20) for majestic cinematic presence
-            
-            // Draw main central leaf
-            this.leafSystem.drawLeaf(this.ctx, node.x, node.y, node.angle, size, node.seed, breathingFactor, false, 1.0);
-            
-            // Draw foliage cluster (two side leaves offset organically mimicking real growth patterns with organic variations)
-            const leftScale = 0.74 + (node.seed % 3) * 0.05; // 0.74 to 0.84
-            const rightScale = 0.74 + ((node.seed + 2) % 3) * 0.05; // 0.74 to 0.84
-            const leftAngleOffset = 0.42 + (node.seed % 4) * 0.04; // 0.42 to 0.54
-            const rightAngleOffset = 0.42 + ((node.seed + 2) % 4) * 0.04; // 0.42 to 0.54
-            
-            const leftOffsetDist = size * (0.28 + (node.seed % 3) * 0.03); // 0.28 to 0.34
-            const rightOffsetDist = size * (0.28 + ((node.seed + 2) % 3) * 0.03); // 0.28 to 0.34
-            
-            // Left cluster leaf
-            const lx = node.x + Math.cos(node.angle - 0.34) * leftOffsetDist;
-            const ly = node.y + Math.sin(node.angle - 0.34) * leftOffsetDist;
-            this.leafSystem.drawLeaf(this.ctx, lx, ly, node.angle - leftAngleOffset, size * leftScale, node.seed + 999, breathingFactor, false, 0.82);
+        // C1. DRAW BARK BRANCH SKELETON (Drawn over Back leaves so they sit behind the branches!)
+        ctxSaveAndRun(this.ctx, () => {
+            // Draw beautiful organic roots fading into soil at base
+            this.animations.drawRoots(this.ctx, treeBaseX, treeBaseY, 18 * this.state.visualStats.treeScale, this.state.visualStats.treeScale);
 
-            // Right cluster leaf
-            const rx = node.x + Math.cos(node.angle + 0.34) * rightOffsetDist;
-            const ry = node.y + Math.sin(node.angle + 0.34) * rightOffsetDist;
-            this.leafSystem.drawLeaf(this.ctx, rx, ry, node.angle + rightAngleOffset, size * rightScale, node.seed + 888, breathingFactor, false, 0.82);
+            // Draw procedural branch segments
+            frameBranchSegments.forEach(segment => {
+                this.animations.drawBranchSegment(this.ctx, segment);
+            });
+        });
+
+        // C2. DRAW MID LAYER LEAVES (Midground - balanced sage/emerald, organic clusters of 1 or 2 leaves)
+        // Average cluster rate of 50% yields 1.5 leaves per node, so we scale midCount by dividing by 1.5
+        const midCount = Math.min(midNodes.length, Math.max(1, Math.round(midTarget / 1.5)));
+        const midStep = midCount > 0 ? midNodes.length / midCount : 1;
+        for (let i = 0; i < midCount; i++) {
+            const nodeIndex = Math.floor(i * midStep);
+            const node = midNodes[nodeIndex % midNodes.length];
+            const size = 17 + (node.seed % 5);
+            
+            // Draw central leaf
+            this.leafSystem.drawLeaf(this.ctx, node.x, node.y, node.angle, size, node.seed, breathingFactor, 'mid', 1.0);
+            
+            // Organic cluster offset (50% cluster rate)
+            if (node.seed % 4 >= 2) {
+                const scale = 0.76 + (node.seed % 3) * 0.04;
+                const angleOffset = 0.44 + (node.seed % 4) * 0.03;
+                const offsetDist = size * (0.30 + (node.seed % 3) * 0.03);
+                
+                if (node.seed % 2 === 0) { // Left offset
+                    const lx = node.x + Math.cos(node.angle - 0.34) * offsetDist;
+                    const ly = node.y + Math.sin(node.angle - 0.34) * offsetDist;
+                    this.leafSystem.drawLeaf(this.ctx, lx, ly, node.angle - angleOffset, size * scale, node.seed + 999, breathingFactor, 'mid', 0.82);
+                } else { // Right offset
+                    const rx = node.x + Math.cos(node.angle + 0.34) * offsetDist;
+                    const ry = node.y + Math.sin(node.angle + 0.34) * offsetDist;
+                    this.leafSystem.drawLeaf(this.ctx, rx, ry, node.angle + angleOffset, size * scale, node.seed + 888, breathingFactor, 'mid', 0.82);
+                }
+            }
         }
 
-        // C2. Draw blossoms (Milestones)
+        // C3. DRAW FRONT LAYER LEAVES (Foreground - vibrant emerald, organic clusters of 1, 2, or 3 leaves)
+        // Average cluster rate yields 1.8 leaves per node, so we scale frontCount by dividing by 1.8
+        const frontCount = Math.min(frontNodes.length, Math.max(1, Math.round(frontTarget / 1.8)));
+        const frontStep = frontCount > 0 ? frontNodes.length / frontCount : 1;
+        for (let i = 0; i < frontCount; i++) {
+            const nodeIndex = Math.floor(i * frontStep);
+            const node = frontNodes[nodeIndex % frontNodes.length];
+            const size = 22 + (node.seed % 6);
+            
+            // Draw central leaf
+            this.leafSystem.drawLeaf(this.ctx, node.x, node.y, node.angle, size, node.seed, breathingFactor, 'front', 1.0);
+            
+            // Organic cluster offset: 40% single leaf, 40% double (1 side), 20% triple (both sides)
+            const clusterMode = node.seed % 10;
+            const leftScale = 0.74 + (node.seed % 3) * 0.05;
+            const rightScale = 0.74 + ((node.seed + 2) % 3) * 0.05;
+            const leftAngleOffset = 0.42 + (node.seed % 4) * 0.04;
+            const rightAngleOffset = 0.42 + ((node.seed + 2) % 4) * 0.04;
+            
+            const leftOffsetDist = size * (0.28 + (node.seed % 3) * 0.03);
+            const rightOffsetDist = size * (0.28 + ((node.seed + 2) % 3) * 0.03);
+            
+            if (clusterMode >= 4 && clusterMode < 8) { // Draw left only (40%)
+                const lx = node.x + Math.cos(node.angle - 0.34) * leftOffsetDist;
+                const ly = node.y + Math.sin(node.angle - 0.34) * leftOffsetDist;
+                this.leafSystem.drawLeaf(this.ctx, lx, ly, node.angle - leftAngleOffset, size * leftScale, node.seed + 999, breathingFactor, 'front', 0.82);
+            } else if (clusterMode >= 8) { // Draw both left and right (20%)
+                const lx = node.x + Math.cos(node.angle - 0.34) * leftOffsetDist;
+                const ly = node.y + Math.sin(node.angle - 0.34) * leftOffsetDist;
+                this.leafSystem.drawLeaf(this.ctx, lx, ly, node.angle - leftAngleOffset, size * leftScale, node.seed + 999, breathingFactor, 'front', 0.82);
+                
+                const rx = node.x + Math.cos(node.angle + 0.34) * rightOffsetDist;
+                const ry = node.y + Math.sin(node.angle + 0.34) * rightOffsetDist;
+                this.leafSystem.drawLeaf(this.ctx, rx, ry, node.angle + rightAngleOffset, size * rightScale, node.seed + 888, breathingFactor, 'front', 0.82);
+            }
+        }
+
+        // C4. Draw blossoms (Milestones)
         const flowerCount = Math.min(outerNodes.length, Math.round(this.state.visualStats.flowers));
         for (let i = 0; i < flowerCount; i++) {
             const node = outerNodes[(i * 9 + 4) % outerNodes.length];
@@ -209,12 +304,18 @@ export class TreeView {
             this.leafSystem.drawFlower(this.ctx, node.x, node.y, size, rotation, breathingFactor, node.seed);
         }
 
-        // C3. Draw golden diamond stars (Shares - Rebalanced as quiet delicate accent twinkles)
+        // C5. Draw golden diamond stars (Shares - Rebalanced as quiet delicate accent twinkles)
         const starCount = Math.min(outerNodes.length, Math.round(this.state.visualStats.stars));
         const timeFactor = Date.now() * 0.0022;
-        for (let i = 0; i < starCount; i++) {
-            const node = outerNodes[(i * 17 + 7) % outerNodes.length];
-            const size = 2.5 + (node.seed % 3); // Muted sizing to 2.5-5.5px (previously 3-5px) for elegant accent sparkles
+        const usedStarIndices = new Set();
+        let starsDrawn = 0;
+        for (let i = 0; i < outerNodes.length && starsDrawn < starCount; i++) {
+            const index = (i * 17 + 7) % outerNodes.length;
+            if (usedStarIndices.has(index)) continue;
+            usedStarIndices.add(index);
+            
+            const node = outerNodes[index];
+            const size = 7 + (node.seed % 4); // Beautiful, visible but delicate size
             const pulse = 1.0 + Math.sin(timeFactor + node.seed) * 0.16;
             
             const offsetDist = 5 + (node.seed % 6);
@@ -222,6 +323,7 @@ export class TreeView {
             const oy = Math.sin(node.angle) * offsetDist;
             
             this.leafSystem.drawStar(this.ctx, node.x + ox, node.y + oy, size, pulse, node.seed);
+            starsDrawn++;
         }
 
         // C4. Draw occasional falling leaves
@@ -234,7 +336,7 @@ export class TreeView {
             this.ctx.globalAlpha = leaf.currentAlpha * 0.65;
             
             // Draw leaf sprite (Sage or Emerald leaf texture)
-            const sprite = (leaf.seed % 2 === 0) ? this.leafSystem.sprites.leafEmerald : this.leafSystem.sprites.leafSage;
+            const sprite = (leaf.seed % 2 === 0) ? this.leafSystem.sprites.leafFront : this.leafSystem.sprites.leafMid;
             const finalScale = leaf.size / 22;
             this.ctx.scale(finalScale, finalScale);
             
