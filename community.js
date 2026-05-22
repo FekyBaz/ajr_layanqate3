@@ -534,6 +534,11 @@ function incrementLocalShareMetrics(submissionId) {
 
     state.goal.currentProgress = Math.max(Number(state.goal.currentProgress) || 0, 0) + 1;
     renderGoal(state.goal);
+
+    // Trigger dynamic Tree of Goodness growth + shooting particle effect
+    if (window.GlobalTreeOfGoodness) {
+        window.GlobalTreeOfGoodness.triggerShareEffect(window.activeShareClickEvent);
+    }
 }
 
 async function shareSubmission(item) {
@@ -800,6 +805,11 @@ function renderStats(stats = {}, pagination = {}) {
     if (elements.mobileStatsBar) {
         elements.mobileStatsBar.hidden = false;
     }
+
+    // Sync stats directly with the Tree of Goodness engine
+    if (window.GlobalTreeOfGoodness) {
+        window.GlobalTreeOfGoodness.updateStats(totalApproved, totalShares);
+    }
 }
 
 function cacheSubmissions(submissions = []) {
@@ -919,7 +929,10 @@ elements.communityPage.addEventListener('click', async (event) => {
         const selected = state.submissionsById.get(submissionId);
         if (!selected) return;
 
+        // Temporarily store click coordinate context for beautiful shooting star physics
+        window.activeShareClickEvent = event;
         await shareSubmission(selected);
+        window.activeShareClickEvent = null;
         return;
     }
 
