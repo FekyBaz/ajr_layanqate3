@@ -10,9 +10,9 @@ export class GlowEffects {
     }
 
     /**
-     * Primary background atmosphere drawing call
+     * Primary background atmosphere drawing call with dynamic spiritual aura
      */
-    drawBackgroundAtmosphere(ctx, width, height) {
+    drawBackgroundAtmosphere(ctx, width, height, state = null) {
         ctx.save();
         
         // 1. Deep cosmic spiritual night sky gradient backing
@@ -24,33 +24,38 @@ export class GlowEffects {
         ctx.fillStyle = skyGrad;
         ctx.fillRect(0, 0, width, height);
 
-        // 2. Majestic radial halo right behind the spiritual tree center
+        // Calculate dynamic Spiritual Aura expansion & warmth based on stats
+        const totalActivity = state ? (state.rawStats.dhikr + state.rawStats.shares) : 0;
+        const auraGrowth = Math.min(1.0, totalActivity / 400); // asymptotic normalization capped at 400 activities
+
+        // 2. Majestic radial halo right behind the spiritual tree center (grows in size and warm golden radiance)
         const centerX = width / 2;
         const centerY = height * 0.52;
+        const haloRadius = Math.min(width, height) * (0.75 + auraGrowth * 0.20);
         const radialGlow = ctx.createRadialGradient(
             centerX, centerY, 5, 
-            centerX, centerY, Math.min(width, height) * 0.78
+            centerX, centerY, haloRadius
         );
-        radialGlow.addColorStop(0, 'rgba(200, 166, 115, 0.20)'); // Radiant gold heart
-        radialGlow.addColorStop(0.28, 'rgba(140, 106, 53, 0.08)'); // Diluted golden halo
+        radialGlow.addColorStop(0, `rgba(220, 175, 110, ${0.18 + auraGrowth * 0.16})`); // warm radiant golden heart
+        radialGlow.addColorStop(0.28, `rgba(150, 115, 60, ${0.07 + auraGrowth * 0.08})`); // deep cosmic gold glow
         radialGlow.addColorStop(0.65, 'rgba(17, 31, 50, 0.02)');
         radialGlow.addColorStop(1, 'rgba(0, 0, 0, 0)');
 
         ctx.fillStyle = radialGlow;
         ctx.beginPath();
-        ctx.arc(centerX, centerY, Math.min(width, height) * 0.78, 0, Math.PI * 2);
+        ctx.arc(centerX, centerY, haloRadius, 0, Math.PI * 2);
         ctx.fill();
 
-        // 3. Draw multi-layered horizontal atmospheric fog
-        this.drawAtmosphereFog(ctx, width, height);
+        // 3. Draw multi-layered horizontal atmospheric fog with dynamic warmth
+        this.drawAtmosphereFog(ctx, width, height, auraGrowth);
 
         ctx.restore();
     }
 
     /**
-     * Renders drifting horizontal bands of soft twilight mist for cinematic parralax depth
+     * Renders drifting horizontal bands of soft twilight mist for cinematic depth
      */
-    drawAtmosphereFog(ctx, width, height) {
+    drawAtmosphereFog(ctx, width, height, auraGrowth = 0.0) {
         this.fogTime += 0.005; // calm, peaceful progression
 
         ctx.save();
@@ -60,7 +65,7 @@ export class GlowEffects {
         const groundGrad = ctx.createLinearGradient(0, height * 0.7, 0, height);
         groundGrad.addColorStop(0, 'rgba(11, 20, 36, 0)');
         groundGrad.addColorStop(0.5, 'rgba(27, 45, 70, 0.12)'); // subtle blue fog
-        groundGrad.addColorStop(1, 'rgba(200, 166, 115, 0.05)'); // warm golden horizon edge
+        groundGrad.addColorStop(1, `rgba(220, 175, 110, ${0.04 + auraGrowth * 0.08})`); // warmer golden horizon edge
 
         ctx.fillStyle = groundGrad;
         ctx.fillRect(0, height * 0.7, width, height * 0.3);
@@ -69,7 +74,7 @@ export class GlowEffects {
         const waveY1 = height * 0.55 + Math.sin(this.fogTime) * 15;
         const mistGrad1 = ctx.createLinearGradient(0, waveY1 - 50, 0, waveY1 + 50);
         mistGrad1.addColorStop(0, 'rgba(27, 45, 70, 0)');
-        mistGrad1.addColorStop(0.5, 'rgba(140, 106, 53, 0.03)'); // ultra-soft golden mist
+        mistGrad1.addColorStop(0.5, `rgba(220, 175, 110, ${0.03 + auraGrowth * 0.05})`); // dynamic soft golden mist
         mistGrad1.addColorStop(1, 'rgba(27, 45, 70, 0)');
 
         ctx.fillStyle = mistGrad1;
