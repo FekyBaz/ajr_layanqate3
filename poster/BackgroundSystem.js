@@ -186,27 +186,74 @@ export class BackgroundSystem {
         ctx.save();
 
         if (theme.id === 'minimal-noor') {
-            // Thin elegant sand-gold border inset
-            const margin = 50 * scale;
-            ctx.strokeStyle = 'rgba(188, 163, 116, 0.25)';
-            ctx.lineWidth = 1 * scale;
+            const margin = 52 * scale;
+            ctx.strokeStyle = 'rgba(197, 168, 128, 0.45)'; // Warm shimmering gold
+            ctx.lineWidth = 1.2 * scale;
+            
+            // Outer Arch Frame Coordinates
+            const left = margin;
+            const right = width - margin;
+            const bottom = height - margin;
+            const top = margin + 30 * scale; // Keep arch peak slightly below margin
+            const arcStartY = margin + (height - margin * 2) * 0.22; // Start curving at top 22%
+
             ctx.beginPath();
-            ctx.rect(margin, margin, width - margin * 2, height - margin * 2);
+            ctx.moveTo(left, bottom);
+            ctx.lineTo(left, arcStartY);
+            
+            // Elegant Islamic arched curvature peak
+            ctx.bezierCurveTo(
+                left, arcStartY - 60 * scale,
+                width * 0.5 - 50 * scale, top,
+                width * 0.5, top
+            );
+            ctx.bezierCurveTo(
+                width * 0.5 + 50 * scale, top,
+                right, arcStartY - 60 * scale,
+                right, arcStartY
+            );
+            
+            ctx.lineTo(right, bottom);
+            ctx.closePath();
             ctx.stroke();
 
-            // Draw small micro-dots at four corners of the border
-            ctx.fillStyle = 'rgba(188, 163, 116, 0.5)';
-            const coords = [
-                [margin, margin],
-                [width - margin, margin],
-                [margin, height - margin],
-                [width - margin, height - margin]
-            ];
-            for (const [cx, cy] of coords) {
-                ctx.beginPath();
-                ctx.arc(cx, cy, 3 * scale, 0, Math.PI * 2);
-                ctx.fill();
-            }
+            // Inner Fine Arch Frame (Double arch for premium look)
+            ctx.strokeStyle = 'rgba(197, 168, 128, 0.18)';
+            ctx.lineWidth = 0.6 * scale;
+            const innerMargin = margin + 6 * scale;
+            const iLeft = innerMargin;
+            const iRight = width - innerMargin;
+            const iBottom = height - innerMargin;
+            const iTop = innerMargin + 30 * scale;
+            const iArcStartY = innerMargin + (height - innerMargin * 2) * 0.22;
+
+            ctx.beginPath();
+            ctx.moveTo(iLeft, iBottom);
+            ctx.lineTo(iLeft, iArcStartY);
+            ctx.bezierCurveTo(
+                iLeft, iArcStartY - 54 * scale,
+                width * 0.5 - 45 * scale, iTop,
+                width * 0.5, iTop
+            );
+            ctx.bezierCurveTo(
+                width * 0.5 + 45 * scale, iTop,
+                iRight, iArcStartY - 54 * scale,
+                iRight, iArcStartY
+            );
+            ctx.lineTo(iRight, iBottom);
+            ctx.closePath();
+            ctx.stroke();
+
+            // Draw a majestic small gold diamond at the peak of the arch
+            ctx.fillStyle = 'rgba(197, 168, 128, 0.85)';
+            this.drawDiamond(ctx, width * 0.5, top - 12 * scale, 4 * scale);
+
+            // Tiny elegant dots at the bottom corners
+            ctx.fillStyle = 'rgba(197, 168, 128, 0.5)';
+            ctx.beginPath();
+            ctx.arc(left, bottom, 2.5 * scale, 0, Math.PI * 2);
+            ctx.arc(right, bottom, 2.5 * scale, 0, Math.PI * 2);
+            ctx.fill();
 
         } else if (theme.id === 'premium-gold') {
             // Double golden luxury lines
