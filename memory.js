@@ -187,6 +187,9 @@
 
         // Initialize Surah Yaseen Modal
         initYaseenModal(memory);
+
+        // Initialize Proposed Edit Modal
+        initEditModal(memory);
     }
 
     function showError(message) {
@@ -447,6 +450,235 @@
                     sendInteraction(memory.id, 'yaseen').catch(() => {});
                 }
             });
+        }
+    }
+
+    // ═══════════════════════════════════════════════════════════════════
+    // Proposed Edit Modal Logic
+    // ═══════════════════════════════════════════════════════════════════
+    function initEditModal(memory) {
+        const btnOpen = document.getElementById('btn-open-edit');
+        const modal = document.getElementById('edit-modal');
+        const btnClose = document.getElementById('btn-close-edit');
+        const btnCancel = document.getElementById('btn-cancel-edit');
+        const btnSubmit = document.getElementById('btn-submit-edit');
+        const backdrop = modal ? modal.querySelector('#edit-modal-backdrop') : null;
+        const form = document.getElementById('edit-memory-form');
+
+        // Form Fields
+        const proposedByName = document.getElementById('edit-proposed-by-name');
+        const proposedByRelation = document.getElementById('edit-proposed-by-relation');
+        const biography = document.getElementById('edit-biography');
+        const goodTraits = document.getElementById('edit-good-traits');
+        const ongoingCharity = document.getElementById('edit-ongoing-charity');
+        const story = document.getElementById('edit-story');
+        const linksContainer = document.getElementById('edit-links-container');
+        const addLinkBtn = document.getElementById('edit-add-link-btn');
+        const formStatus = document.getElementById('edit-form-status');
+
+        // Character counters
+        const bioCount = document.getElementById('edit-bio-char-count');
+        const traitsCount = document.getElementById('edit-traits-char-count');
+        const charityCount = document.getElementById('edit-charity-char-count');
+        const storyCount = document.getElementById('edit-story-char-count');
+
+        if (!btnOpen || !modal) return;
+
+        function updateCharCount(el, countEl, max) {
+            if (!el || !countEl) return;
+            const current = el.value.length;
+            countEl.textContent = `${current} / ${max}`;
+        }
+
+        function setupCharCount(el, countEl, max) {
+            if (!el || !countEl) return;
+            updateCharCount(el, countEl, max);
+            el.addEventListener('input', () => updateCharCount(el, countEl, max));
+        }
+
+        // Setup character counts
+        setupCharCount(biography, bioCount, 1000);
+        setupCharCount(goodTraits, traitsCount, 500);
+        setupCharCount(ongoingCharity, charityCount, 1000);
+        setupCharCount(story, storyCount, 2000);
+
+        // Links management
+        function createLinkRow(titleVal = '', urlVal = '') {
+            const rows = linksContainer.querySelectorAll('.edit-link-row');
+            if (rows.length >= 5) {
+                showToast('الحد الأقصى هو 5 روابط');
+                return;
+            }
+
+            const row = document.createElement('div');
+            row.className = 'edit-link-row';
+            row.style.cssText = 'display: flex; gap: 8px; align-items: center; width: 100%;';
+            row.innerHTML = `
+                <input type="text" class="link-title" placeholder="اسم الرابط (مثال: منصة إحسان)" value="${titleVal}" style="flex: 2; padding: 6px 10px; font-size: 0.85rem; border: 1px solid var(--color-border, #ddd); border-radius: 6px; background: var(--color-surface, #fff); box-sizing: border-box;">
+                <input type="url" class="link-url" placeholder="رابط التبرع (https://...)" value="${urlVal}" style="flex: 3; padding: 6px 10px; font-size: 0.85rem; border: 1px solid var(--color-border, #ddd); border-radius: 6px; background: var(--color-surface, #fff); direction: ltr; text-align: left; box-sizing: border-box;">
+                <button type="button" class="btn-remove-link" title="حذف الرابط" style="padding: 6px 10px; background: transparent; border: 1px solid rgba(231,76,60,0.3); color: #e74c3c; border-radius: 6px; cursor: pointer; font-size: 0.85rem; display: flex; align-items: center; justify-content: center; height: 32px; width: 32px;">×</button>
+            `;
+
+            row.querySelector('.btn-remove-link').addEventListener('click', () => {
+                row.remove();
+            });
+
+            linksContainer.appendChild(row);
+        }
+
+        if (addLinkBtn) {
+            addLinkBtn.addEventListener('click', () => {
+                createLinkRow();
+            });
+        }
+
+        function populateForm() {
+            form.reset();
+            biography.value = memory.biography || '';
+            goodTraits.value = memory.good_traits || '';
+            ongoingCharity.value = memory.ongoing_charity || '';
+            story.value = memory.story || '';
+
+            // Update char counts
+            updateCharCount(biography, bioCount, 1000);
+            updateCharCount(goodTraits, traitsCount, 500);
+            updateCharCount(ongoingCharity, charityCount, 1000);
+            updateCharCount(story, storyCount, 2000);
+
+            // Pop links
+            linksContainer.innerHTML = '';
+            if (Array.isArray(memory.external_links)) {
+                memory.external_links.forEach(link => {
+                    createLinkRow(link.title || '', link.url || '');
+                });
+            }
+            if (linksContainer.querySelectorAll('.edit-link-row').length === 0) {
+                createLinkRow(); // Add one default empty row
+            }
+
+            formStatus.style.display = 'none';
+        }
+
+        function openModal() {
+            populateForm();
+            modal.classList.remove('hidden');
+            document.body.style.overflow = 'hidden';
+            modal.querySelector('.yaseen-modal__body').scrollTop = 0;
+        }
+
+        function closeModal() {
+            modal.classList.add('hidden');
+            document.body.style.overflow = '';
+        }
+
+        btnOpen.addEventListener('click', (e) => {
+            createRipple(btnOpen, e);
+            openModal();
+        });
+
+        if (btnClose) btnClose.addEventListener('click', closeModal);
+        if (btnCancel) btnCancel.addEventListener('click', closeModal);
+        if (backdrop) backdrop.addEventListener('click', closeModal);
+
+        document.addEventListener('keydown', (e) => {
+            if (e.key === 'Escape' && !modal.classList.contains('hidden')) {
+                closeModal();
+            }
+        });
+
+        // Submit action
+        btnSubmit.addEventListener('click', async (e) => {
+            createRipple(btnSubmit, e);
+            formStatus.style.display = 'none';
+
+            // Validate required
+            const editorName = proposedByName.value.trim();
+            const editorRelation = proposedByRelation.value.trim();
+
+            if (!editorName || editorName.length < 3) {
+                showStatus('يرجى إدخال اسمك الكريم (3 أحرف على الأقل)', 'error');
+                proposedByName.focus();
+                return;
+            }
+            if (!editorRelation || editorRelation.length < 3) {
+                showStatus('يرجى إدخال صلة قرابتك بالمتوفى (3 أحرف على الأقل)', 'error');
+                proposedByRelation.focus();
+                return;
+            }
+
+            // Gather external links
+            const links = [];
+            const rows = linksContainer.querySelectorAll('.edit-link-row');
+            let linksError = null;
+
+            rows.forEach(row => {
+                const title = row.querySelector('.link-title').value.trim();
+                const url = row.querySelector('.link-url').value.trim();
+
+                if (url) {
+                    if (!/^https?:\/\/.+/i.test(url)) {
+                        linksError = 'يرجى إدخال رابط تبرع صحيح يبدأ بـ http:// أو https://';
+                    }
+                    links.push({ title: title || url, url });
+                }
+            });
+
+            if (linksError) {
+                showStatus(linksError, 'error');
+                return;
+            }
+
+            btnSubmit.disabled = true;
+            btnSubmit.textContent = 'جاري إرسال طلبك...';
+
+            try {
+                const response = await fetch(`${API_BASE}/api/memory/update-propose`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        memory_id: memory.id,
+                        proposed_by_name: editorName,
+                        proposed_by_relation: editorRelation,
+                        biography: biography.value.trim(),
+                        good_traits: goodTraits.value.trim(),
+                        ongoing_charity: ongoingCharity.value.trim(),
+                        external_links: links,
+                        story: story.value.trim()
+                    })
+                });
+
+                const result = await response.json();
+
+                if (result.success) {
+                    showToast('تم إرسال اقتراح التعديل بنجاح لمراجعته.');
+                    closeModal();
+                    proposedByName.value = '';
+                    proposedByRelation.value = '';
+                } else {
+                    showStatus(result.message || 'فشل إرسال التعديل. يرجى المحاولة مرة أخرى.', 'error');
+                }
+            } catch (err) {
+                showStatus('حدث خطأ أثناء الاتصال بالخادم. يرجى التحقق من اتصالك بالإنترنت.', 'error');
+            } finally {
+                btnSubmit.disabled = false;
+                btnSubmit.textContent = 'إرسال طلب التعديل ✨';
+            }
+        });
+
+        function showStatus(msg, type) {
+            formStatus.textContent = msg;
+            formStatus.style.display = 'block';
+            formStatus.style.cssText = `
+                display: block;
+                font-size: 0.9rem;
+                text-align: center;
+                border-radius: 8px;
+                padding: 10px;
+                margin-top: 12px;
+                background: ${type === 'error' ? '#fde2e2' : '#e2fdf2'};
+                color: ${type === 'error' ? '#c0392b' : '#27ae60'};
+                border: 1px solid ${type === 'error' ? '#f5b7b7' : '#b7f5d6'};
+            `;
         }
     }
 

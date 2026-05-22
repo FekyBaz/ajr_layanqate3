@@ -70,6 +70,7 @@
                     onclick="switchTab('submissions')">المشاركات</button>
                 <button class="btn btn-ghost btn-sm admin-tab" id="tab-memories" onclick="switchTab('memories')">صفحات
                     الذكرى</button>
+                <button class="btn btn-ghost btn-sm admin-tab" id="tab-memory-updates" onclick="switchTab('memory-updates')">طلبات التعديل</button>
                 <button class="btn btn-ghost btn-sm admin-tab" id="tab-feedback"
                     onclick="switchTab('feedback')">
                     الرسائل
@@ -104,6 +105,21 @@
 
                 <div id="memory-empty-state" class="empty-state hidden">
                     <p>✅ لا توجد صفحات ذكرى في الانتظار</p>
+                </div>
+            </div>
+
+            <!-- Proposed Edits Tab -->
+            <div id="memory-updates-tab" class="hidden">
+                <button class="btn refresh-btn" onclick="loadPendingMemoryUpdates()">🔄 تحديث قائمة التعديلات</button>
+
+                <div id="memory-updates-notification" class="hidden"></div>
+
+                <div id="memory-updates-loading" class="loading hidden">جاري التحميل...</div>
+
+                <div id="memory-updates-list" class="submissions-list hidden"></div>
+
+                <div id="memory-updates-empty-state" class="empty-state hidden">
+                    <p>✅ لا توجد طلبات تعديل معلقة</p>
                 </div>
             </div>
 
