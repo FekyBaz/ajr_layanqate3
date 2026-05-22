@@ -251,6 +251,11 @@ body.poster-page-root .btn-ghost:hover {
     z-index: 10;
     font-size: var(--font-size-sm);
     backdrop-filter: blur(4px);
+    transition: opacity 0.3s ease;
+}
+
+.viewport-loader[hidden] {
+    display: none !important;
 }
 
 .spinner {
@@ -294,8 +299,7 @@ body.poster-page-root .btn-ghost:hover {
     font-weight: 500;
 }
 
-.control-group textarea,
-.control-group select {
+.control-group textarea {
     background: rgba(255, 255, 255, 0.02);
     border: 1px solid rgba(255, 255, 255, 0.1);
     border-radius: var(--radius-md);
@@ -307,9 +311,31 @@ body.poster-page-root .btn-ghost:hover {
     outline: none;
 }
 
-.control-group textarea:focus,
-.control-group select:focus {
+.control-group select {
+    background-color: #0d1527 !important;
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    border-radius: var(--radius-md);
+    color: #ede3d2 !important;
+    font-family: var(--font-primary);
+    font-size: var(--font-size-sm);
+    padding: 10px 14px;
+    transition: all var(--transition-fast);
+    outline: none;
+}
+
+.control-group select option {
+    background-color: #0d1527 !important;
+    color: #ede3d2 !important;
+}
+
+.control-group textarea:focus {
     background: rgba(255, 255, 255, 0.05);
+    border-color: var(--color-gold);
+    box-shadow: 0 0 12px rgba(200, 166, 115, 0.15);
+}
+
+.control-group select:focus {
+    background-color: #0d1527 !important;
     border-color: var(--color-gold);
     box-shadow: 0 0 12px rgba(200, 166, 115, 0.15);
 }
