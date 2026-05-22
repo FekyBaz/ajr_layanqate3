@@ -1,0 +1,164 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>مصمم البطاقات الروحانية | أجر لا ينقطع</title>
+    <meta name="description" content="اصنع بطاقات فنية جميلة لأذكارك وأدعيتك وشاركها كصدقة جارية بأسلوب فني وراقٍ.">
+    
+    <!-- Premium Google Fonts for Arabic Typography -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Amiri:ital,wght@0,400;0,700;1,400;1,700&family=Cairo:wght@200..1000&family=IBM+Plex+Sans+Arabic:wght@100..700&family=Reem+Kufi:wght@400..700&family=Tajawal:wght@200..900&display=swap" rel="stylesheet">
+    
+    <!-- Base styling files -->
+    <link rel="stylesheet" href="base.css?v=20260523">
+    <link rel="stylesheet" href="poster.css?v=20260523">
+</head>
+<body class="poster-page-root">
+    
+    <!-- Main header navigation -->
+    <header class="site-header" role="banner">
+        <div class="site-container site-header__content">
+            <a href="index.html" class="site-logo" aria-label="أجر لا ينقطع الرئيسية">أجر لا ينقطع 🤍</a>
+            <nav class="site-nav" role="navigation" aria-label="التنقل الرئيسي">
+                <a href="community.html">مساهمات المجتمع</a>
+                <a href="memories.html">الذكريات والصدقات</a>
+            </nav>
+            <a href="community.html" class="btn btn-ghost btn-sm">العودة للمجتمع</a>
+        </div>
+    </header>
+
+    <!-- Main Workspace Container -->
+    <main class="poster-workspace" aria-live="polite">
+        <div class="workspace-container">
+            
+            <!-- RIGHT COLUMN: Theme Presets (ثيمات فنية) -->
+            <aside class="workspace-sidebar themes-sidebar" aria-labelledby="themes-title">
+                <h2 id="themes-title" class="sidebar-title">🌌 اختر ثيمًا روحانيًا</h2>
+                <p class="sidebar-subtitle">خلفيات سينمائية وهدوء بصري</p>
+                
+                <div class="themes-grid" id="themesContainer">
+                    <!-- Dynamic Theme Selection Cards -->
+                    <button class="theme-card active" data-theme="night-spiritual" aria-label="ثيم سكون الليل">
+                        <div class="theme-preview night-preview"></div>
+                        <span>🌌 سكون الليل</span>
+                    </button>
+                    <button class="theme-card" data-theme="nature-serenity" aria-label="ثيم صفاء الطبيعة">
+                        <div class="theme-preview nature-preview"></div>
+                        <span>🍃 صفاء الطبيعة</span>
+                    </button>
+                    <button class="theme-card" data-theme="minimal-noor" aria-label="ثيم نور هادئ">
+                        <div class="theme-preview noor-preview"></div>
+                        <span>✨ نور هادئ</span>
+                    </button>
+                    <button class="theme-card" data-theme="premium-gold" aria-label="ثيم مذهب راقٍ">
+                        <div class="theme-preview gold-preview"></div>
+                        <span>⚜️ مذهب راقٍ</span>
+                    </button>
+                </div>
+            </aside>
+
+            <!-- CENTER COLUMN: Poster Live Preview Viewport -->
+            <section class="workspace-preview-area" aria-label="معاينة حية للبطاقة">
+                <div class="preview-wrapper">
+                    <!-- The Interactive Canvas Preview Container -->
+                    <div class="canvas-viewport" id="canvasViewport" data-ratio="square">
+                        <canvas id="previewCanvas"></canvas>
+                        
+                        <!-- Overlay loading state indicator -->
+                        <div class="viewport-loader" id="viewportLoader" hidden>
+                            <span class="spinner"></span>
+                            <span>جاري معالجة الأبعاد...</span>
+                        </div>
+                    </div>
+                    
+                    <p class="preview-hint">💡 المعاينة تتحرك بلطف وهدوء لإعطائك إحساسًا بالجمال (تتوقف عند التصدير لضمان الجودة والسرعة)</p>
+                </div>
+            </section>
+
+            <!-- LEFT COLUMN: Editor Controls Panel (لوحة التحكم والتحرير) -->
+            <aside class="workspace-sidebar controls-sidebar" aria-labelledby="controls-title">
+                <h2 id="controls-title" class="sidebar-title">✍️ تحرير وصناعة اللوحة</h2>
+                <p class="sidebar-subtitle">خصص خطوطك وتفاصيلك الفنية</p>
+                
+                <div class="controls-sections-wrap">
+                    
+                    <!-- Section A: Text content input -->
+                    <div class="control-group">
+                        <label for="posterText">الذكر أو الدعاء *</label>
+                        <textarea id="posterText" rows="4" maxlength="320" required placeholder="اكتب هنا الآية، الذكر، أو الدعاء..."></textarea>
+                        <div class="char-counter"><span id="charCount">0</span> / 320 حرفًا</div>
+                    </div>
+                    
+                    <!-- Section B: Typography adjustments -->
+                    <div class="control-group">
+                        <label for="fontSelect">الخط العربي</label>
+                        <select id="fontSelect">
+                            <option value="Amiri" selected>الخط الأميري (روحاني كلاسيكي)</option>
+                            <option value="Cairo">خط القاهرة (حديث وجريء)</option>
+                            <option value="Tajawal">خط تجول (ناعم وأنيق)</option>
+                            <option value="Reem Kufi">الخط الكوفي (هندسي متميز)</option>
+                            <option value="IBM Plex Sans Arabic">خط آي بي إم (نقي وبسيط)</option>
+                        </select>
+                    </div>
+
+                    <div class="control-row">
+                        <div class="control-group flex-1">
+                            <label for="fontSizeSlider">حجم النص الرئيسي</label>
+                            <div class="slider-wrap">
+                                <input type="range" id="fontSizeSlider" min="20" max="60" value="38" step="1">
+                                <span class="slider-value" id="fontSizeValue">38px</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Section C: Sizing aspect ratio selection -->
+                    <div class="control-group">
+                        <label>أبعاد ومقاس البطاقة</label>
+                        <div class="ratio-options-grid" id="ratioSelectors">
+                            <button class="ratio-btn active" data-ratio="square" aria-label="أبعاد مربعة 1080x1080">
+                                <span class="ratio-icon ratio-icon--square"></span>
+                                <span class="ratio-label">تغذية مربعة (1:1)</span>
+                            </button>
+                            <button class="ratio-btn" data-ratio="story" aria-label="أبعاد ستوري 1080x1920">
+                                <span class="ratio-icon ratio-icon--story"></span>
+                                <span class="ratio-label">حالة / ستوري (9:16)</span>
+                            </button>
+                            <button class="ratio-btn" data-ratio="landscape" aria-label="أبعاد عرضية 1600x900">
+                                <span class="ratio-icon ratio-icon--landscape"></span>
+                                <span class="ratio-label">منشور عريض (16:9)</span>
+                            </button>
+                            <button class="ratio-btn" data-ratio="wallpaper" aria-label="أبعاد خلفية موبايل 1440x2560">
+                                <span class="ratio-icon ratio-icon--wallpaper"></span>
+                                <span class="ratio-label">خلفية شاشة (9:16)</span>
+                            </button>
+                        </div>
+                    </div>
+
+                    <!-- Section D: Save and Export Options -->
+                    <div class="export-actions-wrap">
+                        <button type="button" id="downloadBtn" class="btn btn-primary btn-block">
+                            <span>📤 تحميل البطاقة الفنية (PNG)</span>
+                        </button>
+                        <button type="button" id="shareBtn" class="btn btn-ghost btn-block">
+                            <span>🔗 مشاركة سريعة للهاتف</span>
+                        </button>
+                    </div>
+
+                </div>
+            </aside>
+            
+        </div>
+    </main>
+
+    <!-- Hidden high-res canvas for ultra-sharp high-DPI export -->
+    <canvas id="exportCanvas" style="display: none;"></canvas>
+
+    <!-- Toast notification element -->
+    <div class="toast" id="posterToast" role="status" aria-live="polite" hidden>تم النسخ ✨</div>
+
+    <!-- Modular JS loading -->
+    <script type="module" src="poster/PosterEngine.js?v=20260523"></script>
+</body>
+</html>

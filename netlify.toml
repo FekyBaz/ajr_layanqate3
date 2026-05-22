@@ -182,6 +182,16 @@
 
 # Clean URLs for pages
 [[redirects]]
+  from = "/poster"
+  to = "/poster.html"
+  status = 200
+
+[[redirects]]
+  from = "/dhikr-generator"
+  to = "/poster.html"
+  status = 200
+
+[[redirects]]
   from = "/admin"
   to = "/admin.html"
   status = 200

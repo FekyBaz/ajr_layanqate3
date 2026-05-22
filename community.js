@@ -264,12 +264,25 @@ function createCard(item, avgPostCount = 0) {
 
     card.appendChild(meta);
 
+    // Group action buttons horizontally for a premium layout
+    const actions = document.createElement('div');
+    actions.className = 'card-actions';
+
     const shareButton = document.createElement('button');
     shareButton.className = 'share-btn btn btn-ghost';
     shareButton.type = 'button';
     shareButton.dataset.shareId = String(item.id);
-    shareButton.textContent = '📤 شارك هذا الذكر';
-    card.appendChild(shareButton);
+    shareButton.textContent = '📤 شارك الذكر';
+    actions.appendChild(shareButton);
+
+    const posterButton = document.createElement('a');
+    posterButton.className = 'poster-btn btn';
+    posterButton.href = `/poster?text=${encodeURIComponent(resolveMessage(item))}&type=${encodeURIComponent(item.content_type || 'dhikr')}`;
+    posterButton.innerHTML = '🎨 تصميم بوستر ✨';
+    posterButton.title = 'تحويل هذا الذكر إلى لوحة فنية ومشاركته كصدقة جارية';
+    actions.appendChild(posterButton);
+
+    card.appendChild(actions);
 
     return card;
 }
