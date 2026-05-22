@@ -266,20 +266,18 @@ export class PosterEngine {
         requestAnimationFrame(loop);
     }
 
-    /**
-     * Helper displaying visual overlay loaders.
-     */
     setLoadingState(isLoading, message = '') {
         const loader = document.getElementById('viewportLoader');
         if (!loader) return;
         
-        loader.hidden = !isLoading;
         if (isLoading) {
+            loader.style.display = 'flex';
             const label = loader.querySelector('span:last-child');
             if (label) label.textContent = message;
             this.downloadBtn.disabled = true;
             this.shareBtn.disabled = true;
         } else {
+            loader.style.display = 'none';
             this.downloadBtn.disabled = false;
             this.shareBtn.disabled = false;
         }
