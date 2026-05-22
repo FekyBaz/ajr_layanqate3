@@ -44,8 +44,8 @@
             <h1 class="memory-name" id="memory-name"></h1>
             <div class="memory-relation" id="memory-relation"></div>
 
-            <div class="memory-edit-trigger-container" style="margin-top: 12px; text-align: center;">
-                <button class="btn btn-secondary btn-sm" id="btn-open-edit" type="button" style="font-size: 0.85rem; padding: 6px 14px; gap: 6px; border: 1px solid rgba(201, 170, 113, 0.4); border-radius: 100px; display: inline-flex; align-items: center; justify-content: center; background: rgba(201, 170, 113, 0.05); color: var(--color-accent, #8c6a35); cursor: pointer; transition: all 0.2s ease;">
+            <div class="memory-edit-trigger-container">
+                <button class="btn" id="btn-open-edit" type="button">
                     <span aria-hidden="true">✍️</span> تعديل أو إثراء الصفحة
                 </button>
             </div>
@@ -53,23 +53,30 @@
             <hr class="memory-separator">
 
             <!-- Section: About -->
-            <div class="memory-section" id="section-about">
-                <div class="memory-section-title">عن المتوفى</div>
-                <div class="memory-biography" id="memory-biography"></div>
+            <div class="memory-section hidden" id="section-about">
+                <div id="bio-container" class="hidden">
+                    <div class="memory-section-title">عن المتوفى</div>
+                    <div class="memory-biography" id="memory-biography"></div>
+                </div>
 
-                <div id="traits-container" class="hidden">
-                    <div class="memory-subsection-title">من صفاته الطيبة</div>
+                <div id="traits-container" class="hidden" style="margin-top: 20px;">
+                    <div class="memory-section-title">من صفاته الطيبة</div>
                     <div class="memory-traits" id="memory-traits"></div>
                 </div>
             </div>
 
             <!-- Section: Charity -->
             <div class="memory-section hidden" id="section-charity">
-                <div class="memory-section-title">الصدقة الجارية</div>
-                <div class="memory-charity" id="memory-charity"></div>
+                <div id="charity-text-container" class="hidden">
+                    <div class="memory-section-title">الصدقة الجارية</div>
+                    <div class="memory-charity" id="memory-charity"></div>
+                </div>
 
-                <div id="links-container" class="memory-links hidden">
-                    <!-- Dynamic links injected here securely via JS -->
+                <div id="charity-links-container" class="hidden" style="margin-top: 20px;">
+                    <div class="memory-section-title">رابط صدقة جارية</div>
+                    <div id="links-container" class="memory-links">
+                        <!-- Dynamic links injected here securely via JS -->
+                    </div>
                 </div>
             </div>
 

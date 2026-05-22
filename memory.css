@@ -1545,3 +1545,44 @@
 .yaseen-modal__btn-icon {
     font-size: 20px;
 }
+
+/* ── Edit Trigger Button ────────────────────────────────────────────────── */
+.memory-edit-trigger-container {
+    margin: 1.5rem 0 0.5rem;
+    display: flex;
+    justify-content: center;
+}
+
+#btn-open-edit {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    font-size: 0.85rem;
+    font-weight: 600;
+    padding: 8px 18px;
+    height: 36px;
+    min-height: auto; /* Override .btn's min-height */
+    border: 1px solid rgba(201, 170, 113, 0.4);
+    border-radius: 100px;
+    background: rgba(201, 170, 113, 0.05);
+    color: var(--color-accent, #8c6a35);
+    cursor: pointer;
+    box-shadow: 0 4px 10px rgba(140, 106, 53, 0.03);
+    transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+    backdrop-filter: blur(4px);
+    -webkit-backdrop-filter: blur(4px);
+}
+
+#btn-open-edit:hover {
+    background: rgba(201, 170, 113, 0.15) !important;
+    border-color: rgba(201, 170, 113, 0.6) !important;
+    color: var(--color-accent, #8c6a35) !important;
+    transform: translateY(-2px);
+    box-shadow: 0 6px 16px rgba(140, 106, 53, 0.08);
+}
+
+#btn-open-edit:active {
+    transform: translateY(0) scale(0.97);
+    box-shadow: 0 2px 6px rgba(140, 106, 53, 0.04);
+}

@@ -36,12 +36,15 @@
 
     // Sections
     const sectionAbout = document.getElementById('section-about');
+    const bioContainer = document.getElementById('bio-container');
     const bioEl = document.getElementById('memory-biography');
     const traitsContainer = document.getElementById('traits-container');
     const traitsEl = document.getElementById('memory-traits');
 
     const sectionCharity = document.getElementById('section-charity');
+    const charityTextContainer = document.getElementById('charity-text-container');
     const charityEl = document.getElementById('memory-charity');
+    const charityLinksContainer = document.getElementById('charity-links-container');
     const linksContainer = document.getElementById('links-container');
 
     const sectionStory = document.getElementById('section-story');
@@ -121,15 +124,21 @@
         // About Section
         if (memory.biography || memory.good_traits) {
             hasStructuredContent = true;
+            sectionAbout.classList.remove('hidden');
+
             if (memory.biography) {
                 bioEl.textContent = memory.biography;
-                bioEl.classList.remove('hidden');
+                bioContainer.classList.remove('hidden');
             } else {
-                bioEl.classList.add('hidden');
+                bioContainer.classList.add('hidden');
             }
+
             if (memory.good_traits) {
                 traitsEl.textContent = memory.good_traits;
                 traitsContainer.classList.remove('hidden');
+                traitsContainer.style.marginTop = memory.biography ? '20px' : '0';
+            } else {
+                traitsContainer.classList.add('hidden');
             }
         } else {
             sectionAbout.classList.add('hidden');
@@ -137,42 +146,56 @@
 
         // Charity Section
         let hasCharity = false;
-        if (memory.ongoing_charity) {
-            charityEl.textContent = memory.ongoing_charity;
+        const validLinks = Array.isArray(memory.external_links) ? memory.external_links.filter(link => link && link.url) : [];
+        const hasLinks = validLinks.length > 0;
+
+        if (memory.ongoing_charity || hasLinks) {
             hasCharity = true;
+            sectionCharity.classList.remove('hidden');
+
+            if (memory.ongoing_charity) {
+                charityEl.textContent = memory.ongoing_charity;
+                charityTextContainer.classList.remove('hidden');
+            } else {
+                charityTextContainer.classList.add('hidden');
+            }
+
+            if (hasLinks) {
+                charityLinksContainer.classList.remove('hidden');
+                charityLinksContainer.style.marginTop = memory.ongoing_charity ? '20px' : '0';
+                linksContainer.innerHTML = ''; // clear initial safe
+
+                validLinks.forEach(link => {
+                    const a = document.createElement('a');
+                    a.href = link.url;
+                    a.className = 'external-link';
+                    a.target = '_blank';
+                    a.rel = 'noopener noreferrer';
+                    a.textContent = link.title || link.url;
+                    linksContainer.appendChild(a);
+                });
+            } else {
+                charityLinksContainer.classList.add('hidden');
+            }
+        } else {
+            sectionCharity.classList.add('hidden');
         }
-
-        // External Links mapping safely (XSS defense)
-        if (Array.isArray(memory.external_links) && memory.external_links.length > 0) {
-            hasCharity = true;
-            linksContainer.innerHTML = ''; // clear initial safe
-            linksContainer.classList.remove('hidden');
-
-            memory.external_links.forEach(link => {
-                if (!link.url) return;
-                const a = document.createElement('a');
-                a.href = link.url;
-                a.className = 'external-link';
-                a.target = '_blank';
-                a.rel = 'noopener noreferrer';
-                a.textContent = link.title || link.url;
-                linksContainer.appendChild(a);
-            });
-        }
-
-        if (hasCharity) sectionCharity.classList.remove('hidden');
 
         // Story Section
         if (memory.story) {
             hasStructuredContent = true;
             storyEl.textContent = memory.story;
             sectionStory.classList.remove('hidden');
+        } else {
+            sectionStory.classList.add('hidden');
         }
 
         // Legacy Fallback (if no bio exists, show old message)
         if (!hasStructuredContent && memory.message) {
             messageEl.textContent = memory.message;
             messageEl.classList.remove('hidden');
+        } else {
+            messageEl.classList.add('hidden');
         }
 
         // Update page title
