@@ -1,173 +1,272 @@
 /**
- * TreeAnimations.js
- * Implements organic procedural recursive tree branching (L-system style)
- * with dynamic wind physics sway and smooth branch thickness scaling.
+ * TreeAnimations.js (Upgraded Cinematic Version)
+ * Implements procedural organic branching utilizing fluid Bezier splines,
+ * volumetric 3-layer wood-bark rendering, root-fade soil blending,
+ * and fractional-recursion smooth branch sprouting growth stages.
  */
 
 export class TreeAnimations {
     constructor() {
-        // Pseudo-random generator seed to keep the organic tree stable
         this.rngSeed = 101;
     }
 
-    /**
-     * Re-seed the pseudo-random generator
-     */
     resetRNG() {
-        this.rngSeed = 997; // a beautiful prime
+        this.rngSeed = 997; // Pure prime seed
     }
 
-    /**
-     * Deterministic pseudo-random float [0, 1)
-     */
     nextRandom() {
-        // Simple and fast LCG (Linear Congruential Generator)
         this.rngSeed = (this.rngSeed * 9301 + 49297) % 233280;
         return this.rngSeed / 233280;
     }
 
     /**
-     * Draws the organic tree procedurally
-     * @param {CanvasRenderingContext2D} ctx - canvas 2D context
-     * @param {number} startX - base X
-     * @param {number} startY - base Y
-     * @param {TreePhysics} physics - physics engine for wind sway
-     * @param {TreeState} state - tree state for leaf/star density
-     * @param {LeafSystem} leafSystem - foliage rendering system
+     * Primary entry point for rendering the cinematic tree
      */
     drawTree(ctx, startX, startY, physics, state, leafSystem) {
         this.resetRNG();
         
-        // Cache leaf nodes where we can plant foliage/stars
         const leafNodes = [];
 
-        // Dynamic scale factor of the tree height based on total contributions
+        // Dynamic metrics from visualStats
         const scale = state.visualStats.treeScale;
-        const initialLength = 115 * scale;
-        const initialThickness = 14 * scale;
+        const targetDepth = state.visualStats.recursionDepth;
+        const windSensitivity = state.visualStats.windSwaySensitivity;
+
+        const initialLength = 110 * scale;
+        // Make the trunk wider and more majestic!
+        const initialThickness = 18 * scale; 
+
+        // 1. DRAW ROOT FADE SOIL MERGING (الاندماج الأرضي)
+        this.drawRoots(ctx, startX, startY, initialThickness, scale);
 
         ctx.save();
         
-        // Let's recursively draw the branches
+        // 2. RECURSIVELY DRAW VOLUMETRIC BARK SPLINES
         this.branch(
             ctx,
             startX,
             startY,
             initialLength,
-            -Math.PI / 2, // going straight up
+            -Math.PI / 2, // Straight up
             initialThickness,
-            0,            // depth / recursion level
+            0,            // current recursion depth
+            targetDepth,  // fractional recursion limit
+            windSensitivity,
             physics,
+            state.visualStats.branchLengthFactor,
             leafNodes
         );
 
-        // Sort leaf nodes deterministically so that leaves grow in the same spots
+        // Deterministic leaf index mapping
         leafNodes.forEach((node, index) => {
             node.index = index;
         });
 
-        // 1. Draw Green Leaves (Dhikr)
+        // 3. DRAW LEAF BREATHING FOLIAGE
+        const breathingFactor = Date.now() * 0.0009; // slow spiritual breathing frequency
         const leafCount = Math.min(leafNodes.length, Math.round(state.visualStats.leaves));
         for (let i = 0; i < leafCount; i++) {
             const node = leafNodes[i % leafNodes.length];
-            // Leaf size scales slightly with approved count
-            const size = 9 + (i % 4);
-            const angleOffset = (this.nextRandom() - 0.5) * 1.5;
-            leafSystem.drawLeaf(ctx, node.x, node.y, node.angle + angleOffset, size, i);
+            const size = 9 + (i % 5);
+            // Dynamic random rotation offsets
+            const angleOffset = (this.nextRandom() - 0.5) * 1.6;
+            
+            leafSystem.drawLeaf(
+                ctx, 
+                node.x, 
+                node.y, 
+                node.angle + angleOffset, 
+                size, 
+                i, 
+                breathingFactor
+            );
         }
 
-        // 2. Draw Blossoms/Flowers (Featured milestones)
+        // 4. DRAW JASMIN BLOSSOMS
         const flowerCount = Math.min(leafNodes.length, Math.round(state.visualStats.flowers));
         for (let i = 0; i < flowerCount; i++) {
-            const node = leafNodes[(i * 7 + 3) % leafNodes.length]; // spread them out
-            const size = 7 + (i % 3);
+            const node = leafNodes[(i * 9 + 4) % leafNodes.length]; // spread out
+            const size = 8 + (i % 4);
             const rotation = this.nextRandom() * Math.PI * 2;
-            leafSystem.drawFlower(ctx, node.x, node.y, size, rotation);
+            
+            leafSystem.drawFlower(ctx, node.x, node.y, size, rotation, breathingFactor, i);
         }
 
-        // 3. Draw Twinkling Golden Stars (Shares)
+        // 5. DRAW TWINKLING GOLD STAR GEMS (✦)
         const starCount = Math.min(leafNodes.length, Math.round(state.visualStats.stars));
-        const timeFactor = Date.now() * 0.003;
+        const timeFactor = Date.now() * 0.0022;
         for (let i = 0; i < starCount; i++) {
-            const node = leafNodes[(i * 13 + 5) % leafNodes.length];
-            const size = 6 + (i % 4);
-            const pulse = 1.0 + Math.sin(timeFactor + i) * 0.15; // gentle twinkle animation
-            leafSystem.drawStar(ctx, node.x + (i % 3 - 1) * 8, node.y + (i % 3 - 1) * 8, size, pulse, i);
+            const node = leafNodes[(i * 17 + 7) % leafNodes.length];
+            const size = 6 + (i % 5);
+            const pulse = 1.0 + Math.sin(timeFactor + i) * 0.16; // calm twinkling
+            
+            // offset slightly from branch tips for sparkling sky dust effect
+            const offsetDist = 5 + (i % 6);
+            const ox = Math.cos(node.angle) * offsetDist;
+            const oy = Math.sin(node.angle) * offsetDist;
+            
+            leafSystem.drawStar(ctx, node.x + ox, node.y + oy, size, pulse, i);
         }
 
         ctx.restore();
     }
 
     /**
-     * Recursive branching function
+     * Draws beautiful, organic roots fading into the soil at the base
      */
-    branch(ctx, x, y, length, angle, thickness, depth, physics, leafNodes) {
-        if (depth > 6 || thickness < 0.8) {
-            // Leaf/foliage attachment coordinate
-            leafNodes.push({ x, y, angle });
+    drawRoots(ctx, x, y, trunkThickness, scale) {
+        ctx.save();
+        this.resetRNG();
+
+        const numRoots = 4;
+        const rootLength = 32 * scale;
+        
+        for (let i = 0; i < numRoots; i++) {
+            const angle = Math.PI - 0.45 + (i * 0.3) + (this.nextRandom() - 0.5) * 0.1;
+            const endX = x + Math.cos(angle) * rootLength;
+            const endY = y + Math.sin(angle) * rootLength * 0.4; // shallow root depth
+
+            ctx.beginPath();
+            ctx.moveTo(x + (i - 1.5) * (trunkThickness * 0.22), y);
+            ctx.quadraticCurveTo(x + (i - 1.5) * (trunkThickness * 0.22), y + 10 * scale, endX, endY);
+
+            // Soil-merging gradient (fades to 0 opacity)
+            const rootGrad = ctx.createLinearGradient(x, y, endX, endY);
+            rootGrad.addColorStop(0, '#2e1e0f'); // trunk brown
+            rootGrad.addColorStop(1, 'rgba(11, 20, 36, 0)'); // deep indigo bg color
+
+            ctx.strokeStyle = rootGrad;
+            ctx.lineWidth = trunkThickness * (0.5 - i * 0.05);
+            ctx.lineCap = 'round';
+            ctx.stroke();
+        }
+
+        ctx.restore();
+    }
+
+    /**
+     * Recursive branching algorithm supporting fractional recursion depth limits (smooth bough sprouting)
+     */
+    branch(ctx, x, y, length, angle, thickness, depth, targetDepth, windSensitivity, physics, lengthFactor, leafNodes) {
+        // Enforce fractional recursion boundary
+        const intTargetDepth = Math.floor(targetDepth);
+        const fraction = targetDepth - intTargetDepth;
+
+        let drawScale = 1.0;
+
+        if (depth > intTargetDepth) {
+            // If this is the next level during fractional growth, scale the branch down smoothly
+            if (depth === intTargetDepth + 1 && fraction > 0.05) {
+                drawScale = fraction;
+            } else {
+                // Growth node coordinate
+                leafNodes.push({ x, y, angle });
+                return;
+            }
+        }
+
+        // Apply wind physics to branch angle
+        const heightFraction = depth / 7;
+        const windSway = physics.getWindSway(heightFraction, windSensitivity);
+        const adjustedAngle = angle + windSway;
+
+        // Apply fractional length/thickness scaling
+        const branchLength = length * drawScale;
+        const branchThickness = thickness * drawScale;
+
+        // Calculate organic curved control points
+        const endX = x + Math.cos(adjustedAngle) * branchLength;
+        const endY = y + Math.sin(adjustedAngle) * branchLength;
+
+        // Curved spline control points
+        const curveOffset = (this.nextRandom() - 0.5) * (14 / (depth + 1));
+        const ctrlX = x + Math.cos(adjustedAngle) * (branchLength * 0.5) + Math.cos(adjustedAngle + Math.PI / 2) * curveOffset;
+        const ctrlY = y + Math.sin(adjustedAngle) * (branchLength * 0.5) + Math.sin(adjustedAngle + Math.PI / 2) * curveOffset;
+
+        // RENDER STEP: 3-LAYER VOLUMETRIC BARK (التجسيم الخشبي الفاخر)
+        ctx.save();
+        ctx.lineCap = 'round';
+
+        // --- LAYER 1: Main Dark Bark Base ---
+        ctx.beginPath();
+        ctx.moveTo(x, y);
+        ctx.quadraticCurveTo(ctrlX, ctrlY, endX, endY);
+
+        const barkGrad = ctx.createLinearGradient(x, y, endX, endY);
+        barkGrad.addColorStop(0, '#2e1e0f'); // Deep cosmic wood base
+        barkGrad.addColorStop(0.5, '#3e2c1a'); // Shaded bark
+        barkGrad.addColorStop(1, '#4f3b26'); // Soft branch tip
+
+        ctx.strokeStyle = barkGrad;
+        ctx.lineWidth = branchThickness;
+        ctx.stroke();
+
+        // --- LAYER 2: Volumetric Contour Shadow (Interior Bark Textures) ---
+        if (branchThickness > 1.8) {
+            ctx.beginPath();
+            ctx.moveTo(x, y);
+            ctx.quadraticCurveTo(ctrlX, ctrlY, endX, endY);
+            
+            ctx.strokeStyle = 'rgba(12, 6, 2, 0.35)'; // Organic shaded core
+            ctx.lineWidth = branchThickness * 0.65;
+            ctx.stroke();
+        }
+
+        // --- LAYER 3: Golden Celestial Specular Edge Highlight ---
+        if (branchThickness > 1.2) {
+            ctx.beginPath();
+            ctx.moveTo(x, y);
+            ctx.quadraticCurveTo(ctrlX, ctrlY, endX, endY);
+            
+            // Simulates background celestial light hitting the branch edge
+            const highlightGrad = ctx.createLinearGradient(x, y, endX, endY);
+            highlightGrad.addColorStop(0, 'rgba(200, 166, 115, 0.28)'); // Warm soft gold aura
+            highlightGrad.addColorStop(1, 'rgba(251, 242, 216, 0.05)');
+
+            ctx.strokeStyle = highlightGrad;
+            ctx.lineWidth = branchThickness * 0.25;
+            ctx.stroke();
+        }
+
+        ctx.restore();
+
+        // Halt recursion if this was the final fractional sprouting layer
+        if (drawScale < 1.0) {
+            leafNodes.push({ x: endX, y: endY, angle: adjustedAngle });
             return;
         }
 
-        // Wind sway factor - upper branches sway much more
-        const heightFraction = depth / 7;
-        const windSway = physics.getWindSway(heightFraction);
-        const adjustedAngle = angle + windSway;
-
-        // End coordinates of the current branch
-        const endX = x + Math.cos(adjustedAngle) * length;
-        const endY = y + Math.sin(adjustedAngle) * length;
-
-        // Draw organic wood branch
-        ctx.save();
-        ctx.beginPath();
-        ctx.moveTo(x, y);
-        // Slightly organic curved branches instead of perfectly straight lines
-        const ctrlX = x + Math.cos(adjustedAngle) * (length * 0.5) + (this.nextRandom() - 0.5) * (10 / (depth + 1));
-        const ctrlY = y + Math.sin(adjustedAngle) * (length * 0.5) + (this.nextRandom() - 0.5) * (10 / (depth + 1));
-        ctx.quadraticCurveTo(ctrlX, ctrlY, endX, endY);
-
-        // Warm, natural woody gradient
-        const branchGrad = ctx.createLinearGradient(x, y, endX, endY);
-        branchGrad.addColorStop(0, '#3e2c1a'); // Dark trunk brown
-        branchGrad.addColorStop(0.5, '#4f3b26'); // Mid bark
-        branchGrad.addColorStop(1, '#654f39'); // Soft organic branch tip
-
-        ctx.strokeStyle = branchGrad;
-        ctx.lineWidth = thickness;
-        ctx.lineCap = 'round';
-        ctx.stroke();
-        ctx.restore();
-
-        // Branching logic: 2 or 3 branches at each node
-        const numBranches = (depth === 0) ? 3 : 2; // base splits into 3 primary boughs
+        // Determine recursion splits (base primary boughs versus upper branchlets)
+        const numSplits = (depth === 0) ? 3 : 2;
         
-        for (let i = 0; i < numBranches; i++) {
-            // Calculate organic angle splits
-            let branchAngle;
-            if (numBranches === 3) {
-                // Splits: left, center, right
-                const angles = [-0.45, 0, 0.45];
-                branchAngle = adjustedAngle + angles[i] + (this.nextRandom() - 0.5) * 0.15;
+        for (let i = 0; i < numSplits; i++) {
+            let nextAngle;
+            if (numSplits === 3) {
+                // Majestic 3-way primary bough layout
+                const boughAngles = [-0.44, 0.02, 0.46];
+                nextAngle = adjustedAngle + boughAngles[i] + (this.nextRandom() - 0.5) * 0.14;
             } else {
-                // Splits: left and right
-                const angles = [-0.38, 0.38];
-                branchAngle = adjustedAngle + angles[i] + (this.nextRandom() - 0.5) * 0.12;
+                // Elegant fluid 2-way asymmetrical branching
+                const angleOffsets = [-0.36, 0.38];
+                const asymmetricSkew = (this.nextRandom() - 0.5) * 0.1; // organic asymmetry
+                nextAngle = adjustedAngle + angleOffsets[i] + asymmetricSkew;
             }
 
-            // Branches get shorter and thinner
-            const lengthReduction = 0.72 + (this.nextRandom() * 0.08);
-            const nextLength = length * lengthReduction;
-            const nextThickness = thickness * 0.65;
-
+            // Interpolated length reduction factor from TreeState
+            const lengthReduction = lengthFactor + (this.nextRandom() * 0.07);
+            
             this.branch(
                 ctx,
                 endX,
                 endY,
-                nextLength,
-                branchAngle,
-                nextThickness,
+                branchLength * lengthReduction,
+                nextAngle,
+                branchThickness * 0.64,
                 depth + 1,
+                targetDepth,
+                windSensitivity,
                 physics,
+                lengthFactor,
                 leafNodes
             );
         }

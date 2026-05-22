@@ -1,145 +1,192 @@
 /**
- * TreePhysics.js
- * Implements wind sway dynamics and floating/shooting particle simulation.
+ * TreePhysics.js (Upgraded Cinematic Version)
+ * Implements highly optimized wind sway dynamics, multi-layered parallax fireflies,
+ * and high-performance particle pooling for 60fps mobile execution.
  */
 
 export class TreePhysics {
     constructor() {
         this.time = 0;
-        this.windStrength = 0.05; // calm, peaceful sway
-        this.windFrequency = 0.0015;
+        this.windStrength = 0.045; // Peaceful, tranquil sway
+        this.windFrequency = 0.0013;
 
-        // Ambient floating firefly particles
+        // Active particles collections
         this.ambientParticles = [];
-        this.maxAmbient = 35;
-
-        // Active shooting particles (triggered by user sharing)
         this.shootingParticles = [];
+
+        // Capacity and pooling systems (prevents GC frame drops)
+        this.maxAmbient = 45;
+        this.particlePool = []; // Recycled particle storage
     }
 
     /**
-     * Updates time and simulations
-     * @param {number} width - canvas width
-     * @param {number} height - canvas height
+     * Obtains a recycled particle or creates a new one
+     */
+    getParticleFromPool() {
+        if (this.particlePool.length > 0) {
+            return this.particlePool.pop();
+        }
+        return {}; // Fresh object if pool empty
+    }
+
+    /**
+     * Returns a dead particle to the pool for recycling
+     */
+    releaseToPool(particle) {
+        // Clear references
+        particle.onComplete = null;
+        particle.trail = null;
+        this.particlePool.push(particle);
+    }
+
+    /**
+     * Primary tick physics update
      */
     tick(width, height) {
         this.time += 16.67; // approx ms per frame at 60fps
 
-        // Simulate wind sway factor (ranges from -1 to 1, slowly wandering)
-        this.currentWind = Math.sin(this.time * this.windFrequency) * Math.cos(this.time * this.windFrequency * 0.7) * this.windStrength;
+        // Slow cinematic wind wandering wave
+        this.currentWind = Math.sin(this.time * this.windFrequency) * 
+                           Math.cos(this.time * this.windFrequency * 0.73) * 
+                           this.windStrength;
 
-        // Update ambient firefly particles
+        // Update ambient firefly particles with 3D parallax depth
         this.updateAmbient(width, height);
 
-        // Update shooting particles
+        // Update active shooting particles
         this.updateShooting();
     }
 
     /**
-     * Returns wind angle offset for a branch at a given height fraction (0 = trunk base, 1 = topmost leaves)
-     * @param {number} heightFraction 
+     * Dynamic branch wind sway calculations based on height
+     * @param {number} heightFraction - [0 at base, 1 at top]
+     * @param {number} windSensitivity - factor from TreeState
      */
-    getWindSway(heightFraction) {
-        // Upper branches sway much more than the base trunk
-        const heightMultiplier = Math.pow(heightFraction, 1.8);
-        // Add a slight phase shift based on height to make it feel organic, like a wave passing through the tree
-        const phaseShift = Math.sin(this.time * 0.002 + heightFraction * 5.0) * 0.015;
-        return (this.currentWind + phaseShift) * heightMultiplier;
+    getWindSway(heightFraction, windSensitivity) {
+        const heightMultiplier = Math.pow(heightFraction, 2.0); // exponential sway
+        
+        // Cascading time delay (phase shift) makes the branches wave organically
+        const phaseShift = Math.sin(this.time * 0.0018 - heightFraction * 4.5) * 0.012;
+        
+        return (this.currentWind * windSensitivity * 15 + phaseShift) * heightMultiplier;
     }
 
     /**
-     * Ambient floating particles (peaceful fireflies)
+     * Ambient floating particles with 3D depth and parallax movement
      */
     updateAmbient(width, height) {
-        // Spawn ambient particles if under capacity
-        if (this.ambientParticles.length < this.maxAmbient && Math.random() < 0.03) {
-            this.ambientParticles.push({
-                x: Math.random() * width,
-                y: height * 0.3 + Math.random() * height * 0.5,
-                vx: (Math.random() - 0.5) * 0.3,
-                vy: -Math.random() * 0.4 - 0.1, // slowly floats upwards
-                size: Math.random() * 2.5 + 1.0,
-                color: Math.random() > 0.45 ? 'rgba(200, 166, 115, 0.45)' : 'rgba(39, 174, 96, 0.35)', // gold or emerald
-                alpha: Math.random() * 0.7 + 0.1,
-                birth: this.time,
-                life: Math.random() * 12000 + 8000, // lives 8-20 seconds
-                phase: Math.random() * Math.PI * 2
-            });
+        // Spawn ambient fireflies if under capacity
+        if (this.ambientParticles.length < this.maxAmbient && Math.random() < 0.04) {
+            const p = this.getParticleFromPool();
+            
+            // 3D Depth Layer selection:
+            // Layer 0 (Far Background): Tiny, slow, highly translucent
+            // Layer 1 (Mid): Standard
+            // Layer 2 (Foreground): Larger, faster, bright gold
+            const depthLayer = Math.random() < 0.3 ? 0 : (Math.random() < 0.85 ? 1 : 2);
+            
+            p.depth = depthLayer;
+            p.x = Math.random() * width;
+            p.y = height * 0.25 + Math.random() * height * 0.65;
+            
+            // Speed scales directly with 3D depth
+            const baseSpeed = depthLayer === 0 ? 0.08 : (depthLayer === 1 ? 0.22 : 0.45);
+            p.vx = (Math.random() - 0.5) * baseSpeed * 0.8;
+            p.vy = -(Math.random() * baseSpeed + baseSpeed * 0.5); // floats upward
+            
+            // Size and alpha scale with 3D depth
+            p.size = depthLayer === 0 ? (Math.random() * 1.2 + 0.6) :
+                     (depthLayer === 1 ? (Math.random() * 2.0 + 1.2) :
+                                         (Math.random() * 3.5 + 2.5));
+                                         
+            p.alpha = depthLayer === 0 ? (Math.random() * 0.35 + 0.1) :
+                      (depthLayer === 1 ? (Math.random() * 0.65 + 0.2) :
+                                          (Math.random() * 0.85 + 0.4));
+
+            p.color = Math.random() > 0.4 ? 'rgba(200, 166, 115, ' : 'rgba(46, 204, 113, '; // Gold or Emerald
+            p.birth = this.time;
+            p.life = Math.random() * 10000 + 8000; // Lives 8 to 18 seconds
+            p.phase = Math.random() * Math.PI * 2;
+            
+            this.ambientParticles.push(p);
         }
 
-        // Update existing ones
+        // Simulating the ambient particles
         for (let i = this.ambientParticles.length - 1; i >= 0; i--) {
             const p = this.ambientParticles[i];
             const age = this.time - p.birth;
 
             if (age >= p.life) {
                 this.ambientParticles.splice(i, 1);
+                this.releaseToPool(p);
                 continue;
             }
 
-            // Sway movement
-            p.x += p.vx + Math.sin(this.time * 0.001 + p.phase) * 0.15;
+            // Sway horizontal drift
+            const swayAmplitude = p.depth === 0 ? 0.08 : (p.depth === 1 ? 0.18 : 0.35);
+            p.x += p.vx + Math.sin(this.time * 0.0008 + p.phase) * swayAmplitude;
             p.y += p.vy;
 
-            // Fade in at birth, fade out at death
+            // Soft cinematic fade-in at birth, fade-out at death
             const lifeFraction = age / p.life;
+            let currentAlphaMultiplier = 1.0;
             if (lifeFraction < 0.15) {
-                p.currentAlpha = p.alpha * (lifeFraction / 0.15);
+                currentAlphaMultiplier = lifeFraction / 0.15;
             } else if (lifeFraction > 0.8) {
-                p.currentAlpha = p.alpha * ((1 - lifeFraction) / 0.2);
-            } else {
-                p.currentAlpha = p.alpha;
+                currentAlphaMultiplier = (1.0 - lifeFraction) / 0.2;
             }
+            p.currentAlpha = p.alpha * currentAlphaMultiplier;
         }
     }
 
     /**
-     * Triggers a shooting star particle from the clicked share button up into the tree
-     * @param {number} startX - source screen X
-     * @param {number} startY - source screen Y
-     * @param {number} targetX - tree branch target X
-     * @param {number} targetY - tree branch target Y
+     * Shoots a majestic golden particle in a gorgeous, slow Bezier arc
      */
     spawnShootingParticle(startX, startY, targetX, targetY) {
-        this.shootingParticles.push({
-            startX,
-            startY,
-            x: startX,
-            y: startY,
-            targetX,
-            targetY,
-            progress: 0,
-            speed: Math.random() * 0.015 + 0.015, // elegant, cinematic flight
-            size: Math.random() * 3 + 2,
-            trail: [],
-            controlX: (startX + targetX) / 2 + (Math.random() - 0.5) * 150, // elegant bezier arc curve
-            controlY: Math.min(startY, targetY) - 100 - Math.random() * 80,
-            onComplete: null // callback upon hitting target
-        });
+        const p = this.getParticleFromPool();
+        
+        p.startX = startX;
+        p.startY = startY;
+        p.x = startX;
+        p.y = startY;
+        p.targetX = targetX;
+        p.targetY = targetY;
+        
+        p.progress = 0;
+        // Slow cinematic velocity
+        p.speed = Math.random() * 0.009 + 0.009; // takes ~1.5 - 2 seconds to land
+        p.size = Math.random() * 3.5 + 2.5;
+        p.trail = []; // dynamic trailing array
+        
+        // Curved Bezier control point to form a majestic arching vault
+        p.controlX = (startX + targetX) / 2 + (Math.random() - 0.5) * 200;
+        p.controlY = Math.min(startY, targetY) - 160 - Math.random() * 120; // high dramatic arc
+        p.onComplete = null;
+
+        this.shootingParticles.push(p);
     }
 
     /**
-     * Simulates active shooting particles
+     * Simulation of active shooting particles
      */
     updateShooting() {
         for (let i = this.shootingParticles.length - 1; i >= 0; i--) {
             const p = this.shootingParticles[i];
             p.progress += p.speed;
 
-            // Save past positions for an elegant light ribbon trail
+            // Save past positions for light-ribbon trails
             p.trail.push({ x: p.x, y: p.y });
-            if (p.trail.length > 12) p.trail.shift();
+            if (p.trail.length > 15) p.trail.shift();
 
-            // Bezier curve interpolation (Quadratic Bezier)
-            const t = p.progress;
-            if (t >= 1.0) {
-                // Call complete callback
+            if (p.progress >= 1.0) {
                 if (p.onComplete) p.onComplete(p.targetX, p.targetY);
                 this.shootingParticles.splice(i, 1);
+                this.releaseToPool(p);
                 continue;
             }
 
-            // B(t) = (1-t)^2 * P0 + 2*(1-t)*t * P1 + t^2 * P2
+            // Quadratic Bezier Interpolation Curve
+            const t = p.progress;
             const mt = 1 - t;
             p.x = mt * mt * p.startX + 2 * mt * t * p.controlX + t * t * p.targetX;
             p.y = mt * mt * p.startY + 2 * mt * t * p.controlY + t * t * p.targetY;
