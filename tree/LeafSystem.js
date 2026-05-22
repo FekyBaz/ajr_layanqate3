@@ -8,18 +8,18 @@ export class LeafSystem {
     constructor() {
         this.leafHues = [138, 145, 152, 160]; // emerald, mint, sage, and forest green
         
-        // Set up offscreen canvas cache (256x64 sprite sheet)
+        // Set up offscreen canvas cache (512x128 sprite sheet for high-DPI quality with no clipping)
         this.spriteCanvas = document.createElement('canvas');
-        this.spriteCanvas.width = 256;
-        this.spriteCanvas.height = 64;
+        this.spriteCanvas.width = 512;
+        this.spriteCanvas.height = 128;
         this.sCtx = this.spriteCanvas.getContext('2d');
         
-        // Define coordinates on our sprite sheet
+        // Define coordinates on our upscaled sprite sheet (128x128 bounds)
         this.sprites = {
-            leafSage:    { x: 0,   y: 0, w: 64, h: 64 },
-            leafEmerald: { x: 64,  y: 0, w: 64, h: 64 },
-            starGold:    { x: 128, y: 0, w: 64, h: 64 },
-            flowerWhite: { x: 192, y: 0, w: 64, h: 64 }
+            leafSage:    { x: 0,   y: 0, w: 128, h: 128 },
+            leafEmerald: { x: 128,  y: 0, w: 128, h: 128 },
+            starGold:    { x: 256, y: 0, w: 128, h: 128 },
+            flowerWhite: { x: 384, y: 0, w: 128, h: 128 }
         };
 
         this.preRenderSprites();
@@ -30,67 +30,119 @@ export class LeafSystem {
      */
     preRenderSprites() {
         const ctx = this.sCtx;
-        ctx.clearRect(0, 0, 256, 64);
+        ctx.clearRect(0, 0, 512, 128);
 
         // --- 1. RENDER LEAF SAGE ---
         ctx.save();
-        ctx.translate(32, 32);
-        this.drawVectorLeaf(ctx, 142, 42, 22); // Sage green, size 22
+        ctx.translate(64, 64);
+        this.drawVectorLeaf(ctx, 142, 42, 55); // Sage green, high-DPI size 55
         ctx.restore();
 
         // --- 2. RENDER LEAF EMERALD ---
         ctx.save();
-        ctx.translate(96, 32);
-        this.drawVectorLeaf(ctx, 155, 36, 22); // Vibrant emerald green, size 22
+        ctx.translate(192, 64);
+        this.drawVectorLeaf(ctx, 155, 36, 55); // Vibrant emerald green, high-DPI size 55
         ctx.restore();
 
         // --- 3. RENDER GOLD DIAMOND STAR ---
         ctx.save();
-        ctx.translate(160, 32);
-        this.drawVectorStar(ctx, 15); // Diamond flare, size 15
+        ctx.translate(320, 64);
+        this.drawVectorStar(ctx, 25); // Diamond flare, size 25
         ctx.restore();
 
         // --- 4. RENDER WHITE FLOWER BLOSSOM ---
         ctx.save();
-        ctx.translate(224, 32);
-        this.drawVectorFlower(ctx, 12); // Jasmine blossom, size 12
+        ctx.translate(448, 64);
+        this.drawVectorFlower(ctx, 22); // Jasmine blossom, size 22
         ctx.restore();
     }
 
     /**
-     * Draws vector leaf path using bezier curves
+     * Draws vector leaf path using advanced Bezier curves, radial halos, gradients, and veins
      */
     drawVectorLeaf(ctx, hue, lightness, size) {
-        const fillColor = `hsl(${hue}, 64%, ${lightness}%)`;
-        const strokeColor = `hsl(${hue}, 70%, ${lightness - 10}%)`;
+        // 1. Soft radial background glow (backplate shadow) - blends emerald and twilight gold
+        const glowGrad = ctx.createRadialGradient(size * 0.5, 0, 2, size * 0.5, 0, size * 0.95);
+        glowGrad.addColorStop(0, `hsla(${hue + 10}, 85%, 60%, 0.32)`); // Glowing core
+        glowGrad.addColorStop(0.4, `hsla(${hue}, 75%, 45%, 0.14)`);   // Ambient emerald halo
+        glowGrad.addColorStop(0.8, `rgba(200, 166, 115, 0.08)`);       // Soft twilight gold bleeding
+        glowGrad.addColorStop(1, 'rgba(0,0,0,0)');
+        ctx.fillStyle = glowGrad;
+        ctx.beginPath();
+        ctx.arc(size * 0.5, 0, size * 0.95, 0, Math.PI * 2);
+        ctx.fill();
 
+        // 2. Main Leaf Silhouette using Dual Bezier Curves - plumper organic shape
         ctx.beginPath();
         ctx.moveTo(0, 0);
-        ctx.quadraticCurveTo(size * 0.5, -size * 0.45, size, 0);
-        ctx.quadraticCurveTo(size * 0.5, size * 0.45, 0, 0);
+        ctx.bezierCurveTo(size * 0.18, -size * 0.52, size * 0.72, -size * 0.45, size, 0);
+        ctx.bezierCurveTo(size * 0.72, size * 0.45, size * 0.18, size * 0.52, 0, 0);
         ctx.closePath();
 
-        const grad = ctx.createLinearGradient(0, -size * 0.35, size, size * 0.35);
-        grad.addColorStop(0, fillColor);
-        grad.addColorStop(1, `hsl(${hue - 6}, 56%, ${lightness - 6}%)`);
+        // Volumetric base-to-tip HSL gradient with rich color progression
+        const grad = ctx.createLinearGradient(0, 0, size, 0);
+        grad.addColorStop(0, `hsl(${hue - 4}, 78%, ${lightness - 8}%)`); // Deep base
+        grad.addColorStop(0.35, `hsl(${hue}, 70%, ${lightness}%)`);   // Rich green body
+        grad.addColorStop(0.7, `hsl(${hue + 8}, 75%, ${lightness + 5}%)`); // Mid glow
+        grad.addColorStop(1, `hsl(${hue + 16}, 90%, ${lightness + 12}%)`); // Radiant translucent tip
 
         ctx.fillStyle = grad;
         ctx.fill();
 
-        ctx.strokeStyle = strokeColor;
-        ctx.lineWidth = 0.5;
+        // Stroke Layer 1: Soft outer glowing edge aura (wider, softer)
+        ctx.strokeStyle = `hsla(${hue + 15}, 90%, 68%, 0.30)`;
+        ctx.lineWidth = size * 0.08;
+        ctx.stroke();
+
+        // Stroke Layer 2: Soft, organic semi-translucent boundary outline
+        ctx.strokeStyle = `hsla(${hue}, 75%, ${lightness - 10}%, 0.85)`;
+        ctx.lineWidth = 0.95;
+        ctx.stroke();
+
+        // 3. Delicate translucent center vein
+        ctx.beginPath();
+        ctx.moveTo(0, 0);
+        ctx.quadraticCurveTo(size * 0.5, -size * 0.02, size * 0.92, 0);
+        ctx.strokeStyle = `hsla(${hue + 18}, 90%, ${lightness + 24}%, 0.65)`;
+        ctx.lineWidth = size * 0.03;
+        ctx.stroke();
+
+        // 4. Fine lateral veins branching from center (very soft and subtle, organic angles)
+        ctx.strokeStyle = `hsla(${hue + 18}, 85%, ${lightness + 20}%, 0.38)`;
+        ctx.lineWidth = size * 0.016;
+        
+        // Lateral pair 1 (early branch)
+        ctx.beginPath();
+        ctx.moveTo(size * 0.22, -size * 0.01);
+        ctx.quadraticCurveTo(size * 0.36, -size * 0.16, size * 0.46, -size * 0.25);
+        ctx.stroke();
+
+        ctx.beginPath();
+        ctx.moveTo(size * 0.22, size * 0.01);
+        ctx.quadraticCurveTo(size * 0.36, size * 0.16, size * 0.46, size * 0.25);
+        ctx.stroke();
+
+        // Lateral pair 2 (mid branch)
+        ctx.beginPath();
+        ctx.moveTo(size * 0.52, 0);
+        ctx.quadraticCurveTo(size * 0.66, -size * 0.12, size * 0.76, -size * 0.20);
+        ctx.stroke();
+
+        ctx.beginPath();
+        ctx.moveTo(size * 0.52, 0);
+        ctx.quadraticCurveTo(size * 0.66, size * 0.12, size * 0.76, size * 0.20);
         ctx.stroke();
     }
 
     /**
-     * Draws vector 4-pointed golden diamond star
+     * Draws vector 4-pointed golden diamond star (softened highlights)
      */
     drawVectorStar(ctx, size) {
-        // Metallic golden gradient
+        // Softened golden gradient to reduce visual glare
         const metallicGold = ctx.createLinearGradient(-size, -size, size, size);
-        metallicGold.addColorStop(0, '#fbf2d8'); // highlights
-        metallicGold.addColorStop(0.4, '#c8a673'); // mid gold
-        metallicGold.addColorStop(1, '#8c6a35'); // deep bronze shadows
+        metallicGold.addColorStop(0, '#e5d3b3'); // Softer cream gold
+        metallicGold.addColorStop(0.5, '#b8945f'); // Warm mid brass
+        metallicGold.addColorStop(1, '#785628'); // Muted bronze shadow
 
         ctx.beginPath();
         ctx.moveTo(0, -size);
@@ -103,8 +155,8 @@ export class LeafSystem {
         ctx.fillStyle = metallicGold;
         ctx.fill();
 
-        // Center sparkle core
-        ctx.fillStyle = '#ffffff';
+        // Center sparkle core (toned down to soft cream gold highlight)
+        ctx.fillStyle = '#fbf2d8';
         ctx.beginPath();
         ctx.arc(0, 0, size * 0.22, 0, Math.PI * 2);
         ctx.fill();
@@ -143,7 +195,7 @@ export class LeafSystem {
     /**
      * Pre-rendered drawing of leaves with slow breathing sway
      */
-    drawLeaf(ctx, x, y, angle, size, seed, breathingFactor, isInner = false) {
+    drawLeaf(ctx, x, y, angle, size, seed, breathingFactor, isInner = false, opacityScale = 1.0) {
         ctx.save();
         ctx.translate(x, y);
         
@@ -156,7 +208,7 @@ export class LeafSystem {
 
         // Subtly animate leaf size using breathing factor with unique phase
         const breathScale = 0.97 + Math.sin(breathingFactor * 0.8 + leafPhase * 1.2) * 0.03;
-        const finalScale = (size / 22) * breathScale;
+        const finalScale = (size / 55) * breathScale; // 55 is the high-DPI pre-rendered reference size
         ctx.scale(finalScale, finalScale);
 
         // Pick between Sage or Emerald sprite texture based on seed
@@ -164,15 +216,15 @@ export class LeafSystem {
 
         // Semi-transparent leaf layering to construct stunning 3D cinematic depth
         if (isInner) {
-            ctx.globalAlpha = 0.30 + (seed % 3) * 0.06; // softer, background depth layer
+            ctx.globalAlpha = (0.28 + (seed % 3) * 0.05) * opacityScale; // softer, background depth layer
         } else {
-            ctx.globalAlpha = 0.68 + (seed % 4) * 0.04; // standard foliage layer
+            ctx.globalAlpha = (0.76 + (seed % 4) * 0.04) * opacityScale; // standard foliage layer
         }
         
         ctx.drawImage(
             this.spriteCanvas,
             sprite.x, sprite.y, sprite.w, sprite.h,
-            -32, -32, 64, 64 // center drawn
+            -64, -64, 128, 128 // center drawn in upscaled coordinates
         );
 
         ctx.restore();
@@ -181,40 +233,40 @@ export class LeafSystem {
     /**
      * Pre-rendered drawing of glittering golden stars
      */
-    drawStar(ctx, x, y, size, pulse, seed) {
+    drawStar(ctx, x, y, size, pulse, seed, opacityScale = 1.0) {
         ctx.save();
         ctx.translate(x, y);
 
-        const finalScale = (size / 15) * pulse;
+        const finalScale = (size / 25) * pulse; // 25 is the high-DPI pre-rendered star reference size
         ctx.scale(finalScale, finalScale);
 
         const sprite = this.sprites.starGold;
         
-        //Twinkling shimmers
-        const twinkleOpacity = 0.82 + Math.sin(seed + pulse * 1.4) * 0.12;
+        // Twinkling shimmers (highly dimmed to keep stars as soft accent highlights)
+        const twinkleOpacity = (0.15 + Math.sin(seed + pulse * 1.4) * 0.04) * opacityScale;
         ctx.globalAlpha = twinkleOpacity;
 
-        // Draw soft golden backing glow natively
-        const radialGlow = ctx.createRadialGradient(0, 0, 0, 0, 0, 16);
-        radialGlow.addColorStop(0, 'rgba(200, 166, 115, 0.35)');
-        radialGlow.addColorStop(0.5, 'rgba(212, 175, 55, 0.1)');
+        // Draw extremely soft gold/bronze backing glow natively (quiet twilight accents)
+        const radialGlow = ctx.createRadialGradient(0, 0, 0, 0, 0, 20);
+        radialGlow.addColorStop(0, 'rgba(200, 166, 115, 0.06)'); // Muted gold backing (halved)
+        radialGlow.addColorStop(0.5, 'rgba(212, 175, 55, 0.015)');
         radialGlow.addColorStop(1, 'rgba(0,0,0,0)');
         ctx.fillStyle = radialGlow;
         ctx.beginPath();
-        ctx.arc(0, 0, 16, 0, Math.PI * 2);
+        ctx.arc(0, 0, 20, 0, Math.PI * 2);
         ctx.fill();
 
         ctx.drawImage(
             this.spriteCanvas,
             sprite.x, sprite.y, sprite.w, sprite.h,
-            -32, -32, 64, 64
+            -64, -64, 128, 128
         );
 
         ctx.restore();
     }
 
     /**
-     * Pre-rendered drawing of yasmine flowers
+     * Pre-rendered drawing of jasmine flowers
      */
     drawFlower(ctx, x, y, size, rotation, breathingFactor, seed) {
         ctx.save();
@@ -222,7 +274,7 @@ export class LeafSystem {
         
         // Flower scales softly with breathing wave
         const breathScale = 0.96 + Math.sin(breathingFactor + seed * 2.0) * 0.04;
-        const finalScale = (size / 12) * breathScale;
+        const finalScale = (size / 22) * breathScale; // 22 is the pre-rendered reference size
         ctx.scale(finalScale, finalScale);
         ctx.rotate(rotation);
 
@@ -232,7 +284,7 @@ export class LeafSystem {
         ctx.drawImage(
             this.spriteCanvas,
             sprite.x, sprite.y, sprite.w, sprite.h,
-            -32, -32, 64, 64
+            -64, -64, 128, 128
         );
 
         ctx.restore();

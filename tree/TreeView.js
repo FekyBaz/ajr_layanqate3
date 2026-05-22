@@ -164,19 +164,40 @@ export class TreeView {
         const breathingFactor = Date.now() * 0.0009;
         
         // C0. Draw Inner Leaves (Canopy Fill with higher transparency)
-        const innerLeafCount = Math.min(innerNodes.length, Math.round(this.state.visualStats.leaves * 0.65));
+        const innerLeafCount = Math.min(innerNodes.length, Math.round(this.state.visualStats.leaves * 1.45));
         for (let i = 0; i < innerLeafCount; i++) {
             const node = innerNodes[i % innerNodes.length];
-            const size = 7 + (node.seed % 4);
-            this.leafSystem.drawLeaf(this.ctx, node.x, node.y, node.angle, size, node.seed, breathingFactor, true);
+            const size = 14 + (node.seed % 6); // Enlarged ~27% for volumetric density (from 11 -> 14)
+            this.leafSystem.drawLeaf(this.ctx, node.x, node.y, node.angle, size, node.seed, breathingFactor, true, 1.0);
         }
 
-        // C1. Draw Green Leaves (Dhikr on outer canopy tips)
+        // C1. Draw Green Leaves (Dhikr on outer canopy tips with organic 3-leaf clusters)
         const leafCount = Math.min(outerNodes.length, Math.round(this.state.visualStats.leaves));
         for (let i = 0; i < leafCount; i++) {
             const node = outerNodes[i % outerNodes.length];
-            const size = 9 + (node.seed % 5);
-            this.leafSystem.drawLeaf(this.ctx, node.x, node.y, node.angle, size, node.seed, breathingFactor, false);
+            const size = 20 + (node.seed % 8); // Enlarged by ~33% (from 15 -> 20) for majestic cinematic presence
+            
+            // Draw main central leaf
+            this.leafSystem.drawLeaf(this.ctx, node.x, node.y, node.angle, size, node.seed, breathingFactor, false, 1.0);
+            
+            // Draw foliage cluster (two side leaves offset organically mimicking real growth patterns with organic variations)
+            const leftScale = 0.74 + (node.seed % 3) * 0.05; // 0.74 to 0.84
+            const rightScale = 0.74 + ((node.seed + 2) % 3) * 0.05; // 0.74 to 0.84
+            const leftAngleOffset = 0.42 + (node.seed % 4) * 0.04; // 0.42 to 0.54
+            const rightAngleOffset = 0.42 + ((node.seed + 2) % 4) * 0.04; // 0.42 to 0.54
+            
+            const leftOffsetDist = size * (0.28 + (node.seed % 3) * 0.03); // 0.28 to 0.34
+            const rightOffsetDist = size * (0.28 + ((node.seed + 2) % 3) * 0.03); // 0.28 to 0.34
+            
+            // Left cluster leaf
+            const lx = node.x + Math.cos(node.angle - 0.34) * leftOffsetDist;
+            const ly = node.y + Math.sin(node.angle - 0.34) * leftOffsetDist;
+            this.leafSystem.drawLeaf(this.ctx, lx, ly, node.angle - leftAngleOffset, size * leftScale, node.seed + 999, breathingFactor, false, 0.82);
+
+            // Right cluster leaf
+            const rx = node.x + Math.cos(node.angle + 0.34) * rightOffsetDist;
+            const ry = node.y + Math.sin(node.angle + 0.34) * rightOffsetDist;
+            this.leafSystem.drawLeaf(this.ctx, rx, ry, node.angle + rightAngleOffset, size * rightScale, node.seed + 888, breathingFactor, false, 0.82);
         }
 
         // C2. Draw blossoms (Milestones)
@@ -188,12 +209,12 @@ export class TreeView {
             this.leafSystem.drawFlower(this.ctx, node.x, node.y, size, rotation, breathingFactor, node.seed);
         }
 
-        // C3. Draw golden diamond stars (Shares)
+        // C3. Draw golden diamond stars (Shares - Rebalanced as quiet delicate accent twinkles)
         const starCount = Math.min(outerNodes.length, Math.round(this.state.visualStats.stars));
         const timeFactor = Date.now() * 0.0022;
         for (let i = 0; i < starCount; i++) {
             const node = outerNodes[(i * 17 + 7) % outerNodes.length];
-            const size = 6 + (node.seed % 5);
+            const size = 2.5 + (node.seed % 3); // Muted sizing to 2.5-5.5px (previously 3-5px) for elegant accent sparkles
             const pulse = 1.0 + Math.sin(timeFactor + node.seed) * 0.16;
             
             const offsetDist = 5 + (node.seed % 6);

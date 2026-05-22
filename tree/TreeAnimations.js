@@ -237,22 +237,47 @@ export class TreeAnimations {
 
         ctx.restore();
 
-        // Push internal foliage cluster nodes for canopy center fill
-        if (depth >= 3) {
+        // Push internal foliage cluster nodes for canopy center fill (starts earlier for lush density)
+        if (depth >= 1 && depth < targetDepth) {
             leafNodes.push({
                 x: ctrlX,
                 y: ctrlY,
-                angle: adjustedAngle + 0.35,
+                angle: adjustedAngle + 0.42,
                 seed: (localSeed + 1234) | 0,
                 isInner: true
             });
             leafNodes.push({
                 x: ctrlX,
                 y: ctrlY,
-                angle: adjustedAngle - 0.35,
+                angle: adjustedAngle - 0.42,
                 seed: (localSeed + 5678) | 0,
                 isInner: true
             });
+            leafNodes.push({
+                x: x + (endX - x) * 0.35,
+                y: y + (endY - y) * 0.35,
+                angle: adjustedAngle + (nextSplitRand() - 0.5) * 0.2,
+                seed: (localSeed + 7777) | 0,
+                isInner: true
+            });
+
+            // Mid and late segment coordinates for rich volumetric density
+            if (depth >= 2) {
+                leafNodes.push({
+                    x: (x + endX) * 0.5,
+                    y: (y + endY) * 0.5,
+                    angle: adjustedAngle,
+                    seed: (localSeed + 9012) | 0,
+                    isInner: true
+                });
+                leafNodes.push({
+                    x: x + (endX - x) * 0.75,
+                    y: y + (endY - y) * 0.75,
+                    angle: adjustedAngle + (nextSplitRand() - 0.5) * 0.4,
+                    seed: (localSeed + 1111) | 0,
+                    isInner: true
+                });
+            }
         }
 
         // Halt recursion if this was the final fractional sprouting layer
