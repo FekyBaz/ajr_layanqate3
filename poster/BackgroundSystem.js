@@ -67,10 +67,30 @@ export class BackgroundSystem {
             baseGrad.addColorStop(1, '#050506'); // Infinite black
             ctx.fillStyle = baseGrad;
             ctx.fillRect(0, 0, width, height);
+
+        } else if (theme.id === 'paradise-spring') {
+            // Premium soft misty watercolor green-cream sky
+            const baseGrad = ctx.createLinearGradient(0, 0, 0, height);
+            baseGrad.addColorStop(0, '#f2efe9'); // Very soft warm watercolor paper ivory
+            baseGrad.addColorStop(0.6, '#eef3eb'); // Delicate washed mint-white
+            baseGrad.addColorStop(1, '#dfe7db'); // Pale mossy watercolor cream
+            ctx.fillStyle = baseGrad;
+            ctx.fillRect(0, 0, width, height);
+
+            // Radial ambient gold sun/glow in top left
+            const sunGrad = ctx.createRadialGradient(
+                width * 0.15, height * 0.15, 10 * scale,
+                width * 0.15, height * 0.15, width * 0.5
+            );
+            sunGrad.addColorStop(0, 'rgba(239, 218, 187, 0.25)'); // Gentle golden watercolor glow
+            sunGrad.addColorStop(0.5, 'rgba(226, 234, 223, 0.05)');
+            sunGrad.addColorStop(1, 'rgba(0, 0, 0, 0)');
+            ctx.fillStyle = sunGrad;
+            ctx.fillRect(0, 0, width, height);
         }
 
-        // 2. Draw subtle dark vignette (Except for Minimal Noor)
-        if (theme.id !== 'minimal-noor') {
+        // 2. Draw subtle dark vignette (Except for Minimal Noor and Paradise Spring)
+        if (theme.id !== 'minimal-noor' && theme.id !== 'paradise-spring') {
             const vignetteGrad = ctx.createRadialGradient(
                 width * 0.5, height * 0.5, Math.min(width, height) * 0.4,
                 width * 0.5, height * 0.5, Math.max(width, height) * 0.8
@@ -78,6 +98,17 @@ export class BackgroundSystem {
             vignetteGrad.addColorStop(0, 'rgba(0, 0, 0, 0)');
             vignetteGrad.addColorStop(0.5, 'rgba(0, 0, 0, 0.2)');
             vignetteGrad.addColorStop(1, 'rgba(0, 0, 0, 0.75)');
+            ctx.fillStyle = vignetteGrad;
+            ctx.fillRect(0, 0, width, height);
+        } else if (theme.id === 'paradise-spring') {
+            // Soft sage green vignette for watercolor theme
+            const vignetteGrad = ctx.createRadialGradient(
+                width * 0.5, height * 0.5, Math.min(width, height) * 0.35,
+                width * 0.5, height * 0.5, Math.max(width, height) * 0.82
+            );
+            vignetteGrad.addColorStop(0, 'rgba(242, 239, 233, 0)');
+            vignetteGrad.addColorStop(0.65, 'rgba(107, 142, 117, 0.04)');
+            vignetteGrad.addColorStop(1, 'rgba(62, 123, 92, 0.12)');
             ctx.fillStyle = vignetteGrad;
             ctx.fillRect(0, 0, width, height);
         } else {
@@ -173,6 +204,23 @@ export class BackgroundSystem {
 
             // Soft luxury velvet smoke
             this.drawMistBand(ctx, width, height, height * 0.70, 'rgba(212, 175, 55, 0.003)', time * 0.05);
+
+        } else if (theme.id === 'paradise-spring') {
+            // Overlapping misty watercolor hills at the bottom
+            this.drawWatercolorHills(ctx, width, height, scale, time);
+
+            // Breathable soft column of light in center
+            const haloGrad = ctx.createRadialGradient(
+                width * 0.5, height * 0.42, 5 * scale,
+                width * 0.5, height * 0.42, height * (0.32 + breathe)
+            );
+            haloGrad.addColorStop(0, 'rgba(240, 245, 238, 0.35)'); // Soft paper bright core
+            haloGrad.addColorStop(0.5, 'rgba(223, 231, 219, 0.05)');
+            haloGrad.addColorStop(1, 'rgba(0, 0, 0, 0)');
+            ctx.fillStyle = haloGrad;
+            ctx.beginPath();
+            ctx.arc(width * 0.5, height * 0.42, height * 0.45, 0, Math.PI * 2);
+            ctx.fill();
         }
 
         ctx.restore();
@@ -315,6 +363,31 @@ export class BackgroundSystem {
                 ctx.lineTo(cx, cy + 5 * scale);
                 ctx.stroke();
             }
+
+        } else if (theme.id === 'paradise-spring') {
+            // 1. Primary main branch Top-Left
+            const p0_1 = { x: -15 * scale, y: -15 * scale };
+            const p1_1 = { x: width * 0.28, y: height * 0.08 };
+            const p2_1 = { x: width * 0.42, y: height * 0.22 };
+            this.drawBranchOfLeaves(ctx, p0_1, p1_1, p2_1, 14, 46 * scale, '#123524');
+
+            // 2. Secondary side branch Top-Left (angled slightly lower down the left edge)
+            const p0_2 = { x: -15 * scale, y: height * 0.12 };
+            const p1_2 = { x: width * 0.18, y: height * 0.25 };
+            const p2_2 = { x: width * 0.32, y: height * 0.38 };
+            this.drawBranchOfLeaves(ctx, p0_2, p1_2, p2_2, 11, 40 * scale, '#1E4233');
+
+            // 3. Third branch starting further top-right, draping down towards center
+            const p0_3 = { x: width * 0.20, y: -15 * scale };
+            const p1_3 = { x: width * 0.35, y: height * 0.15 };
+            const p2_3 = { x: width * 0.50, y: height * 0.20 };
+            this.drawBranchOfLeaves(ctx, p0_3, p1_3, p2_3, 10, 36 * scale, '#265440');
+
+            // 4. Balancing small branch in the bottom-right corner
+            const p0_4 = { x: width + 15 * scale, y: height + 15 * scale };
+            const p1_4 = { x: width * 0.82, y: height * 0.82 };
+            const p2_4 = { x: width * 0.70, y: height * 0.74 };
+            this.drawBranchOfLeaves(ctx, p0_4, p1_4, p2_4, 9, 38 * scale, '#1E4233');
         }
 
         ctx.restore();
@@ -397,6 +470,159 @@ export class BackgroundSystem {
         ctx.lineTo(width, height);
         ctx.closePath();
         ctx.fill();
+        ctx.restore();
+    }
+
+    /**
+     * Draws a single organic pointed leaf mathematically using two quadratic curves meeting at the tip.
+     */
+    static drawSingleLeaf(ctx, x, y, angle, length, width, leafColor) {
+        ctx.save();
+        ctx.translate(x, y);
+        ctx.rotate(angle);
+        
+        // Create watercolor shading gradient
+        const grad = ctx.createLinearGradient(0, 0, length, 0);
+        grad.addColorStop(0, leafColor); // Base color (deep)
+        grad.addColorStop(1, 'rgba(165, 195, 159, 0.9)'); // Soft Sage Green highlight tip
+        
+        ctx.fillStyle = grad;
+        ctx.beginPath();
+        ctx.moveTo(0, 0);
+        ctx.quadraticCurveTo(length * 0.35, -width * 0.5, length, 0);
+        ctx.quadraticCurveTo(length * 0.35, width * 0.5, 0, 0);
+        ctx.closePath();
+        ctx.fill();
+
+        // Delicate vein in the middle
+        ctx.strokeStyle = 'rgba(255, 255, 255, 0.18)';
+        ctx.lineWidth = 0.8;
+        ctx.beginPath();
+        ctx.moveTo(0, 0);
+        ctx.lineTo(length * 0.85, 0);
+        ctx.stroke();
+
+        ctx.restore();
+    }
+
+    /**
+     * Renders a curved woody branch with alternating organic leaf pairs along a quadratic Bezier path B(t).
+     */
+    static drawBranchOfLeaves(ctx, p0, p1, p2, leafCount, baseLeafSize, leafColor) {
+        ctx.save();
+        
+        // Draw the curved woody branch stem
+        ctx.strokeStyle = 'rgba(84, 98, 77, 0.35)'; // Soft watercolor woody stem
+        ctx.lineWidth = 2.0;
+        ctx.beginPath();
+        ctx.moveTo(p0.x, p0.y);
+        ctx.quadraticCurveTo(p1.x, p1.y, p2.x, p2.y);
+        ctx.stroke();
+
+        // Populate leaves along the stem
+        for (let i = 2; i <= leafCount; i++) {
+            const t = i / leafCount;
+            
+            // Compute coordinate B(t)
+            const mt = 1 - t;
+            const x = mt * mt * p0.x + 2 * mt * t * p1.x + t * t * p2.x;
+            const y = mt * mt * p0.y + 2 * mt * t * p1.y + t * t * p2.y;
+            
+            // Compute tangent direction derivative B'(t)
+            const dx = 2 * mt * (p1.x - p0.x) + 2 * t * (p2.x - p1.x);
+            const dy = 2 * mt * (p1.y - p0.y) + 2 * t * (p2.y - p1.y);
+            const tangentAngle = Math.atan2(dy, dx);
+            
+            // Leaf size decreases towards the branch tip
+            const leafSize = baseLeafSize * (1.1 - t * 0.35);
+            
+            // Sprout a pair of leaves at alternating angles
+            this.drawSingleLeaf(ctx, x, y, tangentAngle - 0.45 - Math.sin(t * 4) * 0.15, leafSize, leafSize * 0.45, leafColor);
+            this.drawSingleLeaf(ctx, x, y, tangentAngle + 0.45 + Math.sin(t * 4) * 0.15, leafSize, leafSize * 0.45, leafColor);
+            
+            // Random-like twig sprouts
+            if (i % 3 === 0 && t < 0.78) {
+                const isLeft = (i % 2 === 0);
+                const twigAngle = tangentAngle + (isLeft ? 0.75 : -0.75);
+                const twigLen = leafSize * 1.4;
+                const tx = x + Math.cos(twigAngle) * twigLen * 0.4;
+                const ty = y + Math.sin(twigAngle) * twigLen * 0.4;
+                
+                ctx.strokeStyle = 'rgba(84, 98, 77, 0.25)';
+                ctx.lineWidth = 1.0;
+                ctx.beginPath();
+                ctx.moveTo(x, y);
+                ctx.lineTo(tx, ty);
+                ctx.stroke();
+                
+                this.drawSingleLeaf(ctx, tx, ty, twigAngle, leafSize * 0.75, leafSize * 0.32, leafColor);
+            }
+        }
+        
+        // Single leaf at absolute branch tip B(1)
+        const tipAngle = Math.atan2(p2.y - p1.y, p2.x - p1.x);
+        this.drawSingleLeaf(ctx, p2.x, p2.y, tipAngle, baseLeafSize * 0.55, baseLeafSize * 0.22, leafColor);
+
+        ctx.restore();
+    }
+
+    /**
+     * Renders overlapping green watercolor hills at the bottom.
+     */
+    static drawWatercolorHills(ctx, width, height, scale, time) {
+        ctx.save();
+        
+        // 1. Far Hill Layer (Soft sage green, high)
+        const grad1 = ctx.createLinearGradient(0, height * 0.65, 0, height);
+        grad1.addColorStop(0, 'rgba(182, 203, 178, 0.42)');
+        grad1.addColorStop(1, 'rgba(223, 231, 219, 0.05)');
+        ctx.fillStyle = grad1;
+        ctx.beginPath();
+        ctx.moveTo(0, height);
+        ctx.lineTo(0, height * 0.76);
+        ctx.bezierCurveTo(
+            width * 0.3, height * 0.71,
+            width * 0.68, height * 0.81,
+            width, height * 0.74
+        );
+        ctx.lineTo(width, height);
+        ctx.closePath();
+        ctx.fill();
+
+        // 2. Mid Hill Layer (Medium green watercolor, middle)
+        const grad2 = ctx.createLinearGradient(0, height * 0.73, 0, height);
+        grad2.addColorStop(0, 'rgba(141, 168, 137, 0.58)');
+        grad2.addColorStop(1, 'rgba(207, 219, 202, 0.08)');
+        ctx.fillStyle = grad2;
+        ctx.beginPath();
+        ctx.moveTo(0, height);
+        ctx.lineTo(0, height * 0.82);
+        ctx.bezierCurveTo(
+            width * 0.35, height * 0.87,
+            width * 0.72, height * 0.79,
+            width, height * 0.84
+        );
+        ctx.lineTo(width, height);
+        ctx.closePath();
+        ctx.fill();
+
+        // 3. Near Hill Layer (Rich mossy watercolor, low)
+        const grad3 = ctx.createLinearGradient(0, height * 0.8, 0, height);
+        grad3.addColorStop(0, 'rgba(92, 122, 98, 0.78)');
+        grad3.addColorStop(1, 'rgba(165, 185, 159, 0.15)');
+        ctx.fillStyle = grad3;
+        ctx.beginPath();
+        ctx.moveTo(0, height);
+        ctx.lineTo(0, height * 0.87);
+        ctx.bezierCurveTo(
+            width * 0.28, height * 0.84,
+            width * 0.6, height * 0.92,
+            width, height * 0.86
+        );
+        ctx.lineTo(width, height);
+        ctx.closePath();
+        ctx.fill();
+
         ctx.restore();
     }
 

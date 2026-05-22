@@ -59,6 +59,20 @@ export const THEMES = {
         lineHeight: 1.6,
         glowIntensity: 0.22,
         defaultFontSize: 42
+    },
+    'paradise-spring': {
+        id: 'paradise-spring',
+        name: 'ربيع الجنة',
+        fontColor: '#123524',
+        accentColor: '#3E7B5C',
+        secondaryColor: '#6B8E75',
+        shadowColor: 'rgba(18, 53, 36, 0.08)',
+        particleColor: 'rgba(62, 123, 92, 0.22)',
+        particleCount: 22,
+        fontFamily: 'Cairo',
+        lineHeight: 1.5,
+        glowIntensity: 0.1,
+        defaultFontSize: 38
     }
 };
 

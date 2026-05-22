@@ -17,6 +17,7 @@ export class PosterEngine {
         this.ratio = 'square';
         this.fontSizeSliderValue = 38;
         this.text = '';
+        this.selectedFontColor = 'theme';
         
         this.startTime = Date.now();
         this.pausedTimeOffset = 0;
@@ -56,6 +57,7 @@ export class PosterEngine {
         
         this.themesContainer = document.getElementById('themesContainer');
         this.ratioSelectors = document.getElementById('ratioSelectors');
+        this.colorSelectors = document.getElementById('colorSelectors');
         
         this.downloadBtn = document.getElementById('downloadBtn');
         this.shareBtn = document.getElementById('shareBtn');
@@ -129,6 +131,20 @@ export class PosterEngine {
             const theme = ThemeManager.getTheme(this.activeThemeId);
             this.fontSelect.value = theme.fontFamily;
 
+            this.needsRedraw = true;
+        });
+
+        // Custom text color overrides
+        this.colorSelectors.addEventListener('click', (e) => {
+            const btn = e.target.closest('.color-btn');
+            if (!btn) return;
+
+            // Update DOM active classes
+            this.colorSelectors.querySelectorAll('.color-btn').forEach(b => b.classList.remove('active'));
+            btn.classList.add('active');
+
+            // Update state variable and trigger redraw
+            this.selectedFontColor = btn.dataset.color;
             this.needsRedraw = true;
         });
 
@@ -234,9 +250,11 @@ export class PosterEngine {
      */
     getCombinedTheme() {
         const baseTheme = ThemeManager.getTheme(this.activeThemeId);
+        const fontColor = this.selectedFontColor === 'theme' ? baseTheme.fontColor : this.selectedFontColor;
         return {
             ...baseTheme,
-            fontFamily: this.fontSelect.value
+            fontFamily: this.fontSelect.value,
+            fontColor: fontColor
         };
     }
 
