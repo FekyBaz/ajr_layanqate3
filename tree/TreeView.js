@@ -152,39 +152,42 @@ export class TreeView {
         // Store these coordinates on the instance so the RealtimeEngine can reference them
         this.activeLeafNodes = frameLeafNodes;
 
-        // Categorize leaves into Front, Mid, and Back layers while applying deterministic breathing gaps
+        // Categorize leaves into Front, Mid, and Back layers while applying continuous density gradients
         const backNodes = [];
         const midNodes = [];
         const frontNodes = [];
 
         frameLeafNodes.forEach(node => {
             const seed = node.seed;
-            
-            if (node.isInner) {
-                // Breathing gaps: skip 40% of inner canopy coordinates for airy pocket design
-                if (seed % 10 < 4) return;
+            const depth = node.depth !== undefined ? node.depth : 2;
+            const maxDepth = node.maxDepth !== undefined ? node.maxDepth : 5;
+            const normalizedDepth = depth / maxDepth;
 
-                // Depth classification
-                const depthSeed = seed % 10;
-                if (depthSeed < 4) {
-                    backNodes.push(node);  // 40% background
-                } else if (depthSeed < 8) {
-                    midNodes.push(node);   // 40% midground
+            // Continuous density skip threshold: dense core (18% skip), highly-breathing outer tips (70% skip)
+            const skipThreshold = 0.18 + normalizedDepth * 0.52;
+            if ((seed % 100) / 100 < skipThreshold) return;
+
+            // Dynamic depth classification distribution based on normalized depth
+            if (normalizedDepth <= 0.4) {
+                if (seed % 10 < 7) {
+                    backNodes.push(node);  // 70% background volume
+                } else {
+                    midNodes.push(node);   // 30% midground
+                }
+            } else if (normalizedDepth <= 0.8) {
+                const layerSeed = seed % 10;
+                if (layerSeed < 2) {
+                    backNodes.push(node);  // 20% background volume
+                } else if (layerSeed < 8) {
+                    midNodes.push(node);   // 60% midground
                 } else {
                     frontNodes.push(node);  // 20% foreground
                 }
             } else {
-                // Breathing gaps: skip 15% of outer canopy tips for lighter natural branch tips
-                if (seed % 20 < 3) return;
-
-                // Depth classification
-                const depthSeed = seed % 10;
-                if (depthSeed < 3) {
-                    backNodes.push(node);  // 30% background
-                } else if (depthSeed < 7) {
-                    midNodes.push(node);   // 40% midground
+                if (seed % 10 < 3) {
+                    midNodes.push(node);   // 30% midground
                 } else {
-                    frontNodes.push(node);  // 30% foreground
+                    frontNodes.push(node);  // 70% foreground
                 }
             }
         });
@@ -192,8 +195,8 @@ export class TreeView {
         // Separate outer branch tips from inner canopy fill coordinates
         const outerNodes = frameLeafNodes.filter(node => !node.isInner);
 
-        // Spawn a falling leaf occasionally (approx every 12-15 seconds)
-        if (outerNodes.length > 0 && Math.random() < 0.0012) {
+        // Spawn a falling leaf occasionally (extremely rare, slow, feather-light drifting)
+        if (outerNodes.length > 0 && Math.random() < 0.0003) {
             const randomNode = outerNodes[Math.floor(Math.random() * outerNodes.length)];
             this.physics.spawnFallingLeaf(randomNode.x, randomNode.y, randomNode.seed);
         }
@@ -213,7 +216,7 @@ export class TreeView {
         for (let i = 0; i < backCount; i++) {
             const nodeIndex = Math.floor(i * backStep);
             const node = backNodes[nodeIndex % backNodes.length];
-            const size = 12 + (node.seed % 4);
+            const size = 9 + (node.seed % 3); // Reduced size by 15-20% for delicate foliage
             this.leafSystem.drawLeaf(this.ctx, node.x, node.y, node.angle, size, node.seed, breathingFactor, 'back', 1.0);
         }
 
@@ -235,7 +238,7 @@ export class TreeView {
         for (let i = 0; i < midCount; i++) {
             const nodeIndex = Math.floor(i * midStep);
             const node = midNodes[nodeIndex % midNodes.length];
-            const size = 17 + (node.seed % 5);
+            const size = 14 + (node.seed % 4); // Reduced size by 15-20% for delicate foliage
             
             // Draw central leaf
             this.leafSystem.drawLeaf(this.ctx, node.x, node.y, node.angle, size, node.seed, breathingFactor, 'mid', 1.0);
@@ -265,7 +268,7 @@ export class TreeView {
         for (let i = 0; i < frontCount; i++) {
             const nodeIndex = Math.floor(i * frontStep);
             const node = frontNodes[nodeIndex % frontNodes.length];
-            const size = 22 + (node.seed % 6);
+            const size = 18 + (node.seed % 4); // Reduced size by 15-20% for delicate foliage
             
             // Draw central leaf
             this.leafSystem.drawLeaf(this.ctx, node.x, node.y, node.angle, size, node.seed, breathingFactor, 'front', 1.0);
@@ -306,7 +309,6 @@ export class TreeView {
 
         // C5. Draw golden diamond stars (Shares - Rebalanced as quiet delicate accent twinkles)
         const starCount = Math.min(outerNodes.length, Math.round(this.state.visualStats.stars));
-        const timeFactor = Date.now() * 0.0022;
         const usedStarIndices = new Set();
         let starsDrawn = 0;
         for (let i = 0; i < outerNodes.length && starsDrawn < starCount; i++) {
@@ -315,8 +317,9 @@ export class TreeView {
             usedStarIndices.add(index);
             
             const node = outerNodes[index];
-            const size = 7 + (node.seed % 4); // Beautiful, visible but delicate size
-            const pulse = 1.0 + Math.sin(timeFactor + node.seed) * 0.16;
+            const size = 5.5 + (node.seed % 3); // Decoupled smaller firefly-like size
+            const speedFactor = 0.0008 + (node.seed % 7) * 0.0003; // Decoupled async pulsing frequency
+            const pulse = 0.88 + Math.sin(Date.now() * speedFactor + node.seed * 2.3) * 0.15;
             
             const offsetDist = 5 + (node.seed % 6);
             const ox = Math.cos(node.angle) * offsetDist;

@@ -168,7 +168,7 @@ export class TreeAnimations {
                 drawScale = fraction;
             } else {
                 // Growth node coordinate
-                leafNodes.push({ x, y, angle, seed: localSeed });
+                leafNodes.push({ x, y, angle, seed: localSeed, depth: depth, maxDepth: targetDepth });
                 return;
             }
         }
@@ -211,21 +211,27 @@ export class TreeAnimations {
                 y: ctrlY,
                 angle: adjustedAngle + 0.42,
                 seed: (localSeed + 1234) | 0,
-                isInner: true
+                isInner: true,
+                depth: depth,
+                maxDepth: targetDepth
             });
             leafNodes.push({
                 x: ctrlX,
                 y: ctrlY,
                 angle: adjustedAngle - 0.42,
                 seed: (localSeed + 5678) | 0,
-                isInner: true
+                isInner: true,
+                depth: depth,
+                maxDepth: targetDepth
             });
             leafNodes.push({
                 x: x + (endX - x) * 0.35,
                 y: y + (endY - y) * 0.35,
                 angle: adjustedAngle + (nextLocalRand() - 0.5) * 0.2,
                 seed: (localSeed + 7777) | 0,
-                isInner: true
+                isInner: true,
+                depth: depth,
+                maxDepth: targetDepth
             });
 
             // Mid and late segment coordinates for rich volumetric density
@@ -235,21 +241,25 @@ export class TreeAnimations {
                     y: (y + endY) * 0.5,
                     angle: adjustedAngle,
                     seed: (localSeed + 9012) | 0,
-                    isInner: true
+                    isInner: true,
+                    depth: depth,
+                    maxDepth: targetDepth
                 });
                 leafNodes.push({
                     x: x + (endX - x) * 0.75,
                     y: y + (endY - y) * 0.75,
                     angle: adjustedAngle + (nextLocalRand() - 0.5) * 0.4,
                     seed: (localSeed + 1111) | 0,
-                    isInner: true
+                    isInner: true,
+                    depth: depth,
+                    maxDepth: targetDepth
                 });
             }
         }
 
         // Halt recursion if this was the final fractional sprouting layer
         if (drawScale < 1.0) {
-            leafNodes.push({ x: endX, y: endY, angle: adjustedAngle, seed: localSeed });
+            leafNodes.push({ x: endX, y: endY, angle: adjustedAngle, seed: localSeed, depth: depth, maxDepth: targetDepth });
             return;
         }
 
