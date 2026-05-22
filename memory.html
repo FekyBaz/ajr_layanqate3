@@ -44,6 +44,12 @@
             <h1 class="memory-name" id="memory-name"></h1>
             <div class="memory-relation" id="memory-relation"></div>
 
+            <div class="memory-edit-trigger-container" style="margin-top: 12px; text-align: center;">
+                <button class="btn btn-secondary btn-sm" id="btn-open-edit" type="button" style="font-size: 0.85rem; padding: 6px 14px; gap: 6px; border: 1px solid rgba(201, 170, 113, 0.4); border-radius: 100px; display: inline-flex; align-items: center; justify-content: center; background: rgba(201, 170, 113, 0.05); color: var(--color-accent, #8c6a35); cursor: pointer; transition: all 0.2s ease;">
+                    <span aria-hidden="true">✍️</span> تعديل أو إثراء الصفحة
+                </button>
+            </div>
+
             <hr class="memory-separator">
 
             <!-- Section: About -->
@@ -260,6 +266,106 @@
                     <span class="yaseen-modal__btn-icon" aria-hidden="true">✓</span>
                     <span class="yaseen-modal__btn-text">تمت القراءة وإهداء الثواب</span>
                 </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Proposed Edit Modal -->
+    <div class="yaseen-modal hidden" id="edit-modal" role="dialog" aria-modal="true" aria-labelledby="edit-modal-title">
+        <div class="yaseen-modal__backdrop" id="edit-modal-backdrop"></div>
+        <div class="yaseen-modal__container" style="max-width: 720px; max-height: 88vh;">
+            <div class="yaseen-modal__header">
+                <div class="yaseen-modal__title-group">
+                    <h2 class="yaseen-modal__title" id="edit-modal-title">تعديل وإثراء الصفحة</h2>
+                    <div class="yaseen-modal__bismillah">مراجعة من الإدارة قبل النشر</div>
+                </div>
+                <button class="yaseen-modal__close" id="btn-close-edit" title="إغلاق النافذة" type="button" aria-label="إغلاق">
+                    <span aria-hidden="true">×</span>
+                </button>
+            </div>
+            <div class="yaseen-modal__body" style="padding: 20px; overflow-y: auto;">
+                <form id="edit-memory-form" novalidate style="display: flex; flex-direction: column; gap: 16px;">
+                    <div class="form-hint" style="color: var(--color-text-secondary); margin-bottom: 8px; font-size: 0.9rem; line-height: 1.6; text-align: right;">
+                        يمكنك اقتراح تعديل أو إضافة معلومات جديدة على هذه الصفحة. سيتم مراجعة طلبك من قبل إدارة الموقع واعتماده في أقرب وقت. لا يتطلب هذا الإجراء تسجيل دخول.
+                    </div>
+
+                    <!-- Editor Details -->
+                    <fieldset class="form-section" style="border: 1px solid rgba(201,170,113,0.25); border-radius: 12px; padding: 14px; background: rgba(140,106,53,0.01); display: flex; flex-direction: column; gap: 12px; margin: 0;">
+                        <legend style="font-size: 0.95rem; font-weight: bold; padding: 2px 12px; border: 1px solid rgba(201, 170, 113, 0.3); border-radius: 50px; background: var(--color-surface, #fff); color: var(--color-text-primary);">بيانات مقدم الطلب</legend>
+                        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 12px;">
+                            <div class="form-group" style="margin-bottom: 0;">
+                                <label for="edit-proposed-by-name" style="font-size: 0.85rem; font-weight: bold; display: block; margin-bottom: 4px;">اسمك الكريم <span class="required-asterisk">*</span></label>
+                                <input type="text" id="edit-proposed-by-name" maxlength="100" required placeholder="مثال: أحمد محمد" style="width: 100%; padding: 8px 12px; font-size: 0.9rem; border: 1px solid var(--color-border, #ddd); border-radius: 8px; background: var(--color-surface, #fff); box-sizing: border-box;">
+                            </div>
+                            <div class="form-group" style="margin-bottom: 0;">
+                                <label for="edit-proposed-by-relation" style="font-size: 0.85rem; font-weight: bold; display: block; margin-bottom: 4px;">صلتك بالمتوفى <span class="required-asterisk">*</span></label>
+                                <input type="text" id="edit-proposed-by-relation" maxlength="100" required placeholder="مثال: ابنته، صديقه" style="width: 100%; padding: 8px 12px; font-size: 0.9rem; border: 1px solid var(--color-border, #ddd); border-radius: 8px; background: var(--color-surface, #fff); box-sizing: border-box;">
+                            </div>
+                        </div>
+                    </fieldset>
+
+                    <!-- Biography & Traits -->
+                    <fieldset class="form-section" style="border: 1px solid rgba(201,170,113,0.25); border-radius: 12px; padding: 14px; background: rgba(140,106,53,0.01); display: flex; flex-direction: column; gap: 12px; margin: 0;">
+                        <legend style="font-size: 0.95rem; font-weight: bold; padding: 2px 12px; border: 1px solid rgba(201, 170, 113, 0.3); border-radius: 50px; background: var(--color-surface, #fff); color: var(--color-text-primary);">عن المتوفى وسيرته</legend>
+                        <div class="form-group" style="margin-bottom: 0;">
+                            <label for="edit-biography" style="font-size: 0.85rem; font-weight: bold; display: block; margin-bottom: 4px;">نبذة تعريفية أو سيرة المتوفى</label>
+                            <textarea id="edit-biography" maxlength="1000" rows="3" placeholder="اكتب نبذة موجزة عن حياته أو الأثر الذي تركه..." style="width: 100%; padding: 8px 12px; font-size: 0.9rem; border: 1px solid var(--color-border, #ddd); border-radius: 8px; background: var(--color-surface, #fff); box-sizing: border-box; line-height: 1.5; resize: vertical;"></textarea>
+                            <div class="form-group__footer" style="display: flex; justify-content: space-between; font-size: 0.75rem; margin-top: 4px; color: #888;">
+                                <span>أضف تفاصيل إيجابية وملهمة تدعو للترحم عليه</span>
+                                <span id="edit-bio-char-count">0 / 1000</span>
+                            </div>
+                        </div>
+                        <div class="form-group" style="margin-bottom: 0;">
+                            <label for="edit-good-traits" style="font-size: 0.85rem; font-weight: bold; display: block; margin-bottom: 4px;">من صفاته الحميدة</label>
+                            <textarea id="edit-good-traits" maxlength="500" rows="2" placeholder="صفات طيبة تميز بها (كرم، بر، صدق...)" style="width: 100%; padding: 8px 12px; font-size: 0.9rem; border: 1px solid var(--color-border, #ddd); border-radius: 8px; background: var(--color-surface, #fff); box-sizing: border-box; line-height: 1.5; resize: vertical;"></textarea>
+                            <div class="form-group__footer" style="display: flex; justify-content: space-between; font-size: 0.75rem; margin-top: 4px; color: #888;">
+                                <span>اذكر مآثره الحسنة تخليداً لذكراه</span>
+                                <span id="edit-traits-char-count">0 / 500</span>
+                            </div>
+                        </div>
+                    </fieldset>
+
+                    <!-- Charity Details -->
+                    <fieldset class="form-section" style="border: 1px solid rgba(201,170,113,0.25); border-radius: 12px; padding: 14px; background: rgba(140,106,53,0.01); display: flex; flex-direction: column; gap: 12px; margin: 0;">
+                        <legend style="font-size: 0.95rem; font-weight: bold; padding: 2px 12px; border: 1px solid rgba(201, 170, 113, 0.3); border-radius: 50px; background: var(--color-surface, #fff); color: var(--color-text-primary);">الصدقة الجارية والوقف</legend>
+                        <div class="form-group" style="margin-bottom: 0;">
+                            <label for="edit-ongoing-charity" style="font-size: 0.85rem; font-weight: bold; display: block; margin-bottom: 4px;">تفاصيل الصدقة الجارية</label>
+                            <textarea id="edit-ongoing-charity" maxlength="1000" rows="3" placeholder="وصف لمشروع خيري جاري باسم المتوفى..." style="width: 100%; padding: 8px 12px; font-size: 0.9rem; border: 1px solid var(--color-border, #ddd); border-radius: 8px; background: var(--color-surface, #fff); box-sizing: border-box; line-height: 1.5; resize: vertical;"></textarea>
+                            <div class="form-group__footer" style="display: flex; justify-content: space-between; font-size: 0.75rem; margin-top: 4px; color: #888;">
+                                <span>تفاصيل تمكن الزوار من المشاركة أو التبرع</span>
+                                <span id="edit-charity-char-count">0 / 1000</span>
+                            </div>
+                        </div>
+                        <div class="form-group links-group" style="margin-bottom: 0;">
+                            <label style="font-size: 0.85rem; font-weight: bold; display: block; margin-bottom: 4px;">روابط التبرع والمشاريع الخيرية المعتمدة (حتى 5 روابط)</label>
+                            <div id="edit-links-container" style="display: flex; flex-direction: column; gap: 8px; margin-bottom: 8px;">
+                                <!-- Dynamic link rows go here -->
+                            </div>
+                            <button type="button" id="edit-add-link-btn" class="btn btn-secondary btn-sm" style="display: flex; align-items: center; gap: 6px; padding: 4px 10px; font-size: 0.8rem; width: fit-content; border: 1px dashed var(--color-gold, #c8a673); border-radius: 6px; background: rgba(200, 166, 115, 0.05); color: var(--color-accent, #8c6a35); cursor: pointer;">
+                                <span aria-hidden="true">+</span> إضافة رابط خيري جديد
+                            </button>
+                        </div>
+                    </fieldset>
+
+                    <!-- Story / Memory -->
+                    <fieldset class="form-section" style="border: 1px solid rgba(201,170,113,0.25); border-radius: 12px; padding: 14px; background: rgba(140,106,53,0.01); display: flex; flex-direction: column; gap: 12px; margin: 0;">
+                        <legend style="font-size: 0.95rem; font-weight: bold; padding: 2px 12px; border: 1px solid rgba(201, 170, 113, 0.3); border-radius: 50px; background: var(--color-surface, #fff); color: var(--color-text-primary);">مواقف وذكريات خالدة</legend>
+                        <div class="form-group" style="margin-bottom: 0;">
+                            <label for="edit-story" style="font-size: 0.85rem; font-weight: bold; display: block; margin-bottom: 4px;">ذكريات أو مواقف مؤثرة</label>
+                            <textarea id="edit-story" maxlength="2000" rows="3" placeholder="اكتب وصية طيبة أو موقفاً نبيلاً لا يُنسى..." style="width: 100%; padding: 8px 12px; font-size: 0.9rem; border: 1px solid var(--color-border, #ddd); border-radius: 8px; background: var(--color-surface, #fff); box-sizing: border-box; line-height: 1.5; resize: vertical;"></textarea>
+                            <div class="form-group__footer" style="display: flex; justify-content: space-between; font-size: 0.75rem; margin-top: 4px; color: #888;">
+                                <span>مساحة لتدوين الأثر الجميل الذي تركه</span>
+                                <span id="edit-story-char-count">0 / 2000</span>
+                            </div>
+                        </div>
+                    </fieldset>
+
+                    <div id="edit-form-status" role="alert" aria-live="assertive" style="font-size: 0.9rem; text-align: center; border-radius: 8px; padding: 10px; display: none;"></div>
+                </form>
+            </div>
+            <div class="yaseen-modal__footer" style="padding: 12px 20px; background: #fffefb; display: flex; gap: 10px; justify-content: flex-end; border-top: 1px solid rgba(201,170,113,0.15); box-sizing: border-box;">
+                <button class="btn btn-secondary btn-md" id="btn-cancel-edit" type="button" style="padding: 6px 16px; font-size: 0.9rem; border-radius: 8px; cursor: pointer;">إلغاء</button>
+                <button class="btn btn-primary btn-md" id="btn-submit-edit" type="button" style="padding: 6px 20px; font-size: 0.9rem; border-radius: 8px; cursor: pointer; background: var(--color-accent, #8c6a35); color: white; border: none;">إرسال طلب التعديل ✨</button>
             </div>
         </div>
     </div>
