@@ -31,6 +31,19 @@
 
         <hr class="community-divider community-divider--header" aria-hidden="true">
 
+        <section class="tree-card card card-elevated" aria-label="شجرة الخير الإسلامية" id="treeContainer">
+            <div class="tree-overlay">
+                <h3>شجرة الخير الجماعية 🌳</h3>
+                <p>شجرة حيّة مباركة تنمو وتزهر بالذكر والدعاء والمشاركات المستمرة لمجتمعنا</p>
+            </div>
+            <canvas id="treeCanvas"></canvas>
+            <div class="tree-legend">
+                <span><span class="dot dot-dhikr"></span> أذكار غُرست (أوراق خضراء)</span>
+                <span><span class="dot dot-share"></span> مشاركات أينعت (نجوم ذهبية)</span>
+            </div>
+        </section>
+
+        <hr class="community-divider" aria-hidden="true">
 
         <section class="community-controls" aria-label="خيارات الفلترة والترتيب">
             <div class="tabs" id="filterTabs">
@@ -110,6 +123,7 @@
     <script src="lib/analytics.js?v=20260521"></script>
     <script src="/lib/ga4.js" async></script>
     <script src="community.js?v=20260227"></script>
+    <script type="module" src="tree/TreeView.js"></script>
     <script src="share-project.js?v=20260227"></script>
 </body>
 
