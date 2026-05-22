@@ -97,7 +97,8 @@ async function getOverviewStats(startDate) {
     }
 
     const sessions = new Set(events.map(e => e.session_id));
-    const returning = events.filter(e => e.is_returning).length;
+    const returningSessions = new Set(events.filter(e => e.is_returning).map(e => e.session_id));
+    const returning = returningSessions.size;
     const pageViews = events.filter(e => e.event_type === 'page_view').length;
 
     // Daily trend
@@ -238,7 +239,7 @@ async function getFunnelData(startDate) {
         .from('analytics_events')
         .select('session_id')
         .eq('event_type', 'page_view')
-        .eq('page_path', '/index.html')
+        .in('page_path', ['/', '/index.html'])
         .gte('created_at', startDate);
 
     const landingSessions = new Set(pageViews?.map(e => e.session_id) || []);
