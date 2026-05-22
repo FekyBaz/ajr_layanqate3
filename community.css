@@ -258,28 +258,61 @@
     font-weight: 500;
 }
 
-/* Premium Share Button */
-.submission-card .share-btn {
-    background: transparent;
-    color: #8c6a35;
-    border: 1px solid rgba(200, 166, 115, 0.25);
-    border-radius: var(--radius-md);
-    padding: 0.6rem 1.2rem;
-    cursor: pointer;
-    transition: all var(--transition-normal);
-    font-weight: 500;
-    font-size: var(--font-size-sm);
+/* Premium Card Action Buttons Row */
+.submission-card .card-actions {
+    display: flex;
+    gap: var(--space-sm);
+    margin-top: auto;
+    width: 100%;
+}
+
+.submission-card .card-actions .btn {
+    flex: 1;
     display: flex;
     align-items: center;
     justify-content: center;
     gap: var(--space-xs);
+    padding: 0.6rem 0.8rem;
+    border-radius: var(--radius-md);
+    font-weight: 500;
+    font-size: 13px;
+    cursor: pointer;
+    transition: all var(--transition-normal);
+    text-decoration: none !important;
 }
 
-.submission-card .share-btn:hover {
+.submission-card .card-actions .share-btn {
+    background: transparent;
+    color: #8c6a35;
+    border: 1px solid rgba(200, 166, 115, 0.25);
+}
+
+.submission-card .card-actions .share-btn:hover {
     background: rgba(200, 166, 115, 0.08);
     border-color: #8c6a35;
     color: #6a4f22;
-    box-shadow: 0 4px 12px rgba(200, 166, 115, 0.1);
+    box-shadow: 0 4px 12px rgba(200, 166, 115, 0.08);
+}
+
+.submission-card .card-actions .poster-btn {
+    background: rgba(200, 166, 115, 0.04);
+    color: #8c6a35;
+    border: 1px solid rgba(200, 166, 115, 0.35);
+}
+
+.submission-card .card-actions .poster-btn:hover {
+    background: rgba(200, 166, 115, 0.15);
+    border-color: #8c6a35;
+    color: #553e18;
+    box-shadow: 0 4px 14px rgba(200, 166, 115, 0.18);
+    transform: translateY(-1px);
+}
+
+@media (max-width: 480px) {
+    .submission-card .card-actions {
+        flex-direction: column;
+        gap: var(--space-xs);
+    }
 }
 
 /* Pagination */
