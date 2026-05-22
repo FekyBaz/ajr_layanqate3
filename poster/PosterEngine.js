@@ -9,9 +9,13 @@ import { TemplateSystem } from './TemplateSystem.js';
 import { ExportEngine } from './ExportEngine.js';
 import { ShareSystem } from './ShareSystem.js';
 import { MotionPreview } from './MotionPreview.js';
+import { BackgroundSystem } from './BackgroundSystem.js';
 
 export class PosterEngine {
     constructor() {
+        // Pre-cache premium background images in the background
+        BackgroundSystem.getThemeImage('poster/paradise-spring-bg.jpg');
+
         // 1. Initialize State Parameters
         this.activeThemeId = 'night-spiritual';
         this.ratio = 'square';

@@ -4,6 +4,49 @@
  */
 
 export class BackgroundSystem {
+    static imageCache = {};
+
+    static getThemeImage(src) {
+        if (BackgroundSystem.imageCache[src]) {
+            return BackgroundSystem.imageCache[src];
+        }
+        const img = new Image();
+        img.src = src;
+        img.isLoaded = false;
+        img.onload = () => {
+            img.isLoaded = true;
+            if (window.posterEngine) {
+                window.posterEngine.needsRedraw = true;
+            }
+        };
+        BackgroundSystem.imageCache[src] = img;
+        return img;
+    }
+
+    static drawImageCover(ctx, img, width, height) {
+        if (!img.isLoaded || img.naturalWidth === 0) return;
+        const imgRatio = img.naturalWidth / img.naturalHeight;
+        const canvasRatio = width / height;
+        
+        let sx, sy, sWidth, sHeight;
+        
+        if (canvasRatio > imgRatio) {
+            // Canvas is wider than Image
+            sWidth = img.naturalWidth;
+            sHeight = img.naturalWidth / canvasRatio;
+            sx = 0;
+            sy = (img.naturalHeight - sHeight) / 2;
+        } else {
+            // Canvas is taller than Image
+            sWidth = img.naturalHeight * canvasRatio;
+            sHeight = img.naturalHeight;
+            sx = (img.naturalWidth - sWidth) / 2;
+            sy = 0;
+        }
+        
+        ctx.drawImage(img, sx, sy, sWidth, sHeight, 0, 0, width, height);
+    }
+
     /**
      * Renders the background gradient, horizon lights, and vignettes.
      */
@@ -69,24 +112,30 @@ export class BackgroundSystem {
             ctx.fillRect(0, 0, width, height);
 
         } else if (theme.id === 'paradise-spring') {
-            // Premium soft misty watercolor green-cream sky
-            const baseGrad = ctx.createLinearGradient(0, 0, 0, height);
-            baseGrad.addColorStop(0, '#f2efe9'); // Very soft warm watercolor paper ivory
-            baseGrad.addColorStop(0.6, '#eef3eb'); // Delicate washed mint-white
-            baseGrad.addColorStop(1, '#dfe7db'); // Pale mossy watercolor cream
-            ctx.fillStyle = baseGrad;
-            ctx.fillRect(0, 0, width, height);
+            // Try loading/drawing the beautiful watercolor background image
+            const bgImg = BackgroundSystem.getThemeImage('poster/paradise-spring-bg.jpg');
+            if (bgImg.isLoaded) {
+                BackgroundSystem.drawImageCover(ctx, bgImg, width, height);
+            } else {
+                // Fallback procedural watercolor green-cream sky while loading
+                const baseGrad = ctx.createLinearGradient(0, 0, 0, height);
+                baseGrad.addColorStop(0, '#f2efe9'); // Very soft warm watercolor paper ivory
+                baseGrad.addColorStop(0.6, '#eef3eb'); // Delicate washed mint-white
+                baseGrad.addColorStop(1, '#dfe7db'); // Pale mossy watercolor cream
+                ctx.fillStyle = baseGrad;
+                ctx.fillRect(0, 0, width, height);
 
-            // Radial ambient gold sun/glow in top left
-            const sunGrad = ctx.createRadialGradient(
-                width * 0.15, height * 0.15, 10 * scale,
-                width * 0.15, height * 0.15, width * 0.5
-            );
-            sunGrad.addColorStop(0, 'rgba(239, 218, 187, 0.25)'); // Gentle golden watercolor glow
-            sunGrad.addColorStop(0.5, 'rgba(226, 234, 223, 0.05)');
-            sunGrad.addColorStop(1, 'rgba(0, 0, 0, 0)');
-            ctx.fillStyle = sunGrad;
-            ctx.fillRect(0, 0, width, height);
+                // Radial ambient gold sun/glow in top left
+                const sunGrad = ctx.createRadialGradient(
+                    width * 0.15, height * 0.15, 10 * scale,
+                    width * 0.15, height * 0.15, width * 0.5
+                );
+                sunGrad.addColorStop(0, 'rgba(239, 218, 187, 0.25)'); // Gentle golden watercolor glow
+                sunGrad.addColorStop(0.5, 'rgba(226, 234, 223, 0.05)');
+                sunGrad.addColorStop(1, 'rgba(0, 0, 0, 0)');
+                ctx.fillStyle = sunGrad;
+                ctx.fillRect(0, 0, width, height);
+            }
         }
 
         // 2. Draw subtle dark vignette (Except for Minimal Noor and Paradise Spring)
@@ -206,8 +255,12 @@ export class BackgroundSystem {
             this.drawMistBand(ctx, width, height, height * 0.70, 'rgba(212, 175, 55, 0.003)', time * 0.05);
 
         } else if (theme.id === 'paradise-spring') {
-            // Overlapping misty watercolor hills at the bottom
-            this.drawWatercolorHills(ctx, width, height, scale, time);
+            // Overlapping misty watercolor hills at the bottom (only as fallback if image is not loaded)
+            const bgImg = BackgroundSystem.imageCache['poster/paradise-spring-bg.jpg'];
+            const isImgLoaded = bgImg && bgImg.isLoaded;
+            if (!isImgLoaded) {
+                this.drawWatercolorHills(ctx, width, height, scale, time);
+            }
 
             // Breathable soft column of light in center
             const haloGrad = ctx.createRadialGradient(
@@ -365,29 +418,34 @@ export class BackgroundSystem {
             }
 
         } else if (theme.id === 'paradise-spring') {
-            // 1. Primary main branch Top-Left
-            const p0_1 = { x: -15 * scale, y: -15 * scale };
-            const p1_1 = { x: width * 0.28, y: height * 0.08 };
-            const p2_1 = { x: width * 0.42, y: height * 0.22 };
-            this.drawBranchOfLeaves(ctx, p0_1, p1_1, p2_1, 14, 46 * scale, '#123524');
+            // Only draw procedural fallback foliage if background image is not loaded
+            const bgImg = BackgroundSystem.imageCache['poster/paradise-spring-bg.jpg'];
+            const isImgLoaded = bgImg && bgImg.isLoaded;
+            if (!isImgLoaded) {
+                // 1. Primary main branch Top-Left
+                const p0_1 = { x: -15 * scale, y: -15 * scale };
+                const p1_1 = { x: width * 0.28, y: height * 0.08 };
+                const p2_1 = { x: width * 0.42, y: height * 0.22 };
+                this.drawBranchOfLeaves(ctx, p0_1, p1_1, p2_1, 14, 46 * scale, '#123524');
 
-            // 2. Secondary side branch Top-Left (angled slightly lower down the left edge)
-            const p0_2 = { x: -15 * scale, y: height * 0.12 };
-            const p1_2 = { x: width * 0.18, y: height * 0.25 };
-            const p2_2 = { x: width * 0.32, y: height * 0.38 };
-            this.drawBranchOfLeaves(ctx, p0_2, p1_2, p2_2, 11, 40 * scale, '#1E4233');
+                // 2. Secondary side branch Top-Left (angled slightly lower down the left edge)
+                const p0_2 = { x: -15 * scale, y: height * 0.12 };
+                const p1_2 = { x: width * 0.18, y: height * 0.25 };
+                const p2_2 = { x: width * 0.32, y: height * 0.38 };
+                this.drawBranchOfLeaves(ctx, p0_2, p1_2, p2_2, 11, 40 * scale, '#1E4233');
 
-            // 3. Third branch starting further top-right, draping down towards center
-            const p0_3 = { x: width * 0.20, y: -15 * scale };
-            const p1_3 = { x: width * 0.35, y: height * 0.15 };
-            const p2_3 = { x: width * 0.50, y: height * 0.20 };
-            this.drawBranchOfLeaves(ctx, p0_3, p1_3, p2_3, 10, 36 * scale, '#265440');
+                // 3. Third branch starting further top-right, draping down towards center
+                const p0_3 = { x: width * 0.20, y: -15 * scale };
+                const p1_3 = { x: width * 0.35, y: height * 0.15 };
+                const p2_3 = { x: width * 0.50, y: height * 0.20 };
+                this.drawBranchOfLeaves(ctx, p0_3, p1_3, p2_3, 10, 36 * scale, '#265440');
 
-            // 4. Balancing small branch in the bottom-right corner
-            const p0_4 = { x: width + 15 * scale, y: height + 15 * scale };
-            const p1_4 = { x: width * 0.82, y: height * 0.82 };
-            const p2_4 = { x: width * 0.70, y: height * 0.74 };
-            this.drawBranchOfLeaves(ctx, p0_4, p1_4, p2_4, 9, 38 * scale, '#1E4233');
+                // 4. Balancing small branch in the bottom-right corner
+                const p0_4 = { x: width + 15 * scale, y: height + 15 * scale };
+                const p1_4 = { x: width * 0.82, y: height * 0.82 };
+                const p2_4 = { x: width * 0.70, y: height * 0.74 };
+                this.drawBranchOfLeaves(ctx, p0_4, p1_4, p2_4, 9, 38 * scale, '#1E4233');
+            }
         }
 
         ctx.restore();
