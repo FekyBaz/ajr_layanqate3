@@ -131,7 +131,7 @@ export class BackgroundSystem {
 
         } else if (theme.id === 'paradise-spring') {
             // Try loading/drawing the beautiful watercolor background image
-            const bgImg = BackgroundSystem.getThemeImage('poster/paradise-spring-bg.jpg');
+            const bgImg = BackgroundSystem.getThemeImage('poster/paradise-spring-bg.png');
             if (bgImg.isLoaded) {
                 BackgroundSystem.drawImageCover(ctx, bgImg, width, height);
             } else {
@@ -278,7 +278,7 @@ export class BackgroundSystem {
 
         } else if (theme.id === 'paradise-spring') {
             // Overlapping misty watercolor hills at the bottom (only as fallback if image is not loaded)
-            const bgImg = BackgroundSystem.imageCache['poster/paradise-spring-bg.jpg'];
+            const bgImg = BackgroundSystem.imageCache['poster/paradise-spring-bg.png'];
             const isImgLoaded = bgImg && bgImg.isLoaded;
             if (!isImgLoaded) {
                 this.drawWatercolorHills(ctx, width, height, scale, time);
@@ -441,7 +441,7 @@ export class BackgroundSystem {
 
         } else if (theme.id === 'paradise-spring') {
             // Only draw procedural fallback foliage if background image is not loaded
-            const bgImg = BackgroundSystem.imageCache['poster/paradise-spring-bg.jpg'];
+            const bgImg = BackgroundSystem.imageCache['poster/paradise-spring-bg.png'];
             const isImgLoaded = bgImg && bgImg.isLoaded;
             if (!isImgLoaded) {
                 // 1. Primary main branch Top-Left
