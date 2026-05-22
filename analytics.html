@@ -4,8 +4,9 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="robots" content="noindex, nofollow">
     <title>لوحة التحليلات | أجر لا ينقطع</title>
-    <meta name="description" content="لوحة تحليلات المنتج — أجر لا ينقطع">
+    <meta name="description" content="لوحة تحليلات النمو — أجر لا ينقطع">
 
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -21,6 +22,7 @@
             <div>
                 <h1 class="analytics-title">📊 لوحة التحليلات</h1>
                 <a href="/admin" class="back-link">← العودة للوحة الإدارة</a>
+                <span id="lastUpdate" class="update-time"></span>
             </div>
             <div class="period-selector">
                 <button class="period-btn" data-period="7d">٧ أيام</button>
@@ -29,55 +31,134 @@
             </div>
         </div>
 
+        <!-- Realtime Bar -->
+        <div class="realtime-bar" id="realtimeBar">
+            <span class="realtime-dot"></span>
+            <span class="realtime-label">المستخدمون النشطون الآن:</span>
+            <span class="realtime-count" id="realtimeActive">—</span>
+        </div>
+
         <div id="analyticsLoading" class="loading">جارٍ تحميل التحليلات...</div>
         <div id="analyticsContent" hidden>
-            <!-- Overview Stats -->
-            <div class="stats-grid" id="overviewStats"></div>
 
-            <!-- Daily Trend -->
-            <div class="section">
-                <h2 class="section-title">📈 الاتجاه اليومي</h2>
-                <div id="dailyTrend" class="bar-chart"></div>
+            <!-- GA4 Warning (shown when GA4 not configured) -->
+            <div id="gaWarning" class="ga-warning">
+                ⚙️ <strong>Google Analytics غير مهيأ</strong> — قم بتعيين <code>GA4_PROPERTY_ID</code> مع حساب الخدمة (<code>GOOGLE_SERVICE_ACCOUNT_JSON</code>) أو بيانات OAuth (<code>GOOGLE_CLIENT_ID</code> + <code>GOOGLE_CLIENT_SECRET</code> + <code>GOOGLE_REFRESH_TOKEN</code>) في متغيرات Netlify البيئية.
             </div>
 
-            <!-- Traffic Sources -->
-            <div class="section">
-                <h2 class="section-title">🔗 مصادر الزيارات</h2>
-                <div id="trafficSources" class="bar-chart"></div>
+            <!-- 💡 Insights -->
+            <div class="section" id="insightsSection">
+                <h2 class="section-title">💡 الرؤى والتوصيات</h2>
+                <div id="insights"></div>
             </div>
 
-            <!-- Top Pages -->
+            <!-- GA4 Overview -->
+            <div class="section" id="gaOverviewSection">
+                <h2 class="section-title">
+                    <span class="section-badge section-badge-ga4">GA4</span>
+                    نظرة عامة — Google Analytics
+                </h2>
+                <div id="gaConfig" hidden>
+                    <p class="empty">GA4 غير مهيأ. أضف <code>GA4_PROPERTY_ID</code> مع <code>GOOGLE_SERVICE_ACCOUNT_JSON</code> أو <code>GOOGLE_CLIENT_ID</code> + <code>GOOGLE_CLIENT_SECRET</code> + <code>GOOGLE_REFRESH_TOKEN</code> لمتغيرات البيئة.</p>
+                </div>
+                <div class="stats-grid" id="gaOverview"></div>
+            </div>
+
+            <!-- Custom Overview -->
             <div class="section">
-                <h2 class="section-title">📄 أكثر الصفحات زيارة</h2>
+                <h2 class="section-title">
+                    <span class="section-badge section-badge-custom">ذاتي</span>
+                    نظرة عامة — التحليلات الذاتية
+                </h2>
+                <div class="stats-grid" id="customOverview"></div>
+            </div>
+
+            <!-- Acquisition (GA4) -->
+            <div class="section">
+                <h2 class="section-title">
+                    <span class="section-badge section-badge-ga4">GA4</span>
+                    قنوات الاكتساب والمصادر
+                </h2>
+                <div id="gaAcquisition"></div>
+            </div>
+
+            <!-- Traffic Sources (Custom) -->
+            <div class="section">
+                <h2 class="section-title">
+                    <span class="section-badge section-badge-custom">ذاتي</span>
+                    مصادر الزيارات
+                </h2>
+                <div id="customSources" class="bar-chart"></div>
+            </div>
+
+            <!-- Top Pages (GA4) -->
+            <div class="section" id="gaTopPagesSection">
+                <h2 class="section-title">
+                    <span class="section-badge section-badge-ga4">GA4</span>
+                    أكثر الصفحات زيارة
+                </h2>
                 <table class="data-table">
-                    <thead><tr><th>الصفحة</th><th>العنوان</th><th>المشاهدات</th></tr></thead>
-                    <tbody id="topPages"></tbody>
+                    <thead><tr><th>المسار</th><th>العنوان</th><th>المشاهدات</th><th>المستخدمون</th></tr></thead>
+                    <tbody id="gaTopPages"></tbody>
                 </table>
             </div>
 
-            <!-- Devices -->
+            <!-- Top Pages (Custom) -->
             <div class="section">
-                <h2 class="section-title">📱 الأجهزة والمتصفحات</h2>
-                <div id="devices"></div>
+                <h2 class="section-title">
+                    <span class="section-badge section-badge-custom">ذاتي</span>
+                    أكثر الصفحات زيارة
+                </h2>
+                <table class="data-table">
+                    <thead><tr><th>المسار</th><th>العنوان</th><th>المشاهدات</th></tr></thead>
+                    <tbody id="customTopPages"></tbody>
+                </table>
             </div>
 
-            <!-- Geography -->
+            <!-- Devices & Geography (GA4) -->
             <div class="section">
-                <h2 class="section-title">🌍 الدول</h2>
-                <div id="geography" class="bar-chart"></div>
+                <h2 class="section-title">
+                    <span class="section-badge section-badge-ga4">GA4</span>
+                    الأجهزة والمتصفحات
+                </h2>
+                <div id="gaDevices"></div>
             </div>
 
-            <!-- Funnels -->
             <div class="section">
-                <h2 class="section-title">🎯 مسارات التحويل</h2>
-                <div id="funnels" class="funnel"></div>
+                <h2 class="section-title">
+                    <span class="section-badge section-badge-ga4">GA4</span>
+                    الدول
+                </h2>
+                <div id="gaGeography" class="bar-chart"></div>
             </div>
 
-            <!-- Retention -->
+            <!-- Custom Funnels -->
             <div class="section">
-                <h2 class="section-title">🔄 الاحتفاظ</h2>
-                <div id="retention"></div>
+                <h2 class="section-title">
+                    <span class="section-badge section-badge-custom">ذاتي</span>
+                    مسارات التحويل
+                </h2>
+                <div id="customFunnels" class="funnel"></div>
             </div>
+
+            <!-- Custom Retention -->
+            <div class="section">
+                <h2 class="section-title">
+                    <span class="section-badge section-badge-custom">ذاتي</span>
+                    الاحتفاظ
+                </h2>
+                <div id="customRetention"></div>
+            </div>
+
+            <!-- Custom Feature Usage -->
+            <div class="section">
+                <h2 class="section-title">
+                    <span class="section-badge section-badge-custom">ذاتي</span>
+                    الأحداث المخصصة
+                </h2>
+                <div id="customFeatureUsage" class="bar-chart"></div>
+            </div>
+
         </div>
     </main>
 

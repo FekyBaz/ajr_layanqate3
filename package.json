@@ -10,7 +10,9 @@
         "start": "netlify dev"
     },
     "dependencies": {
-        "@supabase/supabase-js": "^2.39.0"
+        "@google-analytics/data": "^4.8.0",
+        "@supabase/supabase-js": "^2.39.0",
+        "google-auth-library": "^9.0.0"
     },
     "devDependencies": {
         "netlify-cli": "^17.0.0"
