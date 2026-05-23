@@ -17,6 +17,7 @@ export class PosterEngine {
         BackgroundSystem.getThemeImage('poster/paradise-spring-bg.png');
         BackgroundSystem.getThemeImage('poster/night-serenity-bg.png');
         BackgroundSystem.getThemeImage('poster/nature-serenity-bg.png');
+        BackgroundSystem.getThemeImage('poster/minimal-noor-bg.png');
         BackgroundSystem.getThemeImage('poster/premium-gold-bg.png');
 
         // 1. Initialize State Parameters

@@ -74,42 +74,34 @@ export class BackgroundSystem {
             }
 
         } else if (theme.id === 'nature-serenity') {
-            // Try loading/drawing the beautiful watercolor morning forest background image
+            // Lush golden sunrise mosque landscape
             const bgImg = BackgroundSystem.getThemeImage('poster/nature-serenity-bg.png');
             if (bgImg.isLoaded) {
                 BackgroundSystem.drawImageCover(ctx, bgImg, width, height);
             } else {
-                // Misty morning forest gradient
+                // Warm sunrise fallback gradient
                 const baseGrad = ctx.createLinearGradient(0, 0, 0, height);
-                baseGrad.addColorStop(0, '#0c1a13'); // Deep teal green
-                baseGrad.addColorStop(0.5, '#070f0b'); // Forest night
-                baseGrad.addColorStop(1, '#030604'); // Ground dark green
+                baseGrad.addColorStop(0, '#f5e8c2');
+                baseGrad.addColorStop(0.5, '#d4e8b0');
+                baseGrad.addColorStop(1, '#8aad72');
                 ctx.fillStyle = baseGrad;
-                ctx.fillRect(0, 0, width, height);
-
-                // Soft peach/gold dawn horizon radial glow at the bottom
-                const horizonGrad = ctx.createRadialGradient(
-                    width * 0.5, height * 0.95, 20 * scale,
-                    width * 0.5, height * 0.95, width * 0.7
-                );
-                horizonGrad.addColorStop(0, 'rgba(235, 195, 160, 0.12)'); // Peach horizon light
-                horizonGrad.addColorStop(0.4, 'rgba(168, 211, 180, 0.04)'); // Soft mint glow
-                horizonGrad.addColorStop(1, 'rgba(0, 0, 0, 0)');
-                ctx.fillStyle = horizonGrad;
                 ctx.fillRect(0, 0, width, height);
             }
 
         } else if (theme.id === 'minimal-noor') {
-            // Ultra-calming warm ivory / pristine sand radial gradient
-            const baseGrad = ctx.createRadialGradient(
-                width * 0.5, height * 0.4, 50 * scale,
-                width * 0.5, height * 0.5, Math.max(width, height) * 0.7
-            );
-            baseGrad.addColorStop(0, '#f9f6f0'); // Warm white light center
-            baseGrad.addColorStop(0.6, '#f3ebd9'); // Soft cream
-            baseGrad.addColorStop(1, '#e5d8c3'); // Earthy sand
-            ctx.fillStyle = baseGrad;
-            ctx.fillRect(0, 0, width, height);
+            // Misty hazy morning mosque landscape
+            const bgImg = BackgroundSystem.getThemeImage('poster/minimal-noor-bg.png');
+            if (bgImg.isLoaded) {
+                BackgroundSystem.drawImageCover(ctx, bgImg, width, height);
+            } else {
+                // Soft misty fallback
+                const baseGrad = ctx.createLinearGradient(0, 0, 0, height);
+                baseGrad.addColorStop(0, '#e8efe6');
+                baseGrad.addColorStop(0.6, '#f0f5ec');
+                baseGrad.addColorStop(1, '#c8dbc0');
+                ctx.fillStyle = baseGrad;
+                ctx.fillRect(0, 0, width, height);
+            }
 
         } else if (theme.id === 'premium-gold') {
             // Try loading/drawing the beautiful dark gold abstract background image
@@ -156,8 +148,45 @@ export class BackgroundSystem {
             }
         }
 
-        // 2. Draw subtle dark vignette (Except for Minimal Noor and Paradise Spring)
-        if (theme.id !== 'minimal-noor' && theme.id !== 'paradise-spring') {
+        // 2. Draw text-legibility overlay based on theme
+        if (theme.id === 'nature-serenity') {
+            // Radial center brightener — darkens edges, keeps center clear for light text
+            const vignetteGrad = ctx.createRadialGradient(
+                width * 0.5, height * 0.42, Math.min(width, height) * 0.18,
+                width * 0.5, height * 0.5, Math.max(width, height) * 0.82
+            );
+            vignetteGrad.addColorStop(0, 'rgba(0, 0, 0, 0)');
+            vignetteGrad.addColorStop(0.55, 'rgba(0, 0, 0, 0.18)');
+            vignetteGrad.addColorStop(1, 'rgba(0, 0, 0, 0.55)');
+            ctx.fillStyle = vignetteGrad;
+            ctx.fillRect(0, 0, width, height);
+
+        } else if (theme.id === 'minimal-noor') {
+            // Soft white center glow to brighten text area — misty diffuse vignette
+            const vignetteGrad = ctx.createRadialGradient(
+                width * 0.5, height * 0.42, Math.min(width, height) * 0.15,
+                width * 0.5, height * 0.5, Math.max(width, height) * 0.82
+            );
+            vignetteGrad.addColorStop(0, 'rgba(255, 255, 255, 0.12)');
+            vignetteGrad.addColorStop(0.5, 'rgba(0, 0, 0, 0.1)');
+            vignetteGrad.addColorStop(1, 'rgba(0, 0, 0, 0.45)');
+            ctx.fillStyle = vignetteGrad;
+            ctx.fillRect(0, 0, width, height);
+
+        } else if (theme.id === 'paradise-spring') {
+            // Soft center vignette for the golden sunset scene
+            const vignetteGrad = ctx.createRadialGradient(
+                width * 0.5, height * 0.42, Math.min(width, height) * 0.18,
+                width * 0.5, height * 0.5, Math.max(width, height) * 0.82
+            );
+            vignetteGrad.addColorStop(0, 'rgba(0, 0, 0, 0)');
+            vignetteGrad.addColorStop(0.5, 'rgba(0, 0, 0, 0.12)');
+            vignetteGrad.addColorStop(1, 'rgba(0, 0, 0, 0.50)');
+            ctx.fillStyle = vignetteGrad;
+            ctx.fillRect(0, 0, width, height);
+
+        } else if (theme.id !== 'minimal-noor') {
+            // Standard vignette for other dark themes
             const vignetteGrad = ctx.createRadialGradient(
                 width * 0.5, height * 0.5, Math.min(width, height) * 0.4,
                 width * 0.5, height * 0.5, Math.max(width, height) * 0.8
@@ -165,28 +194,6 @@ export class BackgroundSystem {
             vignetteGrad.addColorStop(0, 'rgba(0, 0, 0, 0)');
             vignetteGrad.addColorStop(0.5, 'rgba(0, 0, 0, 0.2)');
             vignetteGrad.addColorStop(1, 'rgba(0, 0, 0, 0.75)');
-            ctx.fillStyle = vignetteGrad;
-            ctx.fillRect(0, 0, width, height);
-        } else if (theme.id === 'paradise-spring') {
-            // Soft sage green vignette for watercolor theme
-            const vignetteGrad = ctx.createRadialGradient(
-                width * 0.5, height * 0.5, Math.min(width, height) * 0.35,
-                width * 0.5, height * 0.5, Math.max(width, height) * 0.82
-            );
-            vignetteGrad.addColorStop(0, 'rgba(242, 239, 233, 0)');
-            vignetteGrad.addColorStop(0.65, 'rgba(107, 142, 117, 0.04)');
-            vignetteGrad.addColorStop(1, 'rgba(62, 123, 92, 0.12)');
-            ctx.fillStyle = vignetteGrad;
-            ctx.fillRect(0, 0, width, height);
-        } else {
-            // Soft white/light vignette for Minimal Noor to draw eyes inwards
-            const vignetteGrad = ctx.createRadialGradient(
-                width * 0.5, height * 0.5, Math.min(width, height) * 0.3,
-                width * 0.5, height * 0.5, Math.max(width, height) * 0.8
-            );
-            vignetteGrad.addColorStop(0, 'rgba(255, 255, 255, 0)');
-            vignetteGrad.addColorStop(0.6, 'rgba(229, 216, 195, 0.1)');
-            vignetteGrad.addColorStop(1, 'rgba(188, 163, 116, 0.15)');
             ctx.fillStyle = vignetteGrad;
             ctx.fillRect(0, 0, width, height);
         }
@@ -222,42 +229,45 @@ export class BackgroundSystem {
             this.drawMistBand(ctx, width, height, height * 0.72, 'rgba(140, 170, 200, 0.008)', -time * 0.08);
 
         } else if (theme.id === 'nature-serenity') {
-            // Draw overlapping misty mountains silhouette in the bottom background (only as fallback if image is not loaded)
-            const bgImg = BackgroundSystem.imageCache['poster/nature-serenity-bg.png'];
-            const isImgLoaded = bgImg && bgImg.isLoaded;
-            if (!isImgLoaded) {
+            // Soft central glow for text readability on bright landscape
+            const bgImg2 = BackgroundSystem.imageCache['poster/nature-serenity-bg.png'];
+            if (!bgImg2 || !bgImg2.isLoaded) {
                 this.drawMountainSilhouettes(ctx, width, height, scale, time);
             }
 
-            // Draw a central breathing light column halo
             const haloGrad = ctx.createRadialGradient(
-                width * 0.5, height * 0.42, 5 * scale,
-                width * 0.5, height * 0.42, height * (0.3 + breathe)
+                width * 0.5, height * 0.40, 5 * scale,
+                width * 0.5, height * 0.40, height * (0.28 + breathe)
             );
-            haloGrad.addColorStop(0, 'rgba(200, 240, 215, 0.07)'); // soft mint core
-            haloGrad.addColorStop(0.5, 'rgba(168, 211, 180, 0.02)');
+            haloGrad.addColorStop(0, 'rgba(255, 250, 230, 0.18)');
+            haloGrad.addColorStop(0.5, 'rgba(240, 230, 200, 0.04)');
             haloGrad.addColorStop(1, 'rgba(0, 0, 0, 0)');
             ctx.fillStyle = haloGrad;
             ctx.beginPath();
-            ctx.arc(width * 0.5, height * 0.42, height * 0.4, 0, Math.PI * 2);
+            ctx.arc(width * 0.5, height * 0.40, height * 0.4, 0, Math.PI * 2);
             ctx.fill();
 
-            // Drifting misty forest fog
-            this.drawMistBand(ctx, width, height, height * 0.78, 'rgba(168, 211, 180, 0.015)', time * 0.07);
-
         } else if (theme.id === 'minimal-noor') {
-            // Soft white glowing spiritual beam
+            // Soft glowing ethereal mist — blends with the misty landscape
+            const bgImgNoor = BackgroundSystem.imageCache['poster/minimal-noor-bg.png'];
+            if (!bgImgNoor || !bgImgNoor.isLoaded) {
+                // procedural fallback halo
+            }
+
             const haloGrad = ctx.createRadialGradient(
                 width * 0.5, height * 0.38, 20 * scale,
                 width * 0.5, height * 0.38, height * (0.38 + breathe)
             );
-            haloGrad.addColorStop(0, 'rgba(255, 255, 255, 0.28)'); // Pure light center
-            haloGrad.addColorStop(0.4, 'rgba(245, 235, 220, 0.12)'); // Diffusion
+            haloGrad.addColorStop(0, 'rgba(255, 255, 255, 0.18)');
+            haloGrad.addColorStop(0.4, 'rgba(240, 245, 238, 0.06)');
             haloGrad.addColorStop(1, 'rgba(255, 255, 255, 0)');
             ctx.fillStyle = haloGrad;
             ctx.beginPath();
             ctx.arc(width * 0.5, height * 0.38, height * 0.5, 0, Math.PI * 2);
             ctx.fill();
+
+            // Drifting misty fog band
+            this.drawMistBand(ctx, width, height, height * 0.78, 'rgba(255, 255, 255, 0.02)', time * 0.06);
 
         } else if (theme.id === 'premium-gold') {
             // Elegant thin luxury glow behind text
@@ -277,24 +287,22 @@ export class BackgroundSystem {
             this.drawMistBand(ctx, width, height, height * 0.70, 'rgba(212, 175, 55, 0.003)', time * 0.05);
 
         } else if (theme.id === 'paradise-spring') {
-            // Overlapping misty watercolor hills at the bottom (only as fallback if image is not loaded)
-            const bgImg = BackgroundSystem.imageCache['poster/paradise-spring-bg.png'];
-            const isImgLoaded = bgImg && bgImg.isLoaded;
-            if (!isImgLoaded) {
+            // Subtle soft golden glow in the sky area (sunset scene)
+            const bgImgPs = BackgroundSystem.imageCache['poster/paradise-spring-bg.png'];
+            if (!bgImgPs || !bgImgPs.isLoaded) {
                 this.drawWatercolorHills(ctx, width, height, scale, time);
             }
 
-            // Breathable soft column of light in center
             const haloGrad = ctx.createRadialGradient(
-                width * 0.5, height * 0.42, 5 * scale,
-                width * 0.5, height * 0.42, height * (0.32 + breathe)
+                width * 0.5, height * 0.36, 5 * scale,
+                width * 0.5, height * 0.36, height * (0.30 + breathe)
             );
-            haloGrad.addColorStop(0, 'rgba(240, 245, 238, 0.35)'); // Soft paper bright core
-            haloGrad.addColorStop(0.5, 'rgba(223, 231, 219, 0.05)');
+            haloGrad.addColorStop(0, 'rgba(255, 245, 210, 0.20)');
+            haloGrad.addColorStop(0.5, 'rgba(240, 210, 150, 0.05)');
             haloGrad.addColorStop(1, 'rgba(0, 0, 0, 0)');
             ctx.fillStyle = haloGrad;
             ctx.beginPath();
-            ctx.arc(width * 0.5, height * 0.42, height * 0.45, 0, Math.PI * 2);
+            ctx.arc(width * 0.5, height * 0.36, height * 0.45, 0, Math.PI * 2);
             ctx.fill();
         }
 
@@ -439,35 +447,71 @@ export class BackgroundSystem {
                 ctx.stroke();
             }
 
+        } else if (theme.id === 'nature-serenity') {
+            // Minimal fine border for nature theme
+            const margin = 44 * scale;
+            ctx.strokeStyle = 'rgba(255, 250, 230, 0.20)';
+            ctx.lineWidth = 1.0 * scale;
+            ctx.beginPath();
+            ctx.rect(margin, margin, width - margin * 2, height - margin * 2);
+            ctx.stroke();
+
+        } else if (theme.id === 'minimal-noor') {
+            // Draw the elegant Islamic arch frame (using same logic as before)
+            const margin = 52 * scale;
+            ctx.strokeStyle = 'rgba(220, 210, 185, 0.55)';
+            ctx.lineWidth = 1.2 * scale;
+
+            const left = margin;
+            const right = width - margin;
+            const bottom = height - margin;
+            const top = margin + 30 * scale;
+            const arcStartY = margin + (height - margin * 2) * 0.22;
+
+            ctx.beginPath();
+            ctx.moveTo(left, bottom);
+            ctx.lineTo(left, arcStartY);
+            ctx.bezierCurveTo(left, arcStartY - 60 * scale, width * 0.5 - 50 * scale, top, width * 0.5, top);
+            ctx.bezierCurveTo(width * 0.5 + 50 * scale, top, right, arcStartY - 60 * scale, right, arcStartY);
+            ctx.lineTo(right, bottom);
+            ctx.closePath();
+            ctx.stroke();
+
+            // Inner arch
+            ctx.strokeStyle = 'rgba(220, 210, 185, 0.22)';
+            ctx.lineWidth = 0.6 * scale;
+            const innerMargin = margin + 6 * scale;
+            const iLeft = innerMargin;
+            const iRight = width - innerMargin;
+            const iBottom = height - innerMargin;
+            const iTop = innerMargin + 30 * scale;
+            const iArcStartY = innerMargin + (height - innerMargin * 2) * 0.22;
+            ctx.beginPath();
+            ctx.moveTo(iLeft, iBottom);
+            ctx.lineTo(iLeft, iArcStartY);
+            ctx.bezierCurveTo(iLeft, iArcStartY - 54 * scale, width * 0.5 - 45 * scale, iTop, width * 0.5, iTop);
+            ctx.bezierCurveTo(width * 0.5 + 45 * scale, iTop, iRight, iArcStartY - 54 * scale, iRight, iArcStartY);
+            ctx.lineTo(iRight, iBottom);
+            ctx.closePath();
+            ctx.stroke();
+
+            ctx.fillStyle = 'rgba(220, 210, 185, 0.85)';
+            this.drawDiamond(ctx, width * 0.5, top - 12 * scale, 4 * scale);
+
+            ctx.fillStyle = 'rgba(220, 210, 185, 0.5)';
+            ctx.beginPath();
+            ctx.arc(left, bottom, 2.5 * scale, 0, Math.PI * 2);
+            ctx.arc(right, bottom, 2.5 * scale, 0, Math.PI * 2);
+            ctx.fill();
+
         } else if (theme.id === 'paradise-spring') {
-            // Only draw procedural fallback foliage if background image is not loaded
-            const bgImg = BackgroundSystem.imageCache['poster/paradise-spring-bg.png'];
-            const isImgLoaded = bgImg && bgImg.isLoaded;
-            if (!isImgLoaded) {
-                // 1. Primary main branch Top-Left
-                const p0_1 = { x: -15 * scale, y: -15 * scale };
-                const p1_1 = { x: width * 0.28, y: height * 0.08 };
-                const p2_1 = { x: width * 0.42, y: height * 0.22 };
-                this.drawBranchOfLeaves(ctx, p0_1, p1_1, p2_1, 14, 46 * scale, '#123524');
-
-                // 2. Secondary side branch Top-Left (angled slightly lower down the left edge)
-                const p0_2 = { x: -15 * scale, y: height * 0.12 };
-                const p1_2 = { x: width * 0.18, y: height * 0.25 };
-                const p2_2 = { x: width * 0.32, y: height * 0.38 };
-                this.drawBranchOfLeaves(ctx, p0_2, p1_2, p2_2, 11, 40 * scale, '#1E4233');
-
-                // 3. Third branch starting further top-right, draping down towards center
-                const p0_3 = { x: width * 0.20, y: -15 * scale };
-                const p1_3 = { x: width * 0.35, y: height * 0.15 };
-                const p2_3 = { x: width * 0.50, y: height * 0.20 };
-                this.drawBranchOfLeaves(ctx, p0_3, p1_3, p2_3, 10, 36 * scale, '#265440');
-
-                // 4. Balancing small branch in the bottom-right corner
-                const p0_4 = { x: width + 15 * scale, y: height + 15 * scale };
-                const p1_4 = { x: width * 0.82, y: height * 0.82 };
-                const p2_4 = { x: width * 0.70, y: height * 0.74 };
-                this.drawBranchOfLeaves(ctx, p0_4, p1_4, p2_4, 9, 38 * scale, '#1E4233');
-            }
+            // Simple fine border for sunset scene
+            const margin = 44 * scale;
+            ctx.strokeStyle = 'rgba(255, 245, 200, 0.22)';
+            ctx.lineWidth = 1.0 * scale;
+            ctx.beginPath();
+            ctx.rect(margin, margin, width - margin * 2, height - margin * 2);
+            ctx.stroke();
         }
 
         ctx.restore();
