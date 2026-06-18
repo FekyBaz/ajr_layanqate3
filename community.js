@@ -22,7 +22,7 @@ const badgeLabels = {
 
 const COMMUNITY_INVITE_CARD = {
     contentType: 'benefit',
-    message: '🤍 أضف ذكرك أنت أيضًا\nشاركنا ذكرًا نافعًا بلطف، ليصل أثره إلى قلوب أكثر.',
+    message: 'أضف ذكرك أنت أيضًا\nشاركنا ذكرًا نافعًا بلطف، ليصل أثره إلى قلوب أكثر.',
     ctaText: 'أضف الآن',
     formUrl: '/index.html#form',
 };
@@ -212,7 +212,7 @@ function createCardTop(item, avgPostCount) {
     if (isTrending) {
         const trendingBadge = document.createElement('span');
         trendingBadge.className = 'trending-badge';
-        trendingBadge.textContent = '🔥 رائج الآن';
+        trendingBadge.textContent = 'رائج الآن';
         top.appendChild(trendingBadge);
     }
 
@@ -259,7 +259,7 @@ function createCard(item, avgPostCount = 0) {
     const shares = document.createElement('p');
     shares.className = 'shares';
     shares.dataset.shareCountId = String(item.id);
-    shares.textContent = `🕊 تمت المشاركة ${formatNumber(item.post_count)} مرة`;
+    shares.textContent = `تمت المشاركة ${formatNumber(item.post_count)} مرة`;
     meta.appendChild(shares);
 
     card.appendChild(meta);
@@ -272,13 +272,13 @@ function createCard(item, avgPostCount = 0) {
     shareButton.className = 'share-btn btn btn-ghost';
     shareButton.type = 'button';
     shareButton.dataset.shareId = String(item.id);
-    shareButton.textContent = '📤 شارك الذكر';
+    shareButton.textContent = 'شارك الذكر';
     actions.appendChild(shareButton);
 
     const posterButton = document.createElement('a');
     posterButton.className = 'poster-btn btn';
     posterButton.href = `/poster?text=${encodeURIComponent(resolveMessage(item))}&type=${encodeURIComponent(item.content_type || 'dhikr')}`;
-    posterButton.innerHTML = '🎨 تصميم بوستر ✨';
+    posterButton.innerHTML = 'تصميم بطاقة';
     posterButton.title = 'تحويل هذا الذكر إلى لوحة فنية ومشاركته كصدقة جارية';
     actions.appendChild(posterButton);
 
@@ -457,7 +457,7 @@ function showSubmissionReviewToastIfNeeded() {
 
     if (!hasSubmissionFlag) return;
 
-    elements.shareToast.textContent = 'تم إضافة ذكرك للمراجعة ✨';
+    elements.shareToast.textContent = 'تم إضافة ذكرك للمراجعة';
     showToast();
     sessionStorage.removeItem('ajr_submission_pending_review');
     window.scrollTo({ top: 0, behavior: 'smooth' });
@@ -527,12 +527,12 @@ function incrementLocalShareMetrics(submissionId) {
     item.post_count = Math.max(Number(item.post_count) || 0, 0) + 1;
 
     document.querySelectorAll(`[data-share-count-id="${CSS.escape(normalizedId)}"]`).forEach((element) => {
-        element.textContent = `🕊 تمت المشاركة ${formatNumber(item.post_count)} مرة`;
+        element.textContent = `تمت المشاركة ${formatNumber(item.post_count)} مرة`;
     });
 
     state.stats.totalPostCount = Math.max(Number(state.stats.totalPostCount) || 0, 0) + 1;
     if (elements.totalSharesCount) {
-        elements.totalSharesCount.textContent = `📿 ${formatNumber(state.stats.totalPostCount)} مرة تم نشر الأذكار`;
+        elements.totalSharesCount.textContent = `تم نشر الأذكار ${formatNumber(state.stats.totalPostCount)} مرة`;
     }
 
     // Trigger dynamic Tree of Goodness growth + shooting particle effect
@@ -774,7 +774,7 @@ function renderStats(stats = {}, pagination = {}) {
         elements.approvedCount.textContent = `${formatNumber(totalApproved)} مشاركة معتمدة`;
     }
     if (elements.totalSharesCount) {
-        elements.totalSharesCount.textContent = `📿 ${formatNumber(totalShares)} مرة تم نشر الأذكار`;
+        elements.totalSharesCount.textContent = `تم نشر الأذكار ${formatNumber(totalShares)} مرة`;
     }
     if (elements.mobileApprovedCount) {
         elements.mobileApprovedCount.textContent = `${formatNumber(totalApproved)} مشاركة`;
@@ -1001,9 +1001,9 @@ function setupFeedbackForm() {
         
         // Dynamic spiritual start toast
         const spiritualStarts = [
-            'جاري إرسال مقترحكم... نسأل الله القبول والتوفيق ✨',
-            'في طريق الإرسال... شكر الله سعيكم الطيب 🤍',
-            'يرسل الآن... نسأل الله النفع واليسر 🌿'
+            'جاري إرسال مقترحكم... نسأل الله القبول والتوفيق',
+            'في طريق الإرسال... شكر الله سعيكم الطيب',
+            'يرسل الآن... نسأل الله النفع واليسر'
         ];
         const randomStart = spiritualStarts[Math.floor(Math.random() * spiritualStarts.length)];
         
@@ -1056,7 +1056,7 @@ function setupFeedbackForm() {
             form.hidden = true;
             successMsg.hidden = false;
             
-            elements.shareToast.textContent = 'تم استلام مقترحكم بنجاح! شكر الله سعيكم ✨';
+            elements.shareToast.textContent = 'تم استلام مقترحكم بنجاح! شكر الله سعيكم';
             showToast();
         } catch (err) {
             console.error('[Feedback] failed to send', err);
