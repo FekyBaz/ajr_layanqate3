@@ -74,6 +74,7 @@ export async function handler(event, context) {
         }
 
         // Update in database
+        logger.info(`[Admin Approve] Attempting to approve submission ID: ${id}`);
         const { data: updatedRow, error: updateError } = await supabaseAdmin
             .from('submissions')
             .update(updateData)
@@ -83,30 +84,39 @@ export async function handler(event, context) {
             .maybeSingle();
 
         if (updateError) {
-            return error(500, 'حدث خطأ في تحديث البيانات', origin, updateError.message);
+            logger.error('[Admin Approve] Supabase update error:', updateError.message);
+            return error(500, `حدث خطأ في تحديث البيانات: ${updateError.message}`, origin, updateError.message);
         }
 
         if (!updatedRow) {
+            logger.warn(`[Admin Approve] Submission ${id} not found or not pending.`);
             return error(404, 'المشاركة غير موجودة أو تمت مراجعتها مسبقًا', origin);
         }
 
+        logger.info(`[Admin Approve] Successfully approved in database. Row:`, updatedRow);
+
         // Increment Goal Progress
         try {
+            logger.info('[Admin Approve] Incrementing goal progress...');
             await incrementGoalProgress(1);
+            logger.info('[Admin Approve] Goal progress incremented successfully.');
         } catch (goalError) {
-            logger.error('Admin approve goal progress error:', goalError.message);
+            logger.error('[Admin Approve] Goal progress increment error:', goalError.message);
         }
 
-        // Send Telegram Notification in background
+        // Send Telegram Notification
         try {
+            logger.info('[Admin Approve] Sending telegram notification...');
             await sendTelegramNotification(updatedRow);
+            logger.info('[Admin Approve] Telegram notification sending process finished.');
         } catch (tgError) {
-            logger.error('Telegram notification error:', tgError.message);
+            logger.error('[Admin Approve] Telegram notification catch block error:', tgError.message);
         }
 
         return success({ message: 'تمت الموافقة على المشاركة وبثها' }, origin);
 
     } catch (err) {
-        return error(500, 'حدث خطأ. يرجى المحاولة لاحقًا.', origin, err.message);
+        logger.error('[Admin Approve] Critical handler error:', err.message, err.stack);
+        return error(500, `حدث خطأ داخلي في السيرفر: ${err.message}`, origin, err.message);
     }
 }
