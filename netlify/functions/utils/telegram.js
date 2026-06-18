@@ -22,7 +22,7 @@ function escapeHtml(text) {
 
 /**
  * Sends an approved submission text to the Telegram Channel
- * @param {Object} submission - The submission row object containing message, content_type, and optional name
+ * @param {Object} submission - The submission row object containing message, content_type, and optional author_name
  */
 export async function sendTelegramNotification(submission) {
     const token = process.env.TELEGRAM_BOT_TOKEN;
@@ -37,7 +37,7 @@ export async function sendTelegramNotification(submission) {
         try {
             const text = submission.corrected_message || submission.message;
             const typeLabel = typeLabels[submission.content_type] || submission.content_type;
-            const author = submission.name ? submission.name.trim() : 'فاعل خير';
+            const author = submission.author_name ? submission.author_name.trim() : 'فاعل خير';
 
             // Escape HTML characters to prevent Telegram API parsing errors
             const escapedText = escapeHtml(text);
