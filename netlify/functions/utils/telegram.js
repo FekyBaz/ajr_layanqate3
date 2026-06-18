@@ -1,5 +1,6 @@
 import { logger } from './shared.js';
 import https from 'https';
+import { Buffer } from 'buffer';
 
 const typeLabels = {
     dhikr: 'ذكر 📿',
@@ -8,6 +9,16 @@ const typeLabels = {
     hadith: 'حديث شريف 💬',
     benefit: 'فائدة روحانيّة ✨'
 };
+
+/**
+ * Escapes text for Telegram HTML parse mode
+ */
+function escapeHtml(text) {
+    return (text || '')
+        .replace(/&/g, '&amp;')
+        .replace(/</g, '&lt;')
+        .replace(/>/g, '&gt;');
+}
 
 /**
  * Sends an approved submission text to the Telegram Channel
@@ -28,26 +39,30 @@ export async function sendTelegramNotification(submission) {
             const typeLabel = typeLabels[submission.content_type] || submission.content_type;
             const author = submission.name ? submission.name.trim() : 'فاعل خير';
 
-            // Format a beautiful spiritual post matching the Telegram channel style
+            // Escape HTML characters to prevent Telegram API parsing errors
+            const escapedText = escapeHtml(text);
+            const escapedAuthor = escapeHtml(author);
+
+            // Format a beautiful spiritual HTML post matching the Telegram channel style
             const messageText = 
-`✨ *مشاركة جديدة من المجتمع* ✨
+`✨ <b>مشاركة جديدة من المجتمع</b> ✨
 
-*النوع:* ${typeLabel}
+<b>النوع:</b> ${typeLabel}
 
-« ${text} »
+« <i>${escapedText}</i> »
 
-✍️ *بواسطة:* ${author}
-💚 *بنية الأجر والصدقة الجارية*
+✍️ <b>بواسطة:</b> ${escapedAuthor}
+💚 <b>بنية الأجر والصدقة الجارية</b>
 
 ---
 🔗 للمشاركة وإضافة الأذكار:
-[ajr-la-yanqati.com](https://ajr-la-yanqati.com/)
+<a href="https://ajr-la-yanqati.com/">ajr-la-yanqati.com</a>
 📱 تابعنا على تيليجرام: ${chatId.startsWith('@') ? chatId : ''}`;
 
             const postData = JSON.stringify({
                 chat_id: chatId,
                 text: messageText,
-                parse_mode: 'Markdown',
+                parse_mode: 'HTML',
                 disable_web_page_preview: true
             });
 
