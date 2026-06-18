@@ -1826,42 +1826,48 @@ body.community-focus-mode .submission-message {
     border: 1px solid #d9e8e2;
     box-shadow: 0 4px 14px rgba(15, 23, 42, 0.04);
     border-radius: 16px;
-    padding: 1.25rem;
-    margin-top: -2.5rem;
+    padding: 1.4rem 1.6rem;
 }
 
 .community-page .project-share__title,
 .community-page .project-share__text {
-    text-align: center;
+    text-align: right;
 }
 
 .community-page .project-share__title {
-    font-size: 1.08rem;
+    font-size: 1.1rem;
+    font-family: var(--font-display);
+    color: var(--color-text-primary);
+    margin: 0 0 0.3rem;
 }
 
 .community-page .project-share__text {
     color: #617a74;
     font-size: 0.9rem;
+    margin: 0 0 1rem;
 }
 
 .community-page .project-share__actions {
     display: grid;
-    grid-template-columns: repeat(2, minmax(0, 1fr));
-    gap: 0.55rem;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: 0.6rem;
 }
 
 .community-page .project-share__btn {
-    display: inline-flex;
-    justify-content: center;
-    align-items: center;
-    gap: 0.35rem;
-    min-height: 42px;
-    width: 100%;
-    border-radius: 12px;
+    display: inline-flex !important;
+    justify-content: center !important;
+    align-items: center !important;
+    gap: 0.5rem !important;
+    min-height: 46px !important;
+    width: 100% !important;
+    border-radius: 12px !important;
+    font-size: 0.88rem !important;
+    font-weight: 600 !important;
+    letter-spacing: 0.01em !important;
 }
 
 .community-page .project-share__btn:hover {
-    transform: scale(1.02);
+    transform: translateY(-2px) !important;
 }
 
 .community-page .toast {
