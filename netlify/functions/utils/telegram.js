@@ -45,19 +45,19 @@ export async function sendTelegramNotification(submission) {
 
             // Format a beautiful spiritual HTML post matching the Telegram channel style
             const messageText = 
-`✨ <b>مشاركة جديدة من المجتمع</b> ✨
+`<b>مشاركة جديدة من المجتمع</b>
 
 <b>النوع:</b> ${typeLabel}
 
 « <i>${escapedText}</i> »
 
-✍️ <b>بواسطة:</b> ${escapedAuthor}
-💚 <b>بنية الأجر والصدقة الجارية</b>
+بنية الأجر والصدقة الجارية
 
 ---
-🔗 للمشاركة وإضافة الأذكار:
-<a href="https://ajr-la-yanqati.com/">ajr-la-yanqati.com</a>
-📱 تابعنا على تيليجرام: ${chatId.startsWith('@') ? chatId : ''}`;
+للمشاركة وإضافة الأذكار:
+<a href="https://ajr-layanqate3.netlify.app/#form">ajr-layanqate3.netlify.app</a>
+تابعنا على فيسبوك:
+<a href="https://www.facebook.com/profile.php?id=61585386947319">صفحة أجر لا ينقطع</a>`;
 
             const postData = JSON.stringify({
                 chat_id: chatId,
