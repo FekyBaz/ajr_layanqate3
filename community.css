@@ -619,10 +619,13 @@ body.community-focus-mode .tree-card {
 }
 
 .feedback-submit-btn {
-    align-self: flex-start;
-    padding: 0.75rem 2rem;
-    font-weight: 500;
-    font-size: var(--font-size-sm);
+    align-self: stretch;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 0.95rem 2.5rem;
+    font-weight: 600;
+    font-size: 1.05rem;
     cursor: pointer;
     background: linear-gradient(135deg, #8c6a35, #c8a673);
     color: #ffffff;
@@ -630,6 +633,7 @@ body.community-focus-mode .tree-card {
     border-radius: var(--radius-md);
     transition: all var(--transition-normal);
     box-shadow: 0 4px 14px rgba(140, 106, 53, 0.2);
+    margin-top: 0.5rem;
 }
 
 .feedback-submit-btn:hover {
@@ -652,6 +656,10 @@ body.community-focus-mode .tree-card {
     align-items: center;
     gap: var(--space-sm);
     animation: fadeIn 0.4s ease forwards;
+}
+
+.feedback-success-message[hidden] {
+    display: none !important;
 }
 
 .feedback-success-message .success-icon-wrap {
