@@ -16,6 +16,7 @@ import {
     logger,
 } from './utils/shared.js';
 import { incrementGoalProgress } from './utils/community-goal.js';
+import { sendTelegramNotification } from './utils/telegram.js';
 
 export async function handler(event, context) {
     const origin = event.headers.origin || '';
@@ -78,7 +79,7 @@ export async function handler(event, context) {
             .update(updateData)
             .eq('id', id)
             .eq('status', STATUS.PENDING)
-            .select('id')
+            .select('id, message, corrected_message, content_type, name')
             .maybeSingle();
 
         if (updateError) {
@@ -89,13 +90,21 @@ export async function handler(event, context) {
             return error(404, 'المشاركة غير موجودة أو تمت مراجعتها مسبقًا', origin);
         }
 
+        // Increment Goal Progress
         try {
             await incrementGoalProgress(1);
         } catch (goalError) {
             logger.error('Admin approve goal progress error:', goalError.message);
         }
 
-        return success({ message: 'تمت الموافقة على المشاركة' }, origin);
+        // Send Telegram Notification in background
+        try {
+            await sendTelegramNotification(updatedRow);
+        } catch (tgError) {
+            logger.error('Telegram notification error:', tgError.message);
+        }
+
+        return success({ message: 'تمت الموافقة على المشاركة وبثها' }, origin);
 
     } catch (err) {
         return error(500, 'حدث خطأ. يرجى المحاولة لاحقًا.', origin, err.message);
