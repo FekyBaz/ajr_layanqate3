@@ -80,7 +80,7 @@ export async function handler(event, context) {
             .update(updateData)
             .eq('id', id)
             .eq('status', STATUS.PENDING)
-            .select('id, message, corrected_message, content_type, name')
+            .select('id, message, corrected_message, content_type, author_name')
             .maybeSingle();
 
         if (updateError) {
