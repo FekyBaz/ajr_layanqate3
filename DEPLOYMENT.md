@@ -1,111 +1,63 @@
-# دليل النشر | Deployment Guide
+# Deployment Guide
 
-## 📋 قبل النشر | Before Deployment
+## Supported deployment target
 
-1. **تأكد من تنفيذ الـ Migration في Supabase:**
-   - افتح Supabase SQL Editor
-   - نفذ محتوى `api/migrations/001_add_message_hash.sql`
+The current repository is configured for **Netlify**. Older Vercel instructions have been removed because they no longer match the active project configuration.
 
-2. **تأكد من إعدادات RLS في Supabase:**
-   ```sql
-   -- Enable RLS
-   ALTER TABLE submissions ENABLE ROW LEVEL SECURITY;
-   
-   -- Allow anonymous inserts
-   CREATE POLICY "Allow anonymous inserts" ON submissions
-       FOR INSERT WITH CHECK (true);
-   ```
+## 1. Prepare Supabase
 
----
+1. Create a Supabase project.
+2. Review the SQL migrations in this repository.
+3. Apply the migrations required by the current application.
+4. Configure Row Level Security according to the application's current data-access model.
+5. Keep the Supabase service-role key server-side only.
 
-## 🚀 النشر على Vercel | Deploy to Vercel
+Do not copy credentials from an existing production project into this repository.
 
-### الخطوة 1: رفع الكود على GitHub
+## 2. Create the Netlify site
 
-```bash
-cd "e:\أجر لا ينقطع"
-git init
-git add .
-git commit -m "Initial commit - أجر لا ينقطع"
-git branch -M main
-git remote add origin https://github.com/YOUR_USERNAME/ajr-la-yanqati.git
-git push -u origin main
-```
+Import the GitHub repository into Netlify.
 
-### الخطوة 2: ربط المشروع بـ Vercel
+Use the repository's existing `netlify.toml` as the source of deployment configuration. Do not add Vercel-specific configuration unless the deployment architecture is intentionally changed.
 
-1. اذهب إلى [vercel.com](https://vercel.com)
-2. سجل دخول بحساب GitHub
-3. اضغط "New Project"
-4. اختر الـ repository
+## 3. Configure environment variables
 
-### الخطوة 3: إعداد Environment Variables
+Set the required variables in Netlify's environment-variable settings.
 
-في Vercel، اذهب إلى **Settings → Environment Variables** وأضف:
+At minimum, review:
 
-| Variable | Value |
-|----------|-------|
-| `SUPABASE_URL` | `https://YOUR_PROJECT_REF.supabase.co` |
-| `SUPABASE_SERVICE_ROLE_KEY` | (مفتاح service_role من Supabase) |
-| `ALLOWED_ORIGINS` | `https://your-project.vercel.app` |
-| `NODE_ENV` | `production` |
+- `SUPABASE_URL`
+- `SUPABASE_SERVICE_ROLE_KEY`
+- `SUPABASE_ANON_KEY` (if required by the current functions)
+- `ADMIN_API_KEY`
+- `FRONTEND_URL`
+- `ALLOWED_ORIGINS`
+- Rate-limit variables
+- `IP_SALT`
+- Optional `GA_MEASUREMENT_ID`
 
-> ⚠️ **مهم:** استخدم **service_role key** وليس anon key
+Generate production secrets independently. Never reuse example values.
 
-### الخطوة 4: Deploy
+## 4. Deploy
 
-اضغط "Deploy" وانتظر حتى ينتهي النشر.
+Trigger the first deploy and verify:
 
----
+- The site loads.
+- `/api/health` responds as expected.
+- Public submissions work.
+- Admin authentication works.
+- Admin review actions work.
+- Rate limiting is active.
+- Database writes reach the intended Supabase project.
 
-## 🔧 بعد النشر | After Deployment
+## 5. Production checklist
 
-1. **تحديث ALLOWED_ORIGINS:**
-   - بعد النشر، ستحصل على رابط مثل `https://ajr-la-yanqati.vercel.app`
-   - ارجع إلى Vercel → Settings → Environment Variables
-   - حدث `ALLOWED_ORIGINS` بالرابط الجديد
-
-2. **اختبار الموقع:**
-   - افتح الرابط
-   - جرب إرسال ذكر
-   - تأكد من وصوله للـ database
-
----
-
-## 🌐 ربط Domain مخصص (اختياري)
-
-1. في Vercel → Settings → Domains
-2. أضف الـ domain الخاص بك
-3. اتبع تعليمات DNS
-4. حدث `ALLOWED_ORIGINS` بالـ domain الجديد
-
----
-
-## 📁 هيكل الملفات للنشر
-
-```
-أجر لا ينقطع/
-├── index.html          ← الصفحة الرئيسية
-├── styles.css          ← التصميم
-├── script.js           ← الـ JavaScript
-├── vercel.json         ← إعدادات Vercel
-├── .gitignore          ← ملفات مستثناة
-├── README.md           ← التوثيق
-└── api/
-    ├── server.js       ← الـ Backend API
-    ├── package.json    ← الاعتماديات
-    └── .env.example    ← نموذج المتغيرات
-```
-
----
-
-## ⚠️ ملاحظات أمنية
-
-- ❌ لا ترفع `.env` على GitHub
-- ❌ لا تشارك `service_role key`
-- ✅ استخدم Environment Variables في Vercel
-- ✅ تأكد أن `.gitignore` يحتوي على `.env`
-
----
-
-بالتوفيق! 🤍
+- [ ] No secrets exist in tracked files.
+- [ ] Production environment variables are configured only in Netlify/Supabase.
+- [ ] CORS allows only the intended origins.
+- [ ] Admin credentials have been rotated from any development values.
+- [ ] Supabase RLS and policies have been reviewed.
+- [ ] Database backups/recovery expectations are understood.
+- [ ] Analytics configuration matches the published privacy notice.
+- [ ] Third-party assets have redistribution rights.
+- [ ] The deployment URL and any public identifiers are safe to disclose.

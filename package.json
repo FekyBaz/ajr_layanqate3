@@ -2,7 +2,6 @@
     "name": "ajr-la-yanqati",
     "version": "1.0.0",
     "description": "أجر لا ينقطع - Endless Reward",
-    "private": true,
     "type": "module",
     "scripts": {
         "dev": "netlify dev",
