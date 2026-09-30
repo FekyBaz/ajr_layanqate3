@@ -13,13 +13,13 @@
 
 ### Preview locally
 ```bash
-cd "E:\\أجر لا ينقطع\\prototypes\\quiet-text-story"
+cd prototypes/quiet-text-story
 npx hyperframes preview --port 3018
 ```
 
 ### Render locally once FFmpeg is installed
 ```bash
-cd "E:\\أجر لا ينقطع\\prototypes\\quiet-text-story"
+cd prototypes/quiet-text-story
 npx hyperframes render --quality draft --output renders\\quiet-text-story.mp4
 ```
 

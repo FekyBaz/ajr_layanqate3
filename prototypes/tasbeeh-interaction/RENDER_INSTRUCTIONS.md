@@ -15,13 +15,13 @@ Local MP4 render is currently blocked because `FFmpeg` is not installed in this 
 
 ### To render locally once FFmpeg is available
 ```bash
-cd "E:\\أجر لا ينقطع\\prototypes\\tasbeeh-interaction"
+cd prototypes/tasbeeh-interaction
 npx hyperframes render --quality draft --output renders\\tasbeeh-prototype.mp4
 ```
 
 ### Recommended review path before final render
 ```bash
-cd "E:\\أجر لا ينقطع\\prototypes\\tasbeeh-interaction"
+cd prototypes/tasbeeh-interaction
 npx hyperframes preview
 ```
 
