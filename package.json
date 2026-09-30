@@ -14,6 +14,6 @@
         "google-auth-library": "^9.0.0"
     },
     "devDependencies": {
-        "netlify-cli": "^17.0.0"
+        "netlify-cli": "^27.10.0"
     }
 }
