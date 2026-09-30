@@ -60,19 +60,17 @@
                 </div>
                 <div class="header-actions">
                     <a href="/analytics" class="btn-analytics">📊 التحليلات</a>
-                    <button class="logout-btn" onclick="logout()">تسجيل الخروج</button>
+                    <button class="logout-btn" id="logout-btn">تسجيل الخروج</button>
                 </div>
             </header>
 
             <!-- Tab Navigation -->
             <div class="admin-tabs">
-                <button class="btn btn-primary btn-sm admin-tab active" id="tab-submissions"
-                    onclick="switchTab('submissions')">المشاركات</button>
-                <button class="btn btn-ghost btn-sm admin-tab" id="tab-memories" onclick="switchTab('memories')">صفحات
+                <button class="btn btn-primary btn-sm admin-tab active" id="tab-submissions">المشاركات</button>
+                <button class="btn btn-ghost btn-sm admin-tab" id="tab-memories">صفحات
                     الذكرى</button>
-                <button class="btn btn-ghost btn-sm admin-tab" id="tab-memory-updates" onclick="switchTab('memory-updates')">طلبات التعديل</button>
-                <button class="btn btn-ghost btn-sm admin-tab" id="tab-feedback"
-                    onclick="switchTab('feedback')">
+                <button class="btn btn-ghost btn-sm admin-tab" id="tab-memory-updates">طلبات التعديل</button>
+                <button class="btn btn-ghost btn-sm admin-tab" id="tab-feedback">
                     الرسائل
                     <span id="feedback-badge" class="badge-new hidden"></span>
                 </button>
@@ -80,7 +78,7 @@
 
             <!-- Submissions Tab -->
             <div id="submissions-tab">
-                <button class="btn refresh-btn" onclick="loadPending()">🔄 تحديث القائمة</button>
+                <button class="btn refresh-btn" id="refresh-submissions-btn">🔄 تحديث القائمة</button>
 
                 <div id="notification" class="hidden"></div>
 
@@ -95,7 +93,7 @@
 
             <!-- Memories Tab -->
             <div id="memories-tab" class="hidden">
-                <button class="btn refresh-btn" onclick="loadPendingMemories()">🔄 تحديث قائمة الذكريات</button>
+                <button class="btn refresh-btn" id="refresh-memories-btn">🔄 تحديث قائمة الذكريات</button>
 
                 <div id="memory-notification" class="hidden"></div>
 
@@ -110,7 +108,7 @@
 
             <!-- Proposed Edits Tab -->
             <div id="memory-updates-tab" class="hidden">
-                <button class="btn refresh-btn" onclick="loadPendingMemoryUpdates()">🔄 تحديث قائمة التعديلات</button>
+                <button class="btn refresh-btn" id="refresh-memory-updates-btn">🔄 تحديث قائمة التعديلات</button>
 
                 <div id="memory-updates-notification" class="hidden"></div>
 
@@ -126,14 +124,14 @@
             <!-- Feedback Tab -->
             <div id="feedback-tab" class="hidden">
                 <div class="feedback-filter-bar">
-                    <select id="feedback-filter" class="feedback-filter" onchange="loadFeedback()">
+                    <select id="feedback-filter" class="feedback-filter">
                         <option value="">الكل</option>
                         <option value="New" selected>جديدة</option>
                         <option value="In Progress">قيد المعالجة</option>
                         <option value="Resolved">تم الحل</option>
                         <option value="Archived">مؤرشفة</option>
                     </select>
-                    <button class="btn refresh-btn" onclick="loadFeedback()">🔄 تحديث</button>
+                    <button class="btn refresh-btn" id="refresh-feedback-btn">🔄 تحديث</button>
                     <span id="feedback-total" class="feedback-total"></span>
                 </div>
 

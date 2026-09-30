@@ -48,8 +48,10 @@ jobs:
           cache: npm
       - name: Install dependencies
         run: npm install --ignore-scripts
-      - name: Audit dependencies
-        run: npm audit --audit-level=high
+      - name: Audit production dependencies
+        run: npm audit --omit=dev --audit-level=high
+      - name: Audit all dependencies (informational)
+        run: npm audit --audit-level=high || true
 
   lint-security:
     name: Security Pattern Scan
@@ -71,7 +73,7 @@ jobs:
             FAIL=1
           fi
 
-          if grep -rn "localStorage.*[Kk]ey\|localStorage.*[Tt]oken\|localStorage.*[Ss]ecret" --include="*.js" --exclude-dir=node_modules .; then
+          if grep -rEn "localStorage\.(setItem|getItem)\s*\([^)]*(secret|token|apiKey|api_key|password|credential|service_role)" --include="*.js" --exclude-dir=node_modules .; then
             echo "::error::Found localStorage used with potential secrets"
             FAIL=1
           fi

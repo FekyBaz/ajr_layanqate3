@@ -1168,6 +1168,33 @@
         feedbackFilter.addEventListener('change', loadFeedback);
     }
 
+    const logoutBtn = document.getElementById('logout-btn');
+    if (logoutBtn) logoutBtn.addEventListener('click', logout);
+
+    const tabSubmissionsBtn = document.getElementById('tab-submissions');
+    if (tabSubmissionsBtn) tabSubmissionsBtn.addEventListener('click', () => switchTab('submissions'));
+
+    const tabMemoriesBtn = document.getElementById('tab-memories');
+    if (tabMemoriesBtn) tabMemoriesBtn.addEventListener('click', () => switchTab('memories'));
+
+    const tabMemoryUpdatesBtn = document.getElementById('tab-memory-updates');
+    if (tabMemoryUpdatesBtn) tabMemoryUpdatesBtn.addEventListener('click', () => switchTab('memory-updates'));
+
+    const tabFeedbackBtn = document.getElementById('tab-feedback');
+    if (tabFeedbackBtn) tabFeedbackBtn.addEventListener('click', () => switchTab('feedback'));
+
+    const refreshSubmissionsBtn = document.getElementById('refresh-submissions-btn');
+    if (refreshSubmissionsBtn) refreshSubmissionsBtn.addEventListener('click', loadPending);
+
+    const refreshMemoriesBtn = document.getElementById('refresh-memories-btn');
+    if (refreshMemoriesBtn) refreshMemoriesBtn.addEventListener('click', loadPendingMemories);
+
+    const refreshMemoryUpdatesBtn = document.getElementById('refresh-memory-updates-btn');
+    if (refreshMemoryUpdatesBtn) refreshMemoryUpdatesBtn.addEventListener('click', loadPendingMemoryUpdates);
+
+    const refreshFeedbackBtn = document.getElementById('refresh-feedback-btn');
+    if (refreshFeedbackBtn) refreshFeedbackBtn.addEventListener('click', loadFeedback);
+
     // Auth key is memory-only — user must re-authenticate on each page load.
     // Session expiry is tracked but does not auto-restore credentials.
 })();
