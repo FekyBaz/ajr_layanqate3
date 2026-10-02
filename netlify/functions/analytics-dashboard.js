@@ -30,11 +30,12 @@ export async function handler(event, context) {
 
     // Admin authentication
     const authResult = await validateAdminWithRateLimit(event);
-    if (!authResult.valid) {
-        return error(401, 'Unauthorized', origin);
-    }
+    // 429 first: brute-force floods are rate-limited even with wrong keys (#76)
     if (authResult.rateLimited) {
         return error(429, 'Rate limited', origin);
+    }
+    if (!authResult.valid) {
+        return error(401, 'Unauthorized', origin);
     }
 
     try {

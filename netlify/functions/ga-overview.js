@@ -11,8 +11,9 @@ export async function handler(event, context) {
     if (event.httpMethod !== 'GET') return error(405, 'Method not allowed', origin);
 
     const auth = await validateAdminWithRateLimit(event);
-    if (!auth.valid) return error(401, 'Unauthorized', origin);
+    // 429 first: brute-force floods are rate-limited even with wrong keys (#76)
     if (auth.rateLimited) return error(429, 'Rate limited', origin);
+    if (!auth.valid) return error(401, 'Unauthorized', origin);
 
     try {
         if (!isGAConfigured()) {
