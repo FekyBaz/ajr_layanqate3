@@ -5,7 +5,6 @@
  * ═══════════════════════════════════════════════════════════════════════════
  */
 
-import crypto from 'crypto';
 import {
     supabaseAdmin,
     success,
@@ -15,6 +14,7 @@ import {
     sanitizeName,
     sanitizeLegacyText,
     sanitizeExternalLinks,
+    hashIP,
     getClientIP,
     logger,
 } from './utils/shared.js';
@@ -119,13 +119,9 @@ export async function handler(event, context) {
         // Sanitize relation (optional)
         const sanitizedRelation = relation ? sanitizeName(relation) : null;
 
-        // Hash client IP
+        // Hash client IP (single salted hashIP shared by all writers)
         const clientIP = getClientIP(event);
-        const ipHash = crypto
-            .createHash('sha256')
-            .update((clientIP || 'unknown') + (process.env.IP_SALT || ''))
-            .digest('hex')
-            .substring(0, 32);
+        const ipHash = hashIP(clientIP);
 
         // Generate transliterated Latin slug prefix
         const slugPrefix = transliterateArabicToEnglish(nameResult);

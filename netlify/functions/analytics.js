@@ -17,6 +17,9 @@ import {
     handleOptions,
     logger,
     getClientIP,
+    checkRateLimit,
+    recordRequest,
+    HOT_ENDPOINT_RATE_LIMITS,
 } from './utils/shared.js';
 
 // Valid event types — reject anything else
@@ -80,6 +83,13 @@ export async function handler(event, context) {
 
         const clientIP = getClientIP(event);
         const userAgent = event.headers['user-agent'] || '';
+
+        // Batch ingestion was previously unlimited (#77)
+        const allowed = await checkRateLimit(clientIP, 'analytics', HOT_ENDPOINT_RATE_LIMITS.analytics);
+        if (!allowed) {
+            return error(429, 'تم تجاوز الحد المسموح، يرجى المحاولة لاحقًا.', origin);
+        }
+        await recordRequest(clientIP, 'analytics');
 
         // Process each event
         const inserted = [];

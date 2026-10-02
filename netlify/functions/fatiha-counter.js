@@ -1,5 +1,5 @@
 import { createClient } from '@supabase/supabase-js';
-import { getCorsHeaders } from './utils/shared.js';
+import { getCorsHeaders, getClientIP, checkRateLimit, recordRequest, HOT_ENDPOINT_RATE_LIMITS } from './utils/shared.js';
 
 const FATIHA_ROW_ID = 1;
 const FATIHA_TABLE = 'fatiha_counter';
@@ -53,6 +53,16 @@ export async function handler(event) {
 
   if (!['GET', 'POST'].includes(event.httpMethod)) {
     return jsonResponse(405, origin, { message: 'Method not allowed' });
+  }
+
+  // Writes were previously unlimited (read-modify-write counter, #77)
+  if (event.httpMethod === 'POST') {
+    const clientIP = getClientIP(event);
+    const allowed = await checkRateLimit(clientIP, 'fatiha', HOT_ENDPOINT_RATE_LIMITS.fatiha);
+    if (!allowed) {
+      return jsonResponse(429, origin, { message: 'تم تجاوز الحد المسموح، يرجى المحاولة لاحقًا.' });
+    }
+    await recordRequest(clientIP, 'fatiha');
   }
 
   try {
