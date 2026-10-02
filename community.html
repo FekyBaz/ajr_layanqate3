@@ -163,13 +163,13 @@
         <hr class="community-divider" aria-hidden="true">
 
         <section class="community-controls" aria-label="خيارات الفلترة والترتيب">
-            <div class="tabs" id="filterTabs">
-                <button class="tab is-active" data-type="all">الكل</button>
-                <button class="tab" data-type="dhikr">ذكر</button>
-                <button class="tab" data-type="dua">دعاء</button>
-                <button class="tab" data-type="ayah">آية</button>
-                <button class="tab" data-type="hadith">حديث</button>
-                <button class="tab" data-type="benefit">فائدة</button>
+            <div class="tabs" id="filterTabs" role="group" aria-label="تصفية حسب النوع">
+                <button class="tab is-active" data-type="all" aria-pressed="true">الكل</button>
+                <button class="tab" data-type="dhikr" aria-pressed="false">ذكر</button>
+                <button class="tab" data-type="dua" aria-pressed="false">دعاء</button>
+                <button class="tab" data-type="ayah" aria-pressed="false">آية</button>
+                <button class="tab" data-type="hadith" aria-pressed="false">حديث</button>
+                <button class="tab" data-type="benefit" aria-pressed="false">فائدة</button>
             </div>
 
             <div class="community-controls__actions">
@@ -189,10 +189,10 @@
         <section id="stateMessage" class="state-message card card-outline">جارٍ تحميل المشاركات...</section>
         <section id="submissionsContainer" class="submissions-grid"></section>
 
-        <nav class="pagination" id="pagination" hidden>
-            <button id="prevPage">السابق</button>
-            <span id="pageInfo"></span>
-            <button id="nextPage">التالي</button>
+        <nav class="pagination" id="pagination" aria-label="ترقيم صفحات المشاركات" hidden>
+            <button id="prevPage" aria-label="الصفحة السابقة">السابق</button>
+            <span id="pageInfo" role="status" aria-live="polite"></span>
+            <button id="nextPage" aria-label="الصفحة التالية">التالي</button>
         </nav>
 
         <aside class="mobile-stats-bar" id="mobileStatsBar" hidden>
