@@ -182,7 +182,7 @@
 
     <!-- Surah Yaseen Modal -->
     <div class="yaseen-modal hidden" id="yaseen-modal" role="dialog" aria-modal="true"
-        aria-labelledby="yaseen-modal-title">
+        aria-labelledby="yaseen-modal-title" aria-describedby="yaseen-modal-body">
         <div class="yaseen-modal__backdrop" id="yaseen-modal-backdrop"></div>
         <div class="yaseen-modal__container">
             <div class="yaseen-modal__header">
@@ -191,7 +191,7 @@
                     <div class="yaseen-modal__bismillah">بِسۡمِ ٱللَّهِ ٱلرَّحۡمَٰنِ ٱلرَّحِيمِ</div>
                 </div>
                 <button class="yaseen-modal__close" id="btn-close-yaseen" title="إغلاق النافذة" type="button"
-                    aria-label="إغلاق">
+                    aria-label="إغلاق نافذة سورة يس" data-autofocus>
                     <span aria-hidden="true">×</span>
                 </button>
             </div>
@@ -280,7 +280,7 @@
     </div>
 
     <!-- Proposed Edit Modal -->
-    <div class="yaseen-modal hidden" id="edit-modal" role="dialog" aria-modal="true" aria-labelledby="edit-modal-title">
+    <div class="yaseen-modal hidden" id="edit-modal" role="dialog" aria-modal="true" aria-labelledby="edit-modal-title" aria-describedby="edit-modal-desc">
         <div class="yaseen-modal__backdrop" id="edit-modal-backdrop"></div>
         <div class="yaseen-modal__container" style="max-width: 720px; max-height: 88vh;">
             <div class="yaseen-modal__header">
@@ -288,13 +288,13 @@
                     <h2 class="yaseen-modal__title" id="edit-modal-title">تعديل وإثراء الصفحة</h2>
                     <div class="yaseen-modal__bismillah">مراجعة من الإدارة قبل النشر</div>
                 </div>
-                <button class="yaseen-modal__close" id="btn-close-edit" title="إغلاق النافذة" type="button" aria-label="إغلاق">
+                <button class="yaseen-modal__close" id="btn-close-edit" title="إغلاق النافذة" type="button" aria-label="إغلاق نافذة التعديل" data-autofocus>
                     <span aria-hidden="true">×</span>
                 </button>
             </div>
             <div class="yaseen-modal__body" style="padding: 20px; overflow-y: auto;">
                 <form id="edit-memory-form" novalidate style="display: flex; flex-direction: column; gap: 16px;">
-                    <div class="form-hint" style="color: var(--color-text-secondary); margin-bottom: 8px; font-size: 0.9rem; line-height: 1.6; text-align: right;">
+                    <div class="form-hint" id="edit-modal-desc" style="color: var(--color-text-secondary); margin-bottom: 8px; font-size: 0.9rem; line-height: 1.6; text-align: right;">
                         يمكنك اقتراح تعديل أو إضافة معلومات جديدة على هذه الصفحة. سيتم مراجعة طلبك من قبل إدارة الموقع واعتماده في أقرب وقت. لا يتطلب هذا الإجراء تسجيل دخول.
                     </div>
 
@@ -381,6 +381,7 @@
 
     <script src="lib/analytics.js?v=20260521"></script>
     <script src="/lib/ga4.js" async></script>
+    <script src="lib/modal.js?v=20261002"></script>
     <script src="/memory.js"></script>
 </body>
 
