@@ -283,7 +283,7 @@
     cursor: pointer;
     padding: 0.25rem 0;
     margin-bottom: var(--space-sm);
-    text-align: right;
+    text-align: start;
     width: fit-content;
     transition: color var(--transition-normal);
 }
@@ -440,10 +440,9 @@ body.community-focus-mode .pagination {
 }
 
 .tree-overlay {
-    position: absolute;
-    top: var(--space-md);
-    left: var(--space-md);
-    right: var(--space-md);
+      position: absolute;
+      top: var(--space-md);
+      inset-inline: var(--space-md);
     text-align: center;
     pointer-events: none;
     z-index: 10;
@@ -780,7 +779,7 @@ body.community-focus-mode .tree-card {
     flex-direction: column;
     gap: 3px;
     flex: 1;
-    text-align: right;
+    text-align: start;
 }
 
 .stat-card__value {
