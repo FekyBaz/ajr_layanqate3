@@ -46,12 +46,12 @@
                     </legend>
                     <div class="form-group">
                         <label for="deceased-name">اسم المتوفى / المتوفاة <span class="required-asterisk">*</span></label>
-                        <input type="text" id="deceased-name" maxlength="100" required placeholder="مثال: المغفور له بإذن الله / أحمد بن محمد" autocomplete="off">
+                        <input type="text" id="deceased-name" maxlength="100" required placeholder="مثال: المغفور له بإذن الله / أحمد بن محمد" autocomplete="off" aria-describedby="name-error">
                         <div class="form-group__footer">
                             <div class="form-hint">يُفضل كتابة الاسم الكامل بالشكل الذي ترغب بظهوره في عنوان الصفحة.</div>
                             <div class="char-count" id="name-char-count">0 / 100</div>
                         </div>
-                        <div class="field-error" id="name-error"></div>
+                        <div class="field-error" id="name-error" role="alert"></div>
                     </div>
 
                     <div class="form-group">
@@ -68,22 +68,22 @@
                     </legend>
                     <div class="form-group">
                         <label for="biography">نبذة تعريفية عن المتوفى (اختياري)</label>
-                        <textarea id="biography" maxlength="1000" placeholder="اكتب نبذة موجزة عن حياته ومحبته للخير والأثر الطيب الذي تركه في نفوس من حوله..."></textarea>
+                        <textarea id="biography" maxlength="1000" placeholder="اكتب نبذة موجزة عن حياته ومحبته للخير والأثر الطيب الذي تركه في نفوس من حوله..." aria-describedby="bio-error"></textarea>
                         <div class="form-group__footer">
                             <div class="form-hint">كلمات طيبة تُلهم زوار الصفحة وتدفعهم للدعاء له بالرحمة والمغفرة.</div>
                             <div class="char-count" id="bio-char-count">0 / 1000</div>
                         </div>
-                        <div class="field-error" id="bio-error"></div>
+                        <div class="field-error" id="bio-error" role="alert"></div>
                     </div>
 
                     <div class="form-group">
                         <label for="good-traits">أبرز الصفات الحميدة (اختياري)</label>
-                        <textarea id="good-traits" maxlength="500" placeholder="مثال: كان باراً بوالديه، واصلاً للرحم، محباً للمساكين، وابتسامته لا تفارقه..."></textarea>
+                        <textarea id="good-traits" maxlength="500" placeholder="مثال: كان باراً بوالديه، واصلاً للرحم، محباً للمساكين، وابتسامته لا تفارقه..." aria-describedby="traits-error"></textarea>
                         <div class="form-group__footer">
                             <div class="form-hint">صفات ومآثر لتكون أسوة حسنة وذكرى خالدة.</div>
                             <div class="char-count" id="traits-char-count">0 / 500</div>
                         </div>
-                        <div class="field-error" id="traits-error"></div>
+                        <div class="field-error" id="traits-error" role="alert"></div>
                     </div>
                 </fieldset>
 
@@ -94,12 +94,12 @@
                     </legend>
                     <div class="form-group">
                         <label for="ongoing-charity">وصف للصدقة الجارية (اختياري)</label>
-                        <textarea id="ongoing-charity" maxlength="1000" placeholder="هل هناك مشروع خيري (حفر بئر، بناء مسجد، طباعة مصاحف، كفالة أيتام) مخصص عن روح المتوفى؟"></textarea>
+                        <textarea id="ongoing-charity" maxlength="1000" placeholder="هل هناك مشروع خيري (حفر بئر، بناء مسجد، طباعة مصاحف، كفالة أيتام) مخصص عن روح المتوفى؟" aria-describedby="charity-error"></textarea>
                         <div class="form-group__footer">
                             <div class="form-hint">اذكر تفاصيل المشروع الخيري ليشارك الزوار في ثوابه.</div>
                             <div class="char-count" id="charity-char-count">0 / 1000</div>
                         </div>
-                        <div class="field-error" id="charity-error"></div>
+                        <div class="field-error" id="charity-error" role="alert"></div>
                     </div>
 
                     <div class="form-group links-group">
@@ -111,7 +111,7 @@
                             <span aria-hidden="true">+</span> إضافة رابط تبرع جديد
                         </button>
                         <div class="form-hint">روابط رسمية وموثوقة (مثل منصة إحسان، الجمعيات المعتمدة) للمساهمة عن المتوفى.</div>
-                        <div class="field-error" id="links-error"></div>
+                        <div class="field-error" id="links-error" role="alert"></div>
                     </div>
                 </fieldset>
 
@@ -122,12 +122,12 @@
                     </legend>
                     <div class="form-group">
                         <label for="story">مواقف مؤثرة أو نصيحة لا تُنسى</label>
-                        <textarea id="story" maxlength="2000" placeholder="موقف نبيل، وصية طيبة، أو قصة تعكس حسن خلقه وطيب معشره..."></textarea>
+                        <textarea id="story" maxlength="2000" placeholder="موقف نبيل، وصية طيبة، أو قصة تعكس حسن خلقه وطيب معشره..." aria-describedby="story-error"></textarea>
                         <div class="form-group__footer">
                             <div class="form-hint">مساحة حرة لتدوين الذكريات الجميلة والمؤثرة.</div>
                             <div class="char-count" id="story-char-count">0 / 2000</div>
                         </div>
-                        <div class="field-error" id="story-error"></div>
+                        <div class="field-error" id="story-error" role="alert"></div>
                     </div>
                 </fieldset>
 
