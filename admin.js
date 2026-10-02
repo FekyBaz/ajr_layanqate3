@@ -993,7 +993,7 @@
             if (result.success && result.data && result.data.length > 0) {
                 renderFeedback(result.data);
                 feedbackList.classList.remove('hidden');
-                if (feedbackTotal && result.total != null) {
+                if (feedbackTotal && result.total !== null && result.total !== undefined) {
                     feedbackTotal.textContent = `${result.total} رسالة`;
                 }
                 // Update Badge

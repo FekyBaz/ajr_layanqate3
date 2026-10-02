@@ -1,0 +1,25 @@
+name: ✨ Feature request
+description: Suggest an idea or improvement for the project
+labels: [enhancement]
+body:
+  - type: textarea
+    id: problem
+    attributes:
+      label: Problem / motivation
+      description: What user need does this solve? Who benefits?
+    validations:
+      required: true
+  - type: textarea
+    id: proposal
+    attributes:
+      label: Proposed change
+      description: Rough approach. Note any privacy, security, or RTL/accessibility implications.
+    validations:
+      required: true
+  - type: checkboxes
+    id: checks
+    attributes:
+      label: Checks
+      options:
+        - label: This does not require collecting new personal data (or I explain why below).
+          required: false

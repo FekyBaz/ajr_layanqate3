@@ -287,3 +287,10 @@
   for = "/sw.js"
   [headers.values]
     Cache-Control = "public, max-age=0, must-revalidate"
+
+# Design prototypes are experiments: keep them out of search indexes
+# (robots.txt also disallows /prototypes/)
+[[headers]]
+  for = "/prototypes/*"
+  [headers.values]
+    X-Robots-Tag = "noindex, nofollow"
