@@ -178,12 +178,15 @@ export function success(data, origin, additionalHeaders = {}) {
 }
 
 export function error(statusCode, message, origin, devMessage = null) {
-    const errorCode = statusCode === 401 ? 'INVALID_CREDENTIALS'
-        : statusCode === 429 ? 'RATE_LIMIT_EXCEEDED'
-            : statusCode === 400 ? 'VALIDATION_ERROR'
-                : statusCode === 405 ? 'METHOD_NOT_ALLOWED'
-                    : statusCode === 500 ? 'SERVER_ERROR'
-                        : 'UNKNOWN_ERROR';
+    const errorCode = statusCode === 400 ? 'VALIDATION_ERROR'
+        : statusCode === 401 ? 'INVALID_CREDENTIALS'
+            : statusCode === 403 ? 'FORBIDDEN'
+                : statusCode === 404 ? 'NOT_FOUND'
+                    : statusCode === 405 ? 'METHOD_NOT_ALLOWED'
+                        : statusCode === 429 ? 'RATE_LIMIT_EXCEEDED'
+                            : statusCode === 500 ? 'SERVER_ERROR'
+                                : statusCode === 502 ? 'BAD_GATEWAY'
+                                    : 'UNKNOWN_ERROR';
 
     const body = { success: false, message, error_code: errorCode };
 

@@ -86,7 +86,7 @@ export async function handler(event, context) {
 
         if (updateError) {
             logger.error('[Admin Approve] Supabase update error:', updateError.message);
-            return error(500, `حدث خطأ في تحديث البيانات: ${updateError.message}`, origin, updateError.message);
+            return error(500, 'حدث خطأ في تحديث البيانات', origin, updateError.message);
         }
 
         if (!updatedRow) {
@@ -118,6 +118,6 @@ export async function handler(event, context) {
 
     } catch (err) {
         logger.error('[Admin Approve] Critical handler error:', err.message, err.stack);
-        return error(500, `حدث خطأ داخلي في السيرفر: ${err.message}`, origin, err.message);
+        return error(500, 'حدث خطأ داخلي في السيرفر', origin, err.message);
     }
 }
