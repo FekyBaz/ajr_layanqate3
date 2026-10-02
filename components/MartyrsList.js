@@ -1,7 +1,15 @@
+// Single source: lib/escape.js (classic script loaded before the module),
+// with fallback so the list still renders if the shared lib is missing.
+const EscapeHtmlLib = globalThis.EscapeLib || {
+  escapeHtml(text) {
+    const div = document.createElement('div');
+    div.textContent = String(text ?? '');
+    return div.innerHTML;
+  },
+};
+
 function escapeHtml(text) {
-  const div = document.createElement('div');
-  div.textContent = String(text ?? '');
-  return div.innerHTML;
+  return EscapeHtmlLib.escapeHtml(text);
 }
 
 function getGenderLabel(gender) {

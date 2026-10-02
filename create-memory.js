@@ -12,10 +12,8 @@
     // ═══════════════════════════════════════════════════════════════════
     // Configuration
     // ═══════════════════════════════════════════════════════════════════
-    const PRODUCTION_API_URL = '';
-    const isProduction = !window.location.hostname.includes('localhost') &&
-        !window.location.hostname.includes('127.0.0.1');
-    const API_BASE = isProduction ? PRODUCTION_API_URL : 'http://localhost:8888';
+    // Single source: lib/config.js (loaded before this script)
+    const API_BASE = window.AppConfig.API_BASE;
 
 
     const NAME_MAX_LENGTH = 100;
