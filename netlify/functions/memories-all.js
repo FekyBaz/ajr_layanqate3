@@ -12,6 +12,7 @@ import {
     handleOptions,
     logger,
     STATUS,
+    escapeIlikePattern,
 } from './utils/shared.js';
 
 const MAX_PAGE_SIZE = 60;
@@ -31,7 +32,8 @@ export async function handler(event, context) {
     try {
         const rawPage = Number.parseInt(event.queryStringParameters?.page || '1', 10);
         const rawPageSize = Number.parseInt(event.queryStringParameters?.pageSize || `${DEFAULT_PAGE_SIZE}`, 10);
-        const searchQuery = event.queryStringParameters?.search?.trim() || '';
+        // Cap search length and escape LIKE wildcards so % _ \ match literally (#78)
+        const searchQuery = (event.queryStringParameters?.search?.trim() || '').slice(0, 50);
 
         const page = Number.isNaN(rawPage) || rawPage < 1 ? 1 : rawPage;
         const pageSize = Number.isNaN(rawPageSize) || rawPageSize < 1
@@ -50,7 +52,7 @@ export async function handler(event, context) {
             .order('approved_at', { ascending: false });
 
         if (searchQuery) {
-            query = query.ilike('deceased_name', `%${searchQuery}%`);
+            query = query.ilike('deceased_name', `%${escapeIlikePattern(searchQuery)}%`);
         }
 
         const { data, count, error: queryError } = await query.range(from, to);

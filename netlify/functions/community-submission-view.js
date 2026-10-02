@@ -20,9 +20,13 @@ export async function handler(event) {
             return error(400, 'Invalid payload', origin);
         }
 
-        const submissionId = Number(payload.submissionId);
+        // Submission IDs are UUIDs (see submissions table + record_and_increment_view RPC).
+        // The previous Number() check rejected every real ID with 400 (#78).
+        const UUID_REGEX = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
+        const rawId = typeof payload.submissionId === 'string' ? payload.submissionId.trim() : '';
+        const submissionId = UUID_REGEX.test(rawId) ? rawId.toLowerCase() : null;
 
-        if (!Number.isInteger(submissionId) || submissionId <= 0) {
+        if (!submissionId) {
             return error(400, 'Invalid submission id', origin);
         }
 
