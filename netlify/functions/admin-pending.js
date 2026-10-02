@@ -12,6 +12,7 @@ import {
     handleOptions,
     validateAdminWithRateLimit,
     STATUS,
+    parsePagination,
     logger,
 } from './utils/shared.js';
 
@@ -38,26 +39,28 @@ export async function handler(event, context) {
     }
 
     try {
-        const params = event.queryStringParameters || {};
-        const limit = Math.min(Math.max(parseInt(params.limit, 10) || 50, 1), 100);
-        const page = Math.max(parseInt(params.page, 10) || 1, 1);
-        const from = (page - 1) * limit;
-        const to = from + limit - 1;
+        const { page, limit, from, to } = parsePagination(event.queryStringParameters, {
+            defaultLimit: 50,
+            maxLimit: 100,
+        });
 
-        // Get total count + page data in parallel
+        // Get total count + page data in parallel (exact count for real totals)
         const [countResult, dataResult] = await Promise.all([
             supabaseAdmin
                 .from('submissions')
-                .select('id', { head: true })
+                .select('id', { head: true, count: 'exact' })
                 .eq('status', STATUS.PENDING),
             supabaseAdmin
                 .from('submissions')
                 .select('id, message, corrected_message, content_type, author_name, created_at')
                 .eq('status', STATUS.PENDING)
                 .order('created_at', { ascending: true })
-                .range(from, to)
-                .limit(100), // Added safety cap
+                .range(from, to),
         ]);
+
+        if (countResult.error) {
+            return error(500, 'حدث خطأ في جلب البيانات', origin, countResult.error.message);
+        }
 
         if (dataResult.error) {
             return error(500, 'حدث خطأ في جلب البيانات', origin, dataResult.error.message);
@@ -70,7 +73,7 @@ export async function handler(event, context) {
             count: totalCount,
             page,
             limit,
-            totalPages: Math.ceil(totalCount / limit),
+            totalPages: totalCount === 0 ? 1 : Math.ceil(totalCount / limit),
         }, origin);
 
     } catch (err) {

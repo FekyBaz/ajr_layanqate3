@@ -104,7 +104,7 @@ export async function handler(event) {
         const surface = (params.get('surface') || 'community').toLowerCase();
         const requestedLimit = parsePositiveInt(params.get('limit'), DEFAULT_PAGE_SIZE);
         const cappedLimit = Math.min(requestedLimit, MAX_PAGE_SIZE);
-        const limit = surface === 'homepage_preview' ? Math.min(cappedLimit, HOMEPAGE_PREVIEW_SIZE) : DEFAULT_PAGE_SIZE;
+        const limit = surface === 'homepage_preview' ? Math.min(cappedLimit, HOMEPAGE_PREVIEW_SIZE) : cappedLimit;
         const refSource = sanitizeRefSource(event.headers['x-ref-source'] || event.headers['X-Ref-Source'] || 'direct');
 
         if (!VALID_TYPES.includes(contentType)) {
