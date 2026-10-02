@@ -1,38 +1,22 @@
+import { success, error, handleOptions } from './utils/shared.js';
+
 export async function handler(event, context) {
-    const origin = event.headers.origin || '';
+    const headers = event.headers || {};
+    const origin = headers.origin || headers.Origin || '';
 
     if (event.httpMethod === 'OPTIONS') {
-        return {
-            statusCode: 204,
-            headers: {
-                'Access-Control-Allow-Origin': origin || '*',
-                'Access-Control-Allow-Headers': 'Content-Type',
-                'Access-Control-Allow-Methods': 'GET, OPTIONS',
-            },
-            body: '',
-        };
+        return handleOptions(origin);
     }
 
     if (event.httpMethod !== 'GET') {
-        return {
-            statusCode: 405,
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ success: false, message: 'Method not allowed' }),
-        };
+        return error(405, 'Method not allowed', origin);
     }
 
     const measurementId = process.env.GA_MEASUREMENT_ID || '';
 
-    return {
-        statusCode: 200,
-        headers: {
-            'Content-Type': 'application/json',
-            'Cache-Control': 'public, max-age=300, s-maxage=300',
-            'Access-Control-Allow-Origin': origin || '*',
-        },
-        body: JSON.stringify({
-            success: true,
-            measurement_id: measurementId,
-        }),
-    };
+    return success(
+        { measurement_id: measurementId },
+        origin,
+        { 'Cache-Control': 'public, max-age=300, s-maxage=300' },
+    );
 }
