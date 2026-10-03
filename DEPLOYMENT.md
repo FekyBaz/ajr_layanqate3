@@ -50,6 +50,33 @@ Trigger the first deploy and verify:
 - Rate limiting is active.
 - Database writes reach the intended Supabase project.
 
+### Smoke test (copy-paste)
+
+```bash
+SITE=https://your-site.netlify.app
+curl -s "$SITE/api/health"
+curl -s "$SITE/sitemap.xml" | head -5
+# Expect 401 without a key, 429 only under flood:
+curl -s -o /dev/null -w "%{http_code}\n" "$SITE/api/admin/stats"
+```
+
+### Rollback
+
+Netlify keeps every deploy: **Deploys → pick the last good deploy → Publish deploy**.
+For a code rollback instead: `git revert` the offending commit on `main` and
+push — Netlify redeploys automatically. Database migrations are NOT rolled
+back automatically; review the migration files before reverting schema changes.
+
+### Pre/post-deploy env diff
+
+```bash
+netlify env:list --context production
+```
+
+Compare against `api/.env.example` (now 1:1 with the code): every variable the
+functions read must be set; remove stale names. Rotate `ADMIN_API_KEY` and
+`IP_SALT` on a schedule, never reuse development values in production.
+
 ## 5. Production checklist
 
 - [ ] No secrets exist in tracked files.
