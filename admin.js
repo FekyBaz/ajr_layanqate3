@@ -219,26 +219,53 @@
         }
     }
 
-    async function loadPending() {
+    let submissionsPage = 1;
+    let memoriesPage = 1;
+
+    async function loadPending(page = 1) {
+        // Refresh buttons pass the click Event — only honor real numbers
+        submissionsPage = typeof page === 'number' && page > 0 ? Math.floor(page) : 1;
         loadingEl.classList.remove('hidden');
         submissionsList.classList.add('hidden');
         emptyState.classList.add('hidden');
 
         try {
-            const result = await apiRequest('/api/admin/pending');
+            const result = await apiRequest(`/api/admin/pending?page=${submissionsPage}`);
 
             loadingEl.classList.add('hidden');
 
             if (result.success && result.data.length > 0) {
                 renderSubmissions(result.data);
                 submissionsList.classList.remove('hidden');
+                renderPager('submissions', result);
+            } else if (submissionsPage > 1) {
+                // Page emptied by moderation — step back
+                loadPending(submissionsPage - 1);
             } else {
                 emptyState.classList.remove('hidden');
+                renderPager('submissions', null);
             }
         } catch (error) {
             loadingEl.classList.add('hidden');
             showNotification('فشل تحميل البيانات', 'error');
         }
+    }
+
+    function renderPager(prefix, result) {
+        const pager = document.getElementById(`${prefix}-pager`);
+        const prev = document.getElementById(`${prefix}-prev`);
+        const next = document.getElementById(`${prefix}-next`);
+        const info = document.getElementById(`${prefix}-page-info`);
+        if (!pager || !prev || !next || !info) return;
+
+        const totalPages = result && result.totalPages > 1 ? result.totalPages : 1;
+        const page = Math.min(result && result.page > 0 ? result.page : 1, totalPages);
+        const total = result && typeof result.count === 'number' ? result.count : 0;
+
+        pager.hidden = totalPages <= 1;
+        prev.disabled = page <= 1;
+        next.disabled = page >= totalPages;
+        info.textContent = `صفحة ${page} من ${totalPages} (الإجمالي ${total})`;
     }
 
     // ═══════════════════════════════════════════════════════════════════
@@ -343,8 +370,8 @@
 
             if (result.success) {
                 showNotification('تمت الموافقة على المشاركة', 'success');
-                removeCard(id);
                 loadStats();
+                loadPending(submissionsPage);
             } else {
                 showNotification(result.message || 'حدث خطأ', 'error');
             }
@@ -363,25 +390,13 @@
 
             if (result.success) {
                 showNotification('تم رفض المشاركة', 'success');
-                removeCard(id);
                 loadStats();
+                loadPending(submissionsPage);
             } else {
                 showNotification(result.message || 'حدث خطأ', 'error');
             }
         } catch (error) {
             showNotification('فشل الاتصال بالخادم', 'error');
-        }
-    }
-
-    function removeCard(id) {
-        const card = document.querySelector(`.submission-card[data-id="${id}"]`);
-        if (card) {
-            card.remove();
-        }
-
-        if (submissionsList.children.length === 0) {
-            submissionsList.classList.add('hidden');
-            emptyState.classList.remove('hidden');
         }
     }
 
@@ -441,23 +456,31 @@
         }
     }
 
-    async function loadPendingMemories() {
+    async function loadPendingMemories(page = 1) {
+        // Refresh buttons pass the click Event — only honor real numbers
+        memoriesPage = typeof page === 'number' && page > 0 ? Math.floor(page) : 1;
         memoryLoadingEl.classList.remove('hidden');
         memoriesList.classList.add('hidden');
         memoryEmptyState.classList.add('hidden');
 
         try {
-            const result = await apiRequest('/api/admin/memory/pending');
+            const result = await apiRequest(`/api/admin/memory/pending?page=${memoriesPage}`);
 
             memoryLoadingEl.classList.add('hidden');
 
             if (result.success && result.data.length > 0) {
                 renderMemories(result.data);
                 memoriesList.classList.remove('hidden');
-                document.getElementById('memory-pending-count').textContent = result.data.length;
+                document.getElementById('memory-pending-count').textContent =
+                    typeof result.count === 'number' ? result.count : result.data.length;
+                renderPager('memories', result);
+            } else if (memoriesPage > 1) {
+                // Page emptied by moderation — step back
+                loadPendingMemories(memoriesPage - 1);
             } else {
                 memoryEmptyState.classList.remove('hidden');
                 document.getElementById('memory-pending-count').textContent = '0';
+                renderPager('memories', null);
             }
         } catch (error) {
             memoryLoadingEl.classList.add('hidden');
@@ -545,7 +568,7 @@
 
             if (result.success) {
                 showMemoryNotification('تمت الموافقة على صفحة الذكرى', 'success');
-                removeMemoryCard(id);
+                loadPendingMemories(memoriesPage);
             } else {
                 showMemoryNotification(result.message || 'حدث خطأ', 'error');
             }
@@ -562,28 +585,13 @@
 
             if (result.success) {
                 showMemoryNotification('تم رفض صفحة الذكرى', 'success');
-                removeMemoryCard(id);
+                loadPendingMemories(memoriesPage);
             } else {
                 showMemoryNotification(result.message || 'حدث خطأ', 'error');
             }
         } catch (error) {
             showMemoryNotification('فشل الاتصال بالخادم', 'error');
         }
-    }
-
-    function removeMemoryCard(id) {
-        const card = document.querySelector(`.submission-card[data-memory-id="${id}"]`);
-        if (card) card.remove();
-
-        if (memoriesList.children.length === 0) {
-            memoriesList.classList.add('hidden');
-            memoryEmptyState.classList.remove('hidden');
-        }
-
-        // Update count
-        const countEl = document.getElementById('memory-pending-count');
-        const current = parseInt(countEl.textContent) || 0;
-        countEl.textContent = Math.max(0, current - 1);
     }
 
     function showMemoryNotification(message, type) {
@@ -1196,10 +1204,20 @@
     if (tabFeedbackBtn) tabFeedbackBtn.addEventListener('click', () => switchTab('feedback'));
 
     const refreshSubmissionsBtn = document.getElementById('refresh-submissions-btn');
-    if (refreshSubmissionsBtn) refreshSubmissionsBtn.addEventListener('click', loadPending);
+    if (refreshSubmissionsBtn) refreshSubmissionsBtn.addEventListener('click', () => loadPending(submissionsPage));
 
     const refreshMemoriesBtn = document.getElementById('refresh-memories-btn');
-    if (refreshMemoriesBtn) refreshMemoriesBtn.addEventListener('click', loadPendingMemories);
+    if (refreshMemoriesBtn) refreshMemoriesBtn.addEventListener('click', () => loadPendingMemories(memoriesPage));
+
+    function wirePager(prefix, getPage, loadPage) {
+        const prev = document.getElementById(`${prefix}-prev`);
+        const next = document.getElementById(`${prefix}-next`);
+        if (prev) prev.addEventListener('click', () => loadPage(getPage() - 1));
+        if (next) next.addEventListener('click', () => loadPage(getPage() + 1));
+    }
+
+    wirePager('submissions', () => submissionsPage, loadPending);
+    wirePager('memories', () => memoriesPage, loadPendingMemories);
 
     const refreshMemoryUpdatesBtn = document.getElementById('refresh-memory-updates-btn');
     if (refreshMemoryUpdatesBtn) refreshMemoryUpdatesBtn.addEventListener('click', loadPendingMemoryUpdates);
