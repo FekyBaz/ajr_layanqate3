@@ -1,0 +1,59 @@
+/* Consent banner — minimal, RTL-first with logical properties. */
+
+.consent-banner {
+    position: fixed;
+    inset-inline: 1rem;
+    bottom: 1rem;
+    z-index: 1200;
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    justify-content: space-between;
+    gap: 0.75rem;
+    background: #fffdf7;
+    color: #3a3226;
+    border: 1px solid rgba(140, 106, 53, 0.35);
+    border-radius: 1rem;
+    box-shadow: 0 12px 32px rgba(2, 6, 23, 0.18);
+    padding: 1rem 1.25rem;
+    max-width: 44rem;
+    margin-inline: auto;
+}
+
+.consent-banner__text {
+    margin: 0;
+    font-size: 0.9rem;
+    line-height: 1.7;
+    flex: 1 1 16rem;
+}
+
+.consent-banner__actions {
+    display: flex;
+    gap: 0.5rem;
+}
+
+.consent-banner__btn {
+    font: inherit;
+    font-size: 0.88rem;
+    font-weight: 700;
+    border-radius: 0.6rem;
+    padding: 0.5rem 1.1rem;
+    cursor: pointer;
+    border: 1px solid transparent;
+}
+
+.consent-banner__btn--accept {
+    background: #3e7b5c;
+    color: #fff;
+}
+
+.consent-banner__btn--decline {
+    background: transparent;
+    color: #3e7b5c;
+    border-color: rgba(62, 123, 92, 0.5);
+}
+
+.consent-banner__btn:focus-visible {
+    outline: 2px solid #3e7b5c;
+    outline-offset: 2px;
+}
