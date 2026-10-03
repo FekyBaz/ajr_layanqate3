@@ -213,11 +213,22 @@ export function handleOptions(origin) {
 const ADMIN_RATE_LIMIT_WINDOW_HOURS = 1;
 const ADMIN_RATE_LIMIT_MAX = parseInt(process.env.ADMIN_RATE_LIMIT_MAX) || 300;
 
+/**
+ * Constant-time string comparison (via SHA-256 digests, so unequal
+ * lengths do not leak through short-circuit `===` timing).
+ */
+function timingSafeCompare(a, b) {
+    const digestA = crypto.createHash('sha256').update(String(a)).digest();
+    const digestB = crypto.createHash('sha256').update(String(b)).digest();
+    return crypto.timingSafeEqual(digestA, digestB);
+}
+
 export function validateAdmin(event) {
     const authHeader = event.headers.authorization || event.headers.Authorization || '';
     const token = authHeader.replace('Bearer ', '').trim();
 
-    // Also check X-Admin-Key header for backwards compatibility
+    // X-Admin-Key is used by the shipped admin panel (admin.js); both
+    // vectors are accepted and both are compared in constant time.
     const adminKeyHeader = event.headers['x-admin-key'] || '';
 
     // Support both ADMIN_API_KEY and ADMIN_KEY env var names
@@ -228,7 +239,8 @@ export function validateAdmin(event) {
         return false;
     }
 
-    const isValid = (token && token === adminApiKey) || (adminKeyHeader && adminKeyHeader === adminApiKey);
+    const isValid = (token && timingSafeCompare(token, adminApiKey)) ||
+        (adminKeyHeader && timingSafeCompare(adminKeyHeader, adminApiKey));
 
     if (!isValid) {
         logger.debug('[AUTH] Validation failed.',
@@ -243,15 +255,17 @@ export function validateAdmin(event) {
 
 /**
  * Rate-limited admin validation.
+ *
+ * The attempt is logged and the window count is enforced BEFORE the key
+ * itself is checked, so brute-force floods hit 429 even with wrong keys.
+ * Callers must check `rateLimited` before `valid` (429 takes precedence).
  * @returns {{ valid: boolean, rateLimited: boolean }}
  */
 export async function validateAdminWithRateLimit(event) {
-    const isValid = validateAdmin(event);
     const clientIP = getClientIP(event);
     const ipHash = crypto.createHash('sha256').update(clientIP || 'unknown').digest('hex').substring(0, 32);
 
     // [SECURITY] We log EVERY attempt, including failures, to prevent brute-forcing.
-    // This happens BEFORE we return 'valid: false' to ensure failed attempts are counted.
     // Tagged as 'admin' source to avoid polluting user submission rate limits.
     try {
         await recordRequest(clientIP, 'admin');
@@ -259,10 +273,7 @@ export async function validateAdminWithRateLimit(event) {
         logger.error('Admin attempt logging failed:', logLimitError.message);
     }
 
-    if (!isValid) {
-        return { valid: false, rateLimited: false };
-    }
-
+    // Enforce the flood threshold before validating the key.
     try {
         const windowStart = new Date();
         windowStart.setHours(windowStart.getHours() - ADMIN_RATE_LIMIT_WINDOW_HOURS);
@@ -277,14 +288,16 @@ export async function validateAdminWithRateLimit(event) {
 
         if (countError) {
             logger.error('Admin rate limit check error:', countError.message);
-            return { valid: true, rateLimited: false };
-        }
-
-        if ((count || 0) >= ADMIN_RATE_LIMIT_MAX) {
-            return { valid: true, rateLimited: true };
+        } else if ((count || 0) >= ADMIN_RATE_LIMIT_MAX) {
+            return { valid: false, rateLimited: true };
         }
     } catch (err) {
         logger.error('Admin rate limit error:', err.message);
+    }
+
+    const isValid = validateAdmin(event);
+    if (!isValid) {
+        return { valid: false, rateLimited: false };
     }
 
     return { valid: true, rateLimited: false };

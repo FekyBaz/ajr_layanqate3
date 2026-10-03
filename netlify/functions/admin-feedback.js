@@ -27,11 +27,12 @@ export async function handler(event, context) {
 
     // Validate admin authentication
     const authResult = await validateAdminWithRateLimit(event);
-    if (!authResult.valid) {
-        return error(401, 'بيانات تسجيل الدخول غير صحيحة', origin, 'Admin key validation failed');
-    }
+    // 429 first: brute-force floods are rate-limited even with wrong keys (#76)
     if (authResult.rateLimited) {
         return error(429, 'تم تجاوز الحد المسموح للمحاولات', origin);
+    }
+    if (!authResult.valid) {
+        return error(401, 'بيانات تسجيل الدخول غير صحيحة', origin, 'Admin key validation failed');
     }
 
     try {
