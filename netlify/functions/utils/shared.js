@@ -104,12 +104,24 @@ export const supabasePublic = createClient(
 // CORS Headers
 // ═══════════════════════════════════════════════════════════════════════════
 
-const PRODUCTION_ORIGIN = process.env.FRONTEND_URL || '';
-const ALLOWED_ORIGINS = [
+function normalizeOrigin(value) {
+    return String(value || '').trim().replace(/\/+$/, '');
+}
+
+function parseOriginsCsv(value) {
+    return String(value || '')
+        .split(',')
+        .map(normalizeOrigin)
+        .filter(Boolean);
+}
+
+const PRODUCTION_ORIGIN = normalizeOrigin(process.env.FRONTEND_URL);
+const ALLOWED_ORIGINS = Array.from(new Set([
+    ...parseOriginsCsv(process.env.ALLOWED_ORIGINS),
     PRODUCTION_ORIGIN,
     'http://localhost:8888',
     'http://localhost:3000',
-].filter(Boolean);
+].filter(Boolean)));
 
 /**
  * Strict regex for Netlify deploy-preview origins.
@@ -128,13 +140,14 @@ const SECURITY_HEADERS = {
 };
 
 export function getCorsHeaders(origin) {
-    const isAllowed = ALLOWED_ORIGINS.includes(origin) ||
-        (DEPLOY_PREVIEW_REGEX && DEPLOY_PREVIEW_REGEX.test(origin));
+    const normalizedOrigin = normalizeOrigin(origin);
+    const isAllowed = ALLOWED_ORIGINS.includes(normalizedOrigin) ||
+        (DEPLOY_PREVIEW_REGEX && DEPLOY_PREVIEW_REGEX.test(normalizedOrigin));
 
-    // Safe fallback: never return empty string as Access-Control-Allow-Origin
-    const allowOrigin = isAllowed && origin
-        ? origin
-        : (ALLOWED_ORIGINS.find(Boolean) || 'null');
+    // Deny by default: disallowed origins get 'null' (never echoed back and
+    // never the first allow-listed origin, which would poison caches).
+    // allowOrigin mirrors the request origin only when it is allow-listed.
+    const allowOrigin = isAllowed && normalizedOrigin ? normalizedOrigin : 'null';
 
     return {
         ...SECURITY_HEADERS,
