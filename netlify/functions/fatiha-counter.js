@@ -62,18 +62,13 @@ export async function handler(event) {
       return success({ count }, origin);
     }
 
-    const currentCount = await getCurrentCount(supabase);
+    // Single atomic increment (migration 026) — no read-modify-write race (#110)
+    const { data: newCount, error: rpcError } = await supabase
+      .rpc('increment_fatiha_counter');
 
-    const { data, error: updateError } = await supabase
-      .from(FATIHA_TABLE)
-      .update({ count: currentCount + 1 })
-      .eq('id', FATIHA_ROW_ID)
-      .select('count')
-      .single();
+    if (rpcError) throw rpcError;
 
-    if (updateError) throw updateError;
-
-    return success({ count: Number(data?.count) || currentCount + 1 }, origin);
+    return success({ count: Number(newCount) || 0 }, origin);
   } catch (err) {
     logger.error('[fatiha-counter] Error:', err.message);
     return error(500, 'Failed to process fatiha counter request', origin, err.message);
