@@ -91,7 +91,7 @@ body {
     overflow-x: hidden;
     background-color: var(--color-bg-primary);
     direction: rtl;
-    text-align: right;
+    text-align: start;
     min-height: 100vh;
     display: flex;
     flex-direction: column;
@@ -110,7 +110,7 @@ body {
 .skip-link {
     position: absolute;
     top: -100%;
-    right: 0;
+    inset-inline-start: 0;
     background: var(--color-accent-primary);
     color: white;
     padding: var(--space-sm) var(--space-md);
@@ -165,7 +165,7 @@ p {
     content: '';
     position: absolute;
     bottom: 0;
-    right: 50%;
+    inset-inline-start: 50%;
     transform: translateX(50%);
     width: 90px;
     height: 4px;
@@ -177,7 +177,7 @@ p {
     content: '۞';
     position: absolute;
     top: -1.7rem;
-    right: 50%;
+    inset-inline-start: 50%;
     transform: translateX(50%);
     font-size: 1.1rem;
     color: rgba(207, 169, 104, 0.9);
@@ -319,8 +319,7 @@ p {
     .site-nav {
         position: absolute;
         top: 64px;
-        right: 0;
-        left: 0;
+        inset-inline: 0;
         background: #f7f4e9;
         border-bottom: 1px solid var(--color-border);
         padding: 0 var(--space-md);
