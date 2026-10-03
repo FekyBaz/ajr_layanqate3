@@ -32,6 +32,18 @@
   </url>
 
   <url>
+    <loc>https://ajr-la-yanqati.com/memories</loc>
+    <changefreq>daily</changefreq>
+    <priority>0.8</priority>
+  </url>
+
+  <url>
+    <loc>https://ajr-la-yanqati.com/poster</loc>
+    <changefreq>weekly</changefreq>
+    <priority>0.7</priority>
+  </url>
+
+  <url>
     <loc>https://ajr-la-yanqati.com/contact</loc>
     <changefreq>monthly</changefreq>
     <priority>0.5</priority>
