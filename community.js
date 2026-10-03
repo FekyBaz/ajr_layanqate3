@@ -482,6 +482,12 @@ function incrementSessionViewCount() {
 }
 
 async function copyToClipboard(text) {
+    // Single source lib/share.js when loaded; local fallback otherwise.
+    if (globalThis.ShareLib) {
+        await globalThis.ShareLib.copyText(text);
+        return;
+    }
+
     if (navigator.clipboard?.writeText) {
         await navigator.clipboard.writeText(text);
         return;

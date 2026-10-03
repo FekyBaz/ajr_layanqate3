@@ -67,14 +67,26 @@ export class ShareSystem {
         shareUrl.searchParams.set('text', text);
 
         const fullCopyText = `"${text}"\n\nشاهد لوحة الذكر الفنية وشاركها كصدقة جارية:\n${shareUrl.toString()}`;
+        const plainFallbackText = `"${text}"\n\nمشروع أجر لا ينقطع 🤍`;
 
-        navigator.clipboard.writeText(fullCopyText).then(() => {
-            showToastCallback('تم نسخ رابط لوحتك الفنية لمشاركتها! ✨');
-        }).catch(() => {
-            // Backup direct text copy if browser clipboard permissions are restrictive
-            navigator.clipboard.writeText(`"${text}"\n\nمشروع أجر لا ينقطع 🤍`).then(() => {
-                showToastCallback('تم نسخ نص الذكر لمشاركته! 🕊');
-            });
-        });
+        // Single source lib/share.js when available (own textarea fallback
+        // included); plain clipboard otherwise. Resolved `false` and
+        // rejections both mean "not copied" and trigger the second tier.
+        const copy = globalThis.ShareLib
+            ? (value) => globalThis.ShareLib.copyText(value)
+            : (value) => navigator.clipboard.writeText(value);
+
+        const secondTier = () => copy(plainFallbackText).then(
+            (copied) => { if (copied !== false) showToastCallback('تم نسخ نص الذكر لمشاركته! 🕊'); },
+            () => {},
+        );
+
+        copy(fullCopyText).then(
+            (copied) => {
+                if (copied !== false) showToastCallback('تم نسخ رابط لوحتك الفنية لمشاركتها! ✨');
+                else secondTier();
+            },
+            () => secondTier(),
+        );
     }
 }
