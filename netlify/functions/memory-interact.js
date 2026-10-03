@@ -5,12 +5,12 @@
  * ═══════════════════════════════════════════════════════════════════════════
  */
 
-import crypto from 'crypto';
 import {
     supabaseAdmin,
     success,
     error,
     handleOptions,
+    hashIP,
     getClientIP,
     logger,
 } from './utils/shared.js';
@@ -51,13 +51,9 @@ export async function handler(event, context) {
             return error(400, 'نوع التفاعل غير صالح', origin);
         }
 
-        // Hash client IP
+        // Hash client IP (single salted hashIP shared by all writers)
         const clientIP = getClientIP(event);
-        const ipHash = crypto
-            .createHash('sha256')
-            .update((clientIP || 'unknown') + (process.env.IP_SALT || ''))
-            .digest('hex')
-            .substring(0, 32);
+        const ipHash = hashIP(clientIP);
 
         // Call atomic RPC
         const { data: result, error: rpcError } = await supabaseAdmin.rpc('record_memory_interaction', {

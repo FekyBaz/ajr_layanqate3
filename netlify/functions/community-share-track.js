@@ -1,4 +1,4 @@
-import { supabaseAdmin, error, success, handleOptions, logger } from './utils/shared.js';
+import { supabaseAdmin, error, success, handleOptions, getClientIP, checkRateLimit, recordRequest, HOT_ENDPOINT_RATE_LIMITS, logger } from './utils/shared.js';
 import { incrementGoalProgress } from './utils/community-goal.js';
 
 const VALID_PLATFORMS = ['whatsapp', 'telegram', 'x', 'native'];
@@ -38,6 +38,14 @@ export async function handler(event) {
         const platform = sanitizePlatform(payload.platform);
         const submissionId = sanitizeSubmissionId(payload.submissionId);
         const hasSubmissionId = Boolean(submissionId);
+
+        // Share clicks were previously unlimited (#77)
+        const clientIP = getClientIP(event);
+        const allowed = await checkRateLimit(clientIP, 'share', HOT_ENDPOINT_RATE_LIMITS.share);
+        if (!allowed) {
+            return error(429, 'تم تجاوز الحد المسموح، يرجى المحاولة لاحقًا.', origin);
+        }
+        await recordRequest(clientIP, 'share');
 
         logger.info('[community-share-track] share click', {
             platform,

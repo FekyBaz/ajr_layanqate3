@@ -1,5 +1,4 @@
-import { supabaseAdmin, error, success, handleOptions, getClientIP, getCorsHeaders, logger } from './utils/shared.js';
-import crypto from 'crypto';
+import { supabaseAdmin, error, success, handleOptions, hashIP, getClientIP, checkRateLimit, recordRequest, HOT_ENDPOINT_RATE_LIMITS, getCorsHeaders, logger } from './utils/shared.js';
 
 export async function handler(event) {
     const origin = event.headers.origin || event.headers.Origin;
@@ -26,12 +25,16 @@ export async function handler(event) {
             return error(400, 'Invalid submission id', origin);
         }
 
-        // Hash the client IP for privacy-safe deduplication
+        // Hash the client IP (single salted hashIP shared by all writers)
         const clientIP = getClientIP(event);
-        const ipHash = crypto.createHash('sha256')
-            .update(clientIP || 'unknown')
-            .digest('hex')
-            .substring(0, 32);
+        const ipHash = hashIP(clientIP);
+
+        // View pings were previously unlimited (#77)
+        const allowed = await checkRateLimit(clientIP, 'view', HOT_ENDPOINT_RATE_LIMITS.view);
+        if (!allowed) {
+            return error(429, 'تم تجاوز الحد المسموح، يرجى المحاولة لاحقًا.', origin);
+        }
+        await recordRequest(clientIP, 'view');
 
         // Use atomic RPC with database-backed deduplication
         // This replaces the old in-memory Map throttling + read-modify-write counter

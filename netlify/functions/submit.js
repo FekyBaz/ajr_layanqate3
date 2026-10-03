@@ -5,7 +5,6 @@
  * ═══════════════════════════════════════════════════════════════════════════
  */
 
-import crypto from 'crypto';
 import {
     supabaseAdmin,
     success,
@@ -15,8 +14,7 @@ import {
     sanitizeName,
     validateContentType,
     generateMessageHash,
-    checkRateLimit,
-    recordRequest,
+    hashIP,
     getClientIP,
     logger,
 } from './utils/shared.js';
@@ -66,13 +64,10 @@ export async function handler(event, context) {
         // Generate message hash for duplicate detection
         const messageHash = generateMessageHash(messageResult.sanitized);
 
-        // Get client IP and check rate limit
+        // Get client IP and hash it (single salted hashIP; the atomic RPC
+        // below enforces the rate limit, so no separate check here)
         const clientIP = getClientIP(event);
-        const ipHash = crypto
-            .createHash('sha256')
-            .update((clientIP || 'unknown') + (process.env.IP_SALT || ''))
-            .digest('hex')
-            .substring(0, 32);
+        const ipHash = hashIP(clientIP);
 
         logger.info('[submit] Calling submit_post RPC...', { ipHash, clientIP, rateLimitMax: parseInt(process.env.RATE_LIMIT_MAX || '10', 10), rateLimitHours: parseInt(process.env.RATE_LIMIT_WINDOW || '24', 10) });
 

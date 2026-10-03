@@ -387,12 +387,42 @@ export function generateMessageHash(message) {
 const RATE_LIMIT_WINDOW = parseInt(process.env.RATE_LIMIT_WINDOW || '24', 10); // hours
 const RATE_LIMIT_MAX = parseInt(process.env.RATE_LIMIT_MAX || '10', 10);
 
-export async function checkRateLimit(ip, source = 'submit') {
-    const windowStart = new Date();
-    windowStart.setHours(windowStart.getHours() - RATE_LIMIT_WINDOW);
+// Generous per-endpoint write limits for hot endpoints that previously had
+// no rate limiting at all (#77). Generous on purpose: these are low-cost
+// writes where false positives hurt more than abuse.
+export const HOT_ENDPOINT_RATE_LIMITS = {
+    fatiha: { windowHours: 24, max: 100 },
+    analytics: { windowHours: 24, max: 200 },
+    share: { windowHours: 24, max: 200 },
+    view: { windowHours: 24, max: 500 },
+};
 
-    // Hash the IP for privacy
-    const ipHash = crypto.createHash('sha256').update(ip || 'unknown').digest('hex').substring(0, 32);
+let ipSaltWarned = false;
+
+/**
+ * Single IP-hash function for the whole backend (#77).
+ * Salted with IP_SALT and truncated to 32 hex chars. All writers
+ * (submit/memory RPC hashes, checkRateLimit/recordRequest, view
+ * deduplication) must use this so the same IP lands in one bucket.
+ * Warns once when IP_SALT is missing (required in production).
+ */
+export function hashIP(ip) {
+    const salt = process.env.IP_SALT || '';
+    if (!salt && !ipSaltWarned) {
+        ipSaltWarned = true;
+        logger.warn('[shared] IP_SALT is not set — IP hashes are unsalted. Set IP_SALT in production.');
+    }
+    return crypto.createHash('sha256').update((ip || 'unknown') + salt).digest('hex').substring(0, 32);
+}
+
+export async function checkRateLimit(ip, source = 'submit', options = {}) {
+    const windowHours = options.windowHours || RATE_LIMIT_WINDOW;
+    const max = options.max || RATE_LIMIT_MAX;
+    const windowStart = new Date();
+    windowStart.setHours(windowStart.getHours() - windowHours);
+
+    // Hash the IP for privacy (single salted function, see hashIP)
+    const ipHash = hashIP(ip);
 
     try {
         const { count, error: countError } = await supabaseAdmin
@@ -410,7 +440,7 @@ export async function checkRateLimit(ip, source = 'submit') {
             return true;
         }
 
-        return (count || 0) < RATE_LIMIT_MAX;
+        return (count || 0) < max;
     } catch (err) {
         logger.error('Rate limit error:', err.message);
         return true;
@@ -418,7 +448,7 @@ export async function checkRateLimit(ip, source = 'submit') {
 }
 
 export async function recordRequest(ip, source = 'submit') {
-    const ipHash = crypto.createHash('sha256').update(ip || 'unknown').digest('hex').substring(0, 32);
+    const ipHash = hashIP(ip);
 
     try {
         await supabaseAdmin
@@ -467,9 +497,8 @@ export function getClientIP(event) {
         'unknown';
 }
 
-export function hashIP(ip) {
-    return crypto.createHash('sha256').update(ip || 'unknown').digest('hex');
-}
+// (removed: legacy unsalted full-length hashIP — use the single salted
+// hashIP() in the Rate Limiting section so all buckets agree, see #77)
 
 
 // ═══════════════════════════════════════════════════════════════════════════
