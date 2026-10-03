@@ -41,7 +41,6 @@ export async function handler(event, context) {
 
     } catch (err) {
         logger.error('[ga-content] Error:', err.message, err.details || '');
-        const msg = err.details || err.message || 'Internal server error';
-        return error(500, msg, origin);
+        return error(500, 'Internal server error', origin, err.message);
     }
 }
