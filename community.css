@@ -973,4 +973,14 @@ body.community-focus-mode .tree-card {
     opacity: 0.85;
     transition: opacity 0.2s;
 }
-.community-posters__cta-link:hover { opacity: 1; }
+.community-posters__cta-link:hover { opacity: 1; }
+
+/* Seed-card design link (moved from JS template style= for CSP, see #108) */
+.community-poster-card__seed {
+    display: block;
+    text-align: center;
+    font-size: 0.72rem;
+    padding: 4px 0;
+    color: #3E7B5C;
+    text-decoration: none;
+}

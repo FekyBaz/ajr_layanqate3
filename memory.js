@@ -346,7 +346,7 @@
                 </div>
                 
                 <div class="dhikr-card__track">
-                    <div class="dhikr-card__bar" id="dhikr-bar-${item.id}" style="width: ${progressPercent}%;"></div>
+                    <div class="dhikr-card__bar" id="dhikr-bar-${item.id}"></div>
                 </div>
                 
                 <div class="dhikr-card__buttons">
@@ -366,6 +366,8 @@
             const resetBtn = card.querySelector(`#dhikr-reset-${item.id}`);
             const numEl = card.querySelector(`#dhikr-num-${item.id}`);
             const barEl = card.querySelector(`#dhikr-bar-${item.id}`);
+            // Programmatic style (CSP-safe; no style= attribute in markup)
+            barEl.style.width = `${progressPercent}%`;
             const btnText = card.querySelector(`#dhikr-btn-text-${item.id}`);
             const btnIcon = card.querySelector(`#dhikr-btn-icon-${item.id}`);
 

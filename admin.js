@@ -269,6 +269,23 @@
         return div.innerHTML;
     }
 
+    // Attribute-context escaping (single source lib/escape.js when loaded).
+    // value="..." interpolation with escapeHtml alone allows quote-breakout,
+    // and these values come from user-submitted proposals.
+    const EscapeAttrLib = globalThis.EscapeLib || {
+        escapeAttr(value) {
+            return String(value === null || value === undefined ? '' : value)
+                .replace(/&/g, '&amp;')
+                .replace(/"/g, '&quot;')
+                .replace(/</g, '&lt;')
+                .replace(/>/g, '&gt;');
+        },
+    };
+
+    function escapeAttr(value) {
+        return EscapeAttrLib.escapeAttr(value);
+    }
+
     function renderSubmissions(submissions) {
         submissionsList.innerHTML = submissions.map(sub => `
             <div class="submission-card" data-id="${escapeHtml(String(sub.id))}">
@@ -453,7 +470,7 @@
             // Helper to securely format links
             let linksHtml = '';
             if (Array.isArray(mem.external_links) && mem.external_links.length > 0) {
-                linksHtml = '<div style="margin-top:8px;"><strong>روابط الصدقة:</strong><ul>' +
+                linksHtml = '<div class="admin-links-box"><strong>روابط الصدقة:</strong><ul>' +
                     mem.external_links.map(l =>
                         `<li><a href="${escapeHtml(l.url)}" target="_blank" rel="noopener noreferrer">${escapeHtml(l.title || l.url)}</a></li>`
                     ).join('') +
@@ -468,37 +485,37 @@
                     </div>
                     
                     <div class="original-message-label">اسم المتوفى:</div>
-                    <div class="original-message" style="font-weight:600;">${escapeHtml(mem.deceased_name)}</div>
+                    <div class="original-message admin-strong">${escapeHtml(mem.deceased_name)}</div>
                     
-                    ${mem.relation ? `<div style="font-size:0.85rem;color:#8b7961;margin-top:4px;">صلة القرابة: ${escapeHtml(mem.relation)}</div>` : ''}
+                    ${mem.relation ? `<div class="admin-relation">صلة القرابة: ${escapeHtml(mem.relation)}</div>` : ''}
                     
                     ${mem.biography ? `
-                        <div class="original-message-label" style="margin-top:12px;">عن المتوفى (نبذة):</div>
+                        <div class="original-message-label admin-label-spaced">عن المتوفى (نبذة):</div>
                         <div class="original-message">${escapeHtml(mem.biography)}</div>
                     ` : ''}
 
                     ${mem.good_traits ? `
-                        <div class="original-message-label" style="margin-top:12px;">من صفاته الطيبة:</div>
+                        <div class="original-message-label admin-label-spaced">من صفاته الطيبة:</div>
                         <div class="original-message">${escapeHtml(mem.good_traits)}</div>
                     ` : ''}
 
                     ${mem.ongoing_charity || linksHtml ? `
-                        <div class="original-message-label" style="margin-top:12px;">الصدقة الجارية:</div>
+                        <div class="original-message-label admin-label-spaced">الصدقة الجارية:</div>
                         ${mem.ongoing_charity ? `<div class="original-message">${escapeHtml(mem.ongoing_charity)}</div>` : ''}
                         ${linksHtml}
                     ` : ''}
 
                     ${mem.story ? `
-                        <div class="original-message-label" style="margin-top:12px;">مواقف أو ذكريات:</div>
+                        <div class="original-message-label admin-label-spaced">مواقف أو ذكريات:</div>
                         <div class="original-message">${escapeHtml(mem.story)}</div>
                     ` : ''}
 
                     ${(!mem.biography && mem.message) ? `
-                        <div class="original-message-label" style="margin-top:12px;">الرسالة (قديم):</div>
+                        <div class="original-message-label admin-label-spaced">الرسالة (قديم):</div>
                         <div class="original-message">${escapeHtml(mem.message)}</div>
                     ` : ''}
                     
-                    <div class="actions" style="margin-top:20px;">
+                    <div class="actions admin-actions-spaced">
                         <button class="btn btn-success btn-sm" data-memory-action="approve" data-memory-id="${escapeHtml(String(mem.id))}">
                             ✓ موافقة
                         </button>
@@ -627,155 +644,153 @@
             for (let i = 0; i < 5; i++) {
                 const link = linksList[i] || { title: '', url: '' };
                 linksEditHtml += `
-                    <div class="edit-link-row" style="display: flex; gap: 8px; margin-bottom: 6px;">
+                    <div class="edit-link-row admin-edit-row">
                         <input type="text" 
-                               class="update-link-title" 
+                               class="update-link-title admin-link-title" 
                                placeholder="عنوان الرابط (مثال: صدقة جارية)" 
-                               value="${escapeHtml(link.title || '')}" 
-                               style="flex: 1; padding: 6px; font-size: 0.85rem; border: 1px solid #ddd; border-radius: 6px;" />
+                               value="${escapeAttr(link.title || '')}" />
                         <input type="url" 
-                               class="update-link-url" 
+                               class="update-link-url admin-link-url" 
                                placeholder="https://..." 
-                               value="${escapeHtml(link.url || '')}" 
-                               style="flex: 2; padding: 6px; font-size: 0.85rem; border: 1px solid #ddd; border-radius: 6px; direction: ltr;" />
+                               value="${escapeAttr(link.url || '')}" />
                     </div>
                 `;
             }
 
             return `
-                <div class="submission-card memory-update-card" data-proposal-id="${escapeHtml(String(prop.id))}" style="border: 1px solid rgba(200, 166, 115, 0.25); border-radius: 16px; padding: 20px; background: var(--color-surface, #fff); box-shadow: 0 4px 20px rgba(0,0,0,0.02); margin-bottom: 20px; display: flex; flex-direction: column; gap: 16px;">
-                    <div class="submission-meta" style="display: flex; justify-content: space-between; font-size: 0.85rem; color: #8c6a35; border-bottom: 1px solid rgba(200, 166, 115, 0.1); padding-bottom: 10px;">
-                        <span class="content-type-badge" style="background: rgba(200, 166, 115, 0.1); color: #8c6a35; padding: 2px 10px; border-radius: 50px; font-weight: bold; border: 1px solid rgba(200, 166, 115, 0.15);">طلب تعديل صفحة</span>
+                <div class="submission-card memory-update-card" data-proposal-id="${escapeHtml(String(prop.id))}">
+                    <div class="submission-meta admin-meta">
+                        <span class="content-type-badge admin-meta-badge">طلب تعديل صفحة</span>
                         <span>${formatDate(prop.created_at)}</span>
                     </div>
                     
                     <div>
-                        <div style="font-size: 1.1rem; font-weight: bold; margin-bottom: 4px; color: var(--color-text-primary);">
-                            الصفحة المستهدفة: <a href="${pageUrl}" target="_blank" rel="noopener noreferrer" style="color: #8c6a35; text-decoration: underline;">${escapeHtml(deceasedName)} ↗</a>
+                        <div class="admin-target">
+                            الصفحة المستهدفة: <a href="${pageUrl}" target="_blank" rel="noopener noreferrer">${escapeHtml(deceasedName)} ↗</a>
                         </div>
-                        <div style="font-size: 0.85rem; color: #666; display: flex; gap: 12px;">
+                        <div class="admin-byline">
                             <span>مقدم التعديل: <strong>${escapeHtml(prop.proposed_by_name)}</strong></span>
                             <span>صلة القرابة: <strong>${escapeHtml(prop.proposed_by_relation)}</strong></span>
                         </div>
                     </div>
 
                     <!-- Comparison Section -->
-                    <div style="display: flex; flex-direction: column; gap: 16px; margin-top: 8px;">
+                    <div class="admin-diff-list">
                         
                         <!-- Biography Diff -->
-                        <div class="diff-section" style="border: 1px solid ${isBioChanged ? 'rgba(200,166,115,0.3)' : '#eee'}; border-radius: 12px; overflow: hidden; background: ${isBioChanged ? 'rgba(200,166,115,0.02)' : '#fafafa'};">
-                            <div style="padding: 8px 14px; font-weight: bold; font-size: 0.9rem; background: ${isBioChanged ? 'rgba(200,166,115,0.08)' : '#eee'}; display: flex; justify-content: space-between; align-items: center; color: ${isBioChanged ? '#8c6a35' : '#555'};">
+                        <div class="diff-section${isBioChanged ? ' is-changed' : ''}">
+                            <div class="diff-header${isBioChanged ? ' is-changed' : ''}">
                                 <span>عن المتوفى وسيرته (نبذة تعريفية)</span>
-                                <span style="font-size: 0.75rem; font-weight: normal; background: ${isBioChanged ? '#c8a673' : '#bbb'}; color: white; padding: 2px 8px; border-radius: 50px;">
+                                <span class="diff-badge${isBioChanged ? ' is-changed' : ''}">
                                     ${isBioChanged ? 'معدّل 📝' : 'لم يتغير'}
                                 </span>
                             </div>
-                            <div style="padding: 14px; display: flex; flex-direction: column; gap: 10px;">
-                                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 12px;">
+                            <div class="diff-body">
+                                <div class="diff-grid">
                                     <div>
-                                        <div style="font-size: 0.75rem; color: #888; margin-bottom: 4px;">النسخة الحالية:</div>
-                                        <div style="background: #f5f5f5; padding: 8px 12px; border-radius: 8px; font-size: 0.85rem; min-height: 40px; color: #777; border-right: 3px solid #ccc; white-space: pre-wrap;">${escapeHtml(memory.biography || 'لا يوجد')}</div>
+                                        <div class="diff-col-label">النسخة الحالية:</div>
+                                        <div class="diff-current">${escapeHtml(memory.biography || 'لا يوجد')}</div>
                                     </div>
                                     <div>
-                                        <div style="font-size: 0.75rem; color: #8c6a35; margin-bottom: 4px;">النسخة المقترحة:</div>
-                                        <div style="background: #fffdf5; padding: 8px 12px; border-radius: 8px; font-size: 0.85rem; min-height: 40px; color: #5c4a35; border-right: 3px solid #c8a673; white-space: pre-wrap;">${escapeHtml(prop.biography || 'لا يوجد')}</div>
+                                        <div class="diff-col-label diff-col-label--proposed">النسخة المقترحة:</div>
+                                        <div class="diff-proposed">${escapeHtml(prop.biography || 'لا يوجد')}</div>
                                     </div>
                                 </div>
-                                <div style="margin-top: 6px;">
-                                    <label style="font-size: 0.78rem; font-weight: bold; display: block; margin-bottom: 4px; color: #666;">التعديل النهائي (تعديل واعتماد):</label>
-                                    <textarea class="update-biography" style="width: 100%; padding: 8px; font-size: 0.85rem; border: 1px solid #c8a673; border-radius: 8px; box-sizing: border-box; resize: vertical;" rows="2" placeholder="تعديل النبذة قبل الاعتماد...">${escapeHtml(prop.biography || '')}</textarea>
+                                <div class="diff-edit-wrap">
+                                    <label class="diff-edit-label">التعديل النهائي (تعديل واعتماد):</label>
+                                    <textarea class="update-biography diff-textarea" rows="2" placeholder="تعديل النبذة قبل الاعتماد...">${escapeHtml(prop.biography || '')}</textarea>
                                 </div>
                             </div>
                         </div>
 
                         <!-- Traits Diff -->
-                        <div class="diff-section" style="border: 1px solid ${isTraitsChanged ? 'rgba(200,166,115,0.3)' : '#eee'}; border-radius: 12px; overflow: hidden; background: ${isTraitsChanged ? 'rgba(200,166,115,0.02)' : '#fafafa'};">
-                            <div style="padding: 8px 14px; font-weight: bold; font-size: 0.9rem; background: ${isTraitsChanged ? 'rgba(200,166,115,0.08)' : '#eee'}; display: flex; justify-content: space-between; align-items: center; color: ${isTraitsChanged ? '#8c6a35' : '#555'};">
+                        <div class="diff-section${isTraitsChanged ? ' is-changed' : ''}">
+                            <div class="diff-header${isTraitsChanged ? ' is-changed' : ''}">
                                 <span>من صفاته الحميدة</span>
-                                <span style="font-size: 0.75rem; font-weight: normal; background: ${isTraitsChanged ? '#c8a673' : '#bbb'}; color: white; padding: 2px 8px; border-radius: 50px;">
+                                <span class="diff-badge${isTraitsChanged ? ' is-changed' : ''}">
                                     ${isTraitsChanged ? 'معدّل 📝' : 'لم يتغير'}
                                 </span>
                             </div>
-                            <div style="padding: 14px; display: flex; flex-direction: column; gap: 10px;">
-                                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 12px;">
+                            <div class="diff-body">
+                                <div class="diff-grid">
                                     <div>
-                                        <div style="font-size: 0.75rem; color: #888; margin-bottom: 4px;">النسخة الحالية:</div>
-                                        <div style="background: #f5f5f5; padding: 8px 12px; border-radius: 8px; font-size: 0.85rem; min-height: 40px; color: #777; border-right: 3px solid #ccc; white-space: pre-wrap;">${escapeHtml(memory.good_traits || 'لا يوجد')}</div>
+                                        <div class="diff-col-label">النسخة الحالية:</div>
+                                        <div class="diff-current">${escapeHtml(memory.good_traits || 'لا يوجد')}</div>
                                     </div>
                                     <div>
-                                        <div style="font-size: 0.75rem; color: #8c6a35; margin-bottom: 4px;">النسخة المقترحة:</div>
-                                        <div style="background: #fffdf5; padding: 8px 12px; border-radius: 8px; font-size: 0.85rem; min-height: 40px; color: #5c4a35; border-right: 3px solid #c8a673; white-space: pre-wrap;">${escapeHtml(prop.good_traits || 'لا يوجد')}</div>
+                                        <div class="diff-col-label diff-col-label--proposed">النسخة المقترحة:</div>
+                                        <div class="diff-proposed">${escapeHtml(prop.good_traits || 'لا يوجد')}</div>
                                     </div>
                                 </div>
-                                <div style="margin-top: 6px;">
-                                    <label style="font-size: 0.78rem; font-weight: bold; display: block; margin-bottom: 4px; color: #666;">التعديل النهائي (تعديل واعتماد):</label>
-                                    <textarea class="update-good-traits" style="width: 100%; padding: 8px; font-size: 0.85rem; border: 1px solid #c8a673; border-radius: 8px; box-sizing: border-box; resize: vertical;" rows="2" placeholder="تعديل الصفات قبل الاعتماد...">${escapeHtml(prop.good_traits || '')}</textarea>
+                                <div class="diff-edit-wrap">
+                                    <label class="diff-edit-label">التعديل النهائي (تعديل واعتماد):</label>
+                                    <textarea class="update-good-traits diff-textarea" rows="2" placeholder="تعديل الصفات قبل الاعتماد...">${escapeHtml(prop.good_traits || '')}</textarea>
                                 </div>
                             </div>
                         </div>
 
                         <!-- Charity Diff -->
-                        <div class="diff-section" style="border: 1px solid ${isCharityChanged ? 'rgba(200,166,115,0.3)' : '#eee'}; border-radius: 12px; overflow: hidden; background: ${isCharityChanged ? 'rgba(200,166,115,0.02)' : '#fafafa'};">
-                            <div style="padding: 8px 14px; font-weight: bold; font-size: 0.9rem; background: ${isCharityChanged ? 'rgba(200,166,115,0.08)' : '#eee'}; display: flex; justify-content: space-between; align-items: center; color: ${isCharityChanged ? '#8c6a35' : '#555'};">
+                        <div class="diff-section${isCharityChanged ? ' is-changed' : ''}">
+                            <div class="diff-header${isCharityChanged ? ' is-changed' : ''}">
                                 <span>الصدقة الجارية والوقف</span>
-                                <span style="font-size: 0.75rem; font-weight: normal; background: ${isCharityChanged ? '#c8a673' : '#bbb'}; color: white; padding: 2px 8px; border-radius: 50px;">
+                                <span class="diff-badge${isCharityChanged ? ' is-changed' : ''}">
                                     ${isCharityChanged ? 'معدّل 📝' : 'لم يتغير'}
                                 </span>
                             </div>
-                            <div style="padding: 14px; display: flex; flex-direction: column; gap: 10px;">
-                                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 12px;">
+                            <div class="diff-body">
+                                <div class="diff-grid">
                                     <div>
-                                        <div style="font-size: 0.75rem; color: #888; margin-bottom: 4px;">النسخة الحالية:</div>
-                                        <div style="background: #f5f5f5; padding: 8px 12px; border-radius: 8px; font-size: 0.85rem; min-height: 40px; color: #777; border-right: 3px solid #ccc; white-space: pre-wrap;">${escapeHtml(memory.ongoing_charity || 'لا يوجد')}</div>
+                                        <div class="diff-col-label">النسخة الحالية:</div>
+                                        <div class="diff-current">${escapeHtml(memory.ongoing_charity || 'لا يوجد')}</div>
                                     </div>
                                     <div>
-                                        <div style="font-size: 0.75rem; color: #8c6a35; margin-bottom: 4px;">النسخة المقترحة:</div>
-                                        <div style="background: #fffdf5; padding: 8px 12px; border-radius: 8px; font-size: 0.85rem; min-height: 40px; color: #5c4a35; border-right: 3px solid #c8a673; white-space: pre-wrap;">${escapeHtml(prop.ongoing_charity || 'لا يوجد')}</div>
+                                        <div class="diff-col-label diff-col-label--proposed">النسخة المقترحة:</div>
+                                        <div class="diff-proposed">${escapeHtml(prop.ongoing_charity || 'لا يوجد')}</div>
                                     </div>
                                 </div>
-                                <div style="margin-top: 6px;">
-                                    <label style="font-size: 0.78rem; font-weight: bold; display: block; margin-bottom: 4px; color: #666;">التعديل النهائي (تعديل واعتماد):</label>
-                                    <textarea class="update-ongoing-charity" style="width: 100%; padding: 8px; font-size: 0.85rem; border: 1px solid #c8a673; border-radius: 8px; box-sizing: border-box; resize: vertical;" rows="2" placeholder="تعديل الصدقة قبل الاعتماد...">${escapeHtml(prop.ongoing_charity || '')}</textarea>
+                                <div class="diff-edit-wrap">
+                                    <label class="diff-edit-label">التعديل النهائي (تعديل واعتماد):</label>
+                                    <textarea class="update-ongoing-charity diff-textarea" rows="2" placeholder="تعديل الصدقة قبل الاعتماد...">${escapeHtml(prop.ongoing_charity || '')}</textarea>
                                 </div>
                             </div>
                         </div>
 
                         <!-- Links Diff -->
-                        <div class="diff-section" style="border: 1px solid ${isLinksChanged ? 'rgba(200,166,115,0.3)' : '#eee'}; border-radius: 12px; overflow: hidden; background: ${isLinksChanged ? 'rgba(200,166,115,0.02)' : '#fafafa'};">
-                            <div style="padding: 8px 14px; font-weight: bold; font-size: 0.9rem; background: ${isLinksChanged ? 'rgba(200,166,115,0.08)' : '#eee'}; display: flex; justify-content: space-between; align-items: center; color: ${isLinksChanged ? '#8c6a35' : '#555'};">
+                        <div class="diff-section${isLinksChanged ? ' is-changed' : ''}">
+                            <div class="diff-header${isLinksChanged ? ' is-changed' : ''}">
                                 <span>روابط الصدقة والمشاريع (حتى 5 روابط)</span>
-                                <span style="font-size: 0.75rem; font-weight: normal; background: ${isLinksChanged ? '#c8a673' : '#bbb'}; color: white; padding: 2px 8px; border-radius: 50px;">
+                                <span class="diff-badge${isLinksChanged ? ' is-changed' : ''}">
                                     ${isLinksChanged ? 'معدّل 📝' : 'لم يتغير'}
                                 </span>
                             </div>
-                            <div style="padding: 14px; display: flex; flex-direction: column; gap: 12px;">
-                                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 12px;">
+                            <div class="diff-body diff-body--wide">
+                                <div class="diff-grid">
                                     <div>
-                                        <div style="font-size: 0.75rem; color: #888; margin-bottom: 4px;">النسخة الحالية:</div>
-                                        <div style="background: #f5f5f5; padding: 8px; border-radius: 8px; font-size: 0.8rem; min-height: 40px; color: #777; border-right: 3px solid #ccc;">
-                                            <ul style="margin: 0; padding-right: 18px;">
+                                        <div class="diff-col-label">النسخة الحالية:</div>
+                                        <div class="diff-links-current">
+                                            <ul class="diff-links-list">
                                                 ${(memory.external_links || []).length > 0 
-                                                    ? memory.external_links.map(l => `<li><a href="${escapeHtml(l.url)}" target="_blank" style="color: #666; text-decoration: underline;">${escapeHtml(l.title || l.url)}</a></li>`).join('') 
+                                                     ? memory.external_links.map(l => `<li><a href="${escapeHtml(l.url)}" target="_blank">${escapeHtml(l.title || l.url)}</a></li>`).join('')
                                                     : 'لا يوجد روابط'
                                                 }
                                             </ul>
                                         </div>
                                     </div>
                                     <div>
-                                        <div style="font-size: 0.75rem; color: #8c6a35; margin-bottom: 4px;">النسخة المقترحة:</div>
-                                        <div style="background: #fffdf5; padding: 8px; border-radius: 8px; font-size: 0.8rem; min-height: 40px; color: #5c4a35; border-right: 3px solid #c8a673;">
-                                            <ul style="margin: 0; padding-right: 18px;">
+                                        <div class="diff-col-label diff-col-label--proposed">النسخة المقترحة:</div>
+                                        <div class="diff-links-proposed">
+                                            <ul class="diff-links-list">
                                                 ${(prop.external_links || []).length > 0 
-                                                    ? prop.external_links.map(l => `<li><a href="${escapeHtml(l.url)}" target="_blank" style="color: #8c6a35; text-decoration: underline;">${escapeHtml(l.title || l.url)}</a></li>`).join('') 
+                                                     ? prop.external_links.map(l => `<li><a href="${escapeHtml(l.url)}" target="_blank">${escapeHtml(l.title || l.url)}</a></li>`).join('')
                                                     : 'لا يوجد روابط'
                                                 }
                                             </ul>
                                         </div>
                                     </div>
                                 </div>
-                                <div style="margin-top: 6px;">
-                                    <label style="font-size: 0.78rem; font-weight: bold; display: block; margin-bottom: 6px; color: #666;">التعديل النهائي للروابط (تعديل واعتماد):</label>
-                                    <div class="update-links-container" style="display: flex; flex-direction: column; gap: 6px;">
+                                <div class="diff-edit-wrap">
+                                    <label class="diff-edit-label diff-edit-label--spaced">التعديل النهائي للروابط (تعديل واعتماد):</label>
+                                    <div class="update-links-container diff-links-edit">
                                         ${linksEditHtml}
                                     </div>
                                 </div>
@@ -783,38 +798,38 @@
                         </div>
 
                         <!-- Story Diff -->
-                        <div class="diff-section" style="border: 1px solid ${isStoryChanged ? 'rgba(200,166,115,0.3)' : '#eee'}; border-radius: 12px; overflow: hidden; background: ${isStoryChanged ? 'rgba(200,166,115,0.02)' : '#fafafa'};">
-                            <div style="padding: 8px 14px; font-weight: bold; font-size: 0.9rem; background: ${isStoryChanged ? 'rgba(200,166,115,0.08)' : '#eee'}; display: flex; justify-content: space-between; align-items: center; color: ${isStoryChanged ? '#8c6a35' : '#555'};">
+                        <div class="diff-section${isStoryChanged ? ' is-changed' : ''}">
+                            <div class="diff-header${isStoryChanged ? ' is-changed' : ''}">
                                 <span>مواقف وذكريات خالدة (قصص)</span>
-                                <span style="font-size: 0.75rem; font-weight: normal; background: ${isStoryChanged ? '#c8a673' : '#bbb'}; color: white; padding: 2px 8px; border-radius: 50px;">
+                                <span class="diff-badge${isStoryChanged ? ' is-changed' : ''}">
                                     ${isStoryChanged ? 'معدّل 📝' : 'لم يتغير'}
                                 </span>
                             </div>
-                            <div style="padding: 14px; display: flex; flex-direction: column; gap: 10px;">
-                                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 12px;">
+                            <div class="diff-body">
+                                <div class="diff-grid">
                                     <div>
-                                        <div style="font-size: 0.75rem; color: #888; margin-bottom: 4px;">النسخة الحالية:</div>
-                                        <div style="background: #f5f5f5; padding: 8px 12px; border-radius: 8px; font-size: 0.85rem; min-height: 40px; color: #777; border-right: 3px solid #ccc; white-space: pre-wrap;">${escapeHtml(memory.story || 'لا يوجد')}</div>
+                                        <div class="diff-col-label">النسخة الحالية:</div>
+                                        <div class="diff-current">${escapeHtml(memory.story || 'لا يوجد')}</div>
                                     </div>
                                     <div>
-                                        <div style="font-size: 0.75rem; color: #8c6a35; margin-bottom: 4px;">النسخة المقترحة:</div>
-                                        <div style="background: #fffdf5; padding: 8px 12px; border-radius: 8px; font-size: 0.85rem; min-height: 40px; color: #5c4a35; border-right: 3px solid #c8a673; white-space: pre-wrap;">${escapeHtml(prop.story || 'لا يوجد')}</div>
+                                        <div class="diff-col-label diff-col-label--proposed">النسخة المقترحة:</div>
+                                        <div class="diff-proposed">${escapeHtml(prop.story || 'لا يوجد')}</div>
                                     </div>
                                 </div>
-                                <div style="margin-top: 6px;">
-                                    <label style="font-size: 0.78rem; font-weight: bold; display: block; margin-bottom: 4px; color: #666;">التعديل النهائي (تعديل واعتماد):</label>
-                                    <textarea class="update-story" style="width: 100%; padding: 8px; font-size: 0.85rem; border: 1px solid #c8a673; border-radius: 8px; box-sizing: border-box; resize: vertical;" rows="3" placeholder="تعديل قصة الذكرى قبل الاعتماد...">${escapeHtml(prop.story || '')}</textarea>
+                                <div class="diff-edit-wrap">
+                                    <label class="diff-edit-label">التعديل النهائي (تعديل واعتماد):</label>
+                                    <textarea class="update-story diff-textarea" rows="3" placeholder="تعديل قصة الذكرى قبل الاعتماد...">${escapeHtml(prop.story || '')}</textarea>
                                 </div>
                             </div>
                         </div>
 
                     </div>
 
-                    <div class="actions" style="margin-top: 10px; display: flex; gap: 10px; justify-content: flex-end; border-top: 1px solid #eee; padding-top: 14px;">
-                        <button class="btn btn-success btn-md" data-update-action="approve" data-proposal-id="${escapeHtml(String(prop.id))}" style="background: var(--color-accent, #8c6a35); color: white; padding: 8px 24px; border: none; border-radius: 8px; font-size: 0.9rem; font-weight: bold; cursor: pointer; display: flex; align-items: center; gap: 6px;">
+                    <div class="actions admin-update-actions">
+                        <button class="btn btn-success btn-md admin-approve-btn" data-update-action="approve" data-proposal-id="${escapeHtml(String(prop.id))}">
                             ✓ اعتماد التعديلات والتدميج ✨
                         </button>
-                        <button class="btn btn-danger btn-md" data-update-action="reject" data-proposal-id="${escapeHtml(String(prop.id))}" style="background: #fff; color: #d9534f; padding: 8px 20px; border: 1px solid #d9534f; border-radius: 8px; font-size: 0.9rem; cursor: pointer;">
+                        <button class="btn btn-danger btn-md admin-reject-btn" data-update-action="reject" data-proposal-id="${escapeHtml(String(prop.id))}">
                             ✗ رفض التعديل
                         </button>
                     </div>
