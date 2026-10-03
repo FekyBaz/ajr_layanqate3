@@ -1,0 +1,34 @@
+{
+  "name": "أجر لا ينقطع — شارك ذكرًا يبقى أجره",
+  "short_name": "أجر لا ينقطع",
+  "description": "منصة دعوية لمشاركة الأذكار والأدعية والآيات والأحاديث بنية الأجر.",
+  "lang": "ar",
+  "dir": "rtl",
+  "start_url": "/",
+  "scope": "/",
+  "display": "standalone",
+  "orientation": "portrait",
+  "theme_color": "#f7f4e9",
+  "background_color": "#f7f4e9",
+  "categories": ["religion", "lifestyle"],
+  "icons": [
+    {
+      "src": "/icons/icon-192.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "any"
+    },
+    {
+      "src": "/icons/icon-512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any"
+    },
+    {
+      "src": "/icons/maskable-512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "maskable"
+    }
+  ]
+}
