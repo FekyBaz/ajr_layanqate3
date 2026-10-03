@@ -15,20 +15,69 @@
     const submitBtn = document.getElementById('contactSubmit');
     const successEl = document.getElementById('contactSuccess');
 
+    const emailError = document.getElementById('email-error');
+
     if (!form) return;
+
+    const EMAIL_PATTERN = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+
+    function setFieldError(input, errorEl, message) {
+        if (errorEl) {
+            errorEl.textContent = message;
+            errorEl.classList.add('visible');
+        }
+        if (input) {
+            input.classList.add('is-invalid');
+            input.setAttribute('aria-invalid', 'true');
+        }
+    }
+
+    function clearFieldError(input, errorEl) {
+        if (errorEl) {
+            errorEl.textContent = '';
+            errorEl.classList.remove('visible');
+        }
+        if (input) {
+            input.classList.remove('is-invalid');
+            input.removeAttribute('aria-invalid');
+        }
+    }
 
     messageInput.addEventListener('input', () => {
         msgCount.textContent = messageInput.value.length;
+        if (messageInput.value.trim().length >= 10) {
+            clearFieldError(messageInput, messageError);
+        }
+    });
+
+    emailInput.addEventListener('input', () => {
+        const value = emailInput.value.trim();
+        if (value === '' || EMAIL_PATTERN.test(value)) {
+            clearFieldError(emailInput, emailError);
+        }
     });
 
     form.addEventListener('submit', async (e) => {
         e.preventDefault();
-        messageError.classList.remove('visible');
+        clearFieldError(messageInput, messageError);
+        clearFieldError(emailInput, emailError);
+
+        let firstInvalid = null;
+
+        const email = emailInput.value.trim();
+        if (email !== '' && !EMAIL_PATTERN.test(email)) {
+            setFieldError(emailInput, emailError, 'صيغة البريد الإلكتروني غير صحيحة');
+            firstInvalid = firstInvalid || emailInput;
+        }
 
         const message = messageInput.value.trim();
         if (message.length < 10) {
-            messageError.textContent = 'الرسالة قصيرة جدًا (الأدنى 10 أحرف)';
-            messageError.classList.add('visible');
+            setFieldError(messageInput, messageError, 'الرسالة قصيرة جدًا (الأدنى 10 أحرف)');
+            firstInvalid = firstInvalid || messageInput;
+        }
+
+        if (firstInvalid) {
+            firstInvalid.focus();
             return;
         }
 
@@ -52,14 +101,14 @@
                 form.style.display = 'none';
                 successEl.classList.add('visible');
             } else {
-                messageError.textContent = result.message || 'حدث خطأ. يرجى المحاولة لاحقًا.';
-                messageError.classList.add('visible');
+                setFieldError(messageInput, messageError, result.message || 'حدث خطأ. يرجى المحاولة لاحقًا.');
+                messageInput.focus();
                 submitBtn.disabled = false;
                 submitBtn.textContent = 'إرسال الرسالة';
             }
         } catch (err) {
-            messageError.textContent = 'حدث خطأ في الاتصال. يرجى المحاولة لاحقًا.';
-            messageError.classList.add('visible');
+            setFieldError(messageInput, messageError, 'حدث خطأ في الاتصال. يرجى المحاولة لاحقًا.');
+            messageInput.focus();
             submitBtn.disabled = false;
             submitBtn.textContent = 'إرسال الرسالة';
         }

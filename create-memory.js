@@ -68,20 +68,33 @@
             const len = item.input.value.length;
             item.count.textContent = `${len} / ${item.max}`;
             item.count.classList.toggle('over-limit', len > item.max);
-            clearFieldError(item.error);
+            clearFieldError(item.error, item.input);
         });
     });
 
-    function showFieldError(el, message) {
+    function showFieldError(el, message, input) {
         if (!el) return;
         el.textContent = message;
         el.classList.add('visible');
+        if (input) {
+            input.classList.add('is-invalid');
+            input.setAttribute('aria-invalid', 'true');
+            const describedBy = (input.getAttribute('aria-describedby') || '').split(/\s+/).filter(Boolean);
+            if (el.id && !describedBy.includes(el.id)) {
+                describedBy.push(el.id);
+                input.setAttribute('aria-describedby', describedBy.join(' '));
+            }
+        }
     }
 
-    function clearFieldError(el) {
+    function clearFieldError(el, input) {
         if (!el) return;
         el.textContent = '';
         el.classList.remove('visible');
+        if (input) {
+            input.classList.remove('is-invalid');
+            input.removeAttribute('aria-invalid');
+        }
     }
 
     function showStatus(message, type) {
@@ -189,6 +202,8 @@
     form.addEventListener('submit', async (e) => {
         e.preventDefault();
         clearStatus();
+        Object.values(elements).forEach(item => clearFieldError(item.error, item.input));
+        clearFieldError(linksError);
 
         // Cooldown check
         const now = Date.now();
@@ -200,32 +215,45 @@
 
         // Run client validations
         let hasError = false;
+        let firstInvalid = null;
+        const markInvalid = (errorEl, message, input) => {
+            showFieldError(errorEl, message, input);
+            hasError = true;
+            if (input && !firstInvalid) firstInvalid = input;
+        };
 
         const nameErr = validateInput(nameInput.value, 'الاسم', 3, 100, true);
-        if (nameErr) { showFieldError(elements.name.error, nameErr); hasError = true; }
+        if (nameErr) { markInvalid(elements.name.error, nameErr, nameInput); }
 
         const bioErr = validateInput(bioInput.value, 'النبذة', 3, 1000, false);
-        if (bioErr) { showFieldError(elements.bio.error, bioErr); hasError = true; }
+        if (bioErr) { markInvalid(elements.bio.error, bioErr, bioInput); }
 
         const traitsErr = validateInput(traitsInput.value, 'الصفات', 3, 500, false);
-        if (traitsErr) { showFieldError(elements.traits.error, traitsErr); hasError = true; }
+        if (traitsErr) { markInvalid(elements.traits.error, traitsErr, traitsInput); }
 
         const charityErr = validateInput(charityInput.value, 'الصدقة', 3, 1000, false);
-        if (charityErr) { showFieldError(elements.charity.error, charityErr); hasError = true; }
+        if (charityErr) { markInvalid(elements.charity.error, charityErr, charityInput); }
 
         const storyErr = validateInput(storyInput.value, 'المواقف', 3, 2000, false);
-        if (storyErr) { showFieldError(elements.story.error, storyErr); hasError = true; }
+        if (storyErr) { markInvalid(elements.story.error, storyErr, storyInput); }
 
         // Build Payload
         const linkResult = getExternalLinks();
         if (linkResult.errors.length > 0) {
             showFieldError(linksError, linkResult.errors.join('\n'));
             hasError = true;
+            if (!firstInvalid) {
+                firstInvalid = linksContainer.querySelector('.link-url') || addLinkBtn;
+            }
         }
 
-        if (hasError) return;
+        if (hasError) {
+            if (firstInvalid) firstInvalid.focus();
+            return;
+        }
 
         submitBtn.disabled = true;
+        const submitBtnOriginal = submitBtn.innerHTML;
         submitBtn.textContent = 'جاري الإرسال...';
 
         try {
@@ -265,7 +293,7 @@
             showStatus('فشل الاتصال بالخادم. يرجى المحاولة لاحقًا.', 'error');
         } finally {
             submitBtn.disabled = false;
-            submitBtn.textContent = 'إنشاء صفحة صدقة جارية';
+            submitBtn.innerHTML = submitBtnOriginal;
         }
     });
 })();

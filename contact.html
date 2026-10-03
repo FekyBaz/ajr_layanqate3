@@ -208,16 +208,18 @@
                     <label class="contact-label" for="contact-email">البريد الإلكتروني <span
                             style="color: var(--color-text-muted); font-weight: 400;">(اختياري)</span></label>
                     <input class="contact-input" id="contact-email" type="email" maxlength="200"
-                        placeholder="example@email.com" dir="ltr" style="text-align: left;">
+                        placeholder="example@email.com" dir="ltr" style="text-align: left;"
+                        aria-describedby="email-error">
+                    <p class="contact-error" id="email-error" role="alert"></p>
                 </div>
 
                 <div class="contact-group">
                     <label class="contact-label" for="contact-message">الرسالة <span
                             style="color: var(--color-error);">*</span></label>
                     <textarea class="contact-textarea" id="contact-message" rows="5" maxlength="1000" required
-                        placeholder="اكتب رسالتك هنا..."></textarea>
+                        placeholder="اكتب رسالتك هنا..." aria-describedby="msg-count message-error"></textarea>
                     <p class="contact-hint"><span id="msg-count">0</span>/1000</p>
-                    <p class="contact-error" id="message-error"></p>
+                    <p class="contact-error" id="message-error" role="alert"></p>
                 </div>
 
                 <button type="submit" class="contact-submit" id="contactSubmit">إرسال الرسالة</button>
