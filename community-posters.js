@@ -59,15 +59,43 @@
         return null; // Will use seeds
     }
 
+    const Escape = globalThis.EscapeLib || {
+        escapeHtml(str) {
+            const div = document.createElement('div');
+            div.textContent = String(str || '');
+            return div.innerHTML;
+        },
+        escapeAttr(value) {
+            return String(value == null ? '' : value)
+                .replace(/&/g, '&amp;')
+                .replace(/"/g, '&quot;')
+                .replace(/</g, '&lt;')
+                .replace(/>/g, '&gt;');
+        },
+        isSafeHttpUrl(value) {
+            if (typeof value !== 'string' || value.trim() === '') return false;
+            return !/^[a-zA-Z][a-zA-Z0-9+.-]*:(?!\/\/|image\/)/.test(value.trim())
+                || /^https?:|^data:image\//i.test(value.trim());
+        },
+    };
+
     function escapeHtml(str) {
-        const div = document.createElement('div');
-        div.textContent = String(str || '');
-        return div.innerHTML;
+        return Escape.escapeHtml(str);
+    }
+
+    function escapeAttr(value) {
+        return Escape.escapeAttr(value);
     }
 
     function buildCard(entry) {
-        const imgSrc = entry.imgSrc || entry.dataUrl;
+        const rawSrc = entry.imgSrc || entry.dataUrl;
+        // Validate the image source before injecting it into `src` (see issue #70):
+        // escapeHtml() alone corrupts `&` in URLs and does not block schemes.
+        const imgSrc = Escape.isSafeHttpUrl(rawSrc) ? rawSrc : '';
+        if (!imgSrc) return '';
         const caption = escapeHtml((entry.text || '').slice(0, 80));
+        const captionAttr = escapeAttr((entry.text || '').slice(0, 80));
+        const srcAttr = escapeAttr(imgSrc);
         const themeName = escapeHtml(THEME_NAMES[entry.theme] || entry.theme || '');
         const badgeHtml = themeName
             ? `<span class="community-poster-card__badge">${themeName}</span>`
@@ -77,9 +105,9 @@
             : '';
 
         return `
-            <article class="community-poster-card" role="img" aria-label="${caption}">
+            <article class="community-poster-card" role="img" aria-label="${captionAttr}">
                 ${badgeHtml}
-                <img src="${escapeHtml(imgSrc)}" alt="${caption}" loading="lazy">
+                <img src="${srcAttr}" alt="${captionAttr}" loading="lazy">
                 <p class="community-poster-card__caption">${caption}</p>
                 ${seedNote}
             </article>

@@ -6,10 +6,27 @@ import { renderChartsSection } from '../components/ChartsSection.js';
 import { renderMartyrsList } from '../components/MartyrsList.js';
 import { renderLoadMoreButton } from '../components/LoadMoreButton.js';
 
+const EscapeLib = globalThis.EscapeLib || {
+  escapeHtml: (text) => {
+    const div = document.createElement('div');
+    div.textContent = String(text ?? '');
+    return div.innerHTML;
+  },
+  escapeAttr: (value) => String(value ?? '')
+    .replace(/&/g, '&amp;')
+    .replace(/"/g, '&quot;')
+    .replace(/</g, '&lt;')
+    .replace(/>/g, '&gt;')
+    .replace(/'/g, '&#39;')
+    .replace(/`/g, '&#96;'),
+};
+
 function escapeHtml(text) {
-  const div = document.createElement('div');
-  div.textContent = String(text ?? '');
-  return div.innerHTML;
+  return EscapeLib.escapeHtml(text);
+}
+
+function escapeAttr(value) {
+  return EscapeLib.escapeAttr(value);
 }
 
 const INITIAL_BATCH = 100;
@@ -185,9 +202,15 @@ function showShareToast(message) {
   closeShareToast();
   shareToast = document.createElement('div');
   shareToast.className = 'share-toast';
-  shareToast.innerHTML = `<p>${message}</p><button type="button" aria-label="إغلاق">✕</button>`;
+  const text = document.createElement('p');
+  text.textContent = message;
+  const closeButton = document.createElement('button');
+  closeButton.type = 'button';
+  closeButton.setAttribute('aria-label', 'إغلاق');
+  closeButton.textContent = '✕';
+  closeButton.addEventListener('click', closeShareToast);
+  shareToast.append(text, closeButton);
   document.body.appendChild(shareToast);
-  shareToast.querySelector('button')?.addEventListener('click', closeShareToast);
   setTimeout(closeShareToast, 3200);
 }
 
@@ -221,7 +244,14 @@ function showDuaToast() {
   const randomDua = DUAS[Math.floor(Math.random() * DUAS.length)];
   duaToast = document.createElement('div');
   duaToast.className = 'dua-toast';
-  duaToast.innerHTML = `<p>${randomDua}</p><button type="button" aria-label="إغلاق">✕</button>`;
+  const duaText = document.createElement('p');
+  duaText.textContent = randomDua;
+  const duaClose = document.createElement('button');
+  duaClose.type = 'button';
+  duaClose.setAttribute('aria-label', 'إغلاق');
+  duaClose.textContent = '✕';
+  duaClose.addEventListener('click', closeDuaToast);
+  duaToast.append(duaText, duaClose);
   document.body.appendChild(duaToast);
   duaToast.querySelector('button')?.addEventListener('click', closeDuaToast);
   setTimeout(closeDuaToast, 4200);
@@ -231,7 +261,7 @@ function renderControls() {
   controlsContainer.innerHTML = `
     <section class="controls-section" aria-label="البحث والتصفية">
       <label class="sr-only" for="martyrs-search">ابحث عن اسم شهيد</label>
-      <input id="martyrs-search" class="search-input" type="search" placeholder="ابحث عن اسم شهيد..." value="${searchTerm}">
+      <input id="martyrs-search" class="search-input" type="search" placeholder="ابحث عن اسم شهيد..." value="${escapeAttr(searchTerm)}">
       <div class="filter-buttons" role="group" aria-label="تصفية الشهداء">
         ${Object.entries(FILTERS)
           .map(

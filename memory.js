@@ -551,15 +551,37 @@
             const row = document.createElement('div');
             row.className = 'edit-link-row';
             row.style.cssText = 'display: flex; gap: 8px; align-items: center; width: 100%;';
-            row.innerHTML = `
-                <input type="text" class="link-title" placeholder="اسم الرابط (مثال: منصة إحسان)" value="${titleVal}" style="flex: 2; padding: 6px 10px; font-size: 0.85rem; border: 1px solid var(--color-border, #ddd); border-radius: 6px; background: var(--color-surface, #fff); box-sizing: border-box;">
-                <input type="url" class="link-url" placeholder="رابط التبرع (https://...)" value="${urlVal}" style="flex: 3; padding: 6px 10px; font-size: 0.85rem; border: 1px solid var(--color-border, #ddd); border-radius: 6px; background: var(--color-surface, #fff); direction: ltr; text-align: left; box-sizing: border-box;">
-                <button type="button" class="btn-remove-link" title="حذف الرابط" style="padding: 6px 10px; background: transparent; border: 1px solid rgba(231,76,60,0.3); color: #e74c3c; border-radius: 6px; cursor: pointer; font-size: 0.85rem; display: flex; align-items: center; justify-content: center; height: 32px; width: 32px;">×</button>
-            `;
 
-            row.querySelector('.btn-remove-link').addEventListener('click', () => {
+            // Built with DOM APIs (not innerHTML) so stored titles/URLs cannot
+            // break out of the value attribute (see issue #70).
+            const titleInput = document.createElement('input');
+            titleInput.type = 'text';
+            titleInput.className = 'link-title';
+            titleInput.placeholder = 'اسم الرابط (مثال: منصة إحسان)';
+            titleInput.value = titleVal;
+            titleInput.style.cssText = 'flex: 2; padding: 6px 10px; font-size: 0.85rem; border: 1px solid var(--color-border, #ddd); border-radius: 6px; background: var(--color-surface, #fff); box-sizing: border-box;';
+
+            const urlInput = document.createElement('input');
+            urlInput.type = 'url';
+            urlInput.className = 'link-url';
+            urlInput.placeholder = 'رابط التبرع (https://...)';
+            urlInput.value = urlVal;
+            urlInput.style.cssText = 'flex: 3; padding: 6px 10px; font-size: 0.85rem; border: 1px solid var(--color-border, #ddd); border-radius: 6px; background: var(--color-surface, #fff); direction: ltr; text-align: left; box-sizing: border-box;';
+
+            const removeBtn = document.createElement('button');
+            removeBtn.type = 'button';
+            removeBtn.className = 'btn-remove-link';
+            removeBtn.title = 'حذف الرابط';
+            removeBtn.setAttribute('aria-label', 'حذف الرابط');
+            removeBtn.textContent = '×';
+            removeBtn.style.cssText = 'padding: 6px 10px; background: transparent; border: 1px solid rgba(231,76,60,0.3); color: #e74c3c; border-radius: 6px; cursor: pointer; font-size: 0.85rem; display: flex; align-items: center; justify-content: center; height: 32px; width: 32px;';
+            removeBtn.addEventListener('click', () => {
                 row.remove();
             });
+
+            row.appendChild(titleInput);
+            row.appendChild(urlInput);
+            row.appendChild(removeBtn);
 
             linksContainer.appendChild(row);
         }
