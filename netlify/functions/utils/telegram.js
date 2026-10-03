@@ -45,6 +45,8 @@ export async function sendTelegramNotification(submission) {
             const escapedAuthor = escapeHtml(author);
 
             // Format a beautiful spiritual HTML post matching the Telegram channel style
+            // Site link follows FRONTEND_URL (canonical domain), not a hardcoded preview host.
+            const siteLink = (config.frontendUrl || 'https://ajr-la-yanqati.com').replace(/\/+$/, '');
             const messageText = 
 `<b>مشاركة جديدة من المجتمع</b>
 
@@ -56,7 +58,7 @@ export async function sendTelegramNotification(submission) {
 
 ---
 للمشاركة وإضافة الأذكار:
-<a href="https://ajr-layanqate3.netlify.app/#form">ajr-layanqate3.netlify.app</a>
+<a href="${siteLink}/#form">${siteLink.replace(/^https?:\/\//, '')}</a>
 تابعنا على فيسبوك:
 <a href="https://www.facebook.com/profile.php?id=61585386947319">صفحة أجر لا ينقطع</a>`;
 
