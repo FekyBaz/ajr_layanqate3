@@ -28,9 +28,15 @@ follows Google's terms; server-side GA4 dashboard access additionally needs
 
 ## Opting out / disabling
 
-- End users: block third-party/cookie storage, use private browsing, or enable
-  Do-Not-Track (note: the current tracker does not yet gate on DNT — a
-  consent banner + DNT respect is a wanted contribution, see issue #82).
+- End users: both trackers respect **Do-Not-Track** and a persistent
+  opt-out flag. In the browser console (or a future consent banner):
+  `AjrAnalytics.optOut()` stops the custom tracker immediately (and clears
+  the repeat-visitor cookie; takes full effect on next page load),
+  `AjrAnalytics.optIn()` re-enables, `AjrAnalytics.isOptedOut()` checks.
+  The same `ajr_analytics_optout=1` localStorage flag also prevents the GA4
+  loader (`lib/ga4.js`) from fetching config or injecting gtag.
+- Private browsing / cookie blocking also works (the tracker degrades to
+  memory-only sessions).
 - Operators: to run without analytics, do not set `GA_MEASUREMENT_ID` and
   remove the `lib/analytics.js` script tags from the pages you serve.
 
