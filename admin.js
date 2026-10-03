@@ -999,15 +999,22 @@
         }, 2500);
     }
 
-    async function loadFeedback() {
+    let feedbackPage = 1;
+
+    async function loadFeedback(page = 1) {
         if (!feedbackList || !feedbackLoadingEl) return;
+        // Refresh buttons pass the click Event — only honor real numbers
+        feedbackPage = typeof page === 'number' && page > 0 ? Math.floor(page) : 1;
         feedbackLoadingEl.classList.remove('hidden');
         feedbackList.classList.add('hidden');
         feedbackEmptyState.classList.add('hidden');
         if (feedbackTotal) feedbackTotal.textContent = '';
 
         const statusVal = feedbackFilter ? feedbackFilter.value : '';
-        const queryStr = statusVal ? `?status=${encodeURIComponent(statusVal)}` : '';
+        const query = new URLSearchParams();
+        if (statusVal) query.set('status', statusVal);
+        query.set('page', String(feedbackPage));
+        const queryStr = `?${query.toString()}`;
 
         try {
             const result = await apiRequest(`/api/admin/feedback${queryStr}`);
@@ -1019,6 +1026,7 @@
                 if (feedbackTotal && result.total !== null && result.total !== undefined) {
                     feedbackTotal.textContent = `${result.total} رسالة`;
                 }
+                renderPager('feedback', result);
                 // Update Badge
                 if (feedbackBadge) {
                     if (result.new_count > 0) {
@@ -1027,9 +1035,13 @@
                         feedbackBadge.classList.add('hidden');
                     }
                 }
+            } else if (feedbackPage > 1) {
+                // Page emptied by moderation — step back
+                loadFeedback(feedbackPage - 1);
             } else {
                 feedbackEmptyState.classList.remove('hidden');
                 if (feedbackTotal) feedbackTotal.textContent = '0 رسالة';
+                renderPager('feedback', null);
                 // Even on empty data, result may carry new_count (e.g. if we are filtering for Archived but have 5 New)
                 if (feedbackBadge) {
                     if (result.new_count > 0) {
@@ -1159,7 +1171,7 @@
 
             if (result.success) {
                 showToast('تم تحديث الحالة بنجاح');
-                loadFeedback(); // Refresh list & badge
+                loadFeedback(feedbackPage); // Refresh current page & badge
             } else {
                 showToast(result.message || 'حدث خطأ في التحديث');
                 btns.forEach(b => b.disabled = false); // Re-enable on failure
@@ -1185,8 +1197,10 @@
         memoryUpdatesList.addEventListener('click', handleMemoryUpdateAction);
     }
     if (feedbackFilter) {
-        feedbackFilter.addEventListener('change', loadFeedback);
+        feedbackFilter.addEventListener('change', () => loadFeedback(1));
     }
+
+    wirePager('feedback', () => feedbackPage, loadFeedback);
 
     const logoutBtn = document.getElementById('logout-btn');
     if (logoutBtn) logoutBtn.addEventListener('click', logout);

@@ -11,6 +11,7 @@ import {
     error,
     handleOptions,
     logger,
+    parsePagination,
     validateAdminWithRateLimit,
 } from './utils/shared.js';
 
@@ -36,14 +37,18 @@ export async function handler(event, context) {
     }
 
     try {
-        // Read optional status filter from query string
+        // Read optional status filter + pagination from query string
         const params = event.queryStringParameters || {};
         const statusFilter = params.status || null;
+        const { page, limit, from } = parsePagination(params, {
+            defaultLimit: 50,
+            maxLimit: 100,
+        });
 
         const { data, error: rpcError } = await supabaseAdmin.rpc('get_feedback_messages', {
             p_status: statusFilter,
-            p_limit: 50,
-            p_offset: 0,
+            p_limit: limit,
+            p_offset: from,
         });
 
         if (rpcError) {
@@ -51,7 +56,16 @@ export async function handler(event, context) {
             return error(500, 'خطأ في قاعدة البيانات', origin, 'SERVER_ERROR');
         }
 
-        return success(data, origin);
+        const total = data?.total || 0;
+
+        return success({
+            data: data?.data || [],
+            total,
+            new_count: data?.new_count || 0,
+            page,
+            limit,
+            totalPages: total === 0 ? 1 : Math.ceil(total / limit),
+        }, origin);
 
     } catch (err) {
         logger.error('admin-feedback unexpected error:', err.message);
