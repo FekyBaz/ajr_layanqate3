@@ -5,26 +5,14 @@
  * ═══════════════════════════════════════════════════════════════════════════
  */
 
-import { supabaseAdmin, cleanupRateLimits, logger, success, error } from './utils/shared.js';
-import { config } from './utils/config.js';
+import { supabaseAdmin, cleanupRateLimits, logger, success, error, requireScheduledOrAdmin } from './utils/shared.js';
 
 export async function handler(event, context) {
     const origin = event.headers?.origin || '';
-    // Basic auth check if called manually via HTTP
-    // Only allow scheduled calls (no httpMethod) or admin calls
-    if (event.httpMethod) {
-        // Honors ADMIN_KEY fallback via the validated config
-        const adminKey = config.adminApiKey;
-        if (!adminKey) {
-            logger.error('[cleanup-automation] ADMIN_API_KEY not configured');
-            return error(500, 'Server configuration error', origin);
-        }
-        const providedKey = event.headers['x-admin-key'];
-
-        if (providedKey !== adminKey) {
-            return error(401, 'Unauthorized', origin);
-        }
-    }
+    // Scheduled calls (no httpMethod) pass; manual calls need the admin key.
+    // Uses constant-time comparison via validateAdmin (see shared.js).
+    const denied = requireScheduledOrAdmin(event, origin, 'cleanup-automation');
+    if (denied) return denied;
 
     try {
         logger.info('[cleanup-automation] Starting maintenance tasks...');

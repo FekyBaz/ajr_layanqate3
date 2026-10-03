@@ -1,10 +1,13 @@
-import { supabaseAdmin, VISIBLE_STATUSES, logger, success, error } from './utils/shared.js';
+import { supabaseAdmin, VISIBLE_STATUSES, logger, success, error, requireScheduledOrAdmin } from './utils/shared.js';
 
 export const config = {
     schedule: '0 * * * *',
 };
 
-export async function handler() {
+export async function handler(event = {}) {
+    const denied = requireScheduledOrAdmin(event, event.headers?.origin || '', 'community-stats-refresh');
+    if (denied) return denied;
+
     try {
         const { data, error: rpcError } = await supabaseAdmin.rpc('refresh_community_stats');
 

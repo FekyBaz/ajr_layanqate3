@@ -301,6 +301,21 @@ export async function validateAdminWithRateLimit(event) {
 
     return { valid: true, rateLimited: false };
 }
+
+/**
+ * Guard for scheduled functions that stay HTTP-invocable (#123).
+ * Scheduled invocations carry no httpMethod and pass through; manual
+ * HTTP calls must present a valid admin key (constant-time compare).
+ * @returns {object|null} error response, or null when allowed.
+ */
+export function requireScheduledOrAdmin(event, origin, tag) {
+    if (!event || !event.httpMethod) return null;
+    if (!validateAdmin(event)) {
+        logger.warn(`[${tag}] Rejected manual trigger without a valid admin key`);
+        return error(401, 'Unauthorized', origin);
+    }
+    return null;
+}
 // ═══════════════════════════════════════════════════════════════════════════
 // Input Sanitization
 // ═══════════════════════════════════════════════════════════════════════════
