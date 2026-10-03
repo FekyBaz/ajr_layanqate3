@@ -579,3 +579,269 @@ header h1 {
     margin: var(--space-md) 0 var(--space-xs);
     color: var(--color-muted);
 }
+
+/* ═══════════════════════════════════════════════════════════════════════════
+   Memory moderation cards (moved from JS template style= for CSP, #108)
+   ═══════════════════════════════════════════════════════════════════════════ */
+.admin-strong {
+    font-weight: 600;
+}
+.admin-label-spaced {
+    margin-top: 12px;
+}
+.admin-relation {
+    font-size: 0.85rem;
+    color: #8b7961;
+    margin-top: 4px;
+}
+.admin-actions-spaced {
+    margin-top: 20px;
+}
+.admin-links-box {
+    margin-top: 8px;
+}
+.admin-links-box ul {
+    margin: 0;
+    padding-inline-start: 18px;
+}
+.admin-links-box a {
+    text-decoration: underline;
+}
+.admin-links-current a {
+    color: #666;
+}
+.admin-links-proposed a {
+    color: #8c6a35;
+}
+.admin-edit-row {
+    display: flex;
+    gap: 8px;
+    margin-bottom: 6px;
+}
+.admin-link-title,
+.admin-link-url {
+    padding: 6px;
+    font-size: 0.85rem;
+    border: 1px solid #ddd;
+    border-radius: 6px;
+}
+.admin-link-title {
+    flex: 1;
+}
+.admin-link-url {
+    flex: 2;
+    direction: ltr;
+}
+
+/* Proposal diff cards */
+.memory-update-card {
+    border: 1px solid rgba(200, 166, 115, 0.25);
+    border-radius: 16px;
+    padding: 20px;
+    background: var(--color-surface, #fff);
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.02);
+    margin-bottom: 20px;
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+}
+.admin-meta {
+    display: flex;
+    justify-content: space-between;
+    font-size: 0.85rem;
+    color: #8c6a35;
+    border-bottom: 1px solid rgba(200, 166, 115, 0.1);
+    padding-bottom: 10px;
+}
+.admin-meta-badge {
+    background: rgba(200, 166, 115, 0.1);
+    color: #8c6a35;
+    padding: 2px 10px;
+    border-radius: 50px;
+    font-weight: bold;
+    border: 1px solid rgba(200, 166, 115, 0.15);
+}
+.admin-target {
+    font-size: 1.1rem;
+    font-weight: bold;
+    margin-bottom: 4px;
+    color: var(--color-text-primary);
+}
+.admin-target a {
+    color: #8c6a35;
+    text-decoration: underline;
+}
+.admin-byline {
+    font-size: 0.85rem;
+    color: #666;
+    display: flex;
+    gap: 12px;
+}
+.admin-diff-list {
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+    margin-top: 8px;
+}
+.diff-section {
+    border: 1px solid #eee;
+    border-radius: 12px;
+    overflow: hidden;
+    background: #fafafa;
+}
+.diff-section.is-changed {
+    border-color: rgba(200, 166, 115, 0.3);
+    background: rgba(200, 166, 115, 0.02);
+}
+.diff-header {
+    padding: 8px 14px;
+    font-weight: bold;
+    font-size: 0.9rem;
+    background: #eee;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    color: #555;
+}
+.diff-header.is-changed {
+    background: rgba(200, 166, 115, 0.08);
+    color: #8c6a35;
+}
+.diff-badge {
+    font-size: 0.75rem;
+    font-weight: normal;
+    background: #bbb;
+    color: white;
+    padding: 2px 8px;
+    border-radius: 50px;
+}
+.diff-badge.is-changed {
+    background: #c8a673;
+}
+.diff-body {
+    padding: 14px;
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+}
+.diff-body--wide {
+    gap: 12px;
+}
+.diff-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 12px;
+}
+.diff-col-label {
+    font-size: 0.75rem;
+    color: #888;
+    margin-bottom: 4px;
+}
+.diff-col-label--proposed {
+    color: #8c6a35;
+}
+.diff-current,
+.diff-proposed {
+    padding: 8px 12px;
+    border-radius: 8px;
+    font-size: 0.85rem;
+    min-height: 40px;
+    white-space: pre-wrap;
+}
+.diff-current {
+    background: #f5f5f5;
+    color: #777;
+    border-inline-start: 3px solid #ccc;
+}
+.diff-proposed {
+    background: #fffdf5;
+    color: #5c4a35;
+    border-inline-start: 3px solid #c8a673;
+}
+.diff-links-current,
+.diff-links-proposed {
+    padding: 8px;
+    border-radius: 8px;
+    font-size: 0.8rem;
+    min-height: 40px;
+}
+.diff-links-current {
+    background: #f5f5f5;
+    color: #777;
+    border-inline-start: 3px solid #ccc;
+}
+.diff-links-proposed {
+    background: #fffdf5;
+    color: #5c4a35;
+    border-inline-start: 3px solid #c8a673;
+}
+.diff-links-current ul,
+.diff-links-proposed ul {
+    margin: 0;
+    padding-inline-start: 18px;
+}
+.diff-links-current a {
+    color: #666;
+    text-decoration: underline;
+}
+.diff-links-proposed a {
+    color: #8c6a35;
+    text-decoration: underline;
+}
+.diff-edit-wrap {
+    margin-top: 6px;
+}
+.diff-edit-label {
+    font-size: 0.78rem;
+    font-weight: bold;
+    display: block;
+    margin-bottom: 4px;
+    color: #666;
+}
+.diff-edit-label--spaced {
+    margin-bottom: 6px;
+}
+.diff-textarea {
+    width: 100%;
+    padding: 8px;
+    font-size: 0.85rem;
+    border: 1px solid #c8a673;
+    border-radius: 8px;
+    box-sizing: border-box;
+    resize: vertical;
+}
+.diff-links-edit {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+}
+.admin-update-actions {
+    margin-top: 10px;
+    display: flex;
+    gap: 10px;
+    justify-content: flex-end;
+    border-top: 1px solid #eee;
+    padding-top: 14px;
+}
+.admin-approve-btn {
+    background: var(--color-accent, #8c6a35);
+    color: white;
+    padding: 8px 24px;
+    border: none;
+    border-radius: 8px;
+    font-size: 0.9rem;
+    font-weight: bold;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+}
+.admin-reject-btn {
+    background: #fff;
+    color: #d9534f;
+    padding: 8px 20px;
+    border: 1px solid #d9534f;
+    border-radius: 8px;
+    font-size: 0.9rem;
+    cursor: pointer;
+}

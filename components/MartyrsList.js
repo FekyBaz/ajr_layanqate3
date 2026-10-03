@@ -135,11 +135,17 @@ export function renderMartyrsList(container, martyrs, options = {}) {
 
     container.innerHTML = `
       <section class="martyrs-list-section" aria-label="قائمة الشهداء">
-        <div class="virtual-spacer" style="height:${topPad}px"></div>
+        <div class="virtual-spacer" data-spacer-height="${topPad}"></div>
         <ul class="martyrs-list" data-virtualized="true">${listMarkup}</ul>
-        <div class="virtual-spacer" style="height:${bottomPad}px"></div>
+        <div class="virtual-spacer" data-spacer-height="${bottomPad}"></div>
       </section>
     `;
+
+    // Programmatic heights (CSP-safe; no style= attributes in markup).
+    container.querySelectorAll('.virtual-spacer[data-spacer-height]').forEach((spacer) => {
+      spacer.style.height = `${spacer.getAttribute('data-spacer-height')}px`;
+      spacer.removeAttribute('data-spacer-height');
+    });
 
     const firstItem = container.querySelector('.martyr-item');
     if (firstItem) {
