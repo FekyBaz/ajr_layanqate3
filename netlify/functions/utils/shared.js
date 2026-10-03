@@ -32,6 +32,12 @@ if (MISSING_RECOMMENDED.length > 0) {
 // Shared Constants (Single Source of Truth)
 // ═══════════════════════════════════════════════════════════════════════════
 
+// Public visibility set — single source of truth for every supabasePublic
+// query. MUST stay identical to the anon SELECT policies or public reads
+// silently return empty: submissions → migration 007
+// ("Public visible read only", status IN ('Approved','Posted')); memories
+// stay Approved-only (migration 013, "Memories public approved read") and
+// therefore always filter STATUS.APPROVED explicitly, never this list.
 export const VISIBLE_STATUSES = ['Approved', 'Posted'];
 
 export const VALID_CONTENT_TYPES = ['dhikr', 'dua', 'ayah', 'hadith', 'benefit'];
@@ -81,18 +87,21 @@ export const supabaseAdmin = createClient(
 
 /**
  * Public client — uses anon key, respects RLS policies.
- * Use for public-facing reads where RLS should be the security boundary.
- * SUPABASE_ANON_KEY MUST be set. If missing, the client is initialized
- * with an invalid key so that any use will fail with an auth error
- * rather than silently bypassing RLS with service_role credentials.
+ * Use for public-facing reads where RLS must remain the security boundary.
+ *
+ * Fail-closed by design (#80): SUPABASE_ANON_KEY MUST be set. When it is
+ * missing the client is initialized with a placeholder key that Supabase
+ * rejects with 401 on every request, so reads fail with 500 envelopes
+ * instead of silently bypassing RLS. The service_role key is NEVER used
+ * here — a single missing env var must not disable the entire RLS layer.
  */
 const PUBLIC_KEY = process.env.SUPABASE_ANON_KEY;
 if (!PUBLIC_KEY) {
-    logger.warn('[shared] SUPABASE_ANON_KEY is not set. Falling back to service role key with explicit filters.');
+    logger.error('[shared] SUPABASE_ANON_KEY is not set. Public reads will fail closed (no silent RLS bypass).');
 }
 export const supabasePublic = createClient(
     SUPABASE_URL,
-    PUBLIC_KEY || process.env.SUPABASE_SERVICE_ROLE_KEY || 'SUPABASE_ANON_KEY_NOT_CONFIGURED',
+    PUBLIC_KEY || 'SUPABASE_ANON_KEY_NOT_CONFIGURED',
     CLIENT_OPTIONS,
 );
 
