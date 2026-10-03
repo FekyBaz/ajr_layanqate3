@@ -18,6 +18,7 @@ import {
     getClientIP,
     logger,
 } from './utils/shared.js';
+import { config } from './utils/config.js';
 
 // Phonetic Arabic to English Transliteration Helper for Option A URL slugs
 function transliterateArabicToEnglish(text) {
@@ -136,8 +137,8 @@ export async function handler(event, context) {
             p_external_links: linksResult.links,
             p_story: storyResult.sanitized,
             p_ip_hash: ipHash,
-            p_rate_limit_max: parseInt(process.env.MEMORY_RATE_LIMIT_MAX || '3', 10),
-            p_rate_limit_hours: parseInt(process.env.MEMORY_RATE_LIMIT_HOURS || '24', 10),
+            p_rate_limit_max: config.memoryRateLimitMax,
+            p_rate_limit_hours: config.memoryRateLimitHours,
             p_slug_prefix: slugPrefix,
         });
 

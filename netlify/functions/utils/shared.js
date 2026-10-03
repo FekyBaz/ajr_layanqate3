@@ -6,27 +6,14 @@
 
 import { createClient } from '@supabase/supabase-js';
 import crypto from 'crypto';
+import { config } from './config.js';
 
 // ═══════════════════════════════════════════════════════════════════════════
-// Environment Validation (fail-fast on startup)
+// Environment (validated singleton — see utils/config.js)
 // ═══════════════════════════════════════════════════════════════════════════
-
-const REQUIRED_ENV = ['SUPABASE_URL', 'SUPABASE_SERVICE_ROLE_KEY'];
-const MISSING_ENV = REQUIRED_ENV.filter(key => !process.env[key]);
-
-if (MISSING_ENV.length > 0) {
-    throw new Error(
-        `[shared] Missing required environment variables: ${MISSING_ENV.join(', ')}. ` +
-        'These must be set in Netlify dashboard or .env for local development.'
-    );
-}
-
-// Warn on missing optional-but-recommended vars
-const RECOMMENDED_ENV = ['SUPABASE_ANON_KEY', 'ADMIN_API_KEY', 'IP_SALT'];
-const MISSING_RECOMMENDED = RECOMMENDED_ENV.filter(key => !process.env[key]);
-if (MISSING_RECOMMENDED.length > 0) {
-    console.warn(`[shared] Missing recommended environment variables: ${MISSING_RECOMMENDED.join(', ')}`);
-}
+// All environment reads go through `config`, which validates once at boot
+// and throws a single aggregated error for missing/invalid values (#102).
+// Do NOT read process.env directly in this file.
 
 // ═══════════════════════════════════════════════════════════════════════════
 // Shared Constants (Single Source of Truth)
@@ -54,7 +41,7 @@ export const STATUS = {
 // ═══════════════════════════════════════════════════════════════════════════
 
 const LOG_LEVELS = { debug: 0, info: 1, warn: 2, error: 3 };
-const CURRENT_LOG_LEVEL = LOG_LEVELS[process.env.LOG_LEVEL || 'info'] ?? LOG_LEVELS.info;
+const CURRENT_LOG_LEVEL = LOG_LEVELS[config.logLevel] ?? LOG_LEVELS.info;
 
 export const logger = {
     debug: (...args) => { if (CURRENT_LOG_LEVEL <= LOG_LEVELS.debug) console.debug(...args); },
@@ -67,7 +54,7 @@ export const logger = {
 // Supabase Clients
 // ═══════════════════════════════════════════════════════════════════════════
 
-const SUPABASE_URL = process.env.SUPABASE_URL;
+const SUPABASE_URL = config.supabaseUrl;
 const CLIENT_OPTIONS = {
     auth: {
         autoRefreshToken: false,
@@ -81,7 +68,7 @@ const CLIENT_OPTIONS = {
  */
 export const supabaseAdmin = createClient(
     SUPABASE_URL,
-    process.env.SUPABASE_SERVICE_ROLE_KEY,
+    config.supabaseServiceRoleKey,
     CLIENT_OPTIONS,
 );
 
@@ -95,7 +82,7 @@ export const supabaseAdmin = createClient(
  * instead of silently bypassing RLS. The service_role key is NEVER used
  * here — a single missing env var must not disable the entire RLS layer.
  */
-const PUBLIC_KEY = process.env.SUPABASE_ANON_KEY;
+const PUBLIC_KEY = config.supabaseAnonKey;
 if (!PUBLIC_KEY) {
     logger.error('[shared] SUPABASE_ANON_KEY is not set. Public reads will fail closed (no silent RLS bypass).');
 }
@@ -124,9 +111,9 @@ function parseOriginsCsv(value) {
         .filter(Boolean);
 }
 
-const PRODUCTION_ORIGIN = normalizeOrigin(process.env.FRONTEND_URL);
+const PRODUCTION_ORIGIN = normalizeOrigin(config.frontendUrl);
 const ALLOWED_ORIGINS = Array.from(new Set([
-    ...parseOriginsCsv(process.env.ALLOWED_ORIGINS),
+    ...parseOriginsCsv(config.allowedOrigins),
     PRODUCTION_ORIGIN,
     'http://localhost:8888',
     'http://localhost:3000',
@@ -137,8 +124,8 @@ const ALLOWED_ORIGINS = Array.from(new Set([
  * Only matches deploy previews for YOUR specific site, not any .netlify.app domain.
  * Requires NETLIFY_SITE_NAME env var to be set (e.g., "ajr-la-yanqati").
  */
-const DEPLOY_PREVIEW_REGEX = process.env.NETLIFY_SITE_NAME
-    ? new RegExp(`^https://deploy-preview-\\d+--${process.env.NETLIFY_SITE_NAME}\\.netlify\\.app$`)
+const DEPLOY_PREVIEW_REGEX = config.netlifySiteName
+    ? new RegExp(`^https://deploy-preview-\\d+--${config.netlifySiteName}\\.netlify\\.app$`)
     : null;
 
 const SECURITY_HEADERS = {
@@ -199,7 +186,7 @@ export function error(statusCode, message, origin, devMessage = null) {
 
     const body = { success: false, message, error_code: errorCode };
 
-    if (devMessage && (process.env.NODE_ENV !== 'production' || process.env.LOG_LEVEL === 'debug')) {
+    if (devMessage && (!config.isProduction || config.logLevel === 'debug')) {
         body.dev_message = devMessage;
     }
 
@@ -223,7 +210,7 @@ export function handleOptions(origin) {
 // ═══════════════════════════════════════════════════════════════════════════
 
 const ADMIN_RATE_LIMIT_WINDOW_HOURS = 1;
-const ADMIN_RATE_LIMIT_MAX = parseInt(process.env.ADMIN_RATE_LIMIT_MAX) || 300;
+const ADMIN_RATE_LIMIT_MAX = config.adminRateLimitMax;
 
 /**
  * Constant-time string comparison (via SHA-256 digests, so unequal
@@ -243,8 +230,8 @@ export function validateAdmin(event) {
     // vectors are accepted and both are compared in constant time.
     const adminKeyHeader = event.headers['x-admin-key'] || '';
 
-    // Support both ADMIN_API_KEY and ADMIN_KEY env var names
-    const adminApiKey = process.env.ADMIN_API_KEY || process.env.ADMIN_KEY;
+    // Key presence validated at boot (see config); empty key rejects everything.
+    const adminApiKey = config.adminApiKey;
 
     if (!adminApiKey) {
         logger.error('[AUTH] Neither ADMIN_API_KEY nor ADMIN_KEY env var is set!');
@@ -419,8 +406,8 @@ export function escapeIlikePattern(value) {
 // Rate Limiting (using Supabase table)
 // ═══════════════════════════════════════════════════════════════════════════
 
-const RATE_LIMIT_WINDOW = parseInt(process.env.RATE_LIMIT_WINDOW || '24', 10); // hours
-const RATE_LIMIT_MAX = parseInt(process.env.RATE_LIMIT_MAX || '10', 10);
+const RATE_LIMIT_WINDOW = config.rateLimitWindowHours; // hours
+const RATE_LIMIT_MAX = config.rateLimitMax;
 
 // Generous per-endpoint write limits for hot endpoints that previously had
 // no rate limiting at all (#77). Generous on purpose: these are low-cost
@@ -432,22 +419,15 @@ export const HOT_ENDPOINT_RATE_LIMITS = {
     view: { windowHours: 24, max: 500 },
 };
 
-let ipSaltWarned = false;
-
 /**
  * Single IP-hash function for the whole backend (#77).
  * Salted with IP_SALT and truncated to 32 hex chars. All writers
  * (submit/memory RPC hashes, checkRateLimit/recordRequest, view
  * deduplication) must use this so the same IP lands in one bucket.
- * Warns once when IP_SALT is missing (required in production).
+ * A missing salt is warned about once at boot (see config).
  */
 export function hashIP(ip) {
-    const salt = process.env.IP_SALT || '';
-    if (!salt && !ipSaltWarned) {
-        ipSaltWarned = true;
-        logger.warn('[shared] IP_SALT is not set — IP hashes are unsalted. Set IP_SALT in production.');
-    }
-    return crypto.createHash('sha256').update((ip || 'unknown') + salt).digest('hex').substring(0, 32);
+    return crypto.createHash('sha256').update((ip || 'unknown') + config.ipSalt).digest('hex').substring(0, 32);
 }
 
 export async function checkRateLimit(ip, source = 'submit', options = {}) {

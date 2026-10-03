@@ -5,7 +5,6 @@
  * ═══════════════════════════════════════════════════════════════════════════
  */
 
-import crypto from 'crypto';
 import {
     supabaseAdmin,
     success,
@@ -14,9 +13,11 @@ import {
     sanitizeName,
     sanitizeLegacyText,
     sanitizeExternalLinks,
+    hashIP,
     getClientIP,
     logger,
 } from './utils/shared.js';
+import { config } from './utils/config.js';
 
 export async function handler(event, context) {
     const origin = event.headers.origin || '';
@@ -85,13 +86,9 @@ export async function handler(event, context) {
             return error(400, linksResult.error, origin);
         }
 
-        // Hash client IP for rate limiting
+        // Hash client IP for rate limiting (single salted hashIP)
         const clientIP = getClientIP(event);
-        const ipHash = crypto
-            .createHash('sha256')
-            .update((clientIP || 'unknown') + (process.env.IP_SALT || ''))
-            .digest('hex')
-            .substring(0, 32);
+        const ipHash = hashIP(clientIP);
 
         // Call database RPC
         const { data: result, error: rpcError } = await supabaseAdmin.rpc('propose_memory_update', {
@@ -104,8 +101,8 @@ export async function handler(event, context) {
             p_external_links: linksResult.links,
             p_story: storyResult.sanitized,
             p_ip_hash: ipHash,
-            p_rate_limit_max: parseInt(process.env.MEMORY_UPDATE_RATE_LIMIT_MAX || '5', 10),
-            p_rate_limit_hours: parseInt(process.env.MEMORY_UPDATE_RATE_LIMIT_HOURS || '24', 10),
+            p_rate_limit_max: config.memoryUpdateRateLimitMax,
+            p_rate_limit_hours: config.memoryUpdateRateLimitHours,
         });
 
         if (rpcError) {

@@ -1,4 +1,5 @@
 import { logger } from './shared.js';
+import { config } from './config.js';
 import https from 'https';
 import { Buffer } from 'buffer';
 
@@ -25,8 +26,8 @@ function escapeHtml(text) {
  * @param {Object} submission - The submission row object containing message, content_type, and optional author_name
  */
 export async function sendTelegramNotification(submission) {
-    const token = process.env.TELEGRAM_BOT_TOKEN;
-    const chatId = process.env.TELEGRAM_CHAT_ID; // Can be @channel_username or channel id (e.g., -100xxxxxxx)
+    const token = config.telegramBotToken;
+    const chatId = config.telegramChatId; // Can be @channel_username or channel id (e.g., -100xxxxxxx)
 
     if (!token || !chatId) {
         logger.warn('[Telegram] Skip sending. TELEGRAM_BOT_TOKEN or TELEGRAM_CHAT_ID is not set.');
