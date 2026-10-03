@@ -24,9 +24,9 @@
     <meta name="twitter:title" content="صدقة جارية | أجر لا ينقطع">
     <meta name="twitter:description" content="صفحة صدقة جارية على روح متوفى — أجر لا ينقطع">
     <meta name="twitter:image" content="https://ajr-la-yanqati.com/og-image.png">
-    <!-- Per-memory OG tags (title/image per slug) require server-side prerendering
-         because crawlers do not execute the client-side title update in memory.js.
-         Kept generic here; see issue #68 for the prerender follow-up. -->
+    <!-- Per-memory OG tags are prerendered for crawlers by the memory-og
+         edge function (netlify/edge-functions/memory-og.js, see #111).
+         The generic tags below are the human/no-JS fallback. -->
     <script type="application/ld+json">
     {
         "@context": "https://schema.org",

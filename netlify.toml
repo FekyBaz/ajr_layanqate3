@@ -24,6 +24,14 @@
   schedule = "0 3 * * *"
 
 # ═══════════════════════════════════════════════════════════════════════════
+# Edge Functions — per-memory OG prerender for crawlers (see #111)
+# Runs before redirects; humans pass through untouched (context.next).
+# ═══════════════════════════════════════════════════════════════════════════
+[[edge_functions]]
+  path = "/memory/*"
+  function = "memory-og"
+
+# ═══════════════════════════════════════════════════════════════════════════
 # Redirects - API routes to functions
 # ═══════════════════════════════════════════════════════════════════════════
 
