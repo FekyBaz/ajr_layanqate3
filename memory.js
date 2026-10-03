@@ -432,17 +432,30 @@
 
         if (!btnOpen || !modal) return;
 
+        const useHelper = typeof window.ModalHelper !== 'undefined';
+
         function openModal() {
+            if (useHelper) {
+                window.ModalHelper.open(modal, btnOpen);
+                return;
+            }
             modal.classList.remove('hidden');
             document.body.style.overflow = 'hidden';
             // Reset scroll position to top of Surah Yaseen when opened
             const bodyEl = modal.querySelector('.yaseen-modal__body');
             if (bodyEl) bodyEl.scrollTop = 0;
+            const fallbackFocus = modal.querySelector('[data-autofocus]') || btnClose;
+            if (fallbackFocus) fallbackFocus.focus();
         }
 
         function closeModal() {
+            if (useHelper) {
+                window.ModalHelper.close(modal);
+                return;
+            }
             modal.classList.add('hidden');
             document.body.style.overflow = '';
+            btnOpen.focus();
         }
 
         btnOpen.addEventListener('click', function(e) {
@@ -458,11 +471,13 @@
             backdrop.addEventListener('click', closeModal);
         }
 
-        document.addEventListener('keydown', function(e) {
-            if (e.key === 'Escape' && !modal.classList.contains('hidden')) {
-                closeModal();
-            }
-        });
+        if (!useHelper) {
+            document.addEventListener('keydown', function(e) {
+                if (e.key === 'Escape' && !modal.classList.contains('hidden')) {
+                    closeModal();
+                }
+            });
+        }
 
         if (btnComplete) {
             btnComplete.addEventListener('click', function(e) {
@@ -584,14 +599,25 @@
 
         function openModal() {
             populateForm();
+            if (typeof window.ModalHelper !== 'undefined') {
+                window.ModalHelper.open(modal, btnOpen);
+                return;
+            }
             modal.classList.remove('hidden');
             document.body.style.overflow = 'hidden';
             modal.querySelector('.yaseen-modal__body').scrollTop = 0;
+            const fallbackFocus = modal.querySelector('[data-autofocus]') || btnClose;
+            if (fallbackFocus) fallbackFocus.focus();
         }
 
         function closeModal() {
+            if (typeof window.ModalHelper !== 'undefined') {
+                window.ModalHelper.close(modal);
+                return;
+            }
             modal.classList.add('hidden');
             document.body.style.overflow = '';
+            btnOpen.focus();
         }
 
         btnOpen.addEventListener('click', (e) => {
@@ -603,11 +629,13 @@
         if (btnCancel) btnCancel.addEventListener('click', closeModal);
         if (backdrop) backdrop.addEventListener('click', closeModal);
 
-        document.addEventListener('keydown', (e) => {
-            if (e.key === 'Escape' && !modal.classList.contains('hidden')) {
-                closeModal();
-            }
-        });
+        if (typeof window.ModalHelper === 'undefined') {
+            document.addEventListener('keydown', (e) => {
+                if (e.key === 'Escape' && !modal.classList.contains('hidden')) {
+                    closeModal();
+                }
+            });
+        }
 
         // Submit action
         btnSubmit.addEventListener('click', async (e) => {
