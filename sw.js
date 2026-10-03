@@ -10,6 +10,7 @@
 const CACHE_NAME = 'ajr-v1';
 const PRECACHE_URLS = [
     '/offline.html',
+    '/offline.css',
     '/manifest.webmanifest',
     '/icons/icon-192.png',
     '/icons/icon-512.png',

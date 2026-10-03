@@ -99,7 +99,7 @@
                         <canvas id="previewCanvas"></canvas>
                         
                         <!-- Overlay loading state indicator -->
-                        <div class="viewport-loader" id="viewportLoader" style="display: none;">
+                        <div class="viewport-loader" id="viewportLoader" hidden>
                             <span class="spinner"></span>
                             <span>جاري معالجة الأبعاد...</span>
                         </div>
@@ -154,19 +154,19 @@
                                 <span class="color-btn-tooltip">الافتراضي</span>
                             </button>
                             <button class="color-btn" data-color="#123524" title="أخضر داكن" aria-label="أخضر داكن">
-                                <span class="color-preview-swatch" style="background-color: #123524;"></span>
+                                <span class="color-preview-swatch color-swatch-green"></span>
                                 <span class="color-btn-tooltip">أخضر</span>
                             </button>
                             <button class="color-btn" data-color="#C8A673" title="ذهبي دافئ" aria-label="ذهبي دافئ">
-                                <span class="color-preview-swatch" style="background-color: #C8A673;"></span>
+                                <span class="color-preview-swatch color-swatch-gold"></span>
                                 <span class="color-btn-tooltip">ذهبي</span>
                             </button>
                             <button class="color-btn" data-color="#2F3E46" title="رمادي داكن" aria-label="رمادي داكن">
-                                <span class="color-preview-swatch" style="background-color: #2F3E46;"></span>
+                                <span class="color-preview-swatch color-swatch-gray"></span>
                                 <span class="color-btn-tooltip">رمادي</span>
                             </button>
                             <button class="color-btn" data-color="#FFFBF0" title="أبيض دافئ" aria-label="أبيض دافئ">
-                                <span class="color-preview-swatch" style="background-color: #FFFBF0; border: 1px solid rgba(255,255,255,0.25);"></span>
+                                <span class="color-preview-swatch color-swatch-offwhite"></span>
                                 <span class="color-btn-tooltip">أبيض</span>
                             </button>
                         </div>
@@ -203,7 +203,7 @@
                         <button type="button" id="shareBtn" class="btn btn-ghost btn-block">
                             <span>🔗 مشاركة سريعة للهاتف</span>
                         </button>
-                        <button type="button" id="publishBtn" class="btn btn-secondary btn-block" style="background-color: var(--color-accent, #3E7B5C); color: #fff; margin-top: 10px;">
+                        <button type="button" id="publishBtn" class="btn btn-secondary btn-block publish-btn">
                             <span>✨ نشر في معرض المجتمع</span>
                         </button>
                     </div>
@@ -215,7 +215,7 @@
     </main>
 
     <!-- Hidden high-res canvas for ultra-sharp high-DPI export -->
-    <canvas id="exportCanvas" style="display: none;"></canvas>
+    <canvas id="exportCanvas" hidden></canvas>
 
     <!-- Toast notification element -->
     <div class="toast" id="posterToast" role="status" aria-live="polite" hidden>تم النسخ ✨</div>

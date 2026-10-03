@@ -637,6 +637,22 @@ body.poster-page-root .btn-primary:hover {
     border: 1px solid rgba(255, 255, 255, 0.22);
 }
 
+/* Fixed palette swatches (moved from inline style= for CSP, see #108) */
+.color-swatch-green { background-color: #123524; }
+.color-swatch-gold { background-color: #C8A673; }
+.color-swatch-gray { background-color: #2F3E46; }
+.color-swatch-offwhite {
+    background-color: #FFFBF0;
+    border: 1px solid rgba(255, 255, 255, 0.25);
+}
+
+/* Publish action emphasis (moved from inline style= for CSP, see #108) */
+.publish-btn {
+    background-color: var(--color-accent, #3E7B5C);
+    color: #fff;
+    margin-top: 10px;
+}
+
 .color-btn:hover {
     transform: scale(1.12);
     border-color: rgba(200, 166, 115, 0.45);

@@ -160,3 +160,13 @@ body {
 @media (hover: hover) and (pointer: fine) {
   .martyr-item:hover { transform: translateY(-2px); box-shadow: 0 12px 24px rgba(15, 23, 42, 0.06); border-color: #d1d5db; }
 }
+
+/* Back navigation (moved from inline style= for CSP, see #108) */
+.martyrs-nav {
+    margin: 1.5rem 0 1rem;
+    display: flex;
+    justify-content: flex-start;
+}
+.martyrs-back {
+    text-decoration: none;
+}
