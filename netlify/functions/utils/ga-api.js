@@ -1,5 +1,6 @@
 import { BetaAnalyticsDataClient } from '@google-analytics/data';
 import { OAuth2Client } from 'google-auth-library';
+import { config } from './config.js';
 
 let client = null;
 let reportCache = new Map();
@@ -12,11 +13,11 @@ const CACHE_TTL = {
 
 function getClient() {
     if (client) return client;
-    const propertyId = process.env.GA4_PROPERTY_ID;
+    const propertyId = config.ga4PropertyId;
     if (!propertyId) return null;
 
     // Path 1: Service Account (GOOGLE_SERVICE_ACCOUNT_JSON)
-    const serviceAccount = process.env.GOOGLE_SERVICE_ACCOUNT_JSON;
+    const serviceAccount = config.googleServiceAccountJson;
     if (serviceAccount) {
         let credentials;
         try { credentials = JSON.parse(serviceAccount); } catch {
@@ -32,9 +33,9 @@ function getClient() {
     }
 
     // Path 2: OAuth2 with refresh token
-    const clientId = process.env.GOOGLE_CLIENT_ID;
-    const clientSecret = process.env.GOOGLE_CLIENT_SECRET;
-    const refreshToken = process.env.GOOGLE_REFRESH_TOKEN;
+    const clientId = config.googleClientId;
+    const clientSecret = config.googleClientSecret;
+    const refreshToken = config.googleRefreshToken;
     if (clientId && clientSecret && refreshToken) {
         const oauth2Client = new OAuth2Client({ clientId, clientSecret });
         oauth2Client.setCredentials({ refresh_token: refreshToken });
@@ -55,14 +56,14 @@ function getClient() {
 }
 
 export function isGAConfigured() {
-    if (!process.env.GA4_PROPERTY_ID) return false;
-    if (process.env.GOOGLE_SERVICE_ACCOUNT_JSON) return true;
-    if (process.env.GOOGLE_CLIENT_ID && process.env.GOOGLE_CLIENT_SECRET && process.env.GOOGLE_REFRESH_TOKEN) return true;
+    if (!config.ga4PropertyId) return false;
+    if (config.googleServiceAccountJson) return true;
+    if (config.googleClientId && config.googleClientSecret && config.googleRefreshToken) return true;
     return false;
 }
 
 export function getPropertyId() {
-    return process.env.GA4_PROPERTY_ID || '';
+    return config.ga4PropertyId;
 }
 
 function getCacheKey(name, params) {

@@ -14,6 +14,7 @@ import {
     getClientIP,
     logger,
 } from './utils/shared.js';
+import { config } from './utils/config.js';
 
 const VALID_INTERACTION_TYPES = ['tasbeeh', 'dua', 'share'];
 
@@ -60,7 +61,7 @@ export async function handler(event, context) {
             p_memory_id: memory_id,
             p_interaction_type: interaction_type,
             p_ip_hash: ipHash,
-            p_debounce_seconds: parseInt(process.env.MEMORY_INTERACTION_DEBOUNCE || '30', 10),
+            p_debounce_seconds: config.memoryInteractionDebounceSeconds,
         });
 
         if (rpcError) {

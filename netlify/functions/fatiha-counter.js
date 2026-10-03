@@ -1,12 +1,13 @@
 import { createClient } from '@supabase/supabase-js';
 import { success, error, handleOptions, logger, getClientIP, checkRateLimit, recordRequest, HOT_ENDPOINT_RATE_LIMITS } from './utils/shared.js';
+import { config } from './utils/config.js';
 
 const FATIHA_ROW_ID = 1;
 const FATIHA_TABLE = 'fatiha_counter';
 
 function getSupabaseAdminClient() {
-  const supabaseUrl = process.env.SUPABASE_URL;
-  const serviceRoleKey = process.env.SUPABASE_SERVICE_ROLE_KEY;
+  const supabaseUrl = config.supabaseUrl;
+  const serviceRoleKey = config.supabaseServiceRoleKey;
 
   if (!supabaseUrl || !serviceRoleKey) {
     throw new Error('Missing SUPABASE_URL or SUPABASE_SERVICE_ROLE_KEY environment variables.');
