@@ -377,7 +377,30 @@ export function getTodayDateKey() {
 // ═══════════════════════════════════════════════════════════════════════════
 
 export function generateMessageHash(message) {
-    return crypto.createHash('sha256').update(message, 'utf8').digest('hex');
+    return crypto.createHash('sha256').update(normalizeMessageForHash(message), 'utf8').digest('hex');
+}
+
+/**
+ * Normalize text before duplicate hashing (#78) so trivial variants
+ * (case, extra spaces, Arabic diacritics/tatweel) map to one bucket.
+ * NFKD + harakat/tatweel strip + lowercase + whitespace collapse.
+ */
+export function normalizeMessageForHash(message) {
+    return String(message || '')
+        .normalize('NFKD')
+        // Arabic harakat (U+064B–U+065F), superscript alef (U+0670), tatweel (U+0640)
+        .replace(/[\u064B-\u065F\u0670\u0640]/g, '')
+        .toLowerCase()
+        .replace(/\s+/g, ' ')
+        .trim();
+}
+
+/**
+ * Escape LIKE wildcards in user search input (#78) so `%`/`_`/`\`
+ * are matched literally instead of acting as wildcards.
+ */
+export function escapeIlikePattern(value) {
+    return String(value || '').replace(/[\\%_]/g, (ch) => `\\${ch}`);
 }
 
 // ═══════════════════════════════════════════════════════════════════════════

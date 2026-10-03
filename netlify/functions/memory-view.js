@@ -30,7 +30,10 @@ export async function handler(event, context) {
     try {
         const slug = event.queryStringParameters?.slug;
 
-        if (!slug || typeof slug !== 'string' || slug.length > 100) {
+        // Strict slug shape: matches server-generated slugs
+        // (transliterated base + 6-char hex suffix), 3–100 chars (#78)
+        const SLUG_REGEX = /^[A-Za-z0-9\u0600-\u06FF_-]{3,100}$/;
+        if (!slug || typeof slug !== 'string' || !SLUG_REGEX.test(slug)) {
             return error(400, 'رابط الصفحة غير صالح', origin);
         }
 
