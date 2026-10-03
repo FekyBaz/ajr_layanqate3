@@ -530,6 +530,42 @@ function detectSelectedMartyr() {
   shouldScrollToSelected = true;
 }
 
+let chartJsPromise = null;
+
+function loadChartJs() {
+  if (typeof Chart !== 'undefined') return Promise.resolve(true);
+  if (chartJsPromise) return chartJsPromise;
+  chartJsPromise = new Promise((resolve) => {
+    const script = document.createElement('script');
+    script.src = 'https://cdn.jsdelivr.net/npm/chart.js';
+    script.async = true;
+    script.onload = () => resolve(typeof Chart !== 'undefined');
+    script.onerror = () => resolve(false);
+    document.head.appendChild(script);
+  });
+  return chartJsPromise;
+}
+
+// Chart.js (~200KB) loads only when the charts scroll near the viewport (#112).
+// renderChartsSection itself no-ops when Chart is unavailable.
+function renderChartsWhenVisible(container, stats) {
+  if (!container || !stats) return;
+  const render = async () => {
+    if (await loadChartJs()) renderChartsSection(container, stats);
+  };
+  if (typeof IntersectionObserver === 'function') {
+    const observer = new IntersectionObserver((entries) => {
+      if (entries.some((entry) => entry.isIntersecting)) {
+        observer.disconnect();
+        render();
+      }
+    }, { rootMargin: '200px' });
+    observer.observe(container);
+  } else {
+    render();
+  }
+}
+
 async function initMartyrsPage() {
   app = document.getElementById('martyrs-app');
   heroCount = document.getElementById('hero-count');
@@ -560,7 +596,7 @@ async function initMartyrsPage() {
     const stats = calculateStats(allMartyrs);
     renderMartyrOfDay();
     renderStatsSection(statsContainer, stats);
-    if (stats) renderChartsSection(chartsContainer, stats);
+    renderChartsWhenVisible(chartsContainer, stats);
 
     renderPage();
     initializeFatihaCounter();
