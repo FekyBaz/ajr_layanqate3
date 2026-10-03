@@ -47,10 +47,18 @@
         return item.corrected_message || item.message || '';
     }
 
+    // Single sources: lib/escape.js + lib/share.js (loaded before this script),
+    // with fallbacks so the preview still works if a shared lib is missing.
+    const Escape = globalThis.EscapeLib || {
+        escapeHtml(text) {
+            const div = document.createElement('div');
+            div.textContent = text;
+            return div.innerHTML;
+        },
+    };
+
     function escapeHtml(text) {
-        const div = document.createElement('div');
-        div.textContent = text;
-        return div.innerHTML;
+        return Escape.escapeHtml(text);
     }
 
     function getDailyDateLine() {
@@ -75,6 +83,15 @@
 
     async function shareSubmission(item) {
         const text = `"${resolveMessage(item)}"\n\nمن مشروع أجر لا ينقطع\n${window.location.origin}`;
+
+        // Single source: lib/share.js when available
+        if (globalThis.ShareLib) {
+            await globalThis.ShareLib.shareOrCopy({
+                text,
+                url: `${window.location.origin}/community.html`,
+            });
+            return;
+        }
 
         try {
             if (navigator.share) {

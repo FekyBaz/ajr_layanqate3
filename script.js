@@ -21,26 +21,12 @@
     // ═══════════════════════════════════════════════════════════════════════
 
     /**
-     * ⚠️ PRODUCTION API URL CONFIGURATION
-     * ═══════════════════════════════════════════════════════════════════════
-     * This URL must point to your production backend API.
-     * 
-     * Examples:
-     * - Railway:  'https://your-app.railway.app'
-     * - Render:   'https://your-app.onrender.com'
-     * - Vercel:   'https://your-api.vercel.app'
-     * - Custom:   'https://api.yourdomain.com'
-     * 
-     * Leave empty if frontend and backend are on the same domain.
-     * ═══════════════════════════════════════════════════════════════════════
+     * API base URL — single source in lib/config.js.
+     * To point production at a separate backend origin, set
+     * PRODUCTION_API_URL there (leave empty for same-origin).
      */
-    const PRODUCTION_API_URL = ''; // ← Change this to your production backend URL
-
-    const isProduction = !window.location.hostname.includes('localhost') &&
-        !window.location.hostname.includes('127.0.0.1');
-
     const CONFIG = {
-        API_BASE_URL: isProduction ? PRODUCTION_API_URL : 'http://localhost:8888',
+        API_BASE_URL: window.AppConfig.API_BASE,
         API_ENDPOINT: '/api/submit',
     };
 
