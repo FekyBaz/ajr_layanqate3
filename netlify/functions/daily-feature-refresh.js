@@ -1,8 +1,11 @@
-import { error, success, getTodayDateKey, logger } from './utils/shared.js';
+import { error, success, getTodayDateKey, logger, requireScheduledOrAdmin } from './utils/shared.js';
 import { getDailyFeatureWithSubmission } from './utils/daily-feature.js';
 import { getOrCreateGoal } from './utils/community-goal.js';
 
 export async function handler(event) {
+    const denied = requireScheduledOrAdmin(event, event.headers?.origin || '', 'daily-feature-refresh');
+    if (denied) return denied;
+
     if (event.httpMethod && event.httpMethod !== 'GET') {
         return error(405, 'Method not allowed');
     }
