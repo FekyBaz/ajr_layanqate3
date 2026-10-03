@@ -79,12 +79,18 @@ function getStartDate(period) {
     return now.toISOString();
 }
 
+// Hard cap per dashboard query (#81): analytics reads were fully unbounded
+// and could OOM the function. Keeps the most recent rows; beyond-cap
+// periods need a materialized aggregate RPC (follow-up).
+const DASHBOARD_ROW_CAP = 5000;
+
 async function getOverviewStats(startDate) {
     const { data: events } = await supabaseAdmin
         .from('analytics_events')
         .select('event_type, session_id, is_returning, created_at')
         .gte('created_at', startDate)
-        .order('created_at', { ascending: false });
+        .order('created_at', { ascending: false })
+        .limit(DASHBOARD_ROW_CAP);
 
     if (!events || events.length === 0) {
         return {
@@ -134,7 +140,9 @@ async function getTrafficSources(startDate) {
         .from('analytics_events')
         .select('referrer_domain, utm_source, utm_medium')
         .eq('event_type', 'page_view')
-        .gte('created_at', startDate);
+        .gte('created_at', startDate)
+        .order('created_at', { ascending: false })
+        .limit(DASHBOARD_ROW_CAP);
 
     if (!data || data.length === 0) return [];
 
@@ -156,7 +164,9 @@ async function getTopPages(startDate) {
         .from('analytics_events')
         .select('page_path, page_title')
         .eq('event_type', 'page_view')
-        .gte('created_at', startDate);
+        .gte('created_at', startDate)
+        .order('created_at', { ascending: false })
+        .limit(DASHBOARD_ROW_CAP);
 
     if (!data || data.length === 0) return [];
 
@@ -177,7 +187,9 @@ async function getDeviceBreakdown(startDate) {
         .from('analytics_events')
         .select('device_type, browser, os')
         .eq('event_type', 'page_view')
-        .gte('created_at', startDate);
+        .gte('created_at', startDate)
+        .order('created_at', { ascending: false })
+        .limit(DASHBOARD_ROW_CAP);
 
     if (!data || data.length === 0) return { devices: [], browsers: [], os: [] };
 
@@ -202,7 +214,9 @@ async function getGeographicData(startDate) {
         .from('analytics_events')
         .select('country')
         .eq('event_type', 'page_view')
-        .gte('created_at', startDate);
+        .gte('created_at', startDate)
+        .order('created_at', { ascending: false })
+        .limit(DASHBOARD_ROW_CAP);
 
     if (!data || data.length === 0) return [];
 
@@ -221,7 +235,9 @@ async function getFeatureUsage(startDate) {
     const { data } = await supabaseAdmin
         .from('analytics_events')
         .select('event_type, event_name')
-        .gte('created_at', startDate);
+        .gte('created_at', startDate)
+        .order('created_at', { ascending: false })
+        .limit(DASHBOARD_ROW_CAP);
 
     if (!data || data.length === 0) return {};
 
@@ -241,7 +257,9 @@ async function getFunnelData(startDate) {
         .select('session_id')
         .eq('event_type', 'page_view')
         .in('page_path', ['/', '/index.html'])
-        .gte('created_at', startDate);
+        .gte('created_at', startDate)
+        .order('created_at', { ascending: false })
+        .limit(DASHBOARD_ROW_CAP);
 
     const landingSessions = new Set(pageViews?.map(e => e.session_id) || []);
 
@@ -249,7 +267,9 @@ async function getFunnelData(startDate) {
         .from('analytics_events')
         .select('session_id')
         .in('event_type', ['click', 'scroll', 'cta_click'])
-        .gte('created_at', startDate);
+        .gte('created_at', startDate)
+        .order('created_at', { ascending: false })
+        .limit(DASHBOARD_ROW_CAP);
 
     const interactionSessions = new Set(interactions?.map(e => e.session_id) || []);
 
@@ -257,7 +277,9 @@ async function getFunnelData(startDate) {
         .from('analytics_events')
         .select('session_id')
         .eq('event_type', 'submit')
-        .gte('created_at', startDate);
+        .gte('created_at', startDate)
+        .order('created_at', { ascending: false })
+        .limit(DASHBOARD_ROW_CAP);
 
     const submissionSessions = new Set(submissions?.map(e => e.session_id) || []);
 
@@ -278,7 +300,9 @@ async function getRetentionData(startDate) {
         .from('analytics_events')
         .select('session_id, is_returning, created_at')
         .eq('event_type', 'page_view')
-        .gte('created_at', startDate);
+        .gte('created_at', startDate)
+        .order('created_at', { ascending: false })
+        .limit(DASHBOARD_ROW_CAP);
 
     if (!data || data.length === 0) return { returning_rate: 0, repeat_sessions: 0 };
 

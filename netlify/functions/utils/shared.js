@@ -537,6 +537,36 @@ export function getClientIP(event) {
 
 
 // ═══════════════════════════════════════════════════════════════════════════
+// Pagination Helper (single source, see #81)
+// ═══════════════════════════════════════════════════════════════════════════
+
+/**
+ * Parse and clamp page/limit query params into a PostgREST range.
+ * Accepts a plain object (event.queryStringParameters) or URLSearchParams.
+ * @param {Object|URLSearchParams} params
+ * @param {Object} [options] { defaultLimit: 24, maxLimit: 60 }
+ * @returns {{ page: number, limit: number, from: number, to: number }}
+ */
+export function parsePagination(params, options = {}) {
+    const defaultLimit = options.defaultLimit || 24;
+    const maxLimit = options.maxLimit || 60;
+    const get = (key) => {
+        if (!params) return null;
+        if (typeof params.get === 'function') return params.get(key);
+        return params[key] ?? null;
+    };
+    const rawPage = Number.parseInt(get('page'), 10);
+    const rawLimit = Number.parseInt(get('limit') ?? get('pageSize'), 10);
+    const page = Number.isNaN(rawPage) || rawPage < 1 ? 1 : rawPage;
+    const limit = Number.isNaN(rawLimit) || rawLimit < 1
+        ? defaultLimit
+        : Math.min(rawLimit, maxLimit);
+    const from = (page - 1) * limit;
+    return { page, limit, from, to: from + limit - 1 };
+}
+
+
+// ═══════════════════════════════════════════════════════════════════════════
 // Phase 3: Legacy Hub Helpers
 // ═══════════════════════════════════════════════════════════════════════════
 
