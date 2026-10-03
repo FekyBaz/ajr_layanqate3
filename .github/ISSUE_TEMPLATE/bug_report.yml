@@ -1,0 +1,28 @@
+name: 🐞 Bug report
+description: Report something that is not working as expected
+labels: [bug]
+body:
+  - type: textarea
+    id: what
+    attributes:
+      label: What happened?
+      description: A clear description in Arabic or English, with steps to reproduce.
+      placeholder: "1. Open … 2. Click … 3. Expected … / Actual …"
+    validations:
+      required: true
+  - type: textarea
+    id: environment
+    attributes:
+      label: Environment
+      description: Browser/OS, page URL, and whether it reproduces in a private window.
+    validations:
+      required: false
+  - type: checkboxes
+    id: checks
+    attributes:
+      label: Checks
+      options:
+        - label: I did not include secrets, keys, or personal data in this report.
+          required: true
+        - label: I searched existing issues before opening this one.
+          required: false

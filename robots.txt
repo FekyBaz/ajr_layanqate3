@@ -10,4 +10,7 @@ Disallow: /analytics.html
 # Block API endpoints
 Disallow: /api/
 
+# Block design prototypes (experiments, not indexed)
+Disallow: /prototypes/
+
 Sitemap: https://ajr-la-yanqati.com/sitemap.xml

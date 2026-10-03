@@ -66,7 +66,7 @@
             return div.innerHTML;
         },
         escapeAttr(value) {
-            return String(value == null ? '' : value)
+            return String(value === null || value === undefined ? '' : value)
                 .replace(/&/g, '&amp;')
                 .replace(/"/g, '&quot;')
                 .replace(/</g, '&lt;')
