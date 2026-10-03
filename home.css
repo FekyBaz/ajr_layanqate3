@@ -26,14 +26,14 @@
 
 .hero__ornament--top {
     top: 16px;
-    right: 50%;
+    inset-inline-start: 50%;
     transform: translateX(50%);
     font-size: clamp(1.2rem, 2vw, 1.7rem);
 }
 
 .hero__ornament--bottom {
     bottom: 18px;
-    right: 50%;
+    inset-inline-start: 50%;
     transform: translateX(50%);
     font-size: clamp(0.95rem, 1.7vw, 1.15rem);
 }
@@ -42,7 +42,7 @@
     content: '☾';
     position: absolute;
     top: 24px;
-    right: 8%;
+    inset-inline-start: 8%;
     font-size: clamp(2rem, 8vw, 4rem);
     color: rgba(242, 221, 181, 0.72);
 }
@@ -51,7 +51,7 @@
     content: '✦';
     position: absolute;
     bottom: 32px;
-    left: 7%;
+    inset-inline-end: 7%;
     font-size: clamp(2.2rem, 8vw, 4.5rem);
     color: rgba(242, 221, 181, 0.48);
 }
@@ -141,7 +141,7 @@
     margin: 0 auto var(--space-2xl);
     padding: var(--space-md) var(--space-lg);
     border: 1px solid rgba(201, 170, 113, 0.45);
-    border-right: 4px solid var(--color-gold);
+    border-inline-start: 4px solid var(--color-gold);
     border-radius: var(--radius-lg);
     background: rgba(255, 251, 242, 0.16);
     backdrop-filter: blur(2px);

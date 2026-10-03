@@ -72,8 +72,7 @@ body.poster-page-root .btn-ghost:hover {
 .workspace-sidebar {
     background: rgba(255, 255, 255, 0.03);
     backdrop-filter: blur(16px);
-    border-left: 1px solid rgba(255, 255, 255, 0.06);
-    border-right: 1px solid rgba(255, 255, 255, 0.06);
+    border-inline: 1px solid rgba(255, 255, 255, 0.06);
     padding: var(--space-xl) var(--space-lg);
     display: flex;
     flex-direction: column;
@@ -84,11 +83,11 @@ body.poster-page-root .btn-ghost:hover {
 }
 
 .themes-sidebar {
-    border-right: none;
+    border-inline-start: none;
 }
 
 .controls-sidebar {
-    border-left: none;
+    border-inline-end: none;
 }
 
 .sidebar-title {
@@ -122,7 +121,7 @@ body.poster-page-root .btn-ghost:hover {
     align-items: center;
     gap: var(--space-md);
     transition: all var(--transition-normal);
-    text-align: right;
+    text-align: start;
     font-family: var(--font-primary);
     font-size: var(--font-size-sm);
 }
@@ -238,8 +237,7 @@ body.poster-page-root .btn-ghost:hover {
 .viewport-loader {
     position: absolute;
     top: 0;
-    left: 0;
-    right: 0;
+    inset-inline: 0;
     bottom: 0;
     background: rgba(6, 10, 18, 0.85);
     display: flex;
@@ -348,7 +346,7 @@ body.poster-page-root .btn-ghost:hover {
 .char-counter {
     font-size: 11px;
     color: #8b7961;
-    text-align: left;
+    text-align: end;
     margin-top: -3px;
 }
 
@@ -373,7 +371,7 @@ body.poster-page-root .btn-ghost:hover {
     color: var(--color-gold);
     font-weight: 600;
     min-width: 36px;
-    text-align: left;
+    text-align: end;
 }
 
 /* Ratio Options Grid */
@@ -551,6 +549,7 @@ body.poster-page-root .btn-primary:hover {
 .toast {
     position: fixed;
     bottom: 40px;
+    /* stylelint-disable-next-line property-disallowed-list -- translateX centering pair, see #72 */
     left: 50%;
     transform: translateX(-50%) translateY(20px);
     background: rgba(11, 17, 30, 0.88);
@@ -592,6 +591,7 @@ body.poster-page-root .btn-primary:hover {
     position: absolute;
     font-size: 16px;
     top: 50%;
+    /* stylelint-disable-next-line property-disallowed-list -- translate() centering pair, see #72 */
     left: 50%;
     transform: translate(-50%, -50%);
     opacity: 0.95;
@@ -653,6 +653,7 @@ body.poster-page-root .btn-primary:hover {
 .color-btn-tooltip {
     position: absolute;
     bottom: 100%;
+    /* stylelint-disable-next-line property-disallowed-list -- translateX centering pair, see #72 */
     left: 50%;
     transform: translateX(-50%) translateY(-6px);
     background: rgba(13, 21, 39, 0.95);

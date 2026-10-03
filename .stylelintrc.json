@@ -1,0 +1,27 @@
+{
+    "rules": {
+        "property-disallowed-list": [
+            [
+                "margin-left",
+                "margin-right",
+                "padding-left",
+                "padding-right",
+                "border-left",
+                "border-right",
+                "left",
+                "right"
+            ],
+            {
+                "message": "Use logical properties (margin-inline-start, inset-inline-start, border-inline-start). Physical positioning needs a documented exception, see #72."
+            }
+        ],
+        "declaration-property-value-disallowed-list": [
+            {
+                "text-align": ["left", "right"]
+            },
+            {
+                "message": "Use text-align: start/end/center. LTR contexts (url/email inputs) need a documented exception, see #72."
+            }
+        ]
+    }
+}
