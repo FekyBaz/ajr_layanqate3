@@ -5,6 +5,7 @@
  */
 
 import { ThemeManager } from './ThemeManager.js';
+import { ensureFontFamilyLoaded } from './FontLoader.js';
 import { TemplateSystem } from './TemplateSystem.js';
 import { ExportEngine } from './ExportEngine.js';
 import { ShareSystem } from './ShareSystem.js';
@@ -112,8 +113,11 @@ export class PosterEngine {
             this.needsRedraw = true;
         });
 
-        // Font family select
+        // Font family select (lazy families load on demand, see #112)
         this.fontSelect.addEventListener('change', () => {
+            ensureFontFamilyLoaded(this.fontSelect.value).then(() => {
+                this.needsRedraw = true;
+            });
             this.needsRedraw = true;
         });
 
@@ -139,6 +143,9 @@ export class PosterEngine {
             // Sync default font family if custom select is classical Amiri or default matches
             const theme = ThemeManager.getTheme(this.activeThemeId);
             this.fontSelect.value = theme.fontFamily;
+            ensureFontFamilyLoaded(theme.fontFamily).then(() => {
+                this.needsRedraw = true;
+            });
 
             this.needsRedraw = true;
         });
@@ -177,6 +184,8 @@ export class PosterEngine {
             try {
                 this.setLoadingState(true, 'جاري تصدير الملف الفني...');
                 const theme = this.getCombinedTheme();
+                // Await the selected family so exports never bake fallback glyphs
+                await ensureFontFamilyLoaded(theme.fontFamily);
                 await ExportEngine.downloadPoster(this.exportCanvas, theme, this.text, this.ratio, this.fontSizeSliderValue);
                 this.showToast('تم تحميل لوحتك الفنية بنجاح ✨');
             } catch (err) {
@@ -192,6 +201,7 @@ export class PosterEngine {
             try {
                 this.setLoadingState(true, 'جاري تحضير اللوحة للمشاركة...');
                 const theme = this.getCombinedTheme();
+                await ensureFontFamilyLoaded(theme.fontFamily);
                 await ShareSystem.sharePoster(
                     this.exportCanvas,
                     theme,
