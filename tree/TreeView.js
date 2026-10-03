@@ -451,8 +451,6 @@ export class TreeView {
                 this.resize();
             }
         };
-
-        console.debug('[TreeOfGoodness] Upgraded Cinematic Engine published! 🌳✨');
     }
 }
 
