@@ -42,153 +42,7 @@
         rel="stylesheet">
 
     <link rel="stylesheet" href="/base.css">
-    <style>
-        .contact-page {
-            min-height: 100vh;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            padding: var(--space-xl) var(--space-lg);
-        }
-
-        .contact-card {
-            width: 100%;
-            max-width: 560px;
-            background: var(--color-surface);
-            border-radius: var(--radius-lg);
-            box-shadow: var(--shadow-soft);
-            border: 1px solid var(--color-border);
-            padding: var(--space-3xl) var(--space-xl);
-            text-align: center;
-        }
-
-        .contact-title {
-            font-family: var(--font-display);
-            font-size: var(--font-size-xl);
-            color: var(--color-text-primary);
-            margin-bottom: var(--space-sm);
-        }
-
-        .contact-subtitle {
-            font-size: var(--font-size-sm);
-            color: var(--color-text-muted);
-            margin-bottom: var(--space-xl);
-        }
-
-        .contact-form {
-            text-align: right;
-        }
-
-        .contact-group {
-            margin-bottom: var(--space-lg);
-        }
-
-        .contact-label {
-            display: block;
-            font-size: var(--font-size-sm);
-            font-weight: 500;
-            margin-bottom: var(--space-xs);
-            color: var(--color-text-primary);
-        }
-
-        .contact-input,
-        .contact-textarea {
-            width: 100%;
-            padding: var(--space-md);
-            font-family: var(--font-primary);
-            font-size: var(--font-size-md);
-            color: var(--color-text-primary);
-            background: #fffdf7;
-            border: 2px solid var(--color-border);
-            border-radius: var(--radius-md);
-            transition: border-color 150ms ease;
-            direction: rtl;
-        }
-
-        .contact-input:focus,
-        .contact-textarea:focus {
-            border-color: var(--color-border-focus);
-            box-shadow: 0 0 0 3px rgba(140, 106, 53, 0.16);
-            outline: none;
-        }
-
-        .contact-textarea {
-            resize: vertical;
-            min-height: 120px;
-        }
-
-        .contact-hint {
-            font-size: var(--font-size-xs);
-            color: var(--color-text-muted);
-            margin-top: var(--space-xs);
-        }
-
-        .contact-error {
-            display: none;
-            font-size: var(--font-size-sm);
-            color: var(--color-error);
-            margin-top: var(--space-xs);
-        }
-
-        .contact-error.visible {
-            display: block;
-        }
-
-        .contact-submit {
-            width: 100%;
-            padding: var(--space-md) var(--space-xl);
-            font-family: var(--font-primary);
-            font-size: var(--font-size-md);
-            font-weight: 600;
-            background: var(--color-accent);
-            color: white;
-            border: none;
-            border-radius: 999px;
-            cursor: pointer;
-            transition: 0.2s ease;
-        }
-
-        .contact-submit:hover:not(:disabled) {
-            transform: translateY(-1px);
-            box-shadow: 0 6px 16px rgba(0, 0, 0, 0.12);
-        }
-
-        .contact-submit:disabled {
-            opacity: 0.7;
-            cursor: not-allowed;
-        }
-
-        .contact-success {
-            display: none;
-            text-align: center;
-            padding: var(--space-xl);
-        }
-
-        .contact-success.visible {
-            display: block;
-        }
-
-        .contact-success h3 {
-            font-family: var(--font-display);
-            color: var(--color-success);
-            margin-bottom: var(--space-sm);
-        }
-
-        .contact-footer {
-            margin-top: var(--space-xl);
-            text-align: center;
-        }
-
-        .contact-footer a {
-            color: var(--color-accent);
-            text-decoration: none;
-            font-size: var(--font-size-sm);
-        }
-
-        .contact-footer a:hover {
-            text-decoration: underline;
-        }
-    </style>
+    <link rel="stylesheet" href="/contact.css?v=20261003">
 </head>
 
 <body>
@@ -200,22 +54,22 @@
             <form class="contact-form" id="contactForm" novalidate>
                 <div class="contact-group">
                     <label class="contact-label" for="contact-name">الاسم <span
-                            style="color: var(--color-text-muted); font-weight: 400;">(اختياري)</span></label>
+                            class="contact-optional">(اختياري)</span></label>
                     <input class="contact-input" id="contact-name" type="text" maxlength="100" placeholder="اسمك">
                 </div>
 
                 <div class="contact-group">
                     <label class="contact-label" for="contact-email">البريد الإلكتروني <span
-                            style="color: var(--color-text-muted); font-weight: 400;">(اختياري)</span></label>
+                            class="contact-optional">(اختياري)</span></label>
                     <input class="contact-input" id="contact-email" type="email" maxlength="200"
-                        placeholder="example@email.com" dir="ltr" style="text-align: left;"
+                        placeholder="example@email.com" dir="ltr"
                         aria-describedby="email-error">
                     <p class="contact-error" id="email-error" role="alert"></p>
                 </div>
 
                 <div class="contact-group">
                     <label class="contact-label" for="contact-message">الرسالة <span
-                            style="color: var(--color-error);">*</span></label>
+                            class="contact-required">*</span></label>
                     <textarea class="contact-textarea" id="contact-message" rows="5" maxlength="1000" required
                         placeholder="اكتب رسالتك هنا..." aria-describedby="msg-count message-error"></textarea>
                     <p class="contact-hint"><span id="msg-count">0</span>/1000</p>
