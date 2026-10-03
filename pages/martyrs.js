@@ -225,13 +225,21 @@ async function shareMartyr(_, shareUrl) {
       return;
     }
 
-    await navigator.clipboard.writeText(url);
+    if (globalThis.ShareLib) {
+      await globalThis.ShareLib.copyText(url);
+    } else {
+      await navigator.clipboard.writeText(url);
+    }
     showShareToast('تم نسخ الرابط للمشاركة');
   } catch (shareError) {
     if (shareError?.name === 'AbortError') return;
 
     try {
-      await navigator.clipboard.writeText(url);
+      if (globalThis.ShareLib) {
+        await globalThis.ShareLib.copyText(url);
+      } else {
+        await navigator.clipboard.writeText(url);
+      }
       showShareToast('تم نسخ الرابط للمشاركة');
     } catch (_) {
       showError('تعذر فتح نافذة المشاركة أو نسخ الرابط.');

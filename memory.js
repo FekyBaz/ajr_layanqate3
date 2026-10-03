@@ -256,6 +256,15 @@
     }
 
     function copyToClipboard(text) {
+        // Single source lib/share.js when loaded; local fallback otherwise.
+        // Toast fires after the attempt either way (previous behavior).
+        if (globalThis.ShareLib) {
+            globalThis.ShareLib.copyText(text).then(
+                () => showToast('تم نسخ الرابط'),
+                () => showToast('تم نسخ الرابط'),
+            );
+            return;
+        }
         navigator.clipboard.writeText(text).then(() => {
             showToast('تم نسخ الرابط');
         }).catch(() => {
