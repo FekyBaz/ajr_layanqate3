@@ -836,10 +836,41 @@ function renderResponse(result) {
 }
 
 function setActiveTab(type) {
-    document.querySelectorAll('.tab').forEach((button) => {
-        button.classList.toggle('is-active', button.dataset.type === type);
+    document.querySelectorAll('#filterTabs .tab').forEach((button) => {
+        const isActive = button.dataset.type === type;
+        button.classList.toggle('is-active', isActive);
+        button.setAttribute('aria-pressed', String(isActive));
     });
 }
+
+function focusTabByOffset(current, offset) {
+    const tabs = Array.from(document.querySelectorAll('#filterTabs .tab'));
+    const index = tabs.indexOf(current);
+    if (index === -1 || tabs.length === 0) return;
+    const next = tabs[(index + offset + tabs.length) % tabs.length];
+    if (next) next.focus();
+}
+
+elements.filterTabs.addEventListener('keydown', (event) => {
+    const button = event.target.closest('.tab');
+    if (!button) return;
+    if (event.key === 'ArrowRight' || event.key === 'ArrowLeft') {
+        event.preventDefault();
+        // RTL: ArrowLeft moves forward, ArrowRight moves backward
+        const isRTL = document.documentElement.dir !== 'ltr';
+        const forward = event.key === 'ArrowLeft' ? 1 : -1;
+        focusTabByOffset(button, isRTL ? forward : -forward);
+    } else if (event.key === 'Home') {
+        event.preventDefault();
+        const first = document.querySelector('#filterTabs .tab');
+        if (first) first.focus();
+    } else if (event.key === 'End') {
+        event.preventDefault();
+        const tabs = document.querySelectorAll('#filterTabs .tab');
+        const last = tabs[tabs.length - 1];
+        if (last) last.focus();
+    }
+});
 
 elements.filterTabs.addEventListener('click', (event) => {
     const button = event.target.closest('.tab');
