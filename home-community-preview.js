@@ -191,10 +191,49 @@
     function setupMobileMenu() {
         if (!elements.menuToggle || !elements.mainMenu) return;
 
+        // Use shared accessible helper when available (see lib/mobile-nav.js)
+        if (typeof window.initMobileNav === 'function') {
+            window.initMobileNav({ toggleId: 'menuToggle', menuId: 'mainMenu' });
+            return;
+        }
+
         elements.menuToggle.addEventListener('click', () => {
             const expanded = elements.menuToggle.getAttribute('aria-expanded') === 'true';
             elements.menuToggle.setAttribute('aria-expanded', String(!expanded));
+            elements.menuToggle.setAttribute('aria-label', !expanded ? 'إغلاق القائمة' : 'فتح القائمة');
             elements.mainMenu.classList.toggle('is-open', !expanded);
+            if (!expanded) {
+                const firstLink = elements.mainMenu.querySelector('a[href]');
+                if (firstLink) firstLink.focus();
+            }
+        });
+
+        document.addEventListener('keydown', (event) => {
+            if ((event.key === 'Escape' || event.key === 'Esc') &&
+                elements.menuToggle.getAttribute('aria-expanded') === 'true') {
+                event.stopPropagation();
+                elements.menuToggle.setAttribute('aria-expanded', 'false');
+                elements.menuToggle.setAttribute('aria-label', 'فتح القائمة');
+                elements.mainMenu.classList.remove('is-open');
+                elements.menuToggle.focus();
+            }
+        });
+
+        document.addEventListener('click', (event) => {
+            if (elements.menuToggle.getAttribute('aria-expanded') !== 'true') return;
+            if (elements.menuToggle.contains(event.target) || elements.mainMenu.contains(event.target)) return;
+            elements.menuToggle.setAttribute('aria-expanded', 'false');
+            elements.menuToggle.setAttribute('aria-label', 'فتح القائمة');
+            elements.mainMenu.classList.remove('is-open');
+        });
+
+        window.addEventListener('resize', () => {
+            if (window.innerWidth >= 769 &&
+                elements.menuToggle.getAttribute('aria-expanded') === 'true') {
+                elements.menuToggle.setAttribute('aria-expanded', 'false');
+                elements.menuToggle.setAttribute('aria-label', 'فتح القائمة');
+                elements.mainMenu.classList.remove('is-open');
+            }
         });
     }
 
