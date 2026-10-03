@@ -72,7 +72,7 @@ body {
 .charts-section { display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: .75rem; margin-bottom: 1rem; }
 .chart-card { background: var(--card); border: 1px solid var(--border); border-radius: 12px; padding: 1rem; min-height: 320px; }
 .chart-card canvas { width: 100% !important; height: 240px !important; }
-.age-categories-explanation { margin-top: .8rem; padding-top: .75rem; border-top: 1px dashed var(--border); color: var(--muted); text-align: right; }
+.age-categories-explanation { margin-top: .8rem; padding-top: .75rem; border-top: 1px dashed var(--border); color: var(--muted); text-align: start; }
 .age-categories-explanation h4 { margin: 0 0 .35rem; color: var(--text); font-size: .98rem; }
 .age-categories-explanation ul { margin: 0; padding-inline-start: 1.1rem; }
 .age-categories-explanation li { margin-bottom: .2rem; }
@@ -113,6 +113,7 @@ body {
 .martyr-details-panel { margin: .55rem 0 0; background: var(--accent-soft); border-radius: 8px; padding: .45rem .65rem; color: var(--text); }
 
 .dua-toast {
+  /* stylelint-disable-next-line property-disallowed-list -- translateX(-50%) centering pair, see #72 */
   position: fixed; left: 50%; bottom: 22px; transform: translateX(-50%);
   background: var(--card); border: 1px solid var(--border); border-radius: 10px;
   padding: .7rem .85rem; min-width: 260px; max-width: calc(100vw - 2rem);
@@ -123,6 +124,7 @@ body {
 .dua-toast button { border: 0; background: transparent; cursor: pointer; color: var(--muted); }
 
 .share-toast {
+  /* stylelint-disable-next-line property-disallowed-list -- translateX(-50%) centering pair, see #72 */
   position: fixed; left: 50%; bottom: 22px; transform: translateX(-50%);
   background: var(--card); border: 1px solid var(--color-border); border-radius: 10px;
   padding: .7rem .85rem; min-width: 260px; max-width: calc(100vw - 2rem);

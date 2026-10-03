@@ -24,6 +24,7 @@ Useful commands:
 ```bash
 npm test        # unit tests (zero dependencies, node:test)
 npm run lint    # ESLint errors (warnings allowed for legacy code)
+npm run lint:css  # stylelint: physical CSS properties fail (use logical ones, see #72)
 ```
 
 Apply the SQL migrations in `api/migrations/` to your Supabase project

@@ -561,6 +561,7 @@
 
 .form-group input[type="url"] {
     direction: ltr;
+    /* stylelint-disable-next-line declaration-property-value-disallowed-list -- LTR URL field, see #72 */
     text-align: left;
 }
 
@@ -962,6 +963,7 @@
 .dhikr-card.completed .dhikr-card__bar::after {
     content: '';
     position: absolute;
+    /* stylelint-disable-next-line property-disallowed-list -- physical shimmer animation, see #72 */
     top: 0; left: -100%;
     width: 100%; height: 100%;
     background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.35), transparent);
@@ -969,7 +971,9 @@
 }
 
 @keyframes barSubtleShine {
+    /* stylelint-disable-next-line property-disallowed-list -- physical shimmer animation, see #72 */
     0% { left: -100%; }
+    /* stylelint-disable-next-line property-disallowed-list -- physical shimmer animation, see #72 */
     100% { left: 100%; }
 }
 

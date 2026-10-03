@@ -475,6 +475,7 @@ body.community-focus-mode .pagination {
 .tree-legend {
     position: absolute;
     bottom: var(--space-md);
+    /* stylelint-disable-next-line property-disallowed-list -- translateX(-50%) centering pair, see #72 */
     left: 50%;
     transform: translateX(-50%);
     display: flex;
