@@ -119,9 +119,15 @@ export default async function handler(request, context) {
     var pageUrl = url.origin + '/memory/' + encodeURIComponent(slug);
     var title = (memory.deceased_name || 'صدقة جارية') + ' | أجر لا ينقطع';
     var rendered = injectHead(html, pageUrl, title, buildDescription(memory));
+    // Memory pages are near-immutable post-approval; proposal-driven edits
+    // may change displayed data, so browsers revalidate quickly (5 min)
+    // while the CDN serves cached copies for an hour (#141).
     return new Response(rendered, {
       status: 200,
-      headers: { 'content-type': 'text/html; charset=utf-8' },
+      headers: {
+        'content-type': 'text/html; charset=utf-8',
+        'cache-control': 'public, max-age=300, s-maxage=3600',
+      },
     });
   } catch (_err3) {
     return context.next();
