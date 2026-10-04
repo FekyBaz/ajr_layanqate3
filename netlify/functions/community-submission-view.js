@@ -1,4 +1,4 @@
-import { supabaseAdmin, error, success, handleOptions, hashIP, getClientIP, checkRateLimit, recordRequest, HOT_ENDPOINT_RATE_LIMITS, getCorsHeaders, logger } from './utils/shared.js';
+import { supabaseAdmin, error, success, handleOptions, hashIP, isUuid, getClientIP, checkRateLimit, recordRequest, HOT_ENDPOINT_RATE_LIMITS, getCorsHeaders, logger } from './utils/shared.js';
 
 export async function handler(event) {
     const origin = event.headers.origin || event.headers.Origin;
@@ -21,9 +21,8 @@ export async function handler(event) {
 
         // Submission IDs are UUIDs (see submissions table + record_and_increment_view RPC).
         // The previous Number() check rejected every real ID with 400 (#78).
-        const UUID_REGEX = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
         const rawId = typeof payload.submissionId === 'string' ? payload.submissionId.trim() : '';
-        const submissionId = UUID_REGEX.test(rawId) ? rawId.toLowerCase() : null;
+        const submissionId = isUuid(rawId) ? rawId.toLowerCase() : null;
 
         if (!submissionId) {
             return error(400, 'Invalid submission id', origin);

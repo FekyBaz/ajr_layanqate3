@@ -9,7 +9,8 @@
         "start": "netlify dev",
         "test": "node --test tests/calculateStats.test.js tests/normalizeData.test.js",
         "lint": "eslint . --quiet",
-        "lint:css": "stylelint \"*.css\" \"lib/*.css\""
+        "lint:css": "stylelint \"*.css\" \"lib/*.css\"",
+        "guard:migrations": "node scripts/check-migrations.cjs"
     },
     "dependencies": {
         "@google-analytics/data": "^7.2.0",

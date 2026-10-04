@@ -48,3 +48,14 @@ jobs:
         run: npm install --ignore-scripts
       - name: Lint CSS (physical properties fail the build)
         run: npm run lint:css
+
+  migration-guard:
+    name: Migration Revoke Guard
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+      - name: Every migration function must revoke PUBLIC
+        run: npm run guard:migrations

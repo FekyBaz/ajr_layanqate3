@@ -572,6 +572,16 @@ export function parsePagination(params, options = {}) {
     return { page, limit, from, to: from + limit - 1 };
 }
 
+const UUID_REGEX = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
+
+/**
+ * Strict UUID check for id params (single source, see #140).
+ * Rejects garbage before any DB call (which would 500 on uuid columns).
+ */
+export function isUuid(value) {
+    return typeof value === 'string' && UUID_REGEX.test(value.trim());
+}
+
 
 // ═══════════════════════════════════════════════════════════════════════════
 // Phase 3: Legacy Hub Helpers

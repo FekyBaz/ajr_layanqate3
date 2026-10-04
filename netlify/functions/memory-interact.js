@@ -11,6 +11,7 @@ import {
     error,
     handleOptions,
     hashIP,
+    isUuid,
     getClientIP,
     logger,
 } from './utils/shared.js';
@@ -42,8 +43,8 @@ export async function handler(event, context) {
 
         const { memory_id, interaction_type } = body;
 
-        // Validate memory_id
-        if (!memory_id || typeof memory_id !== 'string') {
+        // Validate memory_id (strict UUID — the RPC column rejects anything else)
+        if (!isUuid(memory_id)) {
             return error(400, 'معرف الصفحة مطلوب', origin);
         }
 
