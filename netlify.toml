@@ -7,6 +7,10 @@
   publish = "/"
   functions = "netlify/functions"
 
+[build.environment]
+  # Pin the runtime to match .nvmrc and CI (Node 20)
+  NODE_VERSION = "20"
+
 # ═══════════════════════════════════════════════════════════════════════════
 # Functions Configuration
 # ═══════════════════════════════════════════════════════════════════════════
