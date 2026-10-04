@@ -520,10 +520,22 @@ export async function cleanupRateLimits() {
 // Get Client IP
 // ═══════════════════════════════════════════════════════════════════════════
 
+/**
+ * Client IP for rate limiting and abuse review (#132).
+ *
+ * Trust order matters: X-Forwarded-For's leftmost entry (and x-real-ip /
+ * client-ip) are client-influenced and trivially rotated to defeat
+ * per-IP buckets. On Netlify, x-nf-client-connection-ip is set by the
+ * CDN edge and cannot be spoofed, so it wins whenever present.
+ * Local `netlify dev` does not set it — the legacy headers remain
+ * as the local-development fallback.
+ */
 export function getClientIP(event) {
-    return event.headers['x-forwarded-for']?.split(',')[0]?.trim() ||
-        event.headers['x-real-ip'] ||
-        event.headers['client-ip'] ||
+    const headers = event.headers || {};
+    return headers['x-nf-client-connection-ip']?.trim() ||
+        headers['x-forwarded-for']?.split(',')[0]?.trim() ||
+        headers['x-real-ip'] ||
+        headers['client-ip'] ||
         'unknown';
 }
 
