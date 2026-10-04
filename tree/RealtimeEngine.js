@@ -13,9 +13,10 @@ export class RealtimeEngine {
     }
 
     /**
-     * Start background stats sync polling loop
+     * Start background stats sync polling loop (idempotent).
      */
     start() {
+        if (this.pollInterval) return;
         this.pollInterval = setInterval(() => {
             this.syncStats();
         }, 30000);
@@ -29,23 +30,26 @@ export class RealtimeEngine {
     stop() {
         if (this.pollInterval) {
             clearInterval(this.pollInterval);
+            this.pollInterval = null;
         }
     }
 
     /**
-     * Silent statistics polling from netlify serverless functions
+     * Silent statistics polling from netlify serverless functions.
+     * Skipped while the tab is hidden (belt-and-braces alongside
+     * the TreeView visibility handling, see #147).
      */
     async syncStats() {
         try {
+            if (typeof document !== 'undefined' && document.hidden) return;
             const response = await fetch('/.netlify/functions/community-submissions?page=1&limit=1&surface=community');
             if (response.ok) {
                 const result = await response.json();
                 if (result.success && result.stats) {
                     const totalApproved = result.pagination?.total || result.stats.totalApproved || 0;
                     const totalShares = result.stats.totalPostCount || 0;
-                    
+
                     this.state.update(totalApproved, totalShares);
-                    console.debug('[TreeRealtime] Dynamic growth sync success:', { totalApproved, totalShares });
                 }
             }
         } catch (err) {
