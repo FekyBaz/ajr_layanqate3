@@ -52,8 +52,19 @@ export class TreeView {
         // Start animation loop
         this.startLoop();
 
-        // Start background statistics sync polling
+        // Start background statistics sync polling (paused while hidden, see below)
         this.realtime.start();
+
+        // Pause background sync when the tab is hidden to save battery and
+        // backend load; resume (with an immediate sync) when visible (#147).
+        document.addEventListener('visibilitychange', () => {
+            if (document.hidden) {
+                this.realtime.stop();
+            } else {
+                this.realtime.start();
+            }
+        });
+        window.addEventListener('pagehide', () => this.realtime.stop());
         
         // Publish external Global API to window
         this.publishAPI();
