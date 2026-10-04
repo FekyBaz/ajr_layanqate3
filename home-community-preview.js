@@ -19,6 +19,12 @@
 
     const HOME_PREVIEW_SCOPE_CLASS = 'home-community-preview';
 
+    // Timeout-bounded fetch (lib/fetch-utils.js when loaded, see #145).
+    function timedFetch(url, options) {
+        if (globalThis.FetchUtils) return globalThis.FetchUtils.fetchWithTimeout(url, options);
+        return fetch(url, options);
+    }
+
     function sanitizeRefValue(value) {
         if (typeof value !== 'string') return null;
         const normalized = value.trim().toLowerCase();
@@ -155,7 +161,7 @@
 
         try {
             const params = new URLSearchParams({ page: '1', type: 'all', sort: 'latest', limit: '3', surface: 'homepage_preview' });
-            const response = await fetch(`${API_ENDPOINT}?${params.toString()}`, {
+            const response = await timedFetch(`${API_ENDPOINT}?${params.toString()}`, {
                 headers: {
                     'x-ref-source': refSource,
                 },

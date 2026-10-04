@@ -78,6 +78,17 @@ function readSupabaseUrl(errors) {
     return url;
 }
 
+function readTimezone(warnings) {
+    const raw = readString('TIMEZONE').trim() || 'Asia/Gaza';
+    try {
+        new Intl.DateTimeFormat('en-CA', { timeZone: raw });
+        return raw;
+    } catch {
+        warnings.push(`TIMEZONE=${JSON.stringify(raw)} is not a valid IANA name; using "Asia/Gaza"`);
+        return 'Asia/Gaza';
+    }
+}
+
 function buildConfig() {
     const errors = [];
     const warnings = [];
@@ -121,6 +132,7 @@ function buildConfig() {
         frontendUrl: readString('FRONTEND_URL').trim(),
         allowedOrigins: readString('ALLOWED_ORIGINS'),
         netlifySiteName: readString('NETLIFY_SITE_NAME').trim(),
+        siteTimezone: readTimezone(warnings),
 
         rateLimitWindowHours: readInt('RATE_LIMIT_WINDOW', PRODUCTION_DEFAULTS.rateLimitWindowHours, warnings),
         rateLimitMax: readInt('RATE_LIMIT_MAX', PRODUCTION_DEFAULTS.rateLimitMax, warnings),

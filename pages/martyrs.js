@@ -326,15 +326,21 @@ function renderFatihaCount(count = currentFatihaCount) {
   requestAnimationFrame(() => fatihaCount.classList.add('pulse'));
 }
 
+function timedFetch(url, options) {
+  // Timeout-bounded fetch (lib/fetch-utils.js when loaded, see #145).
+  if (globalThis.FetchUtils) return globalThis.FetchUtils.fetchWithTimeout(url, options);
+  return fetch(url, options);
+}
+
 async function fetchGlobalFatihaCount() {
-  const response = await fetch(FATIHA_COUNTER_ENDPOINT, { cache: 'no-store' });
+  const response = await timedFetch(FATIHA_COUNTER_ENDPOINT, { cache: 'no-store' });
   if (!response.ok) throw new Error('تعذر تحميل عداد الفاتحة العام.');
   const payload = await response.json();
   return Number(payload?.count) || 0;
 }
 
 async function incrementGlobalFatihaCount() {
-  const response = await fetch(FATIHA_COUNTER_ENDPOINT, { method: 'POST' });
+  const response = await timedFetch(FATIHA_COUNTER_ENDPOINT, { method: 'POST' });
   if (!response.ok) throw new Error('تعذر تحديث عداد الفاتحة العام.');
   const payload = await response.json();
   return Number(payload?.count) || currentFatihaCount;

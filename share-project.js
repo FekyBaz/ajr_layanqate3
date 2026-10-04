@@ -54,7 +54,11 @@
 
     async function trackShare(platform) {
         try {
-            await fetch(TRACK_ENDPOINT, {
+            // Timeout-bounded (lib/fetch-utils.js when loaded, see #145).
+            const doFetch = globalThis.FetchUtils
+                ? globalThis.FetchUtils.fetchWithTimeout
+                : fetch;
+            await doFetch(TRACK_ENDPOINT, {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({ platform }),

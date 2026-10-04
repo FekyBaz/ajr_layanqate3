@@ -380,10 +380,18 @@ export function validateContentType(contentType) {
 // ═══════════════════════════════════════════════════════════════════════════
 
 /**
- * Returns YYYY-MM-DD in UTC (Single Source of Truth)
+ * Returns YYYY-MM-DD in the site timezone (Single Source of Truth, see #146).
+ * The audience is Gaza-centric, so the "daily" feature/goal boundary follows
+ * Asia/Gaza local midnight — not UTC midnight (which users felt at 2-3 AM).
+ * Overridable with the TIMEZONE env var (validated IANA name).
  */
 export function getTodayDateKey() {
-    return new Date().toISOString().slice(0, 10);
+    return new Intl.DateTimeFormat('en-CA', {
+        timeZone: config.siteTimezone,
+        year: 'numeric',
+        month: '2-digit',
+        day: '2-digit',
+    }).format(new Date());
 }
 
 // ═══════════════════════════════════════════════════════════════════════════

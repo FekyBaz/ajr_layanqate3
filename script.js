@@ -51,6 +51,12 @@
     // Guard: only run form logic on pages that have the submission form
     if (!form) return;
 
+    // Timeout-bounded fetch (lib/fetch-utils.js when loaded, see #145).
+    function timedFetch(url, options) {
+        if (globalThis.FetchUtils) return globalThis.FetchUtils.fetchWithTimeout(url, options);
+        return fetch(url, options);
+    }
+
     // ═══════════════════════════════════════════════════════════════════════
     // Constants
     // ═══════════════════════════════════════════════════════════════════════
@@ -271,7 +277,7 @@
     async function submitToAPI(data) {
         const url = `${CONFIG.API_BASE_URL}${CONFIG.API_ENDPOINT}`;
 
-        const response = await fetch(url, {
+        const response = await timedFetch(url, {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json',

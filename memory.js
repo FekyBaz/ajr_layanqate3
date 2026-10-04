@@ -78,13 +78,19 @@
     // ═══════════════════════════════════════════════════════════════════
     // API Helpers
     // ═══════════════════════════════════════════════════════════════════
+    // Timeout-bounded fetch (lib/fetch-utils.js when loaded, see #145).
+    function timedFetch(url, options) {
+        if (globalThis.FetchUtils) return globalThis.FetchUtils.fetchWithTimeout(url, options);
+        return fetch(url, options);
+    }
+
     async function fetchMemory(slug) {
-        const response = await fetch(`${API_BASE}/api/memory/view?slug=${encodeURIComponent(slug)}`);
+        const response = await timedFetch(`${API_BASE}/api/memory/view?slug=${encodeURIComponent(slug)}`);
         return response.json();
     }
 
     async function sendInteraction(memoryId, interactionType) {
-        const response = await fetch(`${API_BASE}/api/memory/interact`, {
+        const response = await timedFetch(`${API_BASE}/api/memory/interact`, {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({
@@ -714,7 +720,7 @@
             btnSubmit.textContent = 'جاري إرسال طلبك...';
 
             try {
-                const response = await fetch(`${API_BASE}/api/memory/update-propose`, {
+                const response = await timedFetch(`${API_BASE}/api/memory/update-propose`, {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify({
