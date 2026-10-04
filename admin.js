@@ -117,7 +117,8 @@
         lockoutUntil = 0;
         authExpiresAt = Date.now() + AUTH_TIMEOUT_MS;
         sessionStorage.setItem('adminSession', JSON.stringify({ expiresAt: authExpiresAt }));
-        sessionStorage.setItem('adminKey', adminKey);
+        // NOTE: the key itself is NEVER persisted (memory only). Any injected
+        // script could otherwise read it from storage and own the admin API.
     }
 
     function isSessionExpired() {
@@ -189,7 +190,6 @@
         failedAttempts = 0;
         lockoutUntil = 0;
         sessionStorage.removeItem('adminSession');
-        sessionStorage.removeItem('adminKey');
         loginSection.classList.remove('hidden');
         adminSection.classList.add('hidden');
         apiKeyInput.value = '';
@@ -311,6 +311,22 @@
 
     function escapeAttr(value) {
         return EscapeAttrLib.escapeAttr(value);
+    }
+
+    /**
+     * Render a user-submitted URL as a link only when its scheme is safe
+     * (http/https). Anything else (javascript:, data:, ...) renders as
+     * inert text so a stored proposal can never execute in an admin
+     * session — where sessionStorage used to hold the admin key (#131).
+     */
+    function safeReviewLink(url, label) {
+        const text = escapeHtml(label || url);
+        if (EscapeAttrLib.isSafeHttpUrl
+            ? EscapeAttrLib.isSafeHttpUrl(url, { allowRelative: true, allowDataImage: false })
+            : /^https?:/i.test(String(url || '').trim())) {
+            return `<a href="${escapeAttr(url)}" target="_blank" rel="noopener noreferrer">${text}</a>`;
+        }
+        return `<span>${text}</span>`;
     }
 
     function renderSubmissions(submissions) {
@@ -495,7 +511,7 @@
             if (Array.isArray(mem.external_links) && mem.external_links.length > 0) {
                 linksHtml = '<div class="admin-links-box"><strong>روابط الصدقة:</strong><ul>' +
                     mem.external_links.map(l =>
-                        `<li><a href="${escapeHtml(l.url)}" target="_blank" rel="noopener noreferrer">${escapeHtml(l.title || l.url)}</a></li>`
+                        `<li>${safeReviewLink(l.url, l.title || l.url)}</li>`
                     ).join('') +
                     '</ul></div>';
             }
@@ -778,7 +794,7 @@
                                         <div class="diff-links-current">
                                             <ul class="diff-links-list">
                                                 ${(memory.external_links || []).length > 0 
-                                                     ? memory.external_links.map(l => `<li><a href="${escapeHtml(l.url)}" target="_blank">${escapeHtml(l.title || l.url)}</a></li>`).join('')
+                                                     ? memory.external_links.map(l => `<li>${safeReviewLink(l.url, l.title || l.url)}</li>`).join('')
                                                     : 'لا يوجد روابط'
                                                 }
                                             </ul>
@@ -789,7 +805,7 @@
                                         <div class="diff-links-proposed">
                                             <ul class="diff-links-list">
                                                 ${(prop.external_links || []).length > 0 
-                                                     ? prop.external_links.map(l => `<li><a href="${escapeHtml(l.url)}" target="_blank">${escapeHtml(l.title || l.url)}</a></li>`).join('')
+                                                     ? prop.external_links.map(l => `<li>${safeReviewLink(l.url, l.title || l.url)}</li>`).join('')
                                                     : 'لا يوجد روابط'
                                                 }
                                             </ul>
