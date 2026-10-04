@@ -730,6 +730,8 @@ function initializeReturnMemory() {
 }
 
 async function fetchSubmissions() {
+    // Ignore stale responses when filters/pages change mid-flight.
+    const seq = ++fetchSubmissions.seq;
     elements.stateMessage.textContent = 'جارٍ تحميل المشاركات...';
     elements.stateMessage.hidden = false;
     elements.submissionsContainer.innerHTML = '';
@@ -755,26 +757,21 @@ async function fetchSubmissions() {
 
         const result = await response.json();
 
+        if (seq !== fetchSubmissions.seq) return; // superseded
+
         if (!result.success) {
             throw new Error(result.message || 'Unexpected API response');
         }
 
 
-        console.debug('[community] response payload', {
-            submissions: Array.isArray(result.submissions) ? result.submissions.length : 0,
-            total: result.pagination?.total,
-            totalPages: result.pagination?.totalPages,
-            page: result.pagination?.page,
-            type: state.type,
-            sort: state.sort,
-        });
-
         renderResponse(result);
     } catch (err) {
+        if (seq !== fetchSubmissions.seq) return; // superseded, keep newer state
         elements.stateMessage.textContent = 'تعذر تحميل المشاركات حاليًا. حاول مرة أخرى لاحقًا.';
         elements.pagination.hidden = true;
     }
 }
+fetchSubmissions.seq = 0;
 
 function renderStats(stats = {}, pagination = {}) {
     const totalApproved = stats.totalApproved || pagination.total || 0;

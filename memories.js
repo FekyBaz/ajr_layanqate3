@@ -82,6 +82,8 @@
     }
 
     async function loadMemories(page = 1) {
+        // Ignore stale responses when search/page changes mid-flight.
+        const seq = ++loadMemories.seq;
         stateEl.hidden = false;
         stateEl.innerHTML = '<span class="spinner" aria-hidden="true"></span> جارٍ تحميل الصفحات...';
         listEl.hidden = true;
@@ -95,6 +97,8 @@
 
             const response = await timedFetch(`${API_BASE}/api/memories/all?${queryParams}`);
             const result = await response.json();
+
+            if (seq !== loadMemories.seq) return; // superseded
 
             if (!response.ok || !result.success) {
                 throw new Error(result.message || 'تعذر تحميل الصفحات');
@@ -134,11 +138,13 @@
             paginationEl.hidden = (pagination.totalPages || 1) <= 1;
 
         } catch (err) {
+            if (seq !== loadMemories.seq) return; // superseded, keep newer state
             stateEl.hidden = false;
             stateEl.textContent = 'حدث خطأ أثناء تحميل الصفحات. حاول مرة أخرى لاحقًا.';
             paginationEl.hidden = true;
         }
     }
+    loadMemories.seq = 0;
 
     if (searchInput) {
         searchInput.addEventListener('input', (e) => {
