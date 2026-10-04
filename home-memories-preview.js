@@ -12,6 +12,12 @@
     // Single source: lib/config.js (loaded before this script)
     const API_BASE = window.AppConfig.API_BASE;
 
+    // Timeout-bounded fetch (lib/fetch-utils.js when loaded, see #145).
+    function timedFetch(url, options) {
+        if (globalThis.FetchUtils) return globalThis.FetchUtils.fetchWithTimeout(url, options);
+        return fetch(url, options);
+    }
+
     const listEl = document.getElementById('recentMemoriesList');
     const emptyEl = document.getElementById('recentMemoriesEmpty');
 
@@ -19,7 +25,7 @@
 
     async function loadRecentMemories() {
         try {
-            const response = await fetch(`${API_BASE}/api/memories/recent`);
+            const response = await timedFetch(`${API_BASE}/api/memories/recent`);
             const result = await response.json();
 
             if (!result.success || !result.data || result.data.length === 0) {

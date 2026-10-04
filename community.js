@@ -5,6 +5,13 @@ const VIEW_DEBOUNCE_MS = 60_000;
 const SHARE_TRACK_ENDPOINT = '/.netlify/functions/community-share-track';
 const SESSION_VIEW_KEY = 'ajr_community_view_count';
 const SESSION_POPUP_KEY = 'ajr_community_cta_shown';
+
+// Timeout-bounded fetch (lib/fetch-utils.js when loaded, see #145).
+function timedFetch(url, options) {
+    if (globalThis.FetchUtils) return globalThis.FetchUtils.fetchWithTimeout(url, options);
+    return fetch(url, options);
+}
+
 const STORAGE_KEYS = {
     savedIds: 'ajr_community_saved_ids',
     focusMode: 'ajr_community_focus_mode',
@@ -506,7 +513,7 @@ async function copyToClipboard(text) {
 
 async function trackShare(platform, submissionId) {
     try {
-        const response = await fetch(SHARE_TRACK_ENDPOINT, {
+        const response = await timedFetch(SHARE_TRACK_ENDPOINT, {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json',
@@ -595,7 +602,7 @@ async function incrementView(submissionId) {
     incrementSessionViewCount();
 
     try {
-        await fetch(VIEW_ENDPOINT, {
+        await timedFetch(VIEW_ENDPOINT, {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json',
@@ -736,7 +743,7 @@ async function fetchSubmissions() {
     });
 
     try {
-        const response = await fetch(`${API_ENDPOINT}?${query.toString()}`, {
+        const response = await timedFetch(`${API_ENDPOINT}?${query.toString()}`, {
             headers: {
                 'x-ref-source': state.refSource,
             },
@@ -1071,7 +1078,7 @@ function setupFeedbackForm() {
         showToast();
         
         try {
-            const response = await fetch('/.netlify/functions/contact', {
+            const response = await timedFetch('/.netlify/functions/contact', {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',

@@ -17,6 +17,12 @@
 
     if (!form) return;
 
+    // Timeout-bounded fetch (lib/fetch-utils.js when loaded, see #145).
+    function timedFetch(url, options) {
+        if (globalThis.FetchUtils) return globalThis.FetchUtils.fetchWithTimeout(url, options);
+        return fetch(url, options);
+    }
+
     const EMAIL_PATTERN = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 
     function setFieldError(input, errorEl, message) {
@@ -83,7 +89,7 @@
         submitBtn.textContent = 'جاري الإرسال...';
 
         try {
-            const response = await fetch(`${API_BASE}/api/contact`, {
+            const response = await timedFetch(`${API_BASE}/api/contact`, {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({

@@ -62,6 +62,12 @@
     // ═══════════════════════════════════════════════════════════════════
     // API Helpers
     // ═══════════════════════════════════════════════════════════════════
+    // Timeout-bounded fetch (lib/fetch-utils.js when loaded, see #145).
+    function timedFetch(url, options) {
+        if (globalThis.FetchUtils) return globalThis.FetchUtils.fetchWithTimeout(url, options);
+        return fetch(url, options);
+    }
+
     async function apiRequest(endpoint, method = 'GET', body = null) {
         if (!adminKey) {
             logout();
@@ -85,7 +91,7 @@
             options.body = JSON.stringify(body);
         }
 
-        const response = await fetch(`${API_BASE}${endpoint}`, options);
+        const response = await timedFetch(`${API_BASE}${endpoint}`, options);
         return response.json();
     }
 

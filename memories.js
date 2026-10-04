@@ -4,6 +4,12 @@
     // Single source: lib/config.js (loaded before this script)
     const API_BASE = window.AppConfig.API_BASE;
 
+    // Timeout-bounded fetch (lib/fetch-utils.js when loaded, see #145).
+    function timedFetch(url, options) {
+        if (globalThis.FetchUtils) return globalThis.FetchUtils.fetchWithTimeout(url, options);
+        return fetch(url, options);
+    }
+
     const stateEl = document.getElementById('memoriesState');
     const listEl = document.getElementById('memoriesList');
     const paginationEl = document.getElementById('memoriesPagination');
@@ -87,7 +93,7 @@
                 search: currentSearch
             });
 
-            const response = await fetch(`${API_BASE}/api/memories/all?${queryParams}`);
+            const response = await timedFetch(`${API_BASE}/api/memories/all?${queryParams}`);
             const result = await response.json();
 
             if (!response.ok || !result.success) {

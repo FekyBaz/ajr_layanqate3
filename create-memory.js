@@ -46,6 +46,12 @@
     const submitBtn = document.getElementById('submit-btn');
     const formStatus = document.getElementById('form-status');
 
+    // Timeout-bounded fetch (lib/fetch-utils.js when loaded, see #145).
+    function timedFetch(url, options) {
+        if (globalThis.FetchUtils) return globalThis.FetchUtils.fetchWithTimeout(url, options);
+        return fetch(url, options);
+    }
+
     // Counters & Errors
     const elements = {
         name: { input: nameInput, count: document.getElementById('name-char-count'), error: document.getElementById('name-error'), max: 100 },
@@ -255,7 +261,7 @@
         submitBtn.textContent = 'جاري الإرسال...';
 
         try {
-            const response = await fetch(`${API_BASE}/api/memory/create`, {
+            const response = await timedFetch(`${API_BASE}/api/memory/create`, {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({
