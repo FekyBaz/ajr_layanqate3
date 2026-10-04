@@ -11,6 +11,7 @@ import {
     error,
     handleOptions,
     validateAdminWithRateLimit,
+    isUuid,
     STATUS,
     logger,
     sanitizeLegacyText,
@@ -50,11 +51,12 @@ export async function handler(event, context) {
 
         const { id, biography, good_traits, ongoing_charity, external_links, story } = body;
 
-        if (!id || typeof id !== 'string') {
+        if (!isUuid(id)) {
             return error(400, 'معرف الاقتراح مطلوب', origin);
         }
 
-        // Fetch current proposal state
+        // Fetch current proposal state for merging (read-only; the RPC
+        // re-checks Pending under lock, so a concurrent review 404s cleanly).
         const { data: proposal, error: fetchError } = await supabaseAdmin
             .from('memory_updates')
             .select('*')
@@ -96,50 +98,37 @@ export async function handler(event, context) {
             return error(400, linksResult.error, origin);
         }
 
-        // 1. Update memory page content
-        const { error: memoryUpdateError } = await supabaseAdmin
-            .from('memories')
-            .update({
-                biography: bioResult.sanitized,
-                good_traits: traitsResult.sanitized,
-                ongoing_charity: charityResult.sanitized,
-                external_links: linksResult.links,
-                story: storyResult.sanitized,
-                last_activity_at: new Date().toISOString()
-            })
-            .eq('id', proposal.memory_id);
+        // Single atomic RPC merges both writes in one transaction (#156).
+        // A concurrent review resolves to 404 via the Pending re-check.
+        const { data: result, error: rpcError } = await supabaseAdmin
+            .rpc('approve_memory_update', {
+                p_proposal_id: id,
+                p_biography: bioResult.sanitized,
+                p_good_traits: traitsResult.sanitized,
+                p_ongoing_charity: charityResult.sanitized,
+                p_external_links: linksResult.links,
+                p_story: storyResult.sanitized,
+            });
 
-        if (memoryUpdateError) {
-            logger.error('admin-memory-update-approve memories table update error:', memoryUpdateError.message);
-            return error(500, 'فشل تحديث صفحة المتوفى في قاعدة البيانات', origin, memoryUpdateError.message);
+        if (rpcError) {
+            logger.error('admin-memory-update-approve RPC error:', rpcError.message);
+            return error(500, 'فشل تحديث صفحة المتوفى في قاعدة البيانات', origin, rpcError.message);
         }
 
-        // 2. Mark proposal as Approved and save the final merged values (e.g. if the admin modified them)
-        const { error: proposalUpdateError } = await supabaseAdmin
-            .from('memory_updates')
-            .update({
-                status: STATUS.APPROVED,
-                reviewed_at: new Date().toISOString(),
-                biography: bioResult.sanitized,
-                good_traits: traitsResult.sanitized,
-                ongoing_charity: charityResult.sanitized,
-                external_links: linksResult.links,
-                story: storyResult.sanitized
-            })
-            .eq('id', id);
-
-        if (proposalUpdateError) {
-            logger.error('admin-memory-update-approve memory_updates table update error:', proposalUpdateError.message);
-            // This is non-fatal for memories table but we should log it
-            return error(500, 'تم تحديث الصفحة ولكن فشل تحديث حالة الاقتراح', origin, proposalUpdateError.message);
+        if (!result || result.success !== true) {
+            if (result && result.reason === 'not_found_or_reviewed') {
+                return error(404, 'الاقتراح غير موجود أو تم البت فيه مسبقًا', origin);
+            }
+            logger.error('admin-memory-update-approve RPC rejected:', JSON.stringify(result));
+            return error(500, 'فشل تحديث صفحة المتوفى في قاعدة البيانات', origin);
         }
 
-        logger.info(`[admin] Memory update approved and merged successfully. Proposal: ${id}, Memory: ${proposal.memory_id}`);
+        logger.info(`[admin] Memory update approved and merged successfully. Proposal: ${id}, Memory: ${result.memory_id}`);
 
         return success({
             message: 'تم اعتماد ودمج التغييرات المقترحة بنجاح.',
             proposal_id: id,
-            memory_id: proposal.memory_id
+            memory_id: result.memory_id
         }, origin);
 
     } catch (err) {
