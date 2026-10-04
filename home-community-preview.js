@@ -178,12 +178,6 @@
             const total = Number(result.pagination?.total) || 0;
             renderDailyFeature(result.dailyFeature);
 
-            console.debug('[home-preview] payload shape', {
-                submissions: submissions.length,
-                total,
-                page: result.pagination?.page,
-            });
-
             elements.skeleton.hidden = true;
 
             if (newToday > 0) {
