@@ -12,6 +12,7 @@ import {
     handleOptions,
     logger,
     STATUS,
+    parsePagination,
     escapeIlikePattern,
 } from './utils/shared.js';
 
@@ -30,18 +31,12 @@ export async function handler(event, context) {
     }
 
     try {
-        const rawPage = Number.parseInt(event.queryStringParameters?.page || '1', 10);
-        const rawPageSize = Number.parseInt(event.queryStringParameters?.pageSize || `${DEFAULT_PAGE_SIZE}`, 10);
+        const { page, limit, from, to } = parsePagination(event.queryStringParameters, {
+            defaultLimit: DEFAULT_PAGE_SIZE,
+            maxLimit: MAX_PAGE_SIZE,
+        });
         // Cap search length and escape LIKE wildcards so % _ \ match literally (#78)
         const searchQuery = (event.queryStringParameters?.search?.trim() || '').slice(0, 50);
-
-        const page = Number.isNaN(rawPage) || rawPage < 1 ? 1 : rawPage;
-        const pageSize = Number.isNaN(rawPageSize) || rawPageSize < 1
-            ? DEFAULT_PAGE_SIZE
-            : Math.min(rawPageSize, MAX_PAGE_SIZE);
-
-        const from = (page - 1) * pageSize;
-        const to = from + pageSize - 1;
 
         // RLS enforces status = 'Approved' rows for public client
         // Explicitly filter by approved status as defense-in-depth security measure
@@ -66,9 +61,9 @@ export async function handler(event, context) {
             data: data || [],
             pagination: {
                 page,
-                pageSize,
+                pageSize: limit,
                 total: count || 0,
-                totalPages: Math.max(1, Math.ceil((count || 0) / pageSize)),
+                totalPages: Math.max(1, Math.ceil((count || 0) / limit)),
             },
         }, origin, {
             'Cache-Control': 'public, max-age=60, stale-while-revalidate=300',
