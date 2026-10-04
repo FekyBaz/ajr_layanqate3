@@ -14,6 +14,7 @@ import {
     sanitizeLegacyText,
     sanitizeExternalLinks,
     hashIP,
+    isUuid,
     getClientIP,
     logger,
 } from './utils/shared.js';
@@ -51,8 +52,8 @@ export async function handler(event, context) {
             story
         } = body;
 
-        // Validate memory_id (required uuid)
-        if (!memory_id || typeof memory_id !== 'string' || !/^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(memory_id)) {
+        // Validate memory_id (required uuid, shared helper)
+        if (!isUuid(memory_id)) {
             return error(400, 'معرف الصفحة غير صالح', origin);
         }
 
