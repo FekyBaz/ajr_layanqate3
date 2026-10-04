@@ -83,8 +83,11 @@ export class PosterEngine {
         const typeParam = params.get('type');
 
         if (textParam) {
-            // Unescape, decode, and trim preloaded content
-            this.text = decodeURIComponent(textParam).trim();
+            // URLSearchParams already decodes; a second decodeURIComponent
+            // would throw on literal % and kill init. Cap to the textarea
+            // maxlength (JS .value bypasses the HTML attribute).
+            const maxLength = this.textInput.maxLength > 0 ? this.textInput.maxLength : 320;
+            this.text = textParam.trim().slice(0, maxLength);
             this.textInput.value = this.text;
             this.charCountSpan.textContent = this.text.length;
         } else {
