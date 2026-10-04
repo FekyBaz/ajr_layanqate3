@@ -64,7 +64,11 @@
         // Try path-based: /memory/slug-here
         const parts = window.location.pathname.split('/').filter(Boolean);
         if (parts.length >= 2 && parts[0] === 'memory') {
-            return decodeURIComponent(parts[1]);
+            try {
+                return decodeURIComponent(parts[1]);
+            } catch {
+                return null; // malformed escape sequence → invalid slug page
+            }
         }
         // Fallback: ?slug=slug-here (direct URL or query-based access)
         const params = new URLSearchParams(window.location.search);
