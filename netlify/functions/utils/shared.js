@@ -558,13 +558,16 @@ export function getClientIP(event) {
 /**
  * Parse and clamp page/limit query params into a PostgREST range.
  * Accepts a plain object (event.queryStringParameters) or URLSearchParams.
+ * Page is capped (default 1000) because Postgres walks OFFSET rows one by
+ * one — an unbounded page turns into a cheap full-table-scan DoS (#157).
  * @param {Object|URLSearchParams} params
- * @param {Object} [options] { defaultLimit: 24, maxLimit: 60 }
+ * @param {Object} [options] { defaultLimit: 24, maxLimit: 60, maxPage: 1000 }
  * @returns {{ page: number, limit: number, from: number, to: number }}
  */
 export function parsePagination(params, options = {}) {
     const defaultLimit = options.defaultLimit || 24;
     const maxLimit = options.maxLimit || 60;
+    const maxPage = options.maxPage || 1000;
     const get = (key) => {
         if (!params) return null;
         if (typeof params.get === 'function') return params.get(key);
@@ -572,7 +575,7 @@ export function parsePagination(params, options = {}) {
     };
     const rawPage = Number.parseInt(get('page'), 10);
     const rawLimit = Number.parseInt(get('limit') ?? get('pageSize'), 10);
-    const page = Number.isNaN(rawPage) || rawPage < 1 ? 1 : rawPage;
+    const page = Number.isNaN(rawPage) || rawPage < 1 ? 1 : Math.min(rawPage, maxPage);
     const limit = Number.isNaN(rawLimit) || rawLimit < 1
         ? defaultLimit
         : Math.min(rawLimit, maxLimit);
