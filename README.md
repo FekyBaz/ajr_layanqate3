@@ -155,6 +155,10 @@ Security-sensitive material is intentionally excluded from the example configura
 
 If you discover a vulnerability, **do not open a public issue**. Follow [SECURITY.md](./SECURITY.md).
 
+## Roadmap
+
+See [ROADMAP.md](./ROADMAP.md) for planned work across security, content provenance, testing, accessibility, reusable public content, and contributor onboarding. The roadmap is directional; check open Issues before beginning work.
+
 ## Contributing
 
 Pull requests are welcome. Read [CONTRIBUTING.md](./CONTRIBUTING.md) before contributing.
