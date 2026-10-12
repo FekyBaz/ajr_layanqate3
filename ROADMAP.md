@@ -15,6 +15,7 @@ This roadmap describes candidate directions for the project. It is not a promise
 - [ ] Record source/reference fields where appropriate, with clear distinctions between verified source text, editorial notes, and user-submitted content.
 - [ ] Document a review workflow for references and corrections, including how disputed or unverifiable submissions are handled.
 - [ ] Add focused tests for source/reference display and validation before introducing schema changes.
+- [ ] **AI-assisted reference suggestions:** evaluate a reviewer-first workflow to suggest Qur'anic verse references first, then hadith takhrij and adhkar references where reliable sources are available. Show provenance and uncertainty; automated suggestions must never be treated as final verification. Human review remains required. See [issue #172](https://github.com/FekyBaz/ajr_layanqate3/issues/172).
 
 ### P1 — Easier first contributions
 - [ ] Label small, self-contained tasks as `good first issue` and explain the expected outcome and acceptance criteria.
