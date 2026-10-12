@@ -23,12 +23,19 @@ This roadmap describes candidate directions for the project. It is not a promise
 - [ ] Provide a safe local test setup and synthetic/sample data that contains no production data or secrets.
 - [ ] Add a lightweight PR smoke-test checklist and document maintainer review expectations.
 
-### P2 — API and reusable content
+### P2 — Helpful tools and lasting impact
+- [ ] **Living good works:** explain practical ways to build a lasting positive impact during one's lifetime and offer clear ways to contribute to the project, with reviewed religious sourcing. See [issue #173](https://github.com/FekyBaz/ajr_layanqate3/issues/173).
+- [ ] **Daily tools:** explore one small MVP from daily worship/routine checklists, self-reflection, and Ramadan planning. Reuse existing adhkar/tasbeeh and community functionality where possible; define privacy-preserving defaults. See [issue #174](https://github.com/FekyBaz/ajr_layanqate3/issues/174).
+- [ ] **Qur'anic and Islamic learning resources:** curate a reviewed directory of trusted organizations/resources, with official links, inclusion criteria, and a last-reviewed date. See [issue #175](https://github.com/FekyBaz/ajr_layanqate3/issues/175).
+
+### P2 — Community designs and reusable content
+- [ ] Build on the existing Community page by evaluating an opt-in reusable design library. Explicitly distinguish permission to display from permission to download, modify, or redistribute, and preserve creator attribution. See [issue #176](https://github.com/FekyBaz/ajr_layanqate3/issues/176).
 - [ ] Inventory the current endpoints and their data contracts before proposing a public API.
 - [ ] Evaluate a documented, read-only JSON export for approved public content, with provenance, license, update cadence, and privacy boundaries clearly stated.
 - [ ] Define rate limits, versioning, caching, and compatibility expectations before any public API is released.
 
-### P2 — Product improvements
+### P2 — Reach, accessibility, and product quality
+- [ ] Share meaningful project updates in relevant communities/platforms where the intended audience is active, and measure visits/contributions rather than posting without a feedback loop.
 - [ ] Evaluate improvements to the ongoing-charity/memory experience with attention to consent, privacy, and moderation.
 - [ ] Improve accessibility, responsive layouts, RTL behavior, and usability of content submission and review.
 - [ ] Expand automated coverage for validation, authorization, rate limiting, and important user flows.
