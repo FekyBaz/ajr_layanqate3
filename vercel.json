@@ -1,0 +1,153 @@
+{
+  "$schema": "https://openapi.vercel.sh/vercel.json",
+  "functions": {
+    "api/cron/*.js": {
+      "maxDuration": 30
+    },
+    "api/memory-og/*.js": {
+      "maxDuration": 10,
+      "includeFiles": "memory.html"
+    }
+  },
+  "crons": [
+    {
+      "path": "/api/cron/daily-feature-refresh",
+      "schedule": "0 0 * * *"
+    },
+    {
+      "path": "/api/cron/cleanup-automation",
+      "schedule": "0 3 * * *"
+    }
+  ],
+  "rewrites": [
+    {
+      "source": "/poster",
+      "destination": "/poster.html"
+    },
+    {
+      "source": "/dhikr-generator",
+      "destination": "/poster.html"
+    },
+    {
+      "source": "/admin",
+      "destination": "/admin.html"
+    },
+    {
+      "source": "/analytics",
+      "destination": "/analytics.html"
+    },
+    {
+      "source": "/contact",
+      "destination": "/contact.html"
+    },
+    {
+      "source": "/create-memory",
+      "destination": "/create-memory.html"
+    },
+    {
+      "source": "/memories",
+      "destination": "/memories.html"
+    },
+    {
+      "source": "/martyrs",
+      "destination": "/martyrs.html"
+    },
+    {
+      "source": "/memory/:slug",
+      "destination": "/api/memory-og/:slug"
+    }
+  ],
+  "headers": [
+    {
+      "source": "/(.*)",
+      "headers": [
+        {
+          "key": "X-Frame-Options",
+          "value": "DENY"
+        },
+        {
+          "key": "X-Content-Type-Options",
+          "value": "nosniff"
+        },
+        {
+          "key": "Referrer-Policy",
+          "value": "strict-origin-when-cross-origin"
+        },
+        {
+          "key": "Strict-Transport-Security",
+          "value": "max-age=63072000; includeSubDomains; preload"
+        },
+        {
+          "key": "Cross-Origin-Opener-Policy",
+          "value": "same-origin"
+        },
+        {
+          "key": "Cross-Origin-Resource-Policy",
+          "value": "same-origin"
+        },
+        {
+          "key": "Permissions-Policy",
+          "value": "geolocation=(), microphone=(), camera=(), payment=(), usb=(), magnetometer=(), gyroscope=(), accelerometer=()"
+        },
+        {
+          "key": "Content-Security-Policy",
+          "value": "default-src 'self'; script-src 'self' https://cdn.jsdelivr.net https://www.googletagmanager.com; style-src 'self' https://fonts.googleapis.com; font-src 'self' https://fonts.gstatic.com; img-src 'self' data: https://www.google-analytics.com; connect-src 'self' https://*.supabase.co https://data.techforpalestine.org https://www.google-analytics.com https://*.google-analytics.com; object-src 'none'; frame-ancestors 'none'; base-uri 'self'; form-action 'self'; upgrade-insecure-requests;"
+        }
+      ]
+    },
+    {
+      "source": "/(.*\\.css)",
+      "headers": [
+        {
+          "key": "Cache-Control",
+          "value": "public, no-cache, must-revalidate"
+        }
+      ]
+    },
+    {
+      "source": "/(.*\\.js)",
+      "headers": [
+        {
+          "key": "Cache-Control",
+          "value": "public, no-cache, must-revalidate"
+        }
+      ]
+    },
+    {
+      "source": "/(.*\\.html)",
+      "headers": [
+        {
+          "key": "Cache-Control",
+          "value": "public, max-age=0, must-revalidate"
+        }
+      ]
+    },
+    {
+      "source": "/(.*\\.woff2?)",
+      "headers": [
+        {
+          "key": "Cache-Control",
+          "value": "public, max-age=31536000, immutable"
+        }
+      ]
+    },
+    {
+      "source": "/sw.js",
+      "headers": [
+        {
+          "key": "Cache-Control",
+          "value": "public, max-age=0, must-revalidate"
+        }
+      ]
+    },
+    {
+      "source": "/prototypes/(.*)",
+      "headers": [
+        {
+          "key": "X-Robots-Tag",
+          "value": "noindex, nofollow"
+        }
+      ]
+    }
+  ]
+}

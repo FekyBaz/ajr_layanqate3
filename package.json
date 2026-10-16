@@ -4,10 +4,10 @@
     "description": "أجر لا ينقطع - Endless Reward",
     "type": "module",
     "scripts": {
-        "dev": "netlify dev",
+        "dev": "npx --yes vercel dev",
         "build": "echo 'No build required'",
-        "start": "netlify dev",
-        "test": "node --test tests/calculateStats.test.js tests/normalizeData.test.js",
+        "start": "npx --yes vercel dev",
+        "test": "node --test tests/calculateStats.test.js tests/normalizeData.test.js tests/vercel-adapter.test.js",
         "lint": "eslint . --quiet",
         "lint:css": "stylelint \"*.css\" \"lib/*.css\"",
         "guard:migrations": "node scripts/check-migrations.cjs"

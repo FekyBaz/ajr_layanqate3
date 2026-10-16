@@ -1,90 +1,76 @@
-# Deployment Guide
+# Vercel Deployment Guide
 
-## Supported deployment target
+This migration is intentionally staged. Deploy and validate `feat/vercel-migration` as a Preview first. Keep the current Netlify production deployment available until the Vercel Preview passes the full checklist and the domain is ready to move.
 
-The current repository is configured for **Netlify**. Older Vercel instructions have been removed because they no longer match the active project configuration.
+## 1. Create the Vercel project
 
-## 1. Prepare Supabase
+1. Import `FekyBaz/ajr_layanqate3` from GitHub.
+2. Use the repository root as the Root Directory.
+3. Select the **Other** framework preset (static HTML/CSS/JS plus Vercel Functions).
+4. Use Node.js 20, matching `.nvmrc`.
+5. Do not assign the production domain or switch DNS during initial validation.
+6. Ensure `feat/vercel-migration` creates a Preview deployment. Leave the existing main branch deployment and Netlify site unchanged.
 
-1. Create a Supabase project.
-2. Review the SQL migrations in this repository.
-3. Apply the migrations required by the current application.
-4. Configure Row Level Security according to the application's current data-access model.
-5. Keep the Supabase service-role key server-side only.
+## 2. Configure Preview environment variables
 
-Do not copy credentials from an existing production project into this repository.
+Use a development/staging Supabase project for Preview when possible. Do not point the Preview deployment at a production database until you have reviewed the impact of writes, rate limits, admin actions, and scheduled cleanup.
 
-## 2. Create the Netlify site
-
-Import the GitHub repository into Netlify.
-
-Use the repository's existing `netlify.toml` as the source of deployment configuration. Do not add Vercel-specific configuration unless the deployment architecture is intentionally changed.
-
-## 3. Configure environment variables
-
-Set the required variables in Netlify's environment-variable settings.
-
-At minimum, review:
+Required variables:
 
 - `SUPABASE_URL`
-- `SUPABASE_SERVICE_ROLE_KEY`
-- `SUPABASE_ANON_KEY` (if required by the current functions)
+- `SUPABASE_SERVICE_ROLE_KEY` (server-side secret; never prefix it with `NEXT_PUBLIC_` or expose it to the browser)
+- `SUPABASE_ANON_KEY`
 - `ADMIN_API_KEY`
-- `FRONTEND_URL`
-- `ALLOWED_ORIGINS`
-- Rate-limit variables
-- `IP_SALT`
-- Optional `GA_MEASUREMENT_ID`
+- `FRONTEND_URL` (the primary site origin)
+- `IP_SALT` (generate an independent random secret for Preview)
+- `CRON_SECRET` (random secret of at least 16 characters)
+- `ALLOWED_ORIGINS` if you need additional explicit origins
+- Any rate-limit settings that you override
+- Optional GA4 and Telegram variables if those features are to be tested
 
-Generate production secrets independently. Never reuse example values.
+Vercel supplies `VERCEL_URL`, `VERCEL_BRANCH_URL`, and `VERCEL_PROJECT_PRODUCTION_URL` when available. Do not copy values from another project. Add secrets in Vercel Project Settings → Environment Variables and make sure the environment selection is **Preview** for the first deployment.
 
-## 4. Deploy
+## 3. Deploy and smoke-test Preview
 
-Trigger the first deploy and verify:
-
-- The site loads.
-- `/api/health` responds as expected.
-- Public submissions work.
-- Admin authentication works.
-- Admin review actions work.
-- Rate limiting is active.
-- Database writes reach the intended Supabase project.
-
-### Smoke test (copy-paste)
+Use the Preview URL and run the relevant tests:
 
 ```bash
-SITE=https://your-site.netlify.app
-curl -s "$SITE/api/health"
-curl -s "$SITE/sitemap.xml" | head -5
-# Expect 401 without a key, 429 only under flood:
-curl -s -o /dev/null -w "%{http_code}\n" "$SITE/api/admin/stats"
+curl -i https://YOUR-PREVIEW-URL/api/health
+curl -i https://YOUR-PREVIEW-URL/api/admin/stats
+curl -i https://YOUR-PREVIEW-URL/api/memories/recent
+curl -i https://YOUR-PREVIEW-URL/api/community/submissions
 ```
 
-### Rollback
+Expected high-level results:
 
-Netlify keeps every deploy: **Deploys → pick the last good deploy → Publish deploy**.
-For a code rollback instead: `git revert` the offending commit on `main` and
-push — Netlify redeploys automatically. Database migrations are NOT rolled
-back automatically; review the migration files before reverting schema changes.
+- `/api/health`: HTTP 200 and `success: true`.
+- `/api/admin/stats`: HTTP 401 without an admin key.
+- Public reads return the same approved/public data as the current site.
+- Test a public submission only against the staging database.
+- Test admin approve/reject flows with a staging record and the configured admin key.
+- Check browser Network and Console for failed requests, CSP errors, CORS failures, and 404s.
+- Check a real memory URL with a browser and a crawler user-agent to verify that the page and per-memory Open Graph tags work.
+- Check that the current browser-side references no longer require `/.netlify/functions/*`.
 
-### Pre/post-deploy env diff
+Vercel Cron jobs are configured in `vercel.json` and are invoked by production deployments, not Preview deployments. To verify the route logic in Preview, call the relevant `/api/cron/*` route manually with `Authorization: Bearer <CRON_SECRET>`; use staging credentials because cleanup mutates data. Cron invocations without a valid secret are rejected.
 
-```bash
-netlify env:list --context production
-```
+## 4. Production cutover checklist
 
-Compare against `api/.env.example` (now 1:1 with the code): every variable the
-functions read must be set; remove stale names. Rotate `ADMIN_API_KEY` and
-`IP_SALT` on a schedule, never reuse development values in production.
+Do not remove the Netlify fallback until the Preview passes:
 
-## 5. Production checklist
+- [ ] Main page and every clean URL load.
+- [ ] Every API route has been checked for correct method, authorization, status code, and CORS behavior.
+- [ ] Public submissions, community reads, memory interactions, feedback, and admin moderation work.
+- [ ] Supabase service-role access and anon/RLS reads work as intended.
+- [ ] Rate limiting and IP extraction work on Vercel.
+- [ ] Both scheduled handlers succeed when authenticated.
+- [ ] Analytics and optional GA4 features are verified or intentionally left unconfigured.
+- [ ] Memory crawler metadata and the service worker/cache behavior are checked.
+- [ ] All required Production environment variables are configured separately.
+- [ ] A rollback plan for the custom domain/DNS is recorded.
 
-- [ ] No secrets exist in tracked files.
-- [ ] Production environment variables are configured only in Netlify/Supabase.
-- [ ] CORS allows only the intended origins.
-- [ ] Admin credentials have been rotated from any development values.
-- [ ] Supabase RLS and policies have been reviewed.
-- [ ] Database backups/recovery expectations are understood.
-- [ ] Analytics configuration matches the published privacy notice.
-- [ ] Third-party assets have redistribution rights.
-- [ ] The deployment URL and any public identifiers are safe to disclose.
+Only after those checks should the production domain be assigned to Vercel and DNS changed. Verify the domain, TLS, API behavior, and scheduled jobs after cutover. Remove `netlify.toml`, `netlify/functions/`, the Netlify CLI dependency, and any leftover Netlify-specific docs/references only after the Vercel production URL has been validated.
+
+## 5. Database and secret safety
+
+Do not apply migrations automatically as part of deployment. Review each SQL migration and apply the required ones to the intended Supabase environment. Do not print, commit, or share real secrets. Rotate any credential exposed in logs or source control.

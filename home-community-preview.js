@@ -1,7 +1,7 @@
 (function () {
     'use strict';
 
-    const API_ENDPOINT = '/.netlify/functions/community-submissions';
+    const API_ENDPOINT = '/api/community/submissions';
     const REF_ALLOWLIST = ['instagram', 'facebook', 'direct', 'telegram', 'whatsapp_share', 'telegram_share', 'x_share'];
 
     const elements = {
