@@ -50,7 +50,7 @@ Main application areas:
 
 ### Requirements
 
-- Node.js 20 (see `.nvmrc`)
+- Node.js 24 (see `.nvmrc`)
 - npm
 - A Supabase project
 

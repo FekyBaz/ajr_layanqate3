@@ -89,3 +89,10 @@ test('Vercel routing and cron config is valid JSON with both scheduled routes', 
     assert.ok(Array.isArray(config.rewrites));
     assert.ok(config.rewrites.some((rule) => rule.source === '/memory/:slug'));
 });
+
+test('Vercel runtime policy is aligned on Node.js 24', () => {
+    const packageJson = JSON.parse(readFileSync(join(ROOT, 'package.json'), 'utf8'));
+    const nvmrc = readFileSync(join(ROOT, '.nvmrc'), 'utf8').trim();
+    assert.equal(nvmrc, '24');
+    assert.equal(packageJson.engines?.node, '24.x');
+});

@@ -7,7 +7,7 @@ This migration is intentionally staged. Deploy and validate `feat/vercel-migrati
 1. Import `FekyBaz/ajr_layanqate3` from GitHub.
 2. Use the repository root as the Root Directory.
 3. Select the **Other** framework preset (static HTML/CSS/JS plus Vercel Functions).
-4. Use Node.js 20, matching `.nvmrc`.
+4. Use Node.js 24, matching `.nvmrc` and the `engines.node` setting.
 5. Do not assign the production domain or switch DNS during initial validation.
 6. Ensure `feat/vercel-migration` creates a Preview deployment. Leave the existing main branch deployment and Netlify site unchanged.
 
