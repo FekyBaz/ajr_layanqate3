@@ -1,6 +1,6 @@
 # Vercel Migration Status
 
-Updated: 2026-10-16
+Updated: 2026-10-16 (continuation)
 
 ## Safety boundary
 
@@ -17,14 +17,14 @@ Updated: 2026-10-16
 | 1. Vercel route foundation | Code + CI checks complete | Added `api/` route adapters, shared handler adapter, Vercel routing/security config, Cron route definitions, and memory crawler metadata route. Code-level route mapping checks pass; live API behavior is not yet verified. |
 | 2. Remove browser-side Netlify calls | Code + CI checks complete | Browser code uses same-origin `/api/*` for the previously missed Fatiha counter and community tree stats calls. Regression test rejects direct `/.netlify/functions/*` references in browser JS/HTML. |
 | 3. Runtime and dependency alignment | Code + CI checks complete | Uses Node.js 24, removes the root `netlify-cli` development dependency, synchronizes `package-lock.json`, and validates the lock with `npm ci` in GitHub Actions. |
-| 4. Vercel Preview deployment | Blocked / not yet validated | The previous deployment attempt failed before serving traffic and was reported with target `production` rather than the intended Preview. It also reported that Node.js 20 is discontinued. Do not treat that deployment as a successful migration. Confirm the intended Vercel project/account and production branch before retrying. |
+| 4. Vercel Preview deployment | Blocked / not yet validated | The only observed Vercel deployment attempt failed before serving traffic with `BUILD_UTILS_NODE_VERSION_DISCONTINUED` because that deployment used Node.js 20. The branch was subsequently aligned to Node.js 24, but no successful Preview deployment has been observed. The deployment tool also reported the attempted target as `production`, not Preview, and subsequent project/settings reads returned HTTP 403 for the connected Vercel scope. Re-authenticate the intended Vercel account/project and verify Preview targeting before the next deployment. Do not add or copy secrets until the scope is confirmed. |
 
 ## Latest verified repository state
 
 - Branch: `feat/vercel-migration`
-- Latest commit: `9f36ffad38590e032a3d270d024e88334c336b99`
-- CI: passed
-- Security & Validation: passed
+- CI and Security & Validation passed on `9f36ffad38590e032a3d270d024e88334c336b99` after switching the workflow install steps to `npm ci`.
+- Both workflows also passed on `38075967e3d673d51abfba2eef462f7501659aba` after the first migration status note was added.
+- The runtime/lockfile commits are included in those tested heads; the failed Vercel deployment was created from an earlier Node.js 20 commit.
 
 ## Preview acceptance checks
 
