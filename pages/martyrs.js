@@ -31,7 +31,7 @@ function escapeAttr(value) {
 
 const INITIAL_BATCH = 100;
 const BATCH_SIZE = 100;
-const FATIHA_COUNTER_ENDPOINT = '/.netlify/functions/fatiha-counter';
+const FATIHA_COUNTER_ENDPOINT = '/api/fatiha-counter';
 const FATIHA_SYNC_INTERVAL_MS = 15000;
 const FATIHA_COOLDOWN_SECONDS = 10;
 

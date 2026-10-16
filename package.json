@@ -7,7 +7,7 @@
         "dev": "npx --yes vercel dev",
         "build": "echo 'No build required'",
         "start": "npx --yes vercel dev",
-        "test": "node --test tests/calculateStats.test.js tests/normalizeData.test.js tests/vercel-adapter.test.js",
+        "test": "node --test tests/calculateStats.test.js tests/normalizeData.test.js tests/vercel-adapter.test.js tests/vercel-routes.test.js",
         "lint": "eslint . --quiet",
         "lint:css": "stylelint \"*.css\" \"lib/*.css\"",
         "guard:migrations": "node scripts/check-migrations.cjs"
@@ -19,7 +19,6 @@
     },
     "devDependencies": {
         "eslint": "^8.57.1",
-        "netlify-cli": "^27.10.0",
         "stylelint": "^17.16.0",
         "stylelint-config-standard": "^40.0.0"
     }
