@@ -14,17 +14,19 @@ Updated: 2026-10-17
 
 | Phase | Status | Evidence / remaining work |
 |---|---|---|
-| 1. Vercel route foundation | Code + CI checks complete | Added `api/` route adapters, shared handler adapter, Vercel routing/security config, Cron route definitions, and memory crawler metadata route. Code-level route mapping checks pass; live API behavior is not yet verified. |
+| 1. Vercel route foundation | Code + CI checks complete | Added a catch-all API dispatcher plus the dedicated memory Open Graph handler. The 36 existing API endpoints are explicitly mapped in `server/vercel-router.js`; static tests verify all handlers are reachable. The latest build completed as `READY` with only two JavaScript files under `api/`, below the Hobby function-count cap. Live API behavior is not yet verified. |
 | 2. Remove browser-side Netlify calls | Code + CI checks complete | Browser code uses same-origin `/api/*` for the previously missed Fatiha counter and community tree stats calls. Regression test rejects direct `/.netlify/functions/*` references in browser JS/HTML. |
 | 3. Runtime and dependency alignment | Code + CI checks complete | Uses Node.js 24, removes the root `netlify-cli` development dependency, synchronizes `package-lock.json`, and validates the lock with `npm ci` in GitHub Actions. |
-| 4. Vercel Preview deployment | Blocked / not yet validated | No successful Preview deployment has been verified. Deployment `dpl_9hqasRf5XSf3UymKggXkqDUyU93N` failed with `BUILD_UTILS_NODE_VERSION_DISCONTINUED` on an older Node.js 20 commit and was reported with target `production`. Our first direct deployment request also passed `target=preview`, which is not one of that tool's supported target values (`staging`, `production`, or a custom environment identifier); the API returned a Production-target attempt, so do not repeat that request shape. Later project metadata identified a newer deployment, `dpl_8udVSfTovawCfmPwjm7d1m2AUANJ`, as `ERROR` with target `staging`; detailed diagnostics could not be retrieved because the connected Vercel scope returned HTTP 403. Re-authenticate the intended Vercel account/project, inspect the latest failed deployment, and use the Git branch Preview workflow (with `main` confirmed as the production branch) or a correctly configured custom staging environment. Do not add or copy secrets until account/scope and target are confirmed. |
+| 4. Vercel Preview deployment | Build ready; runtime validation blocked | Deployment `dpl_94PeaZjD2AJR47QAKXMimBMoYeth` reached `READY` from commit `d0107c8d29d8baf9da03121c7b6f3860764d5ce4` on `feat/vercel-migration`; `target` is null, not Production, and the alias is branch-specific. The initial Hobby-limit error has been addressed by reducing the function count to two. Runtime smoke tests are still blocked: Vercel denied the connected account's protection-bypass request with HTTP 403 for scope `mohamed-elfekys-projects`, and the general browser tool cannot reach the protected URL. Confirm/re-authorize the Vercel connection for the owning project, then inspect required Preview environment variables and run API smoke tests. Do not copy Production secrets or switch the domain before access and environment scope are verified. |
 
 ## Latest verified repository state
 
 - Branch: `feat/vercel-migration`
-- CI: passed on `7eb6fcf33284a5826cd191f9edd8c87a8a6cb7fe` — [run](https://github.com/FekyBaz/ajr_layanqate3/actions/runs/38943091283).
-- Security & Validation: passed on `7eb6fcf33284a5826cd191f9edd8c87a8a6cb7fe` — [run](https://github.com/FekyBaz/ajr_layanqate3/actions/runs/38943091307).
-- The Node.js 24 runtime alignment, lockfile cleanup, and `npm ci` workflow changes are included in the verified branch history. The earlier production-target failure was created from a Node.js 20 commit.
+- Latest code commit: `d0107c8d29d8baf9da03121c7b6f3860764d5ce4`.
+- CI: passed on the latest code commit — [run](https://github.com/FekyBaz/ajr_layanqate3/actions/runs/39081424104).
+- Security & Validation: passed on the latest code commit — [run](https://github.com/FekyBaz/ajr_layanqate3/actions/runs/39081424121).
+- Preview build: `READY` — deployment ID `dpl_94PeaZjD2AJR47QAKXMimBMoYeth`, [branch deployment URL](https://ajr-layanqate3-git-feat-vercel-d09185-mohamed-elfekys-projects.vercel.app).
+- Code and build are verified; the API's live runtime behavior, required environment variables, and user-visible page load remain unverified because the connected Vercel authorization cannot read/bypass this project's deployment protection.
 
 ## Preview acceptance checks
 
