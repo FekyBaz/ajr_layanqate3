@@ -104,7 +104,7 @@ export default function vercelApiRouter(req, res) {
         return;
     }
 
-    if (pathname.length > 1) pathname = pathname.replace(/\\/+$/, '');
+    while (pathname.length > 1 && pathname.endsWith('/')) pathname = pathname.slice(0, -1);
     const route = ROUTES.get(pathname);
 
     if (!route) {

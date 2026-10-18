@@ -22,10 +22,10 @@ function walkFiles(directory, predicate, excludedDirectories = new Set()) {
 }
 
 test('browser-facing files do not call Netlify Functions directly', () => {
-    const browserFiles = walkFiles(ROOT, (file) => /\\.(?:js|html)$/i.test(file), new Set([
+    const browserFiles = walkFiles(ROOT, (file) => /\.(?:js|html)$/i.test(file), new Set([
         '.git', '.vercel', 'node_modules', '.github', 'api', 'netlify', 'server', 'tests',
     ]));
-    const forbidden = /\\/\\.netlify\\/functions(?:\\/|[?'"`])/;
+    const forbidden = /\/\.netlify\/functions(?:\/|$)/;
     const matches = [];
 
     for (const file of browserFiles) {
@@ -37,7 +37,7 @@ test('browser-facing files do not call Netlify Functions directly', () => {
 test('Vercel API handlers are dispatched through one catch-all function', () => {
     const apiRoot = join(ROOT, 'api');
     const apiFunctions = walkFiles(apiRoot, (file) => file.endsWith('.js'))
-        .map((file) => relative(apiRoot, file).replaceAll('\\\\', '/'))
+        .map((file) => relative(apiRoot, file).replaceAll('\\', '/'))
         .sort();
 
     assert.deepEqual(apiFunctions, ['[...path].js', 'memory-og/[slug].js'],
@@ -46,13 +46,13 @@ test('Vercel API handlers are dispatched through one catch-all function', () => 
 
     const dispatcher = readFileSync(join(ROOT, 'server', 'vercel-router.js'), 'utf8');
     const imports = new Map();
-    for (const match of dispatcher.matchAll(/import\\s+\\{\\s*handler\\s+as\\s+(\\w+)\\s*\\}\\s+from\\s+['"]\\.\\/functions\\/([^'"]+)['"]/g)) {
-        imports.set(match[1], match[2].replace(/\\.js$/, ''));
+    for (const match of dispatcher.matchAll(/import\s+\{\s*handler\s+as\s+(\w+)\s*\}\s+from\s+['"]\.\/functions\/([^'"]+)['"]/g)) {
+        imports.set(match[1], match[2].replace(/\.js$/, ''));
     }
 
     const definitions = Array.from(dispatcher.matchAll(
-        /\\{\\s*path:\\s*['"]([^'"]+)['"],\\s*handler:\\s*(\\w+)(?:,\\s*scheduled:\\s*true)?\\s*\\}/g,
-    )).map((match) => ({ path: match[1], handler: match[2], scheduled: /scheduled:\\s*true/.test(match[0]) }));
+        /\{\s*path:\s*['"]([^'"]+)['"],\s*handler:\s*(\w+)(?:,\s*scheduled:\s*true)?\s*\}/g,
+    )).map((match) => ({ path: match[1], handler: match[2], scheduled: /scheduled:\s*true/.test(match[0]) }));
 
     assert.equal(definitions.length, 36, 'All 36 existing API endpoints should be preserved');
     assert.equal(new Set(definitions.map((route) => route.path)).size, definitions.length,
@@ -60,13 +60,13 @@ test('Vercel API handlers are dispatched through one catch-all function', () => 
     assert.ok(definitions.every((route) => route.path.startsWith('/api/')));
 
     for (const route of definitions) {
-        assert.ok(imports.has(route.handler), `${route.path} imports a known handler`);
+        assert.ok(imports.has(route.handler), route.path + ' imports a known handler');
     }
 
     const mappedModules = new Set(definitions.map((route) => imports.get(route.handler)));
     const sourceHandlers = readdirSync(join(ROOT, 'server', 'functions'), { withFileTypes: true })
         .filter((entry) => entry.isFile() && entry.name.endsWith('.js'))
-        .map((entry) => entry.name.replace(/\\.js$/, ''))
+        .map((entry) => entry.name.replace(/\.js$/, ''))
         .sort();
     assert.deepEqual([...mappedModules].sort(), sourceHandlers,
         'Every server handler must be reachable through the dispatcher');
