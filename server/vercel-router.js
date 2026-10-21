@@ -34,7 +34,6 @@ import { handler as gaAcquisition } from './functions/ga-acquisition.js';
 import { handler as gaContent } from './functions/ga-content.js';
 import { handler as gaOverview } from './functions/ga-overview.js';
 import { handler as gaRealtime } from './functions/ga-realtime.js';
-import { handler as health } from './functions/health.js';
 import { handler as memoriesAll } from './functions/memories-all.js';
 import { handler as memoriesRecent } from './functions/memories-recent.js';
 import { handler as memoryCreate } from './functions/memory-create.js';
@@ -72,7 +71,6 @@ const ROUTE_DEFINITIONS = [
     { path: '/api/ga/content', handler: gaContent },
     { path: '/api/ga/overview', handler: gaOverview },
     { path: '/api/ga/realtime', handler: gaRealtime },
-    { path: '/api/health', handler: health },
     { path: '/api/memories/all', handler: memoriesAll },
     { path: '/api/memories/recent', handler: memoriesRecent },
     { path: '/api/memory/create', handler: memoryCreate },

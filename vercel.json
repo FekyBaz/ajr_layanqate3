@@ -7,6 +7,9 @@
     "api/memory-og/*.js": {
       "maxDuration": 10,
       "includeFiles": "memory.html"
+    },
+    "api/health.js": {
+      "maxDuration": 5
     }
   },
   "crons": [

@@ -40,7 +40,7 @@ test('Vercel API handlers are dispatched through one catch-all function', () => 
         .map((file) => relative(apiRoot, file).replaceAll('\\', '/'))
         .sort();
 
-    assert.deepEqual(apiFunctions, ['[...path].js', 'memory-og/[slug].js'],
+    assert.deepEqual(apiFunctions, ['[...path].js', 'health.js', 'memory-og/[slug].js'],
         'Hobby deployment should expose only the dispatcher and memory OG function');
     assert.ok(apiFunctions.length <= 12, 'Function count must fit Vercel Hobby limit');
 
@@ -54,7 +54,7 @@ test('Vercel API handlers are dispatched through one catch-all function', () => 
         /\{\s*path:\s*['"]([^'"]+)['"],\s*handler:\s*(\w+)(?:,\s*scheduled:\s*true)?\s*\}/g,
     )).map((match) => ({ path: match[1], handler: match[2], scheduled: /scheduled:\s*true/.test(match[0]) }));
 
-    assert.equal(definitions.length, 36, 'All 36 existing API endpoints should be preserved');
+    assert.equal(definitions.length, 35, 'All 35 routed API endpoints should be preserved; health is isolated');
     assert.equal(new Set(definitions.map((route) => route.path)).size, definitions.length,
         'API paths must be unique');
     assert.ok(definitions.every((route) => route.path.startsWith('/api/')));
@@ -68,7 +68,7 @@ test('Vercel API handlers are dispatched through one catch-all function', () => 
         .filter((entry) => entry.isFile() && entry.name.endsWith('.js'))
         .map((entry) => entry.name.replace(/\.js$/, ''))
         .sort();
-    assert.deepEqual([...mappedModules].sort(), sourceHandlers,
+    assert.deepEqual([...mappedModules].sort(), sourceHandlers.filter((name) => name !== 'health'),
         'Every server handler must be reachable through the dispatcher');
 
     const scheduled = definitions.filter((route) => route.scheduled).map((route) => route.path).sort();
@@ -96,4 +96,23 @@ test('Node.js runtime policy remains aligned on Node.js 24', () => {
     const nvmrc = readFileSync(join(ROOT, '.nvmrc'), 'utf8').trim();
     assert.equal(nvmrc, '24');
     assert.equal(packageJson.engines?.node, '24.x');
+});
+
+test('isolated health endpoint fails closed when runtime configuration is missing', async () => {
+    const { getMissingRuntimeConfig } = await import('../api/health.js');
+    assert.ok(getMissingRuntimeConfig({}).length >= 6);
+
+    const validTestConfig = {
+        SUPABASE_URL: 'https://example.supabase.co',
+        SUPABASE_SERVICE_ROLE_KEY: 'test-service-role',
+        SUPABASE_ANON_KEY: 'test-anon-key',
+        ADMIN_API_KEY: 'test-admin-key',
+        IP_SALT: 'a'.repeat(32),
+        CRON_SECRET: 'b'.repeat(32),
+    };
+    assert.deepEqual(getMissingRuntimeConfig(validTestConfig), []);
+    assert.ok(getMissingRuntimeConfig({
+        ...validTestConfig,
+        SUPABASE_URL: 'not a URL',
+    }).includes('Valid Supabase URL'));
 });
