@@ -28,7 +28,7 @@ Required variables:
 - Any rate-limit settings that you override
 - Optional GA4 and Telegram variables if those features are to be tested
 
-Vercel supplies `VERCEL_URL`, `VERCEL_BRANCH_URL`, and `VERCEL_PROJECT_PRODUCTION_URL` when available. Do not copy values from another project. Add secrets in Vercel Project Settings → Environment Variables and make sure the environment selection is **Preview** for the first deployment.
+Vercel supplies `VERCEL_URL`, `VERCEL_BRANCH_URL`, and `VERCEL_PROJECT_PRODUCTION_URL` when available. Do not copy values from another project. Add secrets in Vercel Project Settings → Environment Variables and make sure the environment selection is **Preview** for the first deployment. Use Vercel's **Sensitive** type for `CRON_SECRET`, `IP_SALT`, and other server-side secrets. The current preview is blocked until the Supabase URL, service-role key, anon key, and admin key are added. The current Vercel project is not Git-linked, so manual deployments do not automatically follow future Git pushes; link the repository in Project Settings → Git before treating the setup as complete.
 
 ## 3. Deploy and smoke-test Preview
 
@@ -43,7 +43,7 @@ curl -i https://YOUR-PREVIEW-URL/api/community/submissions
 
 Expected high-level results:
 
-- `/api/health`: HTTP 200 and `success: true`.
+- `/api/health`: until required server variables are present, expect HTTP 503 and `error_code: CONFIGURATION_INCOMPLETE`; after configuration it should return HTTP 200 and `success: true`. This check validates configuration only, not Supabase connectivity.
 - `/api/admin/stats`: HTTP 401 without an admin key.
 - Public reads return the same approved/public data as the current site.
 - Test a public submission only against the staging database.
