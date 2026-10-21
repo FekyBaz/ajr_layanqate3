@@ -51,6 +51,7 @@ Expected high-level results:
 - Check browser Network and Console for failed requests, CSP errors, CORS failures, and 404s.
 - Check a real memory URL with a browser and a crawler user-agent to verify that the page and per-memory Open Graph tags work.
 - Check that the current browser-side references no longer require `/.netlify/functions/*`.
+- Confirm client-IP/rate-limit handling uses Vercel forwarding headers only; do not reintroduce Netlify-specific `x-nf-client-connection-ip` fallbacks.
 
 Vercel Cron jobs are configured in `vercel.json` and are invoked by production deployments, not Preview deployments. To verify the route logic in Preview, call the relevant `/api/cron/*` route manually with `Authorization: Bearer <CRON_SECRET>`; use staging credentials because cleanup mutates data. Cron invocations without a valid secret are rejected.
 

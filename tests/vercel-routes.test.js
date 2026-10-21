@@ -220,3 +220,16 @@ test('health endpoint rejects unsupported methods and keeps HEAD responses empty
     assert.equal(headResponse.statusCode, 503);
     assert.equal(headResponse.body, '');
 });
+
+test('Vercel IP extraction does not depend on Netlify-only headers', () => {
+    const shared = readFileSync(join(ROOT, 'server', 'functions', 'utils', 'shared.js'), 'utf8');
+    const start = shared.indexOf('export function getClientIP(event)');
+    assert.notEqual(start, -1, 'shared utilities should export getClientIP');
+    const end = shared.indexOf('\n}', start);
+    const implementation = shared.slice(start, end === -1 ? undefined : end);
+
+    assert.match(implementation, /x-vercel-forwarded-for/);
+    assert.match(implementation, /x-forwarded-for/);
+    assert.doesNotMatch(implementation, /x-nf-client-connection-ip|client-ip/);
+    assert.doesNotMatch(implementation, /NETLIFY_SITE_NAME|\.netlify/);
+});

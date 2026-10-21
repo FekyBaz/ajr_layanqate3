@@ -544,17 +544,15 @@ export async function cleanupRateLimits() {
 /**
  * Client IP for rate limiting and abuse review (#132).
  *
- * Vercel overwrites x-forwarded-for at its edge to prevent client IP
- * spoofing. Keep the Netlify edge header as a fallback during cutover,
- * then prefer Vercel's platform-provided forwarding header.
+ * Use Vercel's platform-provided forwarding headers for client IP extraction.
+ * Do not trust the Netlify-only x-nf-client-connection-ip header or other
+ * non-platform-specific aliases in this Vercel deployment.
  */
 export function getClientIP(event) {
     const headers = event.headers || {};
     return headers['x-vercel-forwarded-for']?.split(',')[0]?.trim() ||
         headers['x-forwarded-for']?.split(',')[0]?.trim() ||
-        headers['x-nf-client-connection-ip']?.trim() ||
-        headers['x-real-ip'] ||
-        headers['client-ip'] ||
+        headers['x-real-ip']?.trim() ||
         'unknown';
 }
 
