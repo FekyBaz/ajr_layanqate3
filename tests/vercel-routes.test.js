@@ -116,3 +116,107 @@ test('isolated health endpoint fails closed when runtime configuration is missin
         SUPABASE_URL: 'not a URL',
     }).includes('Valid Supabase URL'));
 });
+
+test('health endpoint returns a safe 503 response when required config is missing', async () => {
+    const { default: healthHandler } = await import('../api/health.js');
+    const keys = [
+        'SUPABASE_URL',
+        'SUPABASE_SERVICE_ROLE_KEY',
+        'SUPABASE_ANON_KEY',
+        'ADMIN_API_KEY',
+        'ADMIN_KEY',
+        'IP_SALT',
+        'CRON_SECRET',
+    ];
+    const original = new Map(keys.map((key) => [key, process.env[key]]));
+
+    try {
+        for (const key of keys) delete process.env[key];
+
+        const res = {
+            headers: {},
+            statusCode: 0,
+            body: undefined,
+            setHeader(name, value) { this.headers[name] = value; },
+            end(value) { this.body = value; },
+        };
+
+        healthHandler({ method: 'GET', headers: {} }, res);
+
+        assert.equal(res.statusCode, 503);
+        assert.equal(JSON.parse(res.body).error_code, 'CONFIGURATION_INCOMPLETE');
+        assert.doesNotMatch(res.body, /SUPABASE_URL|SERVICE_ROLE|ANON_KEY|ADMIN_API_KEY|IP_SALT|CRON_SECRET/);
+        assert.equal(res.headers['Cache-Control'], 'no-store');
+    } finally {
+        for (const key of keys) {
+            const value = original.get(key);
+            if (value === undefined) delete process.env[key];
+            else process.env[key] = value;
+        }
+    }
+});
+
+test('health endpoint returns 200 only when required config is present', async () => {
+    const { default: healthHandler } = await import('../api/health.js');
+    const values = {
+        SUPABASE_URL: 'https://example.supabase.co',
+        SUPABASE_SERVICE_ROLE_KEY: 'placeholder-test-service-key',
+        SUPABASE_ANON_KEY: 'placeholder-test-anon-key',
+        ADMIN_API_KEY: 'placeholder-test-admin-key',
+        IP_SALT: 'a'.repeat(32),
+        CRON_SECRET: 'b'.repeat(32),
+    };
+    const original = new Map(Object.keys(values).map((key) => [key, process.env[key]]));
+
+    try {
+        for (const [key, value] of Object.entries(values)) process.env[key] = value;
+
+        const res = {
+            headers: {},
+            statusCode: 0,
+            body: undefined,
+            setHeader(name, value) { this.headers[name] = value; },
+            end(value) { this.body = value; },
+        };
+
+        healthHandler({ method: 'GET', headers: {} }, res);
+
+        assert.equal(res.statusCode, 200);
+        assert.equal(JSON.parse(res.body).success, true);
+        assert.equal(JSON.parse(res.body).status, 'configured');
+        assert.match(res.body, /does not test Supabase connectivity/);
+    } finally {
+        for (const key of Object.keys(values)) {
+            const value = original.get(key);
+            if (value === undefined) delete process.env[key];
+            else process.env[key] = value;
+        }
+    }
+});
+
+test('health endpoint rejects unsupported methods and keeps HEAD responses empty', async () => {
+    const { default: healthHandler } = await import('../api/health.js');
+    const methodResponse = {
+        headers: {},
+        statusCode: 0,
+        body: undefined,
+        setHeader(name, value) { this.headers[name] = value; },
+        end(value) { this.body = value; },
+    };
+
+    healthHandler({ method: 'POST', headers: {} }, methodResponse);
+    assert.equal(methodResponse.statusCode, 405);
+    assert.equal(methodResponse.headers.Allow, 'GET, HEAD');
+
+    const headResponse = {
+        headers: {},
+        statusCode: 0,
+        body: undefined,
+        setHeader(name, value) { this.headers[name] = value; },
+        end(value) { this.body = value; },
+    };
+
+    healthHandler({ method: 'HEAD', headers: {} }, headResponse);
+    assert.equal(headResponse.statusCode, 503);
+    assert.equal(headResponse.body, '');
+});
