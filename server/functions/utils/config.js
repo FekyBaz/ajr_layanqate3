@@ -89,6 +89,33 @@ function readTimezone(warnings) {
     }
 }
 
+/**
+ * Convert deployment URLs into a provider-neutral allowlist.
+ * Vercel supplies generated deployment URLs automatically; other runtimes can
+ * supply equivalent exact origins through RUNTIME_DEPLOYMENT_ORIGINS.
+ */
+function normalizeDeploymentOrigin(value) {
+    const raw = String(value || '').trim();
+    if (!raw) return '';
+    try {
+        const parsed = new URL(raw.includes('://') ? raw : `https://${raw}`);
+        return parsed.origin;
+    } catch {
+        return '';
+    }
+}
+
+function readRuntimeDeploymentOrigins() {
+    const configured = readString('RUNTIME_DEPLOYMENT_ORIGINS').split(',');
+    const values = [
+        ...configured,
+        readString('VERCEL_URL'),
+        readString('VERCEL_BRANCH_URL'),
+        readString('VERCEL_PROJECT_PRODUCTION_URL'),
+    ];
+    return Object.freeze([...new Set(values.map(normalizeDeploymentOrigin).filter(Boolean))]);
+}
+
 function buildConfig() {
     const errors = [];
     const warnings = [];
@@ -131,9 +158,7 @@ function buildConfig() {
 
         frontendUrl: readString('FRONTEND_URL').trim(),
         allowedOrigins: readString('ALLOWED_ORIGINS'),
-        vercelUrl: readString('VERCEL_URL').trim(),
-        vercelBranchUrl: readString('VERCEL_BRANCH_URL').trim(),
-        vercelProjectProductionUrl: readString('VERCEL_PROJECT_PRODUCTION_URL').trim(),
+        runtimeDeploymentOrigins: readRuntimeDeploymentOrigins(),
         siteTimezone: readTimezone(warnings),
 
         rateLimitWindowHours: readInt('RATE_LIMIT_WINDOW', PRODUCTION_DEFAULTS.rateLimitWindowHours, warnings),
