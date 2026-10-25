@@ -49,6 +49,10 @@ test('public build contains only the explicit deploy allowlist', () => {
       () => build.buildPublicAssets(projectRoot),
       /build output must be dist/,
     );
+    assert.throws(
+      () => build.buildPublicAssets(path.parse(projectRoot).root),
+      /build output must be dist/,
+    );
   } finally {
     fs.rmSync(temporaryParent, { recursive: true, force: true });
   }
