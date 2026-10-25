@@ -38,6 +38,9 @@ export function withNetlifyRuntime(handler) {
             ...event,
             headers,
             clientIP,
+            // Netlify may sit behind a Cloudflare proxy; this generic metadata
+            // keeps geo lookups out of application handler code.
+            clientCountry: headers['cf-ipcountry']?.trim() || '',
         }, context);
     };
 }
