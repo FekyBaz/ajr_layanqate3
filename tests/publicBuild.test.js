@@ -52,6 +52,7 @@ test('public build contains only the explicit deploy allowlist', () => {
     assert.throws(
       () => build.buildPublicAssets(path.parse(projectRoot).root),
       (error) => error.message.includes('repository dist/') && error.message.includes('dedicated temporary output directory'),
+    );
   } finally {
     fs.rmSync(temporaryParent, { recursive: true, force: true });
   }
