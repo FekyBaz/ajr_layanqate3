@@ -119,27 +119,7 @@ const ALLOWED_ORIGINS = Array.from(new Set([
     'http://localhost:3000',
 ].filter(Boolean)));
 
-/**
- * Vercel provides the URL for the current deployment and its branch.
- * Only these exact generated origins are added; we do not allow every
- * *.vercel.app origin by wildcard.
- */
-function deploymentOrigin(value) {
-    const raw = String(value || '').trim();
-    if (!raw) return '';
-    try {
-        const parsed = new URL(raw.includes('://') ? raw : `https://${raw}`);
-        return parsed.origin;
-    } catch {
-        return '';
-    }
-}
-
-const VERCEL_DEPLOYMENT_ORIGINS = new Set([
-    config.vercelUrl,
-    config.vercelBranchUrl,
-    config.vercelProjectProductionUrl,
-].map(deploymentOrigin).filter(Boolean));
+const RUNTIME_DEPLOYMENT_ORIGINS = new Set(config.runtimeDeploymentOrigins);
 
 const SECURITY_HEADERS = {
     'Content-Type': 'application/json; charset=utf-8',
@@ -151,7 +131,7 @@ const SECURITY_HEADERS = {
 export function getCorsHeaders(origin) {
     const normalizedOrigin = normalizeOrigin(origin);
     const isAllowed = ALLOWED_ORIGINS.includes(normalizedOrigin) ||
-        VERCEL_DEPLOYMENT_ORIGINS.has(normalizedOrigin);
+        RUNTIME_DEPLOYMENT_ORIGINS.has(normalizedOrigin);
 
     // Deny by default: disallowed origins get 'null' (never echoed back and
     // never the first allow-listed origin, which would poison caches).
