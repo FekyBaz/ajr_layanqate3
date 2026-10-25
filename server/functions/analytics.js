@@ -154,7 +154,7 @@ async function processEvent(evt, clientIP, userAgent, reqEvent) {
     const language = sanitizeString(evt.language, 20);
 
     // Geographic (from headers if available)
-    const country = sanitizeString(evt.country || reqEvent.headers['cf-ipcountry'] || reqEvent.headers['x-vercel-ip-country'], 2);
+    const country = sanitizeString(evt.country || reqEvent.clientCountry || '', 2);
     const region = sanitizeString(evt.region, 100);
 
     // Performance metrics
