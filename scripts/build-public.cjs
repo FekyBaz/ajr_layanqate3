@@ -125,11 +125,13 @@ function listRelativeFiles(directory, prefix = '') {
     const absolute = path.join(directory, entry.name);
 
     if (entry.isSymbolicLink()) {
-      paths.push(relative);
+      throw new Error(`Symbolic links are not allowed in deploy output: ${relative}`);
     } else if (entry.isDirectory()) {
       paths.push(...listRelativeFiles(absolute, relative));
     } else if (entry.isFile()) {
       paths.push(relative);
+    } else {
+      throw new Error(`Unsupported filesystem entry in deploy output: ${relative}`);
     }
   }
   return paths.sort();
@@ -162,6 +164,33 @@ function validateOutputDirectory(outputDir) {
   return resolved;
 }
 
+function verifyPublicBuild(outputDir = DEFAULT_OUTPUT_DIR) {
+  const target = validateOutputDirectory(outputDir);
+  if (!fs.existsSync(target) || !fs.statSync(target).isDirectory()) {
+    throw new Error('Build output directory does not exist.');
+  }
+
+  const actual = listRelativeFiles(target);
+  const expected = [...PUBLIC_FILES].sort();
+  const sortedActual = [...actual].sort();
+  const missing = expected.filter((relative) => !sortedActual.includes(relative));
+  const unexpected = sortedActual.filter((relative) => !expected.includes(relative));
+
+  if (missing.length || unexpected.length) {
+    throw new Error([
+      missing.length ? `Missing public assets: ${missing.join(', ')}` : '',
+      unexpected.length ? `Unexpected public assets: ${unexpected.join(', ')}` : '',
+    ].filter(Boolean).join('\n'));
+  }
+
+  const leaked = FORBIDDEN_PUBLISH_PATHS.filter((relative) => fs.existsSync(path.join(target, relative)));
+  if (leaked.length) {
+    throw new Error(`Internal paths must not be published: ${leaked.join(', ')}`);
+  }
+
+  return { outputDir: target, fileCount: actual.length };
+}
+
 function buildPublicAssets(outputDir = DEFAULT_OUTPUT_DIR) {
   const target = validateOutputDirectory(outputDir);
   const missing = PUBLIC_FILES.filter((relative) => !fs.existsSync(path.join(ROOT, relative)));
@@ -181,7 +210,9 @@ function buildPublicAssets(outputDir = DEFAULT_OUTPUT_DIR) {
     fs.copyFileSync(source, destination);
   }
 
-  return { outputDir: target, fileCount: PUBLIC_FILES.length };
+  const result = verifyPublicBuild(target);
+  console.log(`Built ${result.fileCount} allowlisted public files in ${result.outputDir}`);
+  return result;
 }
 
 function verifyPublicBuild(outputDir = DEFAULT_OUTPUT_DIR) {
@@ -220,6 +251,7 @@ if (require.main === module) {
 }
 
 module.exports = {
+  DEFAULT_OUTPUT_DIR,
   PUBLIC_FILES,
   FORBIDDEN_PUBLISH_PATHS,
   buildPublicAssets,
