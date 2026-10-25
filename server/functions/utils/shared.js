@@ -548,10 +548,20 @@ export async function cleanupRateLimits() {
  * Do not trust the Netlify-only x-nf-client-connection-ip header or other
  * non-platform-specific aliases in this Vercel deployment.
  */
+/**
+ * Return the client IP normalized by the runtime adapter.
+ *
+ * Provider-specific headers (for example Netlify's x-nf-client-connection-ip
+ * and Vercel's x-vercel-forwarded-for) must be interpreted at the adapter
+ * boundary, not in shared application logic. The forwarded-header fallback
+ * supports direct local/test invocation when no adapter metadata is supplied.
+ */
 export function getClientIP(event) {
-    const headers = event.headers || {};
-    return headers['x-vercel-forwarded-for']?.split(',')[0]?.trim() ||
-        headers['x-forwarded-for']?.split(',')[0]?.trim() ||
+    const normalized = typeof event?.clientIP === 'string' ? event.clientIP.trim() : '';
+    if (normalized) return normalized;
+
+    const headers = event?.headers || {};
+    return headers['x-forwarded-for']?.split(',')[0]?.trim() ||
         headers['x-real-ip']?.trim() ||
         'unknown';
 }
