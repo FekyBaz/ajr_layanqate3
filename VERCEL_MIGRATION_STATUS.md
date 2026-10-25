@@ -28,7 +28,7 @@ Updated: 2026-10-26 (runtime-neutral refactor committed; CI passed on commit 659
 - Prior migration baseline CI: [run](https://github.com/FekyBaz/ajr_layanqate3/actions/runs/39684479688).
 - Prior migration baseline Security & Validation: [run](https://github.com/FekyBaz/ajr_layanqate3/actions/runs/39684479455).
 - Prior Preview: [branch deployment URL](https://ajr-layanqate3-git-feat-vercel-d09185-mohamed-elfekys-projects.vercel.app). It does not contain the runtime-neutral refactor.
-- The CI head above is checked; this status document update itself will create a new commit and should rerun CI. The Vercel Preview configuration, Supabase connectivity, and reachability from Egyptian networks remain outstanding.
+- CI and Security & Validation both passed on the current branch head `0120961c11368a6869d41e0ce07cb12c1b63a06f`: [CI](https://github.com/FekyBaz/ajr_layanqate3/actions/runs/40243579756), [Security & Validation](https://github.com/FekyBaz/ajr_layanqate3/actions/runs/40243579816). The Vercel Preview configuration, Supabase connectivity, and reachability from Egyptian networks remain outstanding.
 
 ## Preview acceptance checks
 
