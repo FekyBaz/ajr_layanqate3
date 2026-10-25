@@ -171,9 +171,10 @@ function assertOutputPathIsSafe(outputDirectory) {
     && !insideProject.startsWith(`..${path.sep}`)
     && !path.isAbsolute(insideProject);
   const isProjectRoot = output === ROOT;
-  const isProjectAncestor = ROOT.startsWith(`${output}${path.sep}`);
+  const isFilesystemRoot = output === path.parse(output).root;
+  const isProjectAncestor = ROOT === output || ROOT.startsWith(`${output.replace(/[\\/]+$/, '')}${path.sep}`);
 
-  if (isProjectRoot || isProjectAncestor || (isInsideProject && insideProject !== 'dist')) {
+  if (isProjectRoot || isFilesystemRoot || isProjectAncestor || (isInsideProject && insideProject !== 'dist')) {
     throw new Error('The build output must be dist/ or a temporary directory outside the repository.');
   }
 
