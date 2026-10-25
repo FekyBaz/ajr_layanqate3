@@ -31,7 +31,7 @@ npm run build
 node scripts/build-public.cjs --verify
 ```
 
-The verification fails if a required public asset is missing or an unapproved file appears in `dist/`. Do not change `publish` to `/` or `.`. To expose a new public asset, add its exact path to the allowlist and update `tests/publicBuild.test.js` as appropriate.
+The verification fails if a required public asset is missing or an unapproved file appears in `dist/`. Do not change `publish` to `/` or `.`. To expose a new public asset, add its exact path to the allowlist and update `tests/publicBuild.test.js` as appropriate. Use [SMOKE_TEST_CHECKLIST.md](./docs/SMOKE_TEST_CHECKLIST.md) for the safe local HTTP, browser, admin-authentication, and test-project write-flow checks.
 
 ## 3. Configure environment variables
 
