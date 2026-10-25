@@ -11,10 +11,10 @@ Thank you for contributing to أجر لا ينقطع.
 
 ## Local setup
 
-Requirements: **Node.js 20** (see `.nvmrc`), npm, a Supabase project, Netlify CLI.
+Requirements: **Node.js 22.13.0 or later** (use Node 22 from `.nvmrc`), npm, a Supabase project, Netlify CLI.
 
 ```bash
-npm install
+npm ci
 cp api/.env.example .env   # then fill in your own Supabase credentials
 npm run dev
 ```
@@ -24,7 +24,8 @@ Useful commands:
 ```bash
 npm test        # unit tests (zero dependencies, node:test)
 npm run lint    # ESLint errors (warnings allowed for legacy code)
-npm run lint:css  # stylelint: physical CSS properties fail (use logical ones, see #72)
+npm run lint:css       # Stylelint: prefer logical CSS properties (see #72)
+npm run guard:migrations # Guard against insecure migration grants
 ```
 
 Apply the SQL migrations in `api/migrations/` to your Supabase project
