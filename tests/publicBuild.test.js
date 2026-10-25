@@ -82,3 +82,19 @@ test('builder refuses dangerous and arbitrary output paths before deleting anyth
     fs.rmSync(temporaryParent, { recursive: true, force: true });
   }
 });
+
+test('builder rejects symbolic links in its output instead of following them', () => {
+  const temporaryParent = fs.mkdtempSync(path.join(os.tmpdir(), 'ajr-public-build-'));
+  const outputDirectory = path.join(temporaryParent, 'dist');
+  const externalDirectory = path.join(temporaryParent, 'external');
+  fs.mkdirSync(externalDirectory);
+  fs.writeFileSync(path.join(externalDirectory, 'private.txt'), 'do not publish');
+
+  try {
+    build.buildPublicAssets(outputDirectory);
+    fs.symlinkSync(externalDirectory, path.join(outputDirectory, 'unexpected-link'), 'dir');
+    assert.throws(() => build.verifyPublicBuild(outputDirectory), /symbolic links/i);
+  } finally {
+    fs.rmSync(temporaryParent, { recursive: true, force: true });
+  }
+});
