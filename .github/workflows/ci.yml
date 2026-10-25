@@ -17,7 +17,7 @@ jobs:
       - uses: actions/checkout@v4
       - uses: actions/setup-node@v4
         with:
-          node-version: '20'
+          node-version: '22'
       - name: Build public deployment allowlist
         run: npm run build
       - name: Verify deploy artifact excludes unapproved paths
@@ -32,10 +32,10 @@ jobs:
       - uses: actions/checkout@v4
       - uses: actions/setup-node@v4
         with:
-          node-version: '20'
+          node-version: '22'
           cache: npm
       - name: Install dependencies
-        run: npm install --ignore-scripts
+        run: npm ci --ignore-scripts
       - name: Lint (errors fail the build; warnings allowed for legacy code)
         run: npm run lint
 
@@ -46,10 +46,10 @@ jobs:
       - uses: actions/checkout@v4
       - uses: actions/setup-node@v4
         with:
-          node-version: '20'
+          node-version: '22'
           cache: npm
       - name: Install dependencies
-        run: npm install --ignore-scripts
+        run: npm ci --ignore-scripts
       - name: Lint CSS (physical properties fail the build)
         run: npm run lint:css
 
@@ -60,6 +60,6 @@ jobs:
       - uses: actions/checkout@v4
       - uses: actions/setup-node@v4
         with:
-          node-version: '20'
+          node-version: '22'
       - name: Every migration function must revoke PUBLIC
         run: npm run guard:migrations
