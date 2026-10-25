@@ -44,6 +44,7 @@ function makeEvent(req, includeMethod = true) {
         rawUrl: url.href,
         queryStringParameters,
         clientIP: getVercelClientIP(headers),
+        clientCountry: headers['x-vercel-ip-country']?.trim() || headers['cf-ipcountry']?.trim() || '',
         isBase64Encoded: false,
     };
     if (includeMethod) event.httpMethod = String(req.method || 'GET').toUpperCase();
