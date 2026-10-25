@@ -2,9 +2,9 @@ name: CI
 
 on:
   push:
-    branches: [main, feat/vercel-migration]
+    branches: [main, feat/vercel-migration, feat/runtime-neutral-backend]
   pull_request:
-    branches: [main]
+    branches: [main, feat/vercel-migration]
 
 permissions:
   contents: read
