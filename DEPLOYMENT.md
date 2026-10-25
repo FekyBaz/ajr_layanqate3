@@ -20,6 +20,19 @@ Import the GitHub repository into Netlify.
 
 Use the repository's existing `netlify.toml` as the source of deployment configuration. Do not add Vercel-specific configuration unless the deployment architecture is intentionally changed.
 
+## Static publish boundary
+
+The Netlify publish directory must remain `dist/`. The `npm run build` command copies an explicit allowlist of browser-facing pages and assets from `scripts/build-public.cjs`; it does not publish the repository root. The Netlify Functions and Edge Functions continue to be configured separately from this static output.
+
+To build and verify the output locally, run:
+
+```bash
+npm run build
+node scripts/build-public.cjs --verify
+```
+
+The verification fails if a required public asset is missing or an unapproved file appears in `dist/`. Do not change `publish` to `/` or `.`. To expose a new public asset, add its exact path to the allowlist and update `tests/publicBuild.test.js` as appropriate.
+
 ## 3. Configure environment variables
 
 Set the required variables in Netlify's environment-variable settings.
