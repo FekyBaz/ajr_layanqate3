@@ -1,51 +1,52 @@
-# Vercel Migration Status
+# Vercel Migration and Runtime-Portability Status
 
-Updated: 2026-10-22 (after latest Vercel Preview)
+Updated: 2026-10-26 (runtime-neutral refactor committed; branch validation pending)
 
 ## Safety boundary
 
-- All migration work belongs on `feat/vercel-migration`.
-- `main` is unchanged by this migration work.
-- Keep the current Netlify production deployment and `netlify/` source as the rollback path.
-- Do not move a custom domain, change DNS, or remove Netlify configuration until the Vercel Preview passes the full validation checklist in [DEPLOYMENT.md](./DEPLOYMENT.md).
-- Do not apply database migrations automatically during deployment.
+- The current runtime-portability work is isolated on `feat/runtime-neutral-backend`, based on `feat/vercel-migration`.
+- `main` and the parent `feat/vercel-migration` branch have not been changed by this refactor.
+- Keep the current Netlify production deployment and its configuration as the rollback path.
+- Do not move a custom domain, change DNS, remove Netlify configuration, or apply database migrations automatically during deployment.
 
 ## Phase status
 
 | Phase | Status | Evidence / remaining work |
 |---|---|---|
-| 1. Vercel route foundation | Code + CI checks complete | Added a catch-all API dispatcher, a lightweight standalone `/api/health` configuration check, and the dedicated memory Open Graph handler. The 35 business API routes remain explicitly mapped in `server/vercel-router.js`; static tests validate all mappings. The Vercel deployment exposes three JavaScript function entry points under `api/`, below the Hobby plan limit. |
-| 2. Remove browser-side and runtime Netlify dependencies | Code + CI checks complete | Browser code uses same-origin `/api/*` and tests reject direct `/.netlify/functions/*` references. A final backend audit also removed the Netlify-only `x-nf-client-connection-ip` fallback from Vercel's shared IP extraction; Vercel headers are used instead. |
-| 3. Runtime and dependency alignment | Code + CI checks complete | Uses Node.js 24, removes the root `netlify-cli` development dependency, synchronizes `package-lock.json`, and validates the lock with `npm ci` in GitHub Actions. |
-| 4. Vercel Preview deployment | Build ready; runtime validation blocked | Latest deployment `dpl_FmW6uz6XchJWrsSfYJnajLHgRNkG` reached `READY` from code commit `539d96c1a0eb9469ed6ee9c004dff05a1c0577fc` on `feat/vercel-migration`, with no Production target and no custom domain cutover. The project has four Preview variables: `FRONTEND_URL`, `ALLOWED_ORIGINS`, `CRON_SECRET`, and `IP_SALT`; the latter two are `sensitive` and have no Vercel security warnings. `SUPABASE_URL`, `SUPABASE_SERVICE_ROLE_KEY`, `SUPABASE_ANON_KEY`, and an admin key are still missing, so `/api/health` should return `503 CONFIGURATION_INCOMPLETE` and business API routes cannot be validated. The Vercel project is not connected to Git, so pushes will not auto-deploy. An attempt to establish a separate Git-linked project was denied with HTTP 403 because the current Vercel connection lacks team access. The connected Vercel tool also cannot bypass project SSO protection or read runtime logs (HTTP 403); keep protection enabled and do not change DNS. Grant the Vercel connection access to the owning team via Vercel consent/app installation or link GitHub through the project dashboard, then add real staging credentials and test routes from an authorized session. |
+| 1. Vercel route foundation | Previously implemented on the parent migration branch | The catch-all dispatcher, standalone `/api/health` configuration check, dedicated memory Open Graph handler, and 35 explicit business API routes remain in place. The parent branch's CI previously passed on commit `539d96c1a0eb9469ed6ee9c004dff05a1c0577fc`; the new branch must rerun the checks. |
+| 2. Shared backend and runtime adapters | Code committed; validation pending | The 35 routed business handlers live canonically under `server/functions/`. Netlify's corresponding entry points are thin wrappers that normalize the incoming request and call those same handlers. Netlify- and Vercel-specific client IP/country headers are normalized by their respective adapters; shared handler logic consumes `clientIP` and `clientCountry`, not vendor headers. Shared CORS logic consumes a provider-neutral deployment-origin configuration. |
+| 3. Runtime alignment | Code updated; CI pending on this branch | `.nvmrc`, `package.json`, CI policy, and `netlify.toml` are aligned on Node.js 24 for this branch. The manifest/lockfile had been synchronized on the parent migration branch, but this branch is still behind `main`'s latest dependency-only commits: `@supabase/supabase-js` and `google-auth-library` need reconciliation before the final merge. |
+| 4. Vercel Preview runtime validation | Blocked; no new branch deployment verified | The previously observed Preview belongs to the parent migration branch, not this runtime-neutral branch. Its deployment ID was `dpl_FmW6uz6XchJWrsSfYJnajLHgRNkG` and its build reached `READY`, but the Preview environment lacked `SUPABASE_URL`, `SUPABASE_SERVICE_ROLE_KEY`, `SUPABASE_ANON_KEY`, and an admin key. Vercel Deployment Protection also returned HTTP 403 from the connected session. That older build is not evidence that the new branch's runtime handlers work. Keep protection enabled and do not change DNS. |
 
-## Latest verified repository state
+## Branch and prior CI evidence
 
-- Branch: `feat/vercel-migration`
-- Latest code commit: `539d96c1a0eb9469ed6ee9c004dff05a1c0577fc`.
-- CI: passed on the latest code commit — [run](https://github.com/FekyBaz/ajr_layanqate3/actions/runs/39684479688).
-- Security & Validation: passed on the latest code commit — [run](https://github.com/FekyBaz/ajr_layanqate3/actions/runs/39684479455).
-- Latest Preview build: `READY` — deployment ID `dpl_FmW6uz6XchJWrsSfYJnajLHgRNkG`, [branch deployment URL](https://ajr-layanqate3-git-feat-vercel-d09185-mohamed-elfekys-projects.vercel.app).
-- All required environment-variable keys are not yet configured. Direct testing of the page/API from this session remains blocked by Vercel Deployment Protection returning HTTP 403; this is an authorization issue, not proof that the HTTP handlers are healthy.
+- Work branch: `feat/runtime-neutral-backend`.
+- The original migration branch was 19 commits ahead of `main` and 3 commits behind it when this refactor began; reconcile the dependency updates before merging to `main`.
+- Prior migration baseline CI: [run](https://github.com/FekyBaz/ajr_layanqate3/actions/runs/39684479688).
+- Prior migration baseline Security & Validation: [run](https://github.com/FekyBaz/ajr_layanqate3/actions/runs/39684479455).
+- Prior Preview: [branch deployment URL](https://ajr-layanqate3-git-feat-vercel-d09185-mohamed-elfekys-projects.vercel.app). It does not contain the runtime-neutral refactor.
+- Validation of the current branch, its Preview configuration, Supabase connectivity, and reachability from Egyptian networks remains outstanding.
 
 ## Preview acceptance checks
 
-Before considering the migration functional, deploy this branch as a genuine Preview and verify:
+Before considering the migration functional, deploy the runtime-neutral branch as a genuine Preview and verify:
 
 1. Main page and every clean URL, including `/poster`, `/admin`, `/analytics`, `/contact`, `/memories`, `/martyrs`, and a real `/memory/:slug`.
-2. `GET /api/health` must return HTTP 503 with `CONFIGURATION_INCOMPLETE` while required variables are missing; once configured it should return HTTP 200 with `success: true` (configuration readiness only, not a Supabase connectivity check).
+2. `GET /api/health` returns HTTP 503 with `CONFIGURATION_INCOMPLETE` while required variables are missing; once configured it returns HTTP 200 with `success: true`. This confirms configuration readiness only, not Supabase connectivity.
 3. Protected admin routes reject requests without credentials.
-4. Community submissions, approved memory reads, Fatiha counter, contact, analytics as configured, and other expected methods/status codes behave correctly.
+4. Community submissions, approved memory reads, Fatiha counter, contact, analytics, and other expected methods/status codes behave correctly.
 5. Create or update test data only in a staging Supabase project; verify service-role and anon/RLS access separately.
-6. Both Cron handlers reject unauthenticated requests and complete only with a valid `CRON_SECRET`; scheduled execution itself must be confirmed on the production configuration before cutover.
+6. Both Cron handlers reject unauthenticated requests and complete only with a valid `CRON_SECRET`; confirm scheduled execution separately on production configuration before cutover.
 7. Browser Console and Network have no unexpected 404s, CORS/CSP failures, or stale service-worker behavior.
-8. Check memory Open Graph metadata using both a normal browser user-agent and a crawler user-agent.
+8. Check memory Open Graph metadata with both a normal browser user-agent and a crawler user-agent.
 9. Configure Production environment variables separately and record how to roll the domain/DNS back.
+10. Confirm both Netlify and Vercel invoke the canonical `server/functions/` handlers and that provider headers are normalized only by the relevant adapter.
 
 ## Final cutover
 
 Only after every Preview check succeeds:
+
 - configure the intended production branch and production environment;
 - assign the custom domain to Vercel and verify TLS and API behavior;
 - keep Netlify available until post-cutover checks pass;
-- then remove `netlify.toml`, `netlify/functions/`, the Netlify-specific workflow validation, and any remaining Netlify-only references in a final cleanup commit.
+- then remove `netlify.toml`, `netlify/functions/`, Netlify-only workflow validation, and remaining Netlify-only references in a final cleanup commit.
