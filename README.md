@@ -102,7 +102,7 @@ The repository contains SQL migrations used by the application. Review them befo
 
 ## Deployment
 
-Import the repository into Vercel and use the `feat/vercel-migration` branch for the first preview. Configure the required environment variables for the Preview environment, preferably against a staging Supabase project. Verify the public and administrative flows before assigning the production domain or removing the temporary Netlify fallback.
+Import the repository into Vercel and use the `feat/runtime-neutral-backend` branch for the first preview. Configure the required environment variables for the Preview environment, preferably against a staging Supabase project. Verify the public and administrative flows before assigning the production domain or removing the temporary Netlify fallback.
 
 See [DEPLOYMENT.md](./DEPLOYMENT.md) for the project-specific deployment checklist.
 
