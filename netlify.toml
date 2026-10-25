@@ -2,9 +2,9 @@
 # Full-stack serverless deployment
 
 [build]
-  # No build command needed - pure static files + serverless functions
-  command = ""
-  publish = "/"
+  # Build and publish only the explicit public asset allowlist.
+  command = "npm run build"
+  publish = "dist"
   functions = "netlify/functions"
 
 [build.environment]
