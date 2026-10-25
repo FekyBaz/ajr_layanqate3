@@ -5,9 +5,9 @@
     "type": "module",
     "scripts": {
         "dev": "netlify dev",
-        "build": "echo 'No build required'",
+        "build": "node scripts/build-public.cjs",
         "start": "netlify dev",
-        "test": "node --test tests/calculateStats.test.js tests/normalizeData.test.js",
+        "test": "node --test tests/calculateStats.test.js tests/normalizeData.test.js tests/publicBuild.test.js",
         "lint": "eslint . --quiet",
         "lint:css": "stylelint \"*.css\" \"lib/*.css\"",
         "guard:migrations": "node scripts/check-migrations.cjs"
