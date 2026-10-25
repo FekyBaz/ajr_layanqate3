@@ -23,4 +23,4 @@ npm run lint:css
 npm run guard:migrations
 ```
 
-The ESLint configuration is validated separately in CI by asking ESLint to print its resolved configuration for representative browser and server files, and by asserting that the security rule set is enabled. Do not merge the major upgrade if configuration validation fails.
+The ESLint configuration is validated by running ESLint against the project and by checking the resolved config for representative browser and server files. Do not merge the major upgrade if configuration validation fails.
