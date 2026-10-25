@@ -47,7 +47,7 @@ test('public build contains only the explicit deploy allowlist', () => {
 
     assert.throws(
       () => build.buildPublicAssets(projectRoot),
-      /build output must be dist/,
+      /build output must be the repository dist/ directory or a dedicated temporary output directory/,
     );
     assert.throws(
       () => build.buildPublicAssets(path.parse(projectRoot).root),
