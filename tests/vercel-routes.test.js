@@ -96,6 +96,9 @@ test('Node.js runtime policy remains aligned on Node.js 24', () => {
     const nvmrc = readFileSync(join(ROOT, '.nvmrc'), 'utf8').trim();
     assert.equal(nvmrc, '24');
     assert.equal(packageJson.engines?.node, '24.x');
+    const netlifyToml = readFileSync(join(ROOT, 'netlify.toml'), 'utf8');
+    assert.match(netlifyToml, /NODE_VERSION\s*=\s*"24"/,
+        'Netlify runtime should match the repository Node.js policy');
 });
 
 test('isolated health endpoint fails closed when runtime configuration is missing', async () => {
