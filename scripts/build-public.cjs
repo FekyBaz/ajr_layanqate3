@@ -165,17 +165,25 @@ function listRelativeFiles(directory, prefix = '') {
 
 function assertOutputPathIsSafe(outputDirectory) {
   const output = path.resolve(outputDirectory);
-  const insideProject = path.relative(ROOT, output);
-  const isInsideProject = insideProject !== ''
-    && insideProject !== '..'
-    && !insideProject.startsWith(`..${path.sep}`)
-    && !path.isAbsolute(insideProject);
+  const root = path.parse(output).root;
+  const relativeToRoot = path.relative(ROOT, output);
+  const isInsideProject = relativeToRoot !== ''
+    && relativeToRoot !== '..'
+    && !relativeToRoot.startsWith(`..${path.sep}`)
+    && !path.isAbsolute(relativeToRoot);
   const isProjectRoot = output === ROOT;
-  const isFilesystemRoot = output === path.parse(output).root;
-  const isProjectAncestor = ROOT === output || ROOT.startsWith(`${output.replace(/[\\/]+$/, '')}${path.sep}`);
+  const isFilesystemRoot = output === root;
+  const isProjectAncestor = ROOT.startsWith(`${output.replace(/[\\/]+$/, '')}${path.sep}`) || output === ROOT;
 
-  if (isProjectRoot || isFilesystemRoot || isProjectAncestor || (isInsideProject && insideProject !== 'dist')) {
-    throw new Error('The build output must be dist/ or a temporary directory outside the repository.');
+  if (isFilesystemRoot || isProjectRoot || isProjectAncestor || (isInsideProject && output !== DEFAULT_OUTPUT_DIR)) {
+    throw new Error('The build output must be the repository dist/ directory or a dedicated temporary output directory.');
+  }
+
+  if (output !== DEFAULT_OUTPUT_DIR) {
+    const parentName = path.basename(path.dirname(output)).toLowerCase();
+    if (path.basename(output).toLowerCase() !== 'dist' || !parentName.startsWith('ajr-public-build-')) {
+      throw new Error('The build output must be the repository dist/ directory or a dedicated temporary output directory.');
+    }
   }
 
   return output;
