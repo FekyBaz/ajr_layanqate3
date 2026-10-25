@@ -48,7 +48,7 @@ Main application areas:
 
 ### Requirements
 
-- Node.js 18+
+- Node.js 22.13.0 or later (the repository uses Node 22; see `.nvmrc`)
 - npm
 - A Supabase project
 - Netlify CLI
@@ -59,10 +59,7 @@ Main application areas:
 2. Install dependencies:
 
 ```bash
-npm install
-cd netlify/functions
-npm install
-cd ../..
+npm ci
 ```
 
 3. Create your local environment file from the example:
