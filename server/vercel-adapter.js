@@ -9,6 +9,17 @@ function normalizeHeaders(input = {}) {
     return output;
 }
 
+/**
+ * Resolve Vercel's platform client-IP header at the runtime boundary.
+ * Generic forwarding headers are retained only as local/test fallbacks.
+ */
+function getVercelClientIP(headers) {
+    return headers['x-vercel-forwarded-for']?.split(',')[0]?.trim() ||
+        headers['x-forwarded-for']?.split(',')[0]?.trim() ||
+        headers['x-real-ip']?.trim() ||
+        'unknown';
+}
+
 function normalizeBody(body) {
     if (body === undefined || body === null) return '';
     if (typeof body === 'string') return body;
@@ -32,6 +43,7 @@ function makeEvent(req, includeMethod = true) {
         path: url.pathname,
         rawUrl: url.href,
         queryStringParameters,
+        clientIP: getVercelClientIP(headers),
         isBase64Encoded: false,
     };
     if (includeMethod) event.httpMethod = String(req.method || 'GET').toUpperCase();
