@@ -119,27 +119,7 @@ const ALLOWED_ORIGINS = Array.from(new Set([
     'http://localhost:3000',
 ].filter(Boolean)));
 
-/**
- * Vercel provides the URL for the current deployment and its branch.
- * Only these exact generated origins are added; we do not allow every
- * *.vercel.app origin by wildcard.
- */
-function deploymentOrigin(value) {
-    const raw = String(value || '').trim();
-    if (!raw) return '';
-    try {
-        const parsed = new URL(raw.includes('://') ? raw : `https://${raw}`);
-        return parsed.origin;
-    } catch {
-        return '';
-    }
-}
-
-const VERCEL_DEPLOYMENT_ORIGINS = new Set([
-    config.vercelUrl,
-    config.vercelBranchUrl,
-    config.vercelProjectProductionUrl,
-].map(deploymentOrigin).filter(Boolean));
+const RUNTIME_DEPLOYMENT_ORIGINS = new Set(config.runtimeDeploymentOrigins);
 
 const SECURITY_HEADERS = {
     'Content-Type': 'application/json; charset=utf-8',
@@ -151,7 +131,7 @@ const SECURITY_HEADERS = {
 export function getCorsHeaders(origin) {
     const normalizedOrigin = normalizeOrigin(origin);
     const isAllowed = ALLOWED_ORIGINS.includes(normalizedOrigin) ||
-        VERCEL_DEPLOYMENT_ORIGINS.has(normalizedOrigin);
+        RUNTIME_DEPLOYMENT_ORIGINS.has(normalizedOrigin);
 
     // Deny by default: disallowed origins get 'null' (never echoed back and
     // never the first allow-listed origin, which would poison caches).
@@ -548,10 +528,20 @@ export async function cleanupRateLimits() {
  * Do not trust the Netlify-only x-nf-client-connection-ip header or other
  * non-platform-specific aliases in this Vercel deployment.
  */
+/**
+ * Return the client IP normalized by the runtime adapter.
+ *
+ * Provider-specific headers (for example Netlify's x-nf-client-connection-ip
+ * and Vercel's x-vercel-forwarded-for) must be interpreted at the adapter
+ * boundary, not in shared application logic. The forwarded-header fallback
+ * supports direct local/test invocation when no adapter metadata is supplied.
+ */
 export function getClientIP(event) {
-    const headers = event.headers || {};
-    return headers['x-vercel-forwarded-for']?.split(',')[0]?.trim() ||
-        headers['x-forwarded-for']?.split(',')[0]?.trim() ||
+    const normalized = typeof event?.clientIP === 'string' ? event.clientIP.trim() : '';
+    if (normalized) return normalized;
+
+    const headers = event?.headers || {};
+    return headers['x-forwarded-for']?.split(',')[0]?.trim() ||
         headers['x-real-ip']?.trim() ||
         'unknown';
 }

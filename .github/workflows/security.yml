@@ -2,9 +2,9 @@ name: Security & Validation
 
 on:
   push:
-    branches: [main, open-source-preparation, feat/vercel-migration]
+    branches: [main, open-source-preparation, feat/vercel-migration, feat/runtime-neutral-backend]
   pull_request:
-    branches: [main]
+    branches: [main, feat/vercel-migration]
 
 permissions:
   contents: read

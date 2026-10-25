@@ -7,7 +7,7 @@
         "dev": "npx --yes vercel dev",
         "build": "echo 'No build required'",
         "start": "npx --yes vercel dev",
-        "test": "node --test tests/calculateStats.test.js tests/normalizeData.test.js tests/vercel-adapter.test.js tests/vercel-routes.test.js",
+        "test": "node --test tests/calculateStats.test.js tests/normalizeData.test.js tests/vercel-adapter.test.js tests/vercel-routes.test.js tests/runtime-adapters.test.js",
         "lint": "eslint . --quiet",
         "lint:css": "stylelint \"*.css\" \"lib/*.css\"",
         "guard:migrations": "node scripts/check-migrations.cjs"

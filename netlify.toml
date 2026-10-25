@@ -8,8 +8,8 @@
   functions = "netlify/functions"
 
 [build.environment]
-  # Pin the runtime to match .nvmrc and CI (Node 20)
-  NODE_VERSION = "20"
+  # Keep Netlify's Node runtime aligned with .nvmrc, package.json, and CI.
+  NODE_VERSION = "24"
 
 # ═══════════════════════════════════════════════════════════════════════════
 # Functions Configuration
