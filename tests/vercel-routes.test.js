@@ -221,15 +221,39 @@ test('health endpoint rejects unsupported methods and keeps HEAD responses empty
     assert.equal(headResponse.body, '');
 });
 
-test('Vercel IP extraction does not depend on Netlify-only headers', () => {
+test('provider-specific IP headers are normalized by adapters, not shared utilities', () => {
     const shared = readFileSync(join(ROOT, 'server', 'functions', 'utils', 'shared.js'), 'utf8');
     const start = shared.indexOf('export function getClientIP(event)');
     assert.notEqual(start, -1, 'shared utilities should export getClientIP');
     const end = shared.indexOf('\n}', start);
     const implementation = shared.slice(start, end === -1 ? undefined : end);
+    const vercelAdapter = readFileSync(join(ROOT, 'server', 'vercel-adapter.js'), 'utf8');
+    const netlifyAdapter = readFileSync(join(ROOT, 'netlify', 'functions', 'utils', 'runtime-adapter.js'), 'utf8');
 
-    assert.match(implementation, /x-vercel-forwarded-for/);
+    assert.match(implementation, /event\?\.clientIP/);
     assert.match(implementation, /x-forwarded-for/);
-    assert.doesNotMatch(implementation, /x-nf-client-connection-ip|client-ip/);
+    assert.doesNotMatch(implementation, /x-vercel-forwarded-for|x-nf-client-connection-ip|client-ip/);
+    assert.match(vercelAdapter, /x-vercel-forwarded-for/);
+    assert.match(netlifyAdapter, /x-nf-client-connection-ip/);
     assert.doesNotMatch(implementation, /NETLIFY_SITE_NAME|\.netlify/);
+});
+
+test('Netlify entry points delegate to the canonical server handlers', () => {
+    const serverFunctions = join(ROOT, 'server', 'functions');
+    const netlifyFunctions = join(ROOT, 'netlify', 'functions');
+    const handlers = readdirSync(serverFunctions, { withFileTypes: true })
+        .filter((entry) => entry.isFile() && entry.name.endsWith('.js') && entry.name !== 'health.js')
+        .map((entry) => entry.name.replace(/\.js$/, ''))
+        .sort();
+
+    assert.equal(handlers.length, 35, 'Expected one canonical handler per routed endpoint');
+    for (const name of handlers) {
+        const entryPath = join(netlifyFunctions, name + '.js');
+        assert.ok(existsSync(entryPath), 'Missing Netlify entry point for ' + name);
+        const source = readFileSync(entryPath, 'utf8');
+        assert.ok(source.includes("from '../../server/functions/" + name + ".js'"),
+            name + ' should import its canonical handler');
+        assert.match(source, /withNetlifyRuntime\(coreHandler\)/,
+            name + ' should normalize runtime metadata at the adapter boundary');
+    }
 });
