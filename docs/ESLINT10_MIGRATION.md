@@ -8,7 +8,7 @@ ESLint 10 uses flat config. The repository previously had only `.eslintrc.json`,
 
 `eslint.config.js` keeps the project's existing security-focused rules and warning levels. Browser and Node globals are supplied explicitly through the `globals` package, which is declared as a direct development dependency. The config excludes generated output, local dependencies, Netlify's local build directory, and coverage output.
 
-The deprecated `no-return-await` rule is disabled because it is no longer a supported core rule in modern ESLint. This is not a relaxation of a security rule; its former warning/error semantics no longer apply to the newer runtime.
+The deprecated `no-return-await` core rule was removed from the flat configuration because modern ESLint does not support it as a configurable core rule. No other configured rule severity was intentionally changed.
 
 ## Verification
 
