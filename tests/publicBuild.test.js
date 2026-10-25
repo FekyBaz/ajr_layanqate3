@@ -2,9 +2,12 @@ import assert from 'node:assert/strict';
 import fs from 'node:fs';
 import os from 'node:os';
 import path from 'node:path';
+import { fileURLToPath } from 'node:url';
 import { test } from 'node:test';
 
 import build from '../scripts/build-public.cjs';
+
+const projectRoot = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..');
 
 test('public build contains only the explicit deploy allowlist', () => {
   const temporaryParent = fs.mkdtempSync(path.join(os.tmpdir(), 'ajr-public-build-'));
@@ -43,7 +46,7 @@ test('public build contains only the explicit deploy allowlist', () => {
     }
 
     assert.throws(
-      () => build.buildPublicAssets(path.resolve(path.dirname(new URL(import.meta.url).pathname), '..')),
+      () => build.buildPublicAssets(projectRoot),
       /build output must be dist/,
     );
   } finally {
