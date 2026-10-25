@@ -18,7 +18,11 @@ jobs:
       - uses: actions/setup-node@v4
         with:
           node-version: '20'
-      - name: Run tests (zero dependencies, node:test)
+      - name: Build public deployment allowlist
+        run: npm run build
+      - name: Verify deploy artifact excludes unapproved paths
+        run: node scripts/build-public.cjs --verify
+      - name: Run tests (node:test)
         run: npm test
 
   lint:
