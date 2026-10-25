@@ -48,7 +48,7 @@ Main application areas:
 
 ### Requirements
 
-- Node.js 18+
+- Node.js 22.13.0 or later (the repository uses Node 22; see `.nvmrc`)
 - npm
 - A Supabase project
 - Netlify CLI
@@ -59,10 +59,7 @@ Main application areas:
 2. Install dependencies:
 
 ```bash
-npm install
-cd netlify/functions
-npm install
-cd ../..
+npm ci
 ```
 
 3. Create your local environment file from the example:
@@ -114,7 +111,7 @@ Do not copy production credentials, project URLs, or private data into migration
 
 ## Deployment
 
-The supported deployment target in the current codebase is **Netlify**. The build creates a static `dist/` directory from an explicit allowlist; Netlify publishes `dist/` rather than the repository root. Repository documentation, tests, database migrations, prototypes, and serverless source files are not part of the static site artifact.
+The supported deployment target in the current codebase is **Netlify**.
 
 1. Import the repository into Netlify.
 2. Configure the required environment variables in Netlify.
