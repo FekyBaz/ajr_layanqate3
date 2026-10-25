@@ -239,6 +239,12 @@ test('provider-specific IP headers are normalized by adapters, not shared utilit
     assert.match(vercelAdapter, /x-vercel-forwarded-for/);
     assert.match(netlifyAdapter, /x-nf-client-connection-ip/);
     assert.doesNotMatch(implementation, /NETLIFY_SITE_NAME|\.netlify/);
+    assert.match(shared, /config\.runtimeDeploymentOrigins/);
+    assert.doesNotMatch(shared, /VERCEL_URL|VERCEL_BRANCH_URL|VERCEL_PROJECT_PRODUCTION_URL/);
+
+    const analytics = readFileSync(join(ROOT, 'server', 'functions', 'analytics.js'), 'utf8');
+    assert.match(analytics, /reqEvent\.clientCountry/);
+    assert.doesNotMatch(analytics, /x-vercel-ip-country|cf-ipcountry/);
 });
 
 test('Netlify entry points delegate to the canonical server handlers', () => {
