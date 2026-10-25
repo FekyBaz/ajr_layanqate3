@@ -9,6 +9,7 @@ test('Netlify adapter normalizes headers and injects platform client IP', async 
         httpMethod: 'POST',
         headers: {
             'X-NF-Client-Connection-IP': '203.0.113.7',
+            'CF-IPCountry': 'EG',
             Origin: 'https://ajr.example',
         },
         body: '{"message":"test"}',
@@ -21,6 +22,7 @@ test('Netlify adapter normalizes headers and injects platform client IP', async 
     await handler(originalEvent, { requestId: 'test-request' });
 
     assert.equal(capturedEvent.clientIP, '203.0.113.7');
+    assert.equal(capturedEvent.clientCountry, 'EG');
     assert.equal(capturedEvent.headers.origin, 'https://ajr.example');
     assert.equal(capturedEvent.httpMethod, 'POST');
     assert.equal(capturedEvent.body, originalEvent.body);
@@ -48,11 +50,13 @@ test('Vercel adapter normalizes the trusted client IP before calling a shared ha
         headers: {
             host: 'example.vercel.app',
             'x-vercel-forwarded-for': '198.51.100.8, 10.0.0.1',
+            'x-vercel-ip-country': 'EG',
             'x-forwarded-for': '192.0.2.99',
         },
     }, res);
 
     assert.equal(capturedEvent.clientIP, '198.51.100.8');
+    assert.equal(capturedEvent.clientCountry, 'EG');
     assert.equal(capturedEvent.httpMethod, 'GET');
     assert.equal(res.statusCode, 200);
 });
