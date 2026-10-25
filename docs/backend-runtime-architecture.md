@@ -6,7 +6,7 @@ The business handlers under `server/functions/` are the canonical implementation
 
 The shared handler contract remains intentionally small and compatible with the request shape already used by the application:
 
-- Request event: `httpMethod`, normalized lowercase `headers`, `body`, `path`, `rawUrl`, `queryStringParameters`, and normalized `clientIP`.
+- Request event: `httpMethod`, normalized lowercase `headers`, `body`, `path`, `rawUrl`, `queryStringParameters`, normalized `clientIP`, and normalized `clientCountry`.
 - Handler result: `{ statusCode, headers, body }`.
 - Application handlers own validation, authorization, database operations, response bodies, and status codes.
 - Runtime adapters own raw-request conversion, trusted client-IP extraction, and writing the result to the runtime response.
@@ -17,15 +17,15 @@ This is a shared Node.js function contract, not a claim that every handler can r
 
 ### Netlify
 
-Each routed function in `netlify/functions/` imports its matching handler from `server/functions/` and wraps it with `withNetlifyRuntime`. The adapter normalizes headers and maps Netlify's platform client-IP header to `event.clientIP`.
+Each routed function in `netlify/functions/` imports its matching handler from `server/functions/` and wraps it with `withNetlifyRuntime`. The adapter normalizes headers and maps Netlify's platform client-IP header to `event.clientIP`. It also maps available proxy country metadata to `event.clientCountry`.
 
 ### Vercel
 
-`server/vercel-adapter.js` converts Vercel's request/response objects into the shared handler contract. Its platform-specific client-IP header is resolved before the handler runs. `server/vercel-router.js` maps public API paths to canonical handlers; `vercel.json` owns Vercel routes and cron schedules.
+`server/vercel-adapter.js` converts Vercel's request/response objects into the shared handler contract. Its platform-specific client-IP and country headers are resolved before the handler runs. `server/vercel-router.js` maps public API paths to canonical handlers; `vercel.json` owns Vercel routes and cron schedules.
 
 ### Shared application code
 
-`server/functions/utils/shared.js` consumes the normalized `event.clientIP`; it should not inspect Netlify- or Vercel-specific headers. Keep provider headers, framework request objects, response writers, and cron authentication at runtime boundaries.
+`server/functions/utils/shared.js` consumes normalized `event.clientIP` and a provider-neutral deployment-origin allowlist. Analytics handlers consume `event.clientCountry`. Shared application logic should not inspect Netlify- or Vercel-specific headers. Keep provider headers, framework request objects, response writers, and cron authentication at runtime boundaries.
 
 ## Portability rules
 
