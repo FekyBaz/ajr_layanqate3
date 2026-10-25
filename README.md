@@ -114,7 +114,7 @@ Do not copy production credentials, project URLs, or private data into migration
 
 ## Deployment
 
-The supported deployment target in the current codebase is **Netlify**.
+The supported deployment target in the current codebase is **Netlify**. The build creates a static `dist/` directory from an explicit allowlist; Netlify publishes `dist/` rather than the repository root. Repository documentation, tests, database migrations, prototypes, and serverless source files are not part of the static site artifact.
 
 1. Import the repository into Netlify.
 2. Configure the required environment variables in Netlify.
