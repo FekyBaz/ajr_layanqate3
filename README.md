@@ -38,8 +38,9 @@ Browser
 
 Main application areas:
 
-- `netlify/functions/` — serverless API and shared utilities
-- `api/migrations/` — database migrations
+- `netlify/functions/` — serverless API and shared utilities (the supported backend)
+- `api/migrations/` — database migrations applied to Supabase
+- `api/.env.example` — local environment-variable template; `api/` is not a separate Express server
 - `components/`, `pages/` — UI code
 - `lib/` — client-side utilities
 - `netlify.toml` — Netlify configuration
