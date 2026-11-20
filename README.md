@@ -76,7 +76,7 @@ The Vercel CLI runs the project at its local development URL. It can be installe
 
 ## Environment variables
 
-Never commit real values. Vercel supplies `VERCEL_URL`, `VERCEL_BRANCH_URL`, and `VERCEL_PROJECT_PRODUCTION_URL` when available; these are used only to allow the exact active deployment origin for CORS, not a wildcard for all `vercel.app` sites.
+Never commit real values. `RUNTIME_DEPLOYMENT_ORIGINS` accepts comma-separated exact deployment origins when your runtime does not supply deployment URLs automatically. Vercel's `VERCEL_URL`, `VERCEL_BRANCH_URL`, and `VERCEL_PROJECT_PRODUCTION_URL` are normalized at the configuration boundary when present; CORS never uses a wildcard for every `vercel.app` site.
 
 | Variable | Purpose |
 |---|---|
@@ -85,7 +85,8 @@ Never commit real values. Vercel supplies `VERCEL_URL`, `VERCEL_BRANCH_URL`, and
 | `SUPABASE_ANON_KEY` | Public read key where required |
 | `ADMIN_API_KEY` | Protects admin API endpoints |
 | `FRONTEND_URL` | Primary frontend origin |
-| `ALLOWED_ORIGINS` | Optional comma-separated extra origins |
+| `ALLOWED_ORIGINS` | Optional comma-separated extra browser origins |
+| `RUNTIME_DEPLOYMENT_ORIGINS` | Exact deployment origins for runtimes without automatic deployment URL variables |
 | `CRON_SECRET` | Required to authenticate Vercel scheduled routes |
 | `RATE_LIMIT_*` | Rate-limit configuration |
 | `MEMORY_RATE_LIMIT_*` | Memory/submission rate limits |
@@ -102,7 +103,7 @@ The repository contains SQL migrations used by the application. Review them befo
 
 ## Deployment
 
-Import the repository into Vercel and use the `feat/vercel-migration` branch for the first preview. Configure the required environment variables for the Preview environment, preferably against a staging Supabase project. Verify the public and administrative flows before assigning the production domain or removing the temporary Netlify fallback.
+Import the repository into Vercel and use the `feat/runtime-neutral-backend` branch for the first preview. Configure the required environment variables for the Preview environment, preferably against a staging Supabase project. Verify the public and administrative flows before assigning the production domain or removing the temporary Netlify fallback.
 
 See [DEPLOYMENT.md](./DEPLOYMENT.md) for the project-specific deployment checklist.
 
