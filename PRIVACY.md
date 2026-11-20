@@ -13,8 +13,21 @@ Collected per event (see `lib/analytics.js`):
 - Pseudonymous `session_id` (random, kept in `sessionStorage`)
 - `ajr_returning=1` cookie (`max-age=31536000`, `path=/`, `SameSite=Lax`) marking repeat visits
 
-What is NOT collected: IPs are not stored with events, no names, emails, or
-message contents are sent to analytics.
+What is NOT collected: IPs are not stored with custom analytics events, and no
+names, emails, or message contents are sent to analytics.
+
+## Server-side rate limiting and operational logs
+
+The submission backend derives a salted, truncated hash of the client IP for
+rate-limit/abuse-prevention records; it does not need the raw IP address in its
+application log messages. The application log for the submission RPC records
+operational rate-limit settings only, not the raw IP or its derived hash.
+This hash is pseudonymous, not anonymous.
+
+The hosting platform may separately process connection metadata in its
+infrastructure/security logs. Operators should review the provider's privacy
+terms, access controls, and retention settings rather than assuming those
+platform logs are covered by this application's custom analytics behavior.
 
 Retention/cleanup for `analytics_events` is operator-managed in Supabase
 (no automatic purge job ships with this repo — configure retention yourself).
