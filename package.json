@@ -16,7 +16,7 @@
         "guard:vercel": "node scripts/check-vercel.cjs"
     },
     "dependencies": {
-        "@google-analytics/data": "^7.2.0",
+        "@google-analytics/data": "^7.3.0",
         "@supabase/supabase-js": "^2.118.0",
         "google-auth-library": "^11.3.1"
     },
