@@ -35,14 +35,14 @@ export class RealtimeEngine {
     }
 
     /**
-     * Silent statistics polling from netlify serverless functions.
+     * Silent statistics polling from the same-origin Vercel API.
      * Skipped while the tab is hidden (belt-and-braces alongside
      * the TreeView visibility handling, see #147).
      */
     async syncStats() {
         try {
             if (typeof document !== 'undefined' && document.hidden) return;
-            const response = await fetch('/.netlify/functions/community-submissions?page=1&limit=1&surface=community');
+            const response = await fetch('/api/community/submissions?page=1&limit=1&surface=community');
             if (response.ok) {
                 const result = await response.json();
                 if (result.success && result.stats) {

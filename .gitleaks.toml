@@ -27,3 +27,10 @@ id = "generic-secret"
 description = "Generic Secret Assignment"
 regex = '''(SECRET|PRIVATE_KEY|SERVICE_ROLE)\s*=\s*["'][^"']+["']'''
 keywords = ["SECRET", "PRIVATE_KEY", "SERVICE_ROLE"]
+
+[allowlist]
+description = "Synthetic values used by adapter tests are not credentials"
+regexTarget = "match"
+regexes = [
+  '''.*test-cron-secret.*''',
+]

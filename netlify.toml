@@ -118,6 +118,11 @@
   to = "/.netlify/functions/admin-memory-reject"
   status = 200
 
+[[redirects]]
+  from = "/api/admin/memory/stats"
+  to = "/.netlify/functions/admin-memory-stats"
+  status = 200
+
 # Memory Collaborative Updates API
 [[redirects]]
   from = "/api/memory/update-propose"
@@ -190,6 +195,29 @@
 [[redirects]]
   from = "/api/ga/acquisition"
   to = "/.netlify/functions/ga-acquisition"
+  status = 200
+
+
+# Transitional aliases for the new API paths, so Netlify remains a safe
+# rollback target while the Vercel deployment is being verified.
+[[redirects]]
+  from = "/api/community/submissions"
+  to = "/.netlify/functions/community-submissions"
+  status = 200
+
+[[redirects]]
+  from = "/api/community/submission-view"
+  to = "/.netlify/functions/community-submission-view"
+  status = 200
+
+[[redirects]]
+  from = "/api/community/share-track"
+  to = "/.netlify/functions/community-share-track"
+  status = 200
+
+[[redirects]]
+  from = "/api/community/stats-refresh"
+  to = "/.netlify/functions/community-stats-refresh"
   status = 200
 
 # Clean URLs for pages

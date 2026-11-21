@@ -2,7 +2,7 @@
     'use strict';
 
     const SHARE_TEXT = 'مشروع أجر لا ينقطع\nساهم بذكر أو دعاء واجعل لك أثرًا دائمًا ✨';
-    const TRACK_ENDPOINT = '/.netlify/functions/community-share-track';
+    const TRACK_ENDPOINT = '/api/community/share-track';
     const baseUrl = window.location.origin;
 
     // Single source for the project-share buttons (see issue #73).

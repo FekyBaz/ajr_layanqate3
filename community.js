@@ -1,8 +1,8 @@
-const API_ENDPOINT = '/.netlify/functions/community-submissions';
-const VIEW_ENDPOINT = '/.netlify/functions/community-submission-view';
+const API_ENDPOINT = '/api/community/submissions';
+const VIEW_ENDPOINT = '/api/community/submission-view';
 const REF_ALLOWLIST = ['instagram', 'facebook', 'direct', 'telegram', 'whatsapp_share', 'telegram_share', 'x_share'];
 const VIEW_DEBOUNCE_MS = 60_000;
-const SHARE_TRACK_ENDPOINT = '/.netlify/functions/community-share-track';
+const SHARE_TRACK_ENDPOINT = '/api/community/share-track';
 const SESSION_VIEW_KEY = 'ajr_community_view_count';
 const SESSION_POPUP_KEY = 'ajr_community_cta_shown';
 
@@ -1075,7 +1075,7 @@ function setupFeedbackForm() {
         showToast();
         
         try {
-            const response = await timedFetch('/.netlify/functions/contact', {
+            const response = await timedFetch('/api/contact', {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',

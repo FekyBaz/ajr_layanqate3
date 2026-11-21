@@ -4,13 +4,16 @@
     "description": "أجر لا ينقطع - Endless Reward",
     "type": "module",
     "scripts": {
-        "dev": "netlify dev",
+        "dev": "npx --yes vercel dev",
+        "dev:netlify": "netlify dev",
         "build": "node scripts/build-public.cjs",
-        "start": "netlify dev",
+        "start": "npx --yes vercel dev",
         "test": "node --test",
         "lint": "eslint . --quiet",
         "lint:css": "stylelint \"*.css\" \"lib/*.css\"",
-        "guard:migrations": "node scripts/check-migrations.cjs"
+        "guard:migrations": "node scripts/check-migrations.cjs",
+        "guard:routes": "node scripts/check-routes.cjs",
+        "guard:vercel": "node scripts/check-vercel.cjs"
     },
     "dependencies": {
         "@google-analytics/data": "^7.2.0",
@@ -22,5 +25,8 @@
         "netlify-cli": "^27.13.0",
         "stylelint": "^17.16.0",
         "stylelint-config-standard": "^40.0.0"
+    },
+    "engines": {
+        "node": "22.x"
     }
 }

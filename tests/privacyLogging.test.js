@@ -6,7 +6,7 @@ import { test } from 'node:test';
 
 const projectRoot = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..');
 const submitSource = fs.readFileSync(
-  path.join(projectRoot, 'netlify/functions/submit.js'),
+  path.join(projectRoot, 'server/functions/submit.js'),
   'utf8',
 );
 

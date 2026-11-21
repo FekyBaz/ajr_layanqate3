@@ -1,23 +1,4 @@
-/**
- * ═══════════════════════════════════════════════════════════════════════════
- * GET /.netlify/functions/health
- * Health check endpoint
- * ═══════════════════════════════════════════════════════════════════════════
- */
+import { withNetlifyRuntime } from './utils/runtime-adapter.js';
+import { handler as coreHandler } from '../../server/functions/health.js';
 
-import { success, handleOptions } from './utils/shared.js';
-
-export async function handler(event, context) {
-    const origin = event.headers.origin || '';
-
-    // Handle CORS preflight
-    if (event.httpMethod === 'OPTIONS') {
-        return handleOptions(origin);
-    }
-
-    return success({
-        status: 'ok',
-        timestamp: new Date().toISOString(),
-        service: 'أجر لا ينقطع API',
-    }, origin);
-}
+export const handler = withNetlifyRuntime(coreHandler);

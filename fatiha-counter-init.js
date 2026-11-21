@@ -6,7 +6,7 @@
             const doFetch = globalThis.FetchUtils
                 ? globalThis.FetchUtils.fetchWithTimeout
                 : fetch;
-            const res = await doFetch('/.netlify/functions/fatiha-counter');
+            const res = await doFetch('/api/fatiha-counter');
             if (res.ok) {
                 const data = await res.json();
                 // Unified envelope exposes top-level `count` (legacy `data.total_fatihas` fallback)

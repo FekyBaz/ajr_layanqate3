@@ -22,6 +22,10 @@ jobs:
         run: npm run build
       - name: Verify deploy artifact excludes unapproved paths
         run: node scripts/build-public.cjs --verify
+      - name: Verify API routing and provider parity
+        run: npm run guard:routes
+      - name: Verify Vercel deployment configuration
+        run: npm run guard:vercel
       - name: Run tests (node:test)
         run: npm test
 

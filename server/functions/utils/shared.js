@@ -1,6 +1,6 @@
 /**
  * ═══════════════════════════════════════════════════════════════════════════
- * أجر لا ينقطع - Shared Utilities for Netlify Functions
+ * أجر لا ينقطع - Shared Serverless Utilities
  * ═══════════════════════════════════════════════════════════════════════════
  */
 
@@ -119,14 +119,7 @@ const ALLOWED_ORIGINS = Array.from(new Set([
     'http://localhost:3000',
 ].filter(Boolean)));
 
-/**
- * Strict regex for Netlify deploy-preview origins.
- * Only matches deploy previews for YOUR specific site, not any .netlify.app domain.
- * Requires NETLIFY_SITE_NAME env var to be set (e.g., "ajr-la-yanqati").
- */
-const DEPLOY_PREVIEW_REGEX = config.netlifySiteName
-    ? new RegExp(`^https://deploy-preview-\\d+--${config.netlifySiteName}\\.netlify\\.app$`)
-    : null;
+const RUNTIME_DEPLOYMENT_ORIGINS = new Set(config.runtimeDeploymentOrigins);
 
 const SECURITY_HEADERS = {
     'Content-Type': 'application/json; charset=utf-8',
@@ -138,7 +131,7 @@ const SECURITY_HEADERS = {
 export function getCorsHeaders(origin) {
     const normalizedOrigin = normalizeOrigin(origin);
     const isAllowed = ALLOWED_ORIGINS.includes(normalizedOrigin) ||
-        (DEPLOY_PREVIEW_REGEX && DEPLOY_PREVIEW_REGEX.test(normalizedOrigin));
+        RUNTIME_DEPLOYMENT_ORIGINS.has(normalizedOrigin);
 
     // Deny by default: disallowed origins get 'null' (never echoed back and
     // never the first allow-listed origin, which would poison caches).
@@ -531,19 +524,25 @@ export async function cleanupRateLimits() {
 /**
  * Client IP for rate limiting and abuse review (#132).
  *
- * Trust order matters: X-Forwarded-For's leftmost entry (and x-real-ip /
- * client-ip) are client-influenced and trivially rotated to defeat
- * per-IP buckets. On Netlify, x-nf-client-connection-ip is set by the
- * CDN edge and cannot be spoofed, so it wins whenever present.
- * Local `netlify dev` does not set it — the legacy headers remain
- * as the local-development fallback.
+ * Use Vercel's platform-provided forwarding headers for client IP extraction.
+ * Do not trust the Netlify-only x-nf-client-connection-ip header or other
+ * non-platform-specific aliases in this Vercel deployment.
+ */
+/**
+ * Return the client IP normalized by the runtime adapter.
+ *
+ * Provider-specific headers (for example Netlify's x-nf-client-connection-ip
+ * and Vercel's x-vercel-forwarded-for) must be interpreted at the adapter
+ * boundary, not in shared application logic. The forwarded-header fallback
+ * supports direct local/test invocation when no adapter metadata is supplied.
  */
 export function getClientIP(event) {
-    const headers = event.headers || {};
-    return headers['x-nf-client-connection-ip']?.trim() ||
-        headers['x-forwarded-for']?.split(',')[0]?.trim() ||
-        headers['x-real-ip'] ||
-        headers['client-ip'] ||
+    const normalized = typeof event?.clientIP === 'string' ? event.clientIP.trim() : '';
+    if (normalized) return normalized;
+
+    const headers = event?.headers || {};
+    return headers['x-forwarded-for']?.split(',')[0]?.trim() ||
+        headers['x-real-ip']?.trim() ||
         'unknown';
 }
 
