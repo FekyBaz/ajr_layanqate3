@@ -1,6 +1,6 @@
 /**
  * ═══════════════════════════════════════════════════════════════════════════
- * GET /.netlify/functions/cleanup-automation
+ * GET /api/cron/cleanup-automation
  * Scheduled function to purge old records and maintain DB health
  * ═══════════════════════════════════════════════════════════════════════════
  */

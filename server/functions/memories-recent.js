@@ -1,6 +1,6 @@
 /**
  * ═══════════════════════════════════════════════════════════════════════════
- * GET /.netlify/functions/memories-recent
+ * GET /api/memories/recent
  * Returns up to 3 recently approved memorial pages (public, lightweight)
  * ═══════════════════════════════════════════════════════════════════════════
  */

@@ -22,13 +22,15 @@ npm test
 npm run lint
 npm run lint:css
 npm run guard:migrations
+npm run guard:routes
+npm run guard:vercel
 ```
 
 Expected results:
 - Dependency installation completes from the lockfile.
 - The build creates `dist/` from the explicit public-file allowlist.
 - The artifact verifier reports no missing public files and no unexpected paths.
-- Tests, ESLint, Stylelint, and the migration guard exit successfully.
+- Tests, ESLint, Stylelint, the migration guard, the API routing guard, and the Vercel configuration guard exit successfully.
 
 Before opening a pull request, review `git status --short` and make sure no local `.env`, test export, generated database data, or credential file is staged.
 
@@ -36,13 +38,14 @@ Before opening a pull request, review `git status --short` and make sure no loca
 
 Create `.env` from `api/.env.example` and fill it with values from the dedicated test project. Ensure `IP_SALT` and an independently generated `ADMIN_API_KEY` are set for local use.
 
-Start Netlify Dev:
+Start the local runtime:
 
 ```bash
-npm run dev
+npm run dev          # Vercel
+npm run dev:netlify  # Netlify rollback path
 ```
 
-Use the URL printed by the CLI (typically `http://localhost:8888`). Do not expose the local server to the public internet.
+Use the URL printed by the CLI (typically `http://localhost:3000` for Vercel and `http://localhost:8888` for Netlify). Do not expose the local server to the public internet.
 
 ## 3. Read-only HTTP smoke checks
 
@@ -55,7 +58,7 @@ curl -i http://localhost:8888/api/admin/stats
 ```
 
 Check:
-- `/api/health` returns HTTP 200 with JSON containing `"status":"ok"`.
+- `/api/health` returns HTTP 200 with `"status":"configured"` when every required variable is present, or HTTP 503 with `CONFIGURATION_INCOMPLETE` when one is missing.
 - `/sitemap.xml` returns HTTP 200 with XML content.
 - `/api/admin/stats` without an admin credential returns HTTP 401 (or the expected unauthenticated error envelope); it must not return protected statistics.
 
@@ -104,7 +107,7 @@ Never include admin credentials in URLs, screenshots, issue comments, or browser
 
 ## 6. Publish-boundary verification
 
-The static site should publish from `dist/`, not from the repository root. Confirm the artifact contains required public pages/assets and does **not** contain `.github/`, `api/migrations/`, `netlify/functions/`, `prototypes/`, `tests/`, package manifests, or local environment files. The automated build test checks the allowlist; do not replace the allowlist with a broad copy of the repository.
+The static site should publish from `dist/`, not from the repository root. Confirm the artifact contains required public pages/assets and does **not** contain `.github/`, `api/migrations/`, `server/functions/`, `netlify/functions/`, `prototypes/`, `tests/`, package manifests, or local environment files. The automated build test checks the allowlist; do not replace the allowlist with a broad copy of the repository.
 
 After a release, a maintainer should separately verify the deployed site's public routes and that internal paths are not downloadable. CI alone does not prove the production site's current deploy configuration.
 

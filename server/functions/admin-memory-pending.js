@@ -1,6 +1,6 @@
 /**
  * ═══════════════════════════════════════════════════════════════════════════
- * GET /.netlify/functions/admin-memory-pending
+ * GET /api/admin/memory/pending
  * List all pending memorial pages (admin only)
  * ═══════════════════════════════════════════════════════════════════════════
  */

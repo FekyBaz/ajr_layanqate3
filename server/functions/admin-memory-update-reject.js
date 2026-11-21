@@ -1,6 +1,6 @@
 /**
  * ═══════════════════════════════════════════════════════════════════════════
- * POST /.netlify/functions/admin-memory-update-reject
+ * POST /api/admin/memory-update/reject
  * Reject a proposed memory update (admin only)
  * ═══════════════════════════════════════════════════════════════════════════
  */

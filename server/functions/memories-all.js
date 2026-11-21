@@ -1,6 +1,6 @@
 /**
  * ═══════════════════════════════════════════════════════════════════════════
- * GET /.netlify/functions/memories-all
+ * GET /api/memories/all
  * Returns approved memorial pages (paginated)
  * ═══════════════════════════════════════════════════════════════════════════
  */

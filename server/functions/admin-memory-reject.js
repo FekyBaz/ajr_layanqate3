@@ -1,6 +1,6 @@
 /**
  * ═══════════════════════════════════════════════════════════════════════════
- * POST /.netlify/functions/admin-memory-reject
+ * POST /api/admin/memory/reject
  * Reject a pending memorial page (admin only)
  * ═══════════════════════════════════════════════════════════════════════════
  */

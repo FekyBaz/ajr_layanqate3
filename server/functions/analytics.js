@@ -1,6 +1,6 @@
 /**
  * ═══════════════════════════════════════════════════════════════════════════
- * POST /.netlify/functions/analytics
+ * POST /api/analytics
  * Privacy-first product analytics ingestion for أجر لا ينقطع
  * ═══════════════════════════════════════════════════════════════════════════
  *

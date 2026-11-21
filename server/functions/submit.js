@@ -1,6 +1,6 @@
 /**
  * ═══════════════════════════════════════════════════════════════════════════
- * POST /.netlify/functions/submit
+ * POST /api/submit
  * Submit a new dhikr/dua/ayah/hadith
  * ═══════════════════════════════════════════════════════════════════════════
  */
@@ -70,7 +70,7 @@ export async function handler(event, context) {
         const clientIP = getClientIP(event);
         const ipHash = hashIP(clientIP);
 
-        logger.info('[submit] Calling submit_post RPC...', { ipHash, clientIP, rateLimitMax: config.rateLimitMax, rateLimitHours: config.rateLimitWindowHours });
+        logger.info('[submit] Calling submit_post RPC...', { rateLimitMax: config.rateLimitMax, rateLimitHours: config.rateLimitWindowHours });
 
         // Call atomic check-and-insert RPC to prevent rate limit bypass race conditions
         const { data: result, error: rpcError } = await supabaseAdmin.rpc('submit_post', {

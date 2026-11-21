@@ -1,6 +1,6 @@
 /**
  * ═══════════════════════════════════════════════════════════════════════════
- * GET /.netlify/functions/admin-feedback
+ * GET /api/admin/feedback
  * Returns feedback messages for admin panel
  * ═══════════════════════════════════════════════════════════════════════════
  */

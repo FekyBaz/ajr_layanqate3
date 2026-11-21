@@ -38,7 +38,7 @@ CREATE TABLE IF NOT EXISTS analytics_events (
     screen_height integer,
     language text,                     -- browser language
 
-    -- Geographic (approximate, from Cloudflare/Netlify headers if available)
+    -- Geographic (approximate, from the hosting platform headers if available)
     country text,                      -- 2-letter country code
     region text,                       -- region/state
 
@@ -89,13 +89,13 @@ ALTER TABLE analytics_events ENABLE ROW LEVEL SECURITY;
 ALTER TABLE analytics_daily_stats ENABLE ROW LEVEL SECURITY;
 
 -- No public access to analytics data
--- Only service_role (Netlify functions) can access
+-- Only service_role (serverless functions) can access
 
 -- ═══════════════════════════════════════════════════════════════════════════
 -- Function: Compute daily stats from events (called by scheduled function)
 -- ═══════════════════════════════════════════════════════════════════════════
 
-CREATE OR REPLACE FUNCTION compute_daily_stats(target_date date DEFAULT CURRENT_DATE)
+CREATE OR REPLACE FUNCTION public.compute_daily_stats(target_date date DEFAULT CURRENT_DATE)
 RETURNS void AS $$
 DECLARE
     v_page_views integer;
@@ -137,7 +137,7 @@ $$ LANGUAGE plpgsql SECURITY DEFINER;
 -- Cleanup: Delete events older than 90 days (privacy + storage management)
 -- ═══════════════════════════════════════════════════════════════════════════
 
-CREATE OR REPLACE FUNCTION cleanup_analytics_events()
+CREATE OR REPLACE FUNCTION public.cleanup_analytics_events()
 RETURNS integer AS $$
 DECLARE
     v_deleted integer;
@@ -152,3 +152,8 @@ BEGIN
     RETURN v_deleted;
 END;
 $$ LANGUAGE plpgsql SECURITY DEFINER;
+
+
+-- SECURITY: functions are SECURITY DEFINER; remove the default PUBLIC EXECUTE grant.
+REVOKE ALL ON FUNCTION public.compute_daily_stats(target_date date) FROM PUBLIC;
+REVOKE ALL ON FUNCTION public.cleanup_analytics_events() FROM PUBLIC;

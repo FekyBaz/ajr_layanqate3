@@ -1,6 +1,6 @@
 /**
  * ═══════════════════════════════════════════════════════════════════════════
- * GET /.netlify/functions/admin-memory-updates-pending
+ * GET /api/admin/memory-updates/pending
  * List all pending collaborative proposed updates (admin only)
  * ═══════════════════════════════════════════════════════════════════════════
  */

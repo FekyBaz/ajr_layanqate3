@@ -1,6 +1,6 @@
 /**
  * ═══════════════════════════════════════════════════════════════════════════
- * POST /.netlify/functions/memory-update-propose
+ * POST /api/memory/update-propose
  * Propose an update/enrichment to an existing approved memorial page (no login required)
  * ═══════════════════════════════════════════════════════════════════════════
  */

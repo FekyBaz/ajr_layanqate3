@@ -27,7 +27,22 @@ function normalizeBody(body) {
     return JSON.stringify(body);
 }
 
-function makeEvent(req, includeMethod = true) {
+/**
+ * Vercel parses JSON and form bodies by default, but leaves the raw stream
+ * untouched for other content types. Fall back to reading the stream so the
+ * shared handlers always receive a body string.
+ */
+async function readRequestBody(req) {
+    if (req.body !== undefined) return req.body;
+    if (!req || typeof req[Symbol.asyncIterator] !== 'function') return '';
+    const chunks = [];
+    for await (const chunk of req) {
+        chunks.push(Buffer.isBuffer(chunk) ? chunk : Buffer.from(chunk));
+    }
+    return Buffer.concat(chunks).toString('utf8');
+}
+
+async function makeEvent(req, includeMethod = true) {
     const headers = normalizeHeaders(req.headers);
     const protocol = (headers['x-forwarded-proto'] || 'https').split(',')[0].trim();
     const host = headers.host || 'localhost';
@@ -39,7 +54,7 @@ function makeEvent(req, includeMethod = true) {
 
     const event = {
         headers,
-        body: normalizeBody(req.body),
+        body: normalizeBody(await readRequestBody(req)),
         path: url.pathname,
         rawUrl: url.href,
         queryStringParameters,
@@ -77,7 +92,7 @@ function sendError(res, err) {
 export function netlifyHandlerToVercel(handler) {
     return async function vercelApiHandler(req, res) {
         try {
-            const event = makeEvent(req, true);
+            const event = await makeEvent(req, true);
             const result = await handler(event, {});
             sendResult(res, result);
         } catch (err) {
@@ -120,7 +135,7 @@ export function scheduledHandlerToVercel(handler) {
         try {
             // The secret was validated above; omitting httpMethod marks this
             // as an authenticated scheduled invocation to the shared handler.
-            const event = makeEvent(req, false);
+            const event = await makeEvent(req, false);
             const result = await handler(event, {});
             sendResult(res, result);
         } catch (err) {

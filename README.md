@@ -2,7 +2,7 @@
 
 Arabic-first community project for submitting and reviewing **dhikr, dua, ayah, and hadith** content.
 
-The migration branch is being prepared for **Vercel Functions + Supabase**. Netlify configuration remains temporarily available as a rollback path while the Vercel preview is validated; it is not used by the new Vercel routes.
+The application deploys to **Vercel Functions + Supabase**. Netlify configuration remains temporarily available as a rollback path until the Vercel production deployment is validated; both runtimes use the same canonical handlers.
 
 > **Open-source note:** The source code is licensed under the MIT License. Third-party content and assets may have separate licenses; see [THIRD_PARTY_NOTICES.md](./THIRD_PARTY_NOTICES.md).
 
@@ -39,10 +39,12 @@ Browser
 
 Main application areas:
 
-- `api/` — Vercel HTTP routes and database migrations
-- `server/functions/` — platform-neutral handler logic shared by the Vercel adapters
+- `api/` — Vercel entry points; `api/migrations/` holds SQL migrations that are never published
+- `server/functions/` — platform-neutral handler logic shared by the Vercel and Netlify adapters
 - `server/vercel-adapter.js` — maps Node.js requests to the existing handler contract; also secures scheduled invocations
-- `vercel.json` — clean-page rewrites, security/cache headers, and cron schedules
+- `server/vercel-router.js` — dispatches all `/api/*` paths from one function
+- `vercel.json` — build output, function layout, clean-page rewrites, security/cache headers, and cron schedules
+- `scripts/build-public.cjs` — explicit public-file allowlist that produces `dist/`
 - `lib/`, `components/`, `pages/` — browser-side utilities and UI code
 - `netlify.toml` and `netlify/functions/` — temporary fallback during migration; to be removed after Vercel is verified and the domain cutover is complete
 
@@ -50,7 +52,7 @@ Main application areas:
 
 ### Requirements
 
-- Node.js 24 (see `.nvmrc`)
+- Node.js 22 (see `.nvmrc` and `package.json#engines`)
 - npm
 - A Supabase project
 
@@ -72,7 +74,19 @@ Fill in your own Supabase credentials and a locally generated admin secret. Do n
 npm run dev
 ```
 
-The Vercel CLI runs the project at its local development URL. It can be installed through `npx vercel dev` if it is not installed globally.
+The Vercel CLI runs the project at its local development URL. Use `npm run dev:netlify` to exercise the Netlify fallback instead.
+
+Run the project checks before opening a pull request:
+
+```bash
+npm test
+npm run lint
+npm run lint:css
+npm run build
+npm run guard:migrations
+npm run guard:routes
+npm run guard:vercel
+```
 
 ## Environment variables
 
@@ -103,9 +117,9 @@ The repository contains SQL migrations used by the application. Review them befo
 
 ## Deployment
 
-Import the repository into Vercel and use the `feat/runtime-neutral-backend` branch for the first preview. Configure the required environment variables for the Preview environment, preferably against a staging Supabase project. Verify the public and administrative flows before assigning the production domain or removing the temporary Netlify fallback.
+Import the repository into Vercel and connect the `main` branch. `vercel.json` builds the allowlisted `dist/` output and deploys three functions. Configure the required environment variables for Preview and Production, preferably validating against a staging Supabase project first. Verify the public and administrative flows before assigning the production domain or removing the temporary Netlify fallback.
 
-See [DEPLOYMENT.md](./DEPLOYMENT.md) for the project-specific deployment checklist.
+See [DEPLOYMENT.md](./DEPLOYMENT.md) for the project-specific deployment checklist, Cron configuration, and rollback path.
 
 ## API
 

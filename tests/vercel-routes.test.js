@@ -36,7 +36,7 @@ test('browser-facing files do not call Netlify Functions directly', () => {
 
 test('Vercel API handlers are dispatched through one catch-all function', () => {
     const apiRoot = join(ROOT, 'api');
-    const apiFunctions = walkFiles(apiRoot, (file) => file.endsWith('.js'))
+    const apiFunctions = walkFiles(apiRoot, (file) => file.endsWith('.js'), new Set(['node_modules']))
         .map((file) => relative(apiRoot, file).replaceAll('\\', '/'))
         .sort();
 
@@ -91,14 +91,18 @@ test('Vercel routing and Cron config is valid JSON for the catch-all dispatcher'
     assert.equal(config.functions['api/memory-og/*.js']?.maxDuration, 10);
 });
 
-test('Node.js runtime policy remains aligned on Node.js 24', () => {
+test('Node.js runtime policy remains aligned on Node.js 22', () => {
     const packageJson = JSON.parse(readFileSync(join(ROOT, 'package.json'), 'utf8'));
     const nvmrc = readFileSync(join(ROOT, '.nvmrc'), 'utf8').trim();
-    assert.equal(nvmrc, '24');
-    assert.equal(packageJson.engines?.node, '24.x');
+    assert.equal(nvmrc, '22');
+    assert.equal(packageJson.engines?.node, '22.x');
     const netlifyToml = readFileSync(join(ROOT, 'netlify.toml'), 'utf8');
-    assert.match(netlifyToml, /NODE_VERSION\s*=\s*"24"/,
+    assert.match(netlifyToml, /NODE_VERSION\s*=\s*"22"/,
         'Netlify runtime should match the repository Node.js policy');
+    const ci = readFileSync(join(ROOT, '.github', 'workflows', 'ci.yml'), 'utf8');
+    assert.doesNotMatch(ci, /node-version:\s*'?(?:20|24)'?/,
+        'CI must use the repository Node.js version');
+    assert.match(ci, /node-version:\s*'22'/);
 });
 
 test('isolated health endpoint fails closed when runtime configuration is missing', async () => {

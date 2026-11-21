@@ -45,6 +45,34 @@ test('HTTP adapter maps request URL, headers, method, and JSON body', async () =
     assert.equal(res.body, JSON.stringify({ accepted: true }));
 });
 
+test('HTTP adapter reads the raw body stream when Vercel leaves it unparsed', async () => {
+    let capturedEvent;
+    const handler = netlifyHandlerToVercel(async (event) => {
+        capturedEvent = event;
+        return { statusCode: 200, body: 'ok' };
+    });
+    const chunks = [Buffer.from('plain '), Buffer.from('text')];
+    const req = {
+        method: 'POST',
+        url: '/api/contact',
+        headers: { host: 'example.vercel.app', 'content-type': 'text/plain' },
+        [Symbol.asyncIterator]() {
+            let index = 0;
+            return {
+                next: async () => (index < chunks.length
+                    ? { value: chunks[index++], done: false }
+                    : { value: undefined, done: true }),
+            };
+        },
+    };
+    const res = mockResponse();
+
+    await handler(req, res);
+
+    assert.equal(capturedEvent.body, 'plain text');
+    assert.equal(res.statusCode, 200);
+});
+
 test('cron adapter rejects requests without a valid secret', async (t) => {
     const originalSecret = process.env.CRON_SECRET;
     process.env.CRON_SECRET = 'test-cron-secret';

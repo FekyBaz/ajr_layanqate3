@@ -11,7 +11,7 @@ Thank you for contributing to أجر لا ينقطع.
 
 ## Local setup
 
-Requirements: **Node.js 22.13.0 or later** (use Node 22 from `.nvmrc`), npm, a Supabase project, Netlify CLI.
+Requirements: **Node.js 22** (use Node 22 from `.nvmrc`), npm, a Supabase project. The Vercel CLI is used through `npx`; the Netlify CLI is a devDependency for the rollback path.
 
 ```bash
 npm ci
@@ -25,7 +25,11 @@ Useful commands:
 npm test        # unit tests (zero dependencies, node:test)
 npm run lint    # ESLint errors (warnings allowed for legacy code)
 npm run lint:css       # Stylelint: prefer logical CSS properties (see #72)
+npm run build          # generate the allowlisted dist/ deployment artifact
 npm run guard:migrations # Guard against insecure migration grants
+npm run guard:routes     # Verify API routing and Netlify redirect parity
+npm run guard:vercel     # Validate vercel.json build, headers, rewrites, and crons
+npm run dev:netlify      # Exercise the Netlify rollback path locally
 ```
 
 Apply the SQL migrations in `api/migrations/` to your Supabase project

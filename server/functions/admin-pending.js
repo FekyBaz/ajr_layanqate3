@@ -1,6 +1,6 @@
 /**
  * ═══════════════════════════════════════════════════════════════════════════
- * GET /.netlify/functions/admin-pending
+ * GET /api/admin/pending
  * Returns all pending submissions for admin review
  * ═══════════════════════════════════════════════════════════════════════════
  */

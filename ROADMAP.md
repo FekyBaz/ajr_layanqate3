@@ -5,10 +5,11 @@ This roadmap describes candidate directions for the project. It is not a promise
 ## Priorities
 
 ### P0 — Security and release hygiene
-- [ ] Verify that the deployed Netlify publish directory exposes only intended public assets; prefer a build output directory with an explicit allowlist.
-- [ ] Add deployment checks that fail if internal-only directories or files are served publicly.
-- [ ] Reconcile README setup instructions with CONTRIBUTING.md and validate them in a clean environment.
-- [ ] Document a repeatable smoke-test checklist for a fresh deployment.
+- [x] Verify that the deployed publish directory exposes only intended public assets; the build now publishes an explicit `dist/` allowlist.
+- [x] Add deployment checks that fail if internal-only directories or files are served publicly (artifact verifier, `guard:vercel`).
+- [x] Reconcile README setup instructions with CONTRIBUTING.md and validate them in a clean environment.
+- [x] Document a repeatable smoke-test checklist for a fresh deployment (`docs/SMOKE_TEST_CHECKLIST.md`).
+- [ ] Complete the Vercel production cutover and remove the Netlify fallback only after the preview checklist passes.
 
 ### P1 — Trustworthy religious content
 - [ ] Define a source-citation format for Qur'anic verses, hadith, and adhkar.

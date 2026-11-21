@@ -1,5 +1,9 @@
 {
   "$schema": "https://openapi.vercel.sh/vercel.json",
+  "framework": null,
+  "buildCommand": "npm run build",
+  "outputDirectory": "dist",
+  "installCommand": "npm ci --omit=dev",
   "functions": {
     "api/[...path].js": {
       "maxDuration": 30
@@ -24,6 +28,21 @@
   ],
   "rewrites": [
     {
+      "source": "/memory/:slug",
+      "has": [
+        {
+          "type": "header",
+          "key": "user-agent",
+          "value": "(?i).*(twitterbot|facebookexternalhit|linkedinbot|slackbot|telegrambot|whatsapp|discordbot|googlebot|bingbot|yandexbot|duckduckbot|baiduspider|sogou|exabot|facebot|ia_archiver).*"
+        }
+      ],
+      "destination": "/api/memory-og/:slug"
+    },
+    {
+      "source": "/memory/:slug",
+      "destination": "/memory.html"
+    },
+    {
       "source": "/poster",
       "destination": "/poster.html"
     },
@@ -40,6 +59,10 @@
       "destination": "/analytics.html"
     },
     {
+      "source": "/community",
+      "destination": "/community.html"
+    },
+    {
       "source": "/contact",
       "destination": "/contact.html"
     },
@@ -48,16 +71,16 @@
       "destination": "/create-memory.html"
     },
     {
+      "source": "/adhkar",
+      "destination": "/adhkar.html"
+    },
+    {
       "source": "/memories",
       "destination": "/memories.html"
     },
     {
       "source": "/martyrs",
       "destination": "/martyrs.html"
-    },
-    {
-      "source": "/memory/:slug",
-      "destination": "/api/memory-og/:slug"
     }
   ],
   "headers": [

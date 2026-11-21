@@ -1,6 +1,6 @@
 /**
  * ═══════════════════════════════════════════════════════════════════════════
- * POST /.netlify/functions/admin-feedback-update
+ * POST /api/admin/feedback/update
  * Updates a feedback message status (admin only)
  * ═══════════════════════════════════════════════════════════════════════════
  */

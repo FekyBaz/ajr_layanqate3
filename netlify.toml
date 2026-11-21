@@ -118,6 +118,11 @@
   to = "/.netlify/functions/admin-memory-reject"
   status = 200
 
+[[redirects]]
+  from = "/api/admin/memory/stats"
+  to = "/.netlify/functions/admin-memory-stats"
+  status = 200
+
 # Memory Collaborative Updates API
 [[redirects]]
   from = "/api/memory/update-propose"

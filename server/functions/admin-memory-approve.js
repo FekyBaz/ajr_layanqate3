@@ -1,6 +1,6 @@
 /**
  * ═══════════════════════════════════════════════════════════════════════════
- * POST /.netlify/functions/admin-memory-approve
+ * POST /api/admin/memory/approve
  * Approve a pending memorial page (admin only)
  * ═══════════════════════════════════════════════════════════════════════════
  */

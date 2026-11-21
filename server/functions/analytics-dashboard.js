@@ -1,6 +1,6 @@
 /**
  * ═══════════════════════════════════════════════════════════════════════════
- * GET /.netlify/functions/analytics-dashboard
+ * GET /api/analytics/dashboard
  * Admin analytics dashboard data for أجر لا ينقطع
  * ═══════════════════════════════════════════════════════════════════════════
  *

@@ -1,6 +1,6 @@
 /**
  * ═══════════════════════════════════════════════════════════════════════════
- * GET /.netlify/functions/admin-memory-stats
+ * GET /api/admin/memory/stats
  * Returns aggregated statistics for memorial pages
  * ═══════════════════════════════════════════════════════════════════════════
  */

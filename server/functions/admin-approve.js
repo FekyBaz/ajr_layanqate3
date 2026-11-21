@@ -1,6 +1,6 @@
 /**
  * ═══════════════════════════════════════════════════════════════════════════
- * POST /.netlify/functions/admin-approve
+ * POST /api/admin/approve
  * Approves a submission with optional correction
  * ═══════════════════════════════════════════════════════════════════════════
  */

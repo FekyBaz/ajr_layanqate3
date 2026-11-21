@@ -1,6 +1,6 @@
 /**
  * ═══════════════════════════════════════════════════════════════════════════
- * POST /.netlify/functions/memory-interact
+ * POST /api/memory/interact
  * Record an interaction (tasbeeh, dua, share) on a memorial page
  * ═══════════════════════════════════════════════════════════════════════════
  */

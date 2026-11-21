@@ -1,6 +1,6 @@
 /**
  * ═══════════════════════════════════════════════════════════════════════════
- * POST /.netlify/functions/admin-memory-update-approve
+ * POST /api/admin/memory-update/approve
  * Approve and merge a proposed memory update (admin only)
  * ═══════════════════════════════════════════════════════════════════════════
  */

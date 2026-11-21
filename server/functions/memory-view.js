@@ -1,6 +1,6 @@
 /**
  * ═══════════════════════════════════════════════════════════════════════════
- * GET /.netlify/functions/memory-view?slug=...
+ * GET /api/memory/view
  * Fetch a single approved memorial page by slug
  * ═══════════════════════════════════════════════════════════════════════════
  */
