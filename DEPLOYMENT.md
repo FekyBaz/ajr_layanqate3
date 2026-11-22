@@ -30,12 +30,16 @@ Use a development/staging Supabase project for the Preview environment first. Do
 Required variables:
 
 - `SUPABASE_URL`
-- `SUPABASE_SERVICE_ROLE_KEY` (server-side secret; never expose it to the browser)
-- `SUPABASE_ANON_KEY`
+- `SUPABASE_PUBLISHABLE_KEY` (current `sb_publishable_...` key; low-privilege and RLS-scoped)
+- `SUPABASE_SECRET_KEY` (current `sb_secret_...` key; server-only and bypasses RLS)
 - `ADMIN_API_KEY`
 - `FRONTEND_URL` (the primary site origin)
 - `IP_SALT` (generate an independent random secret for Preview)
 - `CRON_SECRET` (random secret of at least 16 characters)
+
+The application intentionally does not read the retired `SUPABASE_ANON_KEY` or `SUPABASE_SERVICE_ROLE_KEY` variables. The backend validates the new key prefixes at startup, so a legacy JWT or a pasted documentation block fails fast with a safe configuration error.
+
+The repository uses `@supabase/supabase-js` 2.118 or later. This SDK generation recognizes `sb_publishable_...` and `sb_secret_...` keys and sends them as API keys rather than treating them as legacy JWT bearer tokens.
 
 Optional variables:
 
@@ -44,7 +48,7 @@ Optional variables:
 - Rate-limit overrides
 - GA4 and Telegram variables if those features are being tested
 
-Vercel supplies `VERCEL_URL`, `VERCEL_BRANCH_URL`, and `VERCEL_PROJECT_PRODUCTION_URL`. Those exact deployment origins are normalized at the configuration boundary; CORS never allows every `vercel.app` origin. Add secrets in Vercel Project Settings → Environment Variables and select the correct environment (Preview first, Production at cutover). Use Vercel's **Sensitive** type for `CRON_SECRET`, `IP_SALT`, and other server-side secrets.
+Vercel supplies `VERCEL_URL`, `VERCEL_BRANCH_URL`, and `VERCEL_PROJECT_PRODUCTION_URL`. Those exact deployment origins are normalized at the configuration boundary; CORS never allows every `vercel.app` origin. Add secrets in Vercel Project Settings → Environment Variables and select the correct environment (Preview first, Production at cutover). Use Vercel's **Sensitive** type for `SUPABASE_SECRET_KEY`, `CRON_SECRET`, `IP_SALT`, and other server-side secrets. The publishable key is not a secret, but should still be configured only where the application needs it.
 
 See [`api/.env.example`](./api/.env.example) for the complete list with placeholders.
 
@@ -120,7 +124,7 @@ npm run guard:vercel
 - [ ] Main page and every clean URL load: `/poster`, `/dhikr-generator`, `/admin`, `/analytics`, `/community`, `/contact`, `/create-memory`, `/adhkar`, `/memories`, `/martyrs`, and a real `/memory/:slug`.
 - [ ] Every API route has been checked for method, authorization, status code, and CORS behavior.
 - [ ] Public submissions, community reads, memory interactions, feedback, and admin moderation work.
-- [ ] Supabase service-role access and anon/RLS reads work as intended.
+- [ ] Supabase secret-key access and publishable-key/RLS reads work as intended.
 - [ ] Rate limiting and client-IP extraction work on Vercel.
 - [ ] Both scheduled handlers reject unauthenticated requests and succeed with a valid `CRON_SECRET`.
 - [ ] Analytics and optional GA4 features are verified or intentionally left unconfigured.
