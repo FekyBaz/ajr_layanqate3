@@ -68,7 +68,7 @@ Create a local environment file from the example:
 Copy-Item api/.env.example .env
 ```
 
-Fill in your own Supabase credentials and a locally generated admin secret. Do not use production service-role credentials for a local or preview environment unless you intentionally accept the risk. Apply the required SQL migrations to a development/staging database, then run:
+Fill in your own Supabase credentials and a locally generated admin secret. Do not use production secret keys for a local or preview environment unless you intentionally accept the risk. Apply the required SQL migrations to a development/staging database, then run:
 
 ```bash
 npm run dev
@@ -95,8 +95,8 @@ Never commit real values. `RUNTIME_DEPLOYMENT_ORIGINS` accepts comma-separated e
 | Variable | Purpose |
 |---|---|
 | `SUPABASE_URL` | Supabase project URL |
-| `SUPABASE_SERVICE_ROLE_KEY` | Server-side Supabase credential; keep secret |
-| `SUPABASE_ANON_KEY` | Public read key where required |
+| `SUPABASE_PUBLISHABLE_KEY` | Current low-privilege Supabase key for RLS-scoped reads |
+| `SUPABASE_SECRET_KEY` | Current server-only Supabase key; bypasses RLS and must never reach the browser |
 | `ADMIN_API_KEY` | Protects admin API endpoints |
 | `FRONTEND_URL` | Primary frontend origin |
 | `ALLOWED_ORIGINS` | Optional comma-separated extra browser origins |
@@ -108,6 +108,8 @@ Never commit real values. `RUNTIME_DEPLOYMENT_ORIGINS` accepts comma-separated e
 | `GA_MEASUREMENT_ID` | Optional GA4 measurement ID |
 | `GA4_PROPERTY_ID`, Google credentials | Optional server-side GA4 dashboard |
 | `TELEGRAM_BOT_TOKEN`, `TELEGRAM_CHAT_ID` | Optional admin notifications |
+
+The backend accepts only the new `sb_publishable_...` and `sb_secret_...` key formats; it does not fall back to the retired legacy environment variables.
 
 See [api/.env.example](./api/.env.example) for placeholders.
 

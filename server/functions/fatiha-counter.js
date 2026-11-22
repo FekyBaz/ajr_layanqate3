@@ -1,25 +1,7 @@
-import { createClient } from '@supabase/supabase-js';
-import { success, error, handleOptions, logger, getClientIP, checkRateLimit, recordRequest, HOT_ENDPOINT_RATE_LIMITS } from './utils/shared.js';
-import { config } from './utils/config.js';
+import { supabaseAdmin, success, error, handleOptions, logger, getClientIP, checkRateLimit, recordRequest, HOT_ENDPOINT_RATE_LIMITS } from './utils/shared.js';
 
 const FATIHA_ROW_ID = 1;
 const FATIHA_TABLE = 'fatiha_counter';
-
-function getSupabaseAdminClient() {
-  const supabaseUrl = config.supabaseUrl;
-  const serviceRoleKey = config.supabaseServiceRoleKey;
-
-  if (!supabaseUrl || !serviceRoleKey) {
-    throw new Error('Missing SUPABASE_URL or SUPABASE_SERVICE_ROLE_KEY environment variables.');
-  }
-
-  return createClient(supabaseUrl, serviceRoleKey, {
-    auth: {
-      autoRefreshToken: false,
-      persistSession: false
-    }
-  });
-}
 
 async function getCurrentCount(supabase) {
   const { data, error } = await supabase
@@ -55,15 +37,13 @@ export async function handler(event) {
   }
 
   try {
-    const supabase = getSupabaseAdminClient();
-
     if (event.httpMethod === 'GET') {
-      const count = await getCurrentCount(supabase);
+      const count = await getCurrentCount(supabaseAdmin);
       return success({ count }, origin);
     }
 
     // Single atomic increment (migration 026) — no read-modify-write race (#110)
-    const { data: newCount, error: rpcError } = await supabase
+    const { data: newCount, error: rpcError } = await supabaseAdmin
       .rpc('increment_fatiha_counter');
 
     if (rpcError) throw rpcError;

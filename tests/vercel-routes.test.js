@@ -111,8 +111,8 @@ test('isolated health endpoint fails closed when runtime configuration is missin
 
     const validTestConfig = {
         SUPABASE_URL: 'https://example.supabase.co',
-        SUPABASE_SERVICE_ROLE_KEY: 'test-service-role',
-        SUPABASE_ANON_KEY: 'test-anon-key',
+        SUPABASE_SECRET_KEY: 'sb_secret_test',
+        SUPABASE_PUBLISHABLE_KEY: 'sb_publishable_test',
         ADMIN_API_KEY: 'test-admin-key',
         IP_SALT: 'a'.repeat(32),
         CRON_SECRET: 'b'.repeat(32),
@@ -122,12 +122,18 @@ test('isolated health endpoint fails closed when runtime configuration is missin
         ...validTestConfig,
         SUPABASE_URL: 'not a URL',
     }).includes('Valid Supabase URL'));
+    assert.ok(getMissingRuntimeConfig({
+        ...validTestConfig,
+        SUPABASE_SECRET_KEY: 'legacy-jwt-value',
+    }).includes('Valid Supabase secret key format'));
 });
 
 test('health endpoint returns a safe 503 response when required config is missing', async () => {
     const { default: healthHandler } = await import('../api/health.js');
     const keys = [
         'SUPABASE_URL',
+        'SUPABASE_SECRET_KEY',
+        'SUPABASE_PUBLISHABLE_KEY',
         'SUPABASE_SERVICE_ROLE_KEY',
         'SUPABASE_ANON_KEY',
         'ADMIN_API_KEY',
@@ -152,7 +158,7 @@ test('health endpoint returns a safe 503 response when required config is missin
 
         assert.equal(res.statusCode, 503);
         assert.equal(JSON.parse(res.body).error_code, 'CONFIGURATION_INCOMPLETE');
-        assert.doesNotMatch(res.body, /SUPABASE_URL|SERVICE_ROLE|ANON_KEY|ADMIN_API_KEY|IP_SALT|CRON_SECRET/);
+        assert.doesNotMatch(res.body, /SUPABASE_URL|SUPABASE_SECRET_KEY|SUPABASE_PUBLISHABLE_KEY|ADMIN_API_KEY|IP_SALT|CRON_SECRET/);
         assert.equal(res.headers['Cache-Control'], 'no-store');
     } finally {
         for (const key of keys) {
@@ -167,8 +173,8 @@ test('health endpoint returns 200 only when required config is present', async (
     const { default: healthHandler } = await import('../api/health.js');
     const values = {
         SUPABASE_URL: 'https://example.supabase.co',
-        SUPABASE_SERVICE_ROLE_KEY: 'placeholder-test-service-key',
-        SUPABASE_ANON_KEY: 'placeholder-test-anon-key',
+        SUPABASE_SECRET_KEY: 'sb_secret_placeholder_test',
+        SUPABASE_PUBLISHABLE_KEY: 'sb_publishable_placeholder_test',
         ADMIN_API_KEY: 'placeholder-test-admin-key',
         IP_SALT: 'a'.repeat(32),
         CRON_SECRET: 'b'.repeat(32),
