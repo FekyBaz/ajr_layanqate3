@@ -11,8 +11,8 @@
 
 const REQUIRED_ENVIRONMENT_LABELS = Object.freeze([
     ['SUPABASE_URL', 'Supabase URL'],
-    ['SUPABASE_SERVICE_ROLE_KEY', 'Supabase service role key'],
-    ['SUPABASE_ANON_KEY', 'Supabase anonymous key'],
+    ['SUPABASE_SECRET_KEY', 'Supabase secret key'],
+    ['SUPABASE_PUBLISHABLE_KEY', 'Supabase publishable key'],
     ['IP_SALT', 'IP hashing salt'],
     ['CRON_SECRET', 'Cron secret'],
 ]);
@@ -32,6 +32,16 @@ export function getMissingRuntimeConfig(env = process.env) {
         } catch {
             missing.push('Valid Supabase URL');
         }
+    }
+
+    const secretKey = String(env.SUPABASE_SECRET_KEY || '').trim();
+    if (secretKey && !secretKey.startsWith('sb_secret_')) {
+        missing.push('Valid Supabase secret key format');
+    }
+
+    const publishableKey = String(env.SUPABASE_PUBLISHABLE_KEY || '').trim();
+    if (publishableKey && !publishableKey.startsWith('sb_publishable_')) {
+        missing.push('Valid Supabase publishable key format');
     }
 
     if (!String(env.ADMIN_API_KEY || env.ADMIN_KEY || '').trim()) {
