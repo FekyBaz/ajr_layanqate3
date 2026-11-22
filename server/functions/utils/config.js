@@ -2,19 +2,12 @@
  * Validated backend configuration singleton (see issue #102).
  *
  * Single source for every environment variable the functions read.
- * Import `{ config }` from here instead of touching `process.env` directly:
+ * Import `{ config }` from here instead of touching `process.env` directly.
  *
- *   import { config } from './utils/config.js';
- *   const max = config.rateLimitMax;
- *
- * Rules:
- * - Missing hard-required vars (Supabase URL/key) throw ONE aggregated error
- *   at boot so misconfiguration fails fast and loudly.
- * - `requiredInProd` vars (anon key, admin key presence is soft, IP salt)
- *   throw only when NODE_ENV=production, otherwise warn once.
- * - Numerics fall back to documented defaults with a warning on garbage
- *   (a typo must never silently become a 10x looser limit).
- * - The exported object is frozen.
+ * Supabase credentials use the current API-key format only:
+ * - SUPABASE_SECRET_KEY (sb_secret_...) for server-side privileged operations.
+ * - SUPABASE_PUBLISHABLE_KEY (sb_publishable_...) for RLS-scoped operations.
+ * Legacy anon/service_role variables are intentionally not accepted.
  */
 
 const PRODUCTION_DEFAULTS = {
@@ -70,12 +63,25 @@ function readSupabaseUrl(errors) {
     try {
         const parsed = new URL(url);
         if (parsed.protocol !== 'https:' && parsed.protocol !== 'http:') {
-            errors.push(`SUPABASE_URL=${JSON.stringify(url)} must be an http(s) URL`);
+            errors.push('SUPABASE_URL must be an http(s) URL');
         }
     } catch {
-        errors.push(`SUPABASE_URL=${JSON.stringify(url)} is not a valid URL`);
+        errors.push('SUPABASE_URL is not a valid URL');
     }
     return url;
+}
+
+function readSupabaseKey(name, prefix, errors) {
+    const key = readString(name).trim();
+    if (!key) {
+        errors.push(`${name} is missing`);
+        return '';
+    }
+    if (!key.startsWith(prefix)) {
+        errors.push(`${name} must use the current ${prefix} API-key format`);
+        return '';
+    }
+    return key;
 }
 
 function readTimezone(warnings) {
@@ -122,15 +128,8 @@ function buildConfig() {
     const production = isProductionEnv();
 
     const supabaseUrl = readSupabaseUrl(errors);
-    const supabaseServiceRoleKey = readString('SUPABASE_SERVICE_ROLE_KEY');
-    if (!supabaseServiceRoleKey) errors.push('SUPABASE_SERVICE_ROLE_KEY is missing');
-
-    const supabaseAnonKey = readString('SUPABASE_ANON_KEY');
-    if (!supabaseAnonKey) {
-        const message = 'SUPABASE_ANON_KEY is missing — public reads will fail closed';
-        if (production) errors.push(message);
-        else warnings.push(message);
-    }
+    const supabaseSecretKey = readSupabaseKey('SUPABASE_SECRET_KEY', 'sb_secret_', errors);
+    const supabasePublishableKey = readSupabaseKey('SUPABASE_PUBLISHABLE_KEY', 'sb_publishable_', errors);
 
     const adminApiKey = readString('ADMIN_API_KEY') || readString('ADMIN_KEY');
     if (!adminApiKey) {
@@ -150,8 +149,8 @@ function buildConfig() {
         logLevel: readLogLevel(warnings),
 
         supabaseUrl,
-        supabaseServiceRoleKey,
-        supabaseAnonKey,
+        supabaseSecretKey,
+        supabasePublishableKey,
         adminApiKey,
         hasAdminKey: adminApiKey !== '',
         ipSalt,
