@@ -84,6 +84,21 @@ function readSupabaseKey(name, prefix, errors) {
     return key;
 }
 
+function readPublishableKey(errors, warnings, production) {
+    const key = readString('SUPABASE_PUBLISHABLE_KEY').trim();
+    if (!key) {
+        const message = 'SUPABASE_PUBLISHABLE_KEY is missing — public reads will fail closed';
+        if (production) errors.push(message);
+        else warnings.push(message);
+        return '';
+    }
+    if (!key.startsWith('sb_publishable_')) {
+        errors.push('SUPABASE_PUBLISHABLE_KEY must use the current sb_publishable_ API-key format');
+        return '';
+    }
+    return key;
+}
+
 function readTimezone(warnings) {
     const raw = readString('TIMEZONE').trim() || 'Asia/Gaza';
     try {
@@ -129,7 +144,7 @@ function buildConfig() {
 
     const supabaseUrl = readSupabaseUrl(errors);
     const supabaseSecretKey = readSupabaseKey('SUPABASE_SECRET_KEY', 'sb_secret_', errors);
-    const supabasePublishableKey = readSupabaseKey('SUPABASE_PUBLISHABLE_KEY', 'sb_publishable_', errors);
+    const supabasePublishableKey = readPublishableKey(errors, warnings, production);
 
     const adminApiKey = readString('ADMIN_API_KEY') || readString('ADMIN_KEY');
     if (!adminApiKey) {
