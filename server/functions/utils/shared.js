@@ -63,32 +63,32 @@ const CLIENT_OPTIONS = {
 };
 
 /**
- * Admin client — uses service_role key, bypasses RLS.
+ * Admin client — uses the Supabase secret key, bypasses RLS.
  * Use ONLY for admin operations and writes that require elevated access.
  */
 export const supabaseAdmin = createClient(
     SUPABASE_URL,
-    config.supabaseServiceRoleKey,
+    config.supabaseSecretKey,
     CLIENT_OPTIONS,
 );
 
 /**
- * Public client — uses anon key, respects RLS policies.
+ * Public client — uses the Supabase publishable key, respects RLS policies.
  * Use for public-facing reads where RLS must remain the security boundary.
  *
- * Fail-closed by design (#80): SUPABASE_ANON_KEY MUST be set. When it is
+ * Fail-closed by design (#80): SUPABASE_PUBLISHABLE_KEY MUST be set. When it is
  * missing the client is initialized with a placeholder key that Supabase
  * rejects with 401 on every request, so reads fail with 500 envelopes
  * instead of silently bypassing RLS. The service_role key is NEVER used
  * here — a single missing env var must not disable the entire RLS layer.
  */
-const PUBLIC_KEY = config.supabaseAnonKey;
+const PUBLIC_KEY = config.supabasePublishableKey;
 if (!PUBLIC_KEY) {
-    logger.error('[shared] SUPABASE_ANON_KEY is not set. Public reads will fail closed (no silent RLS bypass).');
+    logger.error('[shared] SUPABASE_PUBLISHABLE_KEY is not set. Public reads will fail closed (no silent RLS bypass).');
 }
 export const supabasePublic = createClient(
     SUPABASE_URL,
-    PUBLIC_KEY || 'SUPABASE_ANON_KEY_NOT_CONFIGURED',
+    PUBLIC_KEY || 'SUPABASE_PUBLISHABLE_KEY_NOT_CONFIGURED',
     CLIENT_OPTIONS,
 );
 
