@@ -234,6 +234,15 @@ test('health endpoint rejects unsupported methods and keeps HEAD responses empty
     assert.equal(headResponse.body, '');
 });
 
+
+test('shared Supabase clients use the current validated API-key config properties', () => {
+    const shared = readFileSync(join(ROOT, 'server', 'functions', 'utils', 'shared.js'), 'utf8');
+
+    assert.match(shared, /config\.supabaseSecretKey/);
+    assert.match(shared, /config\.supabasePublishableKey/);
+    assert.doesNotMatch(shared, /config\.supabaseServiceRoleKey|config\.supabaseAnonKey/);
+});
+
 test('provider-specific IP headers are normalized by adapters, not shared utilities', () => {
     const shared = readFileSync(join(ROOT, 'server', 'functions', 'utils', 'shared.js'), 'utf8');
     const start = shared.indexOf('export function getClientIP(event)');
