@@ -105,11 +105,11 @@ export default async function handler(request, context) {
   if (!SLUG_PATTERN.test(slug)) return context.next();
 
   var supabaseUrl = getEnv('SUPABASE_URL');
-  var anonKey = getEnv('SUPABASE_ANON_KEY');
-  if (!supabaseUrl || !anonKey) return context.next();
+  var publishableKey = getEnv('SUPABASE_PUBLISHABLE_KEY');
+  if (!supabaseUrl || !publishableKey) return context.next();
 
   try {
-    var memory = await fetchApprovedMemory(supabaseUrl, anonKey, slug);
+    var memory = await fetchApprovedMemory(supabaseUrl, publishableKey, slug);
     if (!memory) return context.next();
 
     var templateRes = await fetch(new URL('/memory.html', url.origin + '/').href);
