@@ -29,8 +29,8 @@ const badgeLabels = {
 
 const COMMUNITY_INVITE_CARD = {
     contentType: 'benefit',
-    message: 'أضف ذكرك أنت أيضًا\nشاركنا ذكرًا نافعًا بلطف، ليصل أثره إلى قلوب أكثر.',
-    ctaText: 'أضف الآن',
+    message: 'كن سببًا في نشر الخير\nشارك آية أو حديثًا أو ذكرًا نافعًا، لعل الله ينفع به غيرك.',
+    ctaText: 'شارك الآن',
     formUrl: '/index.html#form',
 };
 
@@ -472,7 +472,7 @@ function showSubmissionReviewToastIfNeeded() {
 
     if (!hasSubmissionFlag) return;
 
-    elements.shareToast.textContent = 'تم إضافة ذكرك للمراجعة';
+    elements.shareToast.textContent = 'تم استلام مشاركتك بنجاح، وستُنشر بعد مراجعتها والتحقق منها بإذن الله';
     showToast();
     sessionStorage.removeItem('ajr_submission_pending_review');
     window.scrollTo({ top: 0, behavior: 'smooth' });
