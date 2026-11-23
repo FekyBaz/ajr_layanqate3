@@ -43,14 +43,14 @@
         <header class="community-header memories-page__header">
             <nav class="community-nav">
                 <a href="/index.html" class="btn btn-ghost btn-sm">
-                    <span aria-hidden="true">➔</span> العودة للرئيسية
+                    العودة للرئيسية ←
                 </a>
                 <a href="/create-memory" class="btn btn-primary btn-sm">
-                    <span aria-hidden="true">✍️</span> أنشئ صفحة جديدة
+                    إنشاء صفحة جديدة
                 </a>
             </nav>
             <div class="community-header__intro">
-                <div class="memories-page__badge">🕊️ صدقة جارية ومغفرة</div>
+                <div class="memories-page__badge">صدقة جارية ومغفرة</div>
                 <h1>صفحات الذكرى المعتمدة</h1>
                 <p class="memories-page__desc">
                     سجل ناصع لصفحات الصدقة الجارية التي أنشأها المحبون لأهلهم وذويهم. تصفح الصفحات أو ابحث عن اسم المتوفى لتهدي لروحه ثواب قراءة القرآن والأذكار والدعاء.
@@ -64,7 +64,9 @@
         <!-- Search Controls -->
         <section class="memories-controls" aria-label="البحث والفلترة">
             <div class="memories-search-wrapper">
-                <span class="memories-search-icon" aria-hidden="true">🔍</span>
+                <span class="memories-search-icon" aria-hidden="true">
+                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"></circle><line x1="21" y1="21" x2="16.65" y2="16.65"></line></svg>
+                </span>
                 <input type="search" id="memoriesSearchInput" class="memories-search-input" placeholder="ابحث عن اسم المتوفى (رحمه الله)..." aria-label="البحث بالاسم">
                 <button type="button" id="memoriesSearchClear" class="memories-search-clear" aria-label="مسح البحث" hidden>✕</button>
             </div>
@@ -81,11 +83,11 @@
         <!-- Pagination -->
         <nav id="memoriesPagination" class="pagination memories-page__pagination" hidden aria-label="التنقل بين الصفحات">
             <button id="memoriesPrev" type="button" class="btn btn-secondary btn-pagination" disabled>
-                <span aria-hidden="true">➔</span> السابق
+                السابق
             </button>
             <span id="memoriesPageInfo" class="pagination__info"></span>
             <button id="memoriesNext" type="button" class="btn btn-secondary btn-pagination" disabled>
-                التالي <span aria-hidden="true">➔</span>
+                التالي
             </button>
         </nav>
 
@@ -95,7 +97,7 @@
                 <h2>هل ترغب في إنشاء صفحة صدقة جارية لمن تحب؟</h2>
                 <p>خطوات بسيطة ومجانية بالكامل لإنشاء صفحة مخصصة للقرآن الكريم، الأذكار، والأدعية لتكون صدقة جارية مستمرة.</p>
                 <a href="/create-memory" class="btn btn-primary btn-lg memories-bottom-cta__btn">
-                    <span aria-hidden="true">✍️</span> ابدأ إنشاء صفحة الآن
+                    ابدأ إنشاء صفحة الآن
                 </a>
             </div>
         </section>

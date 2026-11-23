@@ -14,90 +14,95 @@ html { scroll-behavior: smooth; }
 
 body {
   margin: 0;
-  font-family: "Tajawal", "Cairo", system-ui, sans-serif;
+  font-family: var(--font-primary);
   background: var(--bg);
   color: var(--text);
-  line-height: 1.7;
+  line-height: 1.75;
 }
 
-.martyrs-page { max-width: 1200px; margin: 0 auto; padding: 0 16px; }
+.martyrs-page { max-width: 1140px; margin: 0 auto; padding: 0 20px; }
 
 .hero-section {
-  background: linear-gradient(135deg, var(--card), #f4eddf);
+  background: var(--card);
   border: 1px solid var(--border);
-  border-radius: 14px;
-  padding: 1.25rem;
-  margin-bottom: 1rem;
+  border-radius: var(--radius-md, 8px);
+  padding: 1.75rem 2rem;
+  margin-bottom: 1.5rem;
   display: flex;
   flex-direction: column;
-  gap: 0.75rem;
+  gap: 1rem;
   align-items: flex-start;
+  box-shadow: var(--shadow-subtle);
 }
 
-.hero-section h1 { margin: 0; font-size: clamp(1.4rem, 2.4vw, 2rem); }
-.hero-section #hero-count { margin: 0.5rem 0 0; color: var(--accent); font-size: clamp(1.05rem, 2vw, 1.3rem); font-weight: 700; }
-.hero-subtitle { margin: 0.3rem 0 0; color: var(--muted); font-size: 1rem; }
+.hero-section h1 { margin: 0; font-family: var(--font-display); font-size: clamp(1.6rem, 3vw, 2.2rem); font-weight: 700; color: var(--text); }
+.hero-section #hero-count { margin: 0.25rem 0 0; color: var(--accent); font-size: clamp(1.1rem, 2vw, 1.4rem); font-weight: 600; }
+.hero-subtitle { margin: 0.25rem 0 0; color: var(--muted); font-size: 1rem; max-width: 680px; }
 
-.fatiha-box { display: flex; flex-direction: column; gap: 0.4rem; }
+.fatiha-box { display: flex; flex-direction: column; gap: 0.5rem; margin-top: 0.5rem; }
 .fatiha-button {
-  border: 0; background: var(--accent); color: #fff; border-radius: 999px; padding: 0.55rem 1.1rem;
-  font-size: 1rem; cursor: pointer; transition: background-color .2s ease, opacity .2s ease, transform .2s ease;
+  border: 1px solid var(--accent); background: var(--accent); color: #fff; border-radius: var(--radius-md, 8px); padding: 0.65rem 1.4rem;
+  font-size: 1rem; font-family: inherit; cursor: pointer; transition: background-color .15s ease;
 }
 .fatiha-button:hover { background: var(--accent-hover); }
 .fatiha-button:disabled { opacity: .72; cursor: not-allowed; }
-.fatiha-count { margin: 0; color: var(--muted); font-size: .96rem; }
+.fatiha-count { margin: 0; color: var(--muted); font-size: .95rem; }
 .fatiha-cooldown { margin: 0; min-height: 1.2rem; color: var(--accent-hover); font-size: .92rem; }
-.pulse { animation: pulse 500ms ease; }
-@keyframes pulse { 0% { transform: scale(1);} 50% {transform: scale(1.04);} 100% {transform: scale(1);} }
+.pulse { animation: pulse 400ms ease; }
+@keyframes pulse { 0% { transform: scale(1);} 50% {transform: scale(1.02);} 100% {transform: scale(1);} }
 
-.state { text-align: center; margin: 0.75rem 0 1.25rem; font-size: 1rem; }
-.error { color: #b91c1c; }
+.state { text-align: center; margin: 1rem 0 1.5rem; font-size: 1rem; color: var(--muted); }
+.error { color: #9b2c2c; }
 
 .featured-martyr {
-  background: linear-gradient(135deg, #fbf5e7, var(--card));
+  background: var(--card);
   border: 1px solid var(--border);
-  border-radius: 12px;
-  padding: 1rem;
-  margin-bottom: 1rem;
+  border-top: 2px solid var(--color-gold, #9e7d47);
+  border-radius: var(--radius-md, 8px);
+  padding: 1.25rem 1.5rem;
+  margin-bottom: 1.25rem;
+  box-shadow: var(--shadow-subtle);
 }
-.featured-martyr h2, .featured-martyr h3 { margin: 0 0 .35rem; }
+.featured-martyr h2, .featured-martyr h3 { margin: 0 0 .35rem; font-family: var(--font-display); }
 .featured-martyr p { margin: .25rem 0; color: var(--muted); }
 .featured-fatiha-button { margin-top: .5rem; }
 
-.stats-section { display: grid; grid-template-columns: 1fr; gap: .75rem; margin-bottom: 1rem; }
-.stat-card { background: var(--card); border: 1px solid var(--border); border-radius: 12px; padding: .9rem 1rem; box-shadow: 0 4px 12px rgba(140, 106, 53, .08); }
-.stat-card h3 { margin: 0; color: var(--muted); font-size: .95rem; }
-.stat-card p { margin: .35rem 0 0; font-size: 1.3rem; font-weight: 700; }
+.stats-section { display: grid; grid-template-columns: 1fr; gap: .75rem; margin-bottom: 1.25rem; }
+.stat-card { background: var(--card); border: 1px solid var(--border); border-radius: var(--radius-md, 8px); padding: 1rem 1.25rem; box-shadow: var(--shadow-subtle); }
+.stat-card h3 { margin: 0; color: var(--muted); font-size: .95rem; font-weight: 500; }
+.stat-card p { margin: .35rem 0 0; font-size: 1.35rem; font-weight: 700; color: var(--text); }
 
-.charts-section { display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: .75rem; margin-bottom: 1rem; }
-.chart-card { background: var(--card); border: 1px solid var(--border); border-radius: 12px; padding: 1rem; min-height: 320px; }
+.charts-section { display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: .75rem; margin-bottom: 1.25rem; }
+.chart-card { background: var(--card); border: 1px solid var(--border); border-radius: var(--radius-md, 8px); padding: 1.25rem; min-height: 320px; box-shadow: var(--shadow-subtle); }
 .chart-card canvas { width: 100% !important; height: 240px !important; }
 .age-categories-explanation { margin-top: .8rem; padding-top: .75rem; border-top: 1px dashed var(--border); color: var(--muted); text-align: start; }
 .age-categories-explanation h4 { margin: 0 0 .35rem; color: var(--text); font-size: .98rem; }
 .age-categories-explanation ul { margin: 0; padding-inline-start: 1.1rem; }
 .age-categories-explanation li { margin-bottom: .2rem; }
-.chart-card h3 { margin: 0 0 .75rem; font-size: 1rem; }
+.chart-card h3 { margin: 0 0 .75rem; font-size: 1rem; font-family: var(--font-display); }
 
-.controls-section { margin-bottom: 1rem; position: sticky; top: .5rem; z-index: 8; background: var(--bg); padding: .4rem 0; }
-.search-input { width: 100%; border: 1px solid var(--border); border-radius: 10px; padding: .75rem .9rem; font: inherit; background: var(--card); }
+.controls-section { margin-bottom: 1.25rem; position: sticky; top: .5rem; z-index: 8; background: var(--bg); padding: .5rem 0; }
+.search-input { width: 100%; border: 1px solid var(--border); border-radius: var(--radius-md, 8px); padding: .75rem .9rem; font: inherit; background: var(--card); }
+.search-input:focus { outline: none; border-color: var(--accent); }
 .filter-buttons { margin-top: .75rem; display: flex; flex-wrap: wrap; gap: 8px; }
-.filter-button { border: 1px solid var(--border); background: var(--card); color: var(--text); border-radius: 999px; padding: .42rem .9rem; cursor: pointer; font: inherit; min-height: 44px; }
+.filter-button { border: 1px solid var(--border); background: var(--card); color: var(--text); border-radius: var(--radius-sm, 4px); padding: .42rem .9rem; cursor: pointer; font: inherit; min-height: 40px; }
 .filter-button.active { background: var(--accent); color: #fff; border-color: var(--accent); }
 
 #list-container { width: 100%; display: block; position: relative; min-height: auto; height: auto; overflow: auto; padding-inline: .1rem; }
 .martyrs-list { list-style: none; padding: 0; margin: 0; display: grid; grid-template-columns: repeat(auto-fit, minmax(260px, 1fr)); gap: .75rem; }
 .virtual-spacer { width: 100%; }
-.martyr-item { background: var(--card); border: 1px solid var(--border); border-radius: 12px; padding: 1rem; transition: transform .2s ease, box-shadow .2s ease, border-color .2s ease; }
+.martyr-item { background: var(--card); border: 1px solid var(--border); border-radius: var(--radius-md, 8px); padding: 1.1rem; box-shadow: var(--shadow-subtle); transition: border-color .15s ease; }
 .martyr-item.highlighted { border-color: var(--accent); box-shadow: 0 0 0 2px var(--accent-soft); }
-.martyr-name { margin: 0; font-size: 1.05rem; line-height: 1.8; }
-.martyr-meta, .martyr-age, .martyr-birth-year { margin: .3rem 0 0; color: var(--muted); font-size: .98rem; }
-.martyr-age { color: var(--text); font-weight: 600; }
-.martyr-actions { margin-top: .55rem; display: flex; flex-wrap: wrap; gap: .4rem; }
+.martyr-name { margin: 0; font-size: 1.1rem; line-height: 1.8; font-weight: 600; color: var(--text); }
+.martyr-meta, .martyr-age, .martyr-birth-year { margin: .3rem 0 0; color: var(--muted); font-size: .95rem; }
+.martyr-age { color: var(--text); font-weight: 500; }
+.martyr-actions { margin-top: .65rem; display: flex; flex-wrap: wrap; gap: .4rem; }
 .dua-button, .share-link {
-  border: 1px solid var(--border); background: #fff; color: var(--text); text-decoration: none;
-  border-radius: 999px; padding: .25rem .7rem; font-size: .84rem;
+  border: 1px solid var(--border); background: var(--card); color: var(--text); text-decoration: none;
+  border-radius: var(--radius-sm, 4px); padding: .3rem .8rem; font-size: .84rem; font-family: inherit;
 }
 .dua-button { cursor: pointer; }
+.dua-button:hover, .share-link:hover { border-color: var(--accent); }
 .share-link {
   cursor: pointer;
   border-color: var(--color-border);

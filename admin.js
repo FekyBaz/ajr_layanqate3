@@ -184,11 +184,16 @@
 
     // Toggle password visibility
     const togglePassword = document.getElementById('toggle-password');
-    togglePassword.addEventListener('click', () => {
-        const type = apiKeyInput.type === 'password' ? 'text' : 'password';
-        apiKeyInput.type = type;
-        togglePassword.textContent = type === 'password' ? '👁️' : '🙈';
-    });
+    const eyeSvg = '<svg class="icon-eye" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"></path><circle cx="12" cy="12" r="3"></circle></svg>';
+    const eyeOffSvg = '<svg class="icon-eye-off" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M17.94 17.94A10.07 10.07 0 0 1 12 20c-7 0-11-8-11-8a18.45 18.45 0 0 1 5.06-5.94M9.9 4.24A9.12 9.12 0 0 1 12 4c7 0 11 8 11 8a18.5 18.5 0 0 1-2.16 3.19m-6.72-1.07a3 3 0 1 1-4.24-4.24"></path><line x1="1" y1="1" x2="23" y2="23"></line></svg>';
+    if (togglePassword) {
+        togglePassword.addEventListener('click', () => {
+            const isPassword = apiKeyInput.type === 'password';
+            apiKeyInput.type = isPassword ? 'text' : 'password';
+            togglePassword.innerHTML = isPassword ? eyeOffSvg : eyeSvg;
+            togglePassword.setAttribute('aria-label', isPassword ? 'إخفاء كلمة المرور' : 'إظهار كلمة المرور');
+        });
+    }
 
     function logout() {
         adminKey = '';
@@ -712,7 +717,7 @@
                             <div class="diff-header${isBioChanged ? ' is-changed' : ''}">
                                 <span>عن المتوفى وسيرته (نبذة تعريفية)</span>
                                 <span class="diff-badge${isBioChanged ? ' is-changed' : ''}">
-                                    ${isBioChanged ? 'معدّل 📝' : 'لم يتغير'}
+                                    ${isBioChanged ? 'معدّل' : 'لم يتغير'}
                                 </span>
                             </div>
                             <div class="diff-body">
@@ -738,7 +743,7 @@
                             <div class="diff-header${isTraitsChanged ? ' is-changed' : ''}">
                                 <span>من صفاته الحميدة</span>
                                 <span class="diff-badge${isTraitsChanged ? ' is-changed' : ''}">
-                                    ${isTraitsChanged ? 'معدّل 📝' : 'لم يتغير'}
+                                    ${isTraitsChanged ? 'معدّل' : 'لم يتغير'}
                                 </span>
                             </div>
                             <div class="diff-body">
@@ -764,7 +769,7 @@
                             <div class="diff-header${isCharityChanged ? ' is-changed' : ''}">
                                 <span>الصدقة الجارية والوقف</span>
                                 <span class="diff-badge${isCharityChanged ? ' is-changed' : ''}">
-                                    ${isCharityChanged ? 'معدّل 📝' : 'لم يتغير'}
+                                    ${isCharityChanged ? 'معدّل' : 'لم يتغير'}
                                 </span>
                             </div>
                             <div class="diff-body">
@@ -790,7 +795,7 @@
                             <div class="diff-header${isLinksChanged ? ' is-changed' : ''}">
                                 <span>روابط الصدقة والمشاريع (حتى 5 روابط)</span>
                                 <span class="diff-badge${isLinksChanged ? ' is-changed' : ''}">
-                                    ${isLinksChanged ? 'معدّل 📝' : 'لم يتغير'}
+                                    ${isLinksChanged ? 'معدّل' : 'لم يتغير'}
                                 </span>
                             </div>
                             <div class="diff-body diff-body--wide">
@@ -832,7 +837,7 @@
                             <div class="diff-header${isStoryChanged ? ' is-changed' : ''}">
                                 <span>مواقف وذكريات خالدة (قصص)</span>
                                 <span class="diff-badge${isStoryChanged ? ' is-changed' : ''}">
-                                    ${isStoryChanged ? 'معدّل 📝' : 'لم يتغير'}
+                                    ${isStoryChanged ? 'معدّل' : 'لم يتغير'}
                                 </span>
                             </div>
                             <div class="diff-body">
@@ -857,7 +862,7 @@
 
                     <div class="actions admin-update-actions">
                         <button class="btn btn-success btn-md admin-approve-btn" data-update-action="approve" data-proposal-id="${escapeHtml(String(prop.id))}">
-                            ✓ اعتماد التعديلات والتدميج ✨
+                            ✓ اعتماد التعديلات والدمج
                         </button>
                         <button class="btn btn-danger btn-md admin-reject-btn" data-update-action="reject" data-proposal-id="${escapeHtml(String(prop.id))}">
                             ✗ رفض التعديل
@@ -917,7 +922,7 @@
             const result = await apiRequest('/api/admin/memory-update/approve', 'POST', body);
 
             if (result.success) {
-                showMemoryUpdateNotification('تم دمج واعتماد التعديلات المقترحة بنجاح ✨', 'success');
+                showMemoryUpdateNotification('تم دمج واعتماد التعديلات المقترحة بنجاح', 'success');
                 card.remove();
                 loadStats();
                 if (memoryUpdatesList.children.length === 0) {

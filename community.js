@@ -206,6 +206,14 @@ function getShareMessage(item, platform = 'whatsapp') {
     return `"${resolveMessage(item)}"\n\nمن مشروع أجر لا ينقطع\n${siteUrl}`;
 }
 
+function updateSaveButtonVisual(btn, saved) {
+    btn.setAttribute('aria-pressed', saved ? 'true' : 'false');
+    btn.setAttribute('aria-label', saved ? 'إزالة من المحفوظات' : 'حفظ في المحفوظات');
+    btn.innerHTML = saved
+        ? '<svg width="17" height="17" viewBox="0 0 24 24" fill="currentColor" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M19 21l-7-5-7 5V5a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2z"></path></svg>'
+        : '<svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M19 21l-7-5-7 5V5a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2z"></path></svg>';
+}
+
 function createCardTop(item, avgPostCount) {
     const top = document.createElement('div');
     top.className = 'submission-card__top';
@@ -219,7 +227,7 @@ function createCardTop(item, avgPostCount) {
     if (isTrending) {
         const trendingBadge = document.createElement('span');
         trendingBadge.className = 'trending-badge';
-        trendingBadge.textContent = 'رائج الآن';
+        trendingBadge.textContent = 'مختارات متداولة';
         top.appendChild(trendingBadge);
     }
 
@@ -234,7 +242,7 @@ function createCardTop(item, avgPostCount) {
     const isSaved = submissionId ? state.savedIds.has(submissionId) : false;
     saveButton.setAttribute('aria-pressed', isSaved ? 'true' : 'false');
     saveButton.setAttribute('aria-label', isSaved ? 'إزالة من المفضلة' : 'إضافة إلى المفضلة');
-    saveButton.textContent = isSaved ? '♥' : '♡';
+    updateSaveButtonVisual(saveButton, isSaved);
     top.appendChild(saveButton);
 
     return top;
@@ -676,7 +684,7 @@ function syncSaveButtons() {
         const isSaved = state.savedIds.has(submissionId);
         button.setAttribute('aria-pressed', isSaved ? 'true' : 'false');
         button.setAttribute('aria-label', isSaved ? 'إزالة من المفضلة' : 'إضافة إلى المفضلة');
-        button.textContent = isSaved ? '♥' : '♡';
+        updateSaveButtonVisual(button, isSaved);
     });
 }
 

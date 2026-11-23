@@ -370,7 +370,7 @@
                 
                 <div class="dhikr-card__buttons">
                     <button class="dhikr-btn dhikr-btn--tasbeeh" id="dhikr-btn-${item.id}" ${isCompleted ? 'disabled' : ''} type="button">
-                        <span class="dhikr-btn__icon" id="dhikr-btn-icon-${item.id}" aria-hidden="true">${isCompleted ? '✓' : '📿'}</span>
+                        <span class="dhikr-btn__icon" id="dhikr-btn-icon-${item.id}" aria-hidden="true">${isCompleted ? '✓' : ''}</span>
                         <span class="dhikr-btn__text" id="dhikr-btn-text-${item.id}">${isCompleted ? 'تمت' : 'تسبيحة'}</span>
                     </button>
                     <button class="dhikr-btn dhikr-btn--reset" id="dhikr-reset-${item.id}" title="إعادة العداد للصفر" type="button">
@@ -431,7 +431,7 @@
                 card.classList.remove('completed', 'celebrate');
                 countBtn.disabled = false;
                 btnText.textContent = 'تسبيحة';
-                btnIcon.textContent = '📿';
+                btnIcon.textContent = '';
 
                 numEl.textContent = '0';
                 barEl.style.width = '0%';
@@ -753,7 +753,7 @@
                 showStatus('حدث خطأ أثناء الاتصال بالخادم. يرجى التحقق من اتصالك بالإنترنت.', 'error');
             } finally {
                 btnSubmit.disabled = false;
-                btnSubmit.textContent = 'إرسال طلب التعديل ✨';
+                btnSubmit.textContent = 'إرسال طلب التعديل';
             }
         });
 

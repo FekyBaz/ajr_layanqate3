@@ -69,8 +69,8 @@ function renderItem(martyr, { selectedId }) {
       <p class="martyr-age">${getAgeLabel(martyr.age)}</p>
       <p class="martyr-birth-year">${getBirthYearLabel(martyr.birthYear)}</p>
       <div class="martyr-actions">
-        <button class="dua-button" type="button" data-dua-id="${safeId}">🤲 ادعُ له</button>
-        <button class="share-link" type="button" data-share-id="${safeId}">🔗 مشاركة</button>
+        <button class="dua-button" type="button" data-dua-id="${safeId}">ادعُ له</button>
+        <button class="share-link" type="button" data-share-id="${safeId}">مشاركة</button>
       </div>
       ${isSelected ? '<p class="martyr-details-panel">اللهم اجعل مثواه الجنة واربط على قلوب أهله.</p>' : ''}
     </li>

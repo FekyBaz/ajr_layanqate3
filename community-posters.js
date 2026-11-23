@@ -101,7 +101,7 @@
             ? `<span class="community-poster-card__badge">${themeName}</span>`
             : '';
         const seedNote = entry.isSeed
-            ? `<a href="poster.html" class="community-poster-card__seed">✨ صمّم بطاقتك</a>`
+            ? `<a href="poster.html" class="community-poster-card__seed">صمّم بطاقتك</a>`
             : '';
 
         return `

@@ -226,8 +226,8 @@
 }
 
 .external-link::before {
-    content: '🔗';
-    font-size: 1.2rem;
+    content: '↗';
+    font-size: 1.1rem;
 }
 
 /* ── Interaction Counter ───────────────────────────────────────────────── */

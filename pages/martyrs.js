@@ -436,7 +436,7 @@ function renderMartyrOfDay() {
   const safeGender = martyr.gender === 'f' ? 'أنثى' : 'ذكر';
   featuredContainer.innerHTML = `
     <section class="featured-martyr" aria-label="شهيد اليوم">
-      <h2>🕊 شهيد اليوم</h2>
+      <h2>شهيد اليوم</h2>
       <h3>${safeName}</h3>
       <p>${safeAge} • ${safeGender}</p>
       <p>اللهم اجعل مثواه الجنة واربط على قلوب أهله.</p>

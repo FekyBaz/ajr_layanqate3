@@ -62,7 +62,7 @@
         card.innerHTML = `
             <div class="memory-premium-card__header">
                 <span class="memory-premium-card__badge">
-                    <span aria-hidden="true">🕊️</span> صدقة جارية
+                    <span>صدقة جارية</span>
                 </span>
                 ${dateStr ? `<span class="memory-premium-card__date">${dateStr}</span>` : ''}
             </div>
@@ -73,7 +73,7 @@
             <div class="memory-premium-card__footer">
                 <a href="/memory/${cleanSlug}" class="btn memory-premium-card__btn">
                     <span>اقرأ وادعُ له</span>
-                    <span aria-hidden="true">📖</span>
+                    <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" style="margin-inline-start:4px"><path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"></path><path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"></path></svg>
                 </a>
             </div>
         `;
