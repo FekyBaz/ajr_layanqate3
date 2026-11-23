@@ -29,8 +29,8 @@ function buildDescription(memory) {
 
 async function fetchApprovedMemory(slug) {
     const supabaseUrl = String(process.env.SUPABASE_URL || '').trim().replace(/\/+$/, '');
-    const anonKey = String(process.env.SUPABASE_ANON_KEY || '').trim();
-    if (!supabaseUrl || !anonKey) return null;
+    const publishableKey = String(process.env.SUPABASE_PUBLISHABLE_KEY || '').trim();
+    if (!supabaseUrl || !publishableKey) return null;
 
     const query = new URLSearchParams({
         slug: `eq.${slug}`,
@@ -41,8 +41,8 @@ async function fetchApprovedMemory(slug) {
     try {
         const response = await fetch(`${supabaseUrl}/rest/v1/memories?${query}`, {
             headers: {
-                apikey: anonKey,
-                Authorization: `Bearer ${anonKey}`,
+                apikey: publishableKey,
+                Authorization: `Bearer ${publishableKey}`,
                 Accept: 'application/json',
             },
             signal: AbortSignal.timeout(4000),

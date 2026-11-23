@@ -96,6 +96,18 @@ for (const rule of rewrites) {
     }
 }
 
+// A plain @vercel/node project gives `api/[...path].js` a single-segment
+// filesystem route. Nested API paths need an explicit splat rewrite or they
+// 404 at the edge before the dispatcher runs.
+const apiSplatRule = rewrites.find((rule) =>
+    rule.source === '/api/:path*' && rule.destination === '/api/[...path]');
+if (!apiSplatRule) {
+    fail('Missing /api/:path* -> /api/[...path] rewrite; nested API routes would 404 before reaching the dispatcher');
+}
+if (!exists('api/[...path].js')) {
+    fail('API splat rewrite destination api/[...path].js does not exist');
+}
+
 const botRule = rewrites.find((rule) => rule.source === '/memory/:slug' &&
     rule.destination === '/api/memory-og/:slug');
 if (!botRule) {

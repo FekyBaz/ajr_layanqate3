@@ -86,6 +86,9 @@ test('Vercel routing and Cron config is valid JSON for the catch-all dispatcher'
     assert.ok(cronPaths.has('/api/cron/daily-feature-refresh'));
     assert.ok(cronPaths.has('/api/cron/cleanup-automation'));
     assert.ok(Array.isArray(config.rewrites));
+    assert.equal(config.rewrites[0]?.source, '/api/:path*',
+        'The API splat rewrite must run first so nested paths reach the dispatcher');
+    assert.equal(config.rewrites[0]?.destination, '/api/[...path]');
     assert.ok(config.rewrites.some((rule) => rule.source === '/memory/:slug'));
     assert.equal(config.functions['api/[...path].js']?.maxDuration, 30);
     assert.equal(config.functions['api/memory-og/*.js']?.maxDuration, 10);
@@ -264,6 +267,87 @@ test('provider-specific IP headers are normalized by adapters, not shared utilit
     const analytics = readFileSync(join(ROOT, 'server', 'functions', 'analytics.js'), 'utf8');
     assert.match(analytics, /reqEvent\.clientCountry/);
     assert.doesNotMatch(analytics, /x-vercel-ip-country|cf-ipcountry/);
+});
+
+/**
+ * Model Vercel's documented routing order for a plain @vercel/node project:
+ *   1. filesystem routes (exact files, [slug], and [...path] with a single
+ *      segment only — the platform limitation behind this regression),
+ *   2. then `rewrites` in declaration order, first match wins.
+ *
+ * The model is intentionally small: it only needs to be faithful enough to
+ * prove that every routed API path resolves to the catch-all function and that
+ * the splat rewrite is what makes nested paths reachable.
+ */
+function filesystemRoute(pathname, files) {
+    const clean = pathname.replace(/\/+$/, '') || '/';
+    const exact = clean.slice(1) + '.js';
+    if (files.has(exact)) return exact;
+
+    if (/^\/api\/memory-og\/[^/]+$/.test(clean) && files.has('api/memory-og/[slug].js')) {
+        return 'api/memory-og/[slug].js';
+    }
+
+    // A plain @vercel/node `[...path]` function only matches one segment.
+    const singleSegment = clean.match(/^\/api\/([^/]+)$/);
+    if (singleSegment &&
+        singleSegment[1] !== 'health' &&
+        singleSegment[1] !== 'memory-og' &&
+        files.has('api/[...path].js')) {
+        return 'api/[...path].js';
+    }
+
+    return null;
+}
+
+function rewriteRoute(pathname, rewrites) {
+    for (const rule of rewrites) {
+        if (rule.has) continue;
+        if (rule.source === '/api/:path*') {
+            const match = pathname.match(/^\/api\/(.+)$/);
+            if (match && rule.destination === '/api/[...path]') {
+                return 'api/[...path].js';
+            }
+        }
+    }
+    return null;
+}
+
+function resolveVercelRoute(pathname, config) {
+    const files = new Set([
+        'api/health.js',
+        'api/memory-og/[slug].js',
+        'api/[...path].js',
+    ]);
+    return filesystemRoute(pathname, files) || rewriteRoute(pathname, config.rewrites || []);
+}
+
+test('nested API paths resolve to the catch-all dispatcher through the splat rewrite', () => {
+    const config = JSON.parse(readFileSync(join(ROOT, 'vercel.json'), 'utf8'));
+    const dispatcher = readFileSync(join(ROOT, 'server', 'vercel-router.js'), 'utf8');
+    const routePaths = Array.from(dispatcher.matchAll(/\{\s*path:\s*['"](\/api\/[^'"]+)['"]/g))
+        .map((match) => match[1]);
+
+    assert.equal(routePaths.length, 35, 'Expected every routed API path');
+    assert.ok(routePaths.some((path) => path.split('/').length > 3),
+        'Expected at least one nested API path to exercise the regression');
+
+    for (const routePath of routePaths) {
+        assert.equal(resolveVercelRoute(routePath, config), 'api/[...path].js',
+            routePath + ' must reach the dispatcher');
+    }
+
+    // Filesystem routes keep priority over the rewrite.
+    assert.equal(resolveVercelRoute('/api/health', config), 'api/health.js');
+    assert.equal(resolveVercelRoute('/api/memory-og/example-slug', config), 'api/memory-og/[slug].js');
+
+    // Root-cause guard: without the splat rewrite, nested paths are unreachable
+    // at the edge (Vercel returns its own 404 before any handler runs).
+    const withoutSplat = (config.rewrites || []).filter((rule) => rule.source !== '/api/:path*');
+    assert.equal(resolveVercelRoute('/api/community/submissions', { rewrites: withoutSplat }), null,
+        'A nested API path must not resolve without the splat rewrite');
+    assert.equal(resolveVercelRoute('/api/fatiha-counter', { rewrites: withoutSplat }), 'api/[...path].js',
+        'A single-segment API path still matches the catch-all filesystem route');
 });
 
 test('Netlify entry points delegate to the canonical server handlers', () => {
