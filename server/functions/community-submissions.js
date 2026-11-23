@@ -1,6 +1,7 @@
 import { supabasePublic, supabaseAdmin, error, success, handleOptions, VISIBLE_STATUSES, logger } from './utils/shared.js';
 import { getOrCreateGoal } from './utils/community-goal.js';
 import { getDailyFeatureWithSubmission } from './utils/daily-feature.js';
+import { createStatsReconciler, mapStatsRow, mapRefreshResult } from './utils/community-stats.js';
 
 const VALID_TYPES = ['all', 'dhikr', 'dua', 'ayah', 'hadith', 'benefit'];
 const VALID_SORT = ['latest', 'most_shared'];
@@ -27,45 +28,40 @@ function sanitizeRefSource(value) {
     return VALID_REF_SOURCES.includes(normalized) ? normalized : 'direct';
 }
 
-async function getStatsSnapshot() {
-    const { data, error: statsError } = await supabasePublic
-        .from('community_stats')
-        .select('total_approved,total_post_count,average_post_count,updated_at')
-        .eq('id', 1)
-        .maybeSingle();
+// The stats cache is reconciled lazily on read: a stale cache is refreshed
+// through the existing service-role RPC, then served from the table. Public
+// reads still go through the publishable client so RLS remains the boundary.
+const statsReconciler = createStatsReconciler({
+    readCached: async () => {
+        const { data, error: statsError } = await supabasePublic
+            .from('community_stats')
+            .select('total_approved,total_post_count,average_post_count,updated_at')
+            .eq('id', 1)
+            .maybeSingle();
 
-    if (statsError) {
-        throw statsError;
-    }
+        if (statsError) {
+            throw statsError;
+        }
 
-    if (data) {
-        return {
-            stats: {
-                totalApproved: Number(data.total_approved) || 0,
-                totalPostCount: Number(data.total_post_count) || 0,
-                averagePostCount: Number(data.average_post_count) || 0,
-                updatedAt: data.updated_at,
-            },
-            source: 'table',
-        };
-    }
+        return mapStatsRow(data);
+    },
+    refresh: async () => {
+        // Service-role only: refresh_community_stats is revoked from anon
+        // (migrations 012 and 015) and must never be exposed to public reads.
+        const { data, error: rpcError } = await supabaseAdmin.rpc('refresh_community_stats');
 
-    // Fallback uses the background RPC to quickly build the stats without OOMing the node lambda
-    const { data: rpcData, error: rpcError } = await supabaseAdmin.rpc('refresh_community_stats');
+        if (rpcError) {
+            throw rpcError;
+        }
 
-    if (rpcError) {
-        throw rpcError;
-    }
+        return mapRefreshResult(data);
+    },
+    logger,
+});
 
-    return {
-        stats: {
-            totalApproved: Number(rpcData.total_approved) || 0,
-            totalPostCount: Number(rpcData.total_post_count) || 0,
-            averagePostCount: Number(rpcData.average_post_count) || 0,
-            updatedAt: new Date().toISOString(),
-        },
-        source: 'fallback',
-    };
+/** Test-only hook for resetting the in-process refresh state. */
+export function __resetStatsReconcilerForTests() {
+    statsReconciler.reset();
 }
 
 async function getNewVisibleTodayCount() {
@@ -204,7 +200,7 @@ export async function handler(event) {
         const featured = featuredResult.data;
 
         const [statsResult, newVisibleTodayResult, goalResult, dailyFeatureResult] = await Promise.allSettled([
-            getStatsSnapshot(),
+            statsReconciler.getSnapshot({ liveTotal: total }),
             getNewVisibleTodayCount(),
             getOrCreateGoal(),
             getDailyFeatureWithSubmission(),
@@ -236,6 +232,7 @@ export async function handler(event) {
                     updatedAt: new Date().toISOString(),
                 },
                 source: 'degraded_fallback',
+                refreshed: false,
             };
 
         const newApprovedToday = newVisibleTodayResult.status === 'fulfilled' ? newVisibleTodayResult.value : 0;
@@ -251,6 +248,7 @@ export async function handler(event) {
                 ...statsPayload.stats,
                 newApprovedToday,
                 source: statsPayload.source,
+                refreshed: Boolean(statsPayload.refreshed),
                 goal: {
                     dailyTarget: Number(goal.daily_target) || 200,
                     currentProgress: Number(goal.current_progress) || 0,
@@ -272,6 +270,7 @@ export async function handler(event) {
             hasFeatured: Boolean(payload.featured),
             hasDailyFeature: Boolean(payload.dailyFeature),
             statsSource: payload.stats.source,
+            statsRefreshed: payload.stats.refreshed,
             total: payload.pagination.total,
             totalPages: payload.pagination.totalPages,
             page: payload.pagination.page,
