@@ -348,13 +348,13 @@
             submitTransition.hidden = false;
         }
 
-        // Prepare data for API - use backend field names
-        const apiData = {
-            message: sanitizeInput(content.value),
-            content_type: contentType.value,
-        };
-
         try {
+            // Prepare data for API - use backend field names
+            const apiData = {
+                message: sanitizeInput(content.value),
+                content_type: contentType.value,
+            };
+
             // Submit to backend API
             const result = await submitToAPI(apiData);
 
@@ -385,6 +385,10 @@
                     successMessage.hidden = false;
                     successMessage.classList.add('is-visible');
                     successMessage.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+                    const successTitle = successMessage.querySelector('.success-title');
+                    if (successTitle) {
+                        successTitle.focus();
+                    }
                 }
             } else {
                 // Track failed submission

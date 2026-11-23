@@ -937,6 +937,10 @@ canvas {
     color: var(--color-accent-primary);
 }
 
+.success-message .success-title:focus:not(:focus-visible) {
+    outline: none;
+}
+
 .success-message p {
     color: var(--color-text-secondary);
     margin-bottom: var(--space-xl);
