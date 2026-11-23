@@ -189,6 +189,16 @@
     margin-block-end: var(--space-xl);
 }
 
+.form-section .section-title {
+    margin-block: var(--space-md) var(--space-sm);
+    padding-block-end: 0;
+}
+
+.form-section .section-title::before,
+.form-section .section-title::after {
+    display: none;
+}
+
 .form-section__prompt {
     display: inline-block;
     font-size: var(--font-size-sm);
@@ -197,7 +207,7 @@
     padding-block: 0.35rem;
     padding-inline: 0.85rem;
     border-radius: var(--radius-pill);
-    margin-block-end: var(--space-sm);
+    margin-block-end: var(--space-xs);
     font-weight: 500;
 }
 
@@ -213,15 +223,16 @@
 .form-trust-banner {
     display: flex;
     align-items: center;
+    justify-content: center;
     gap: var(--space-md);
     background: var(--color-surface);
     border: 1px solid var(--color-border);
     border-radius: var(--radius-md);
-    padding-block: var(--space-md);
+    padding-block: var(--space-sm);
     padding-inline: var(--space-lg);
-    max-width: 760px;
+    max-width: 680px;
     margin-inline: auto;
-    margin-block-end: var(--space-lg);
+    margin-block-end: var(--space-xl);
     box-shadow: var(--shadow-subtle);
 }
 
