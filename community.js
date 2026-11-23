@@ -472,7 +472,7 @@ function showSubmissionReviewToastIfNeeded() {
 
     if (!hasSubmissionFlag) return;
 
-    elements.shareToast.textContent = 'تم استلام مشاركتك بنجاح، وستُنشر بعد مراجعتها والتحقق منها بإذن الله';
+    elements.shareToast.textContent = 'وصلتنا مشاركتك، شكرًا لمساهمتك في نشر الخير. ستتم مراجعتها والتحقق منها قبل اتخاذ قرار نشرها.';
     showToast();
     sessionStorage.removeItem('ajr_submission_pending_review');
     window.scrollTo({ top: 0, behavior: 'smooth' });

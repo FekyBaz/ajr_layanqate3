@@ -241,15 +241,28 @@
                     </button>
                 </form>
 
-                <div id="success-message" class="success-message" hidden>
+                <div id="success-message" class="success-message" hidden aria-live="polite">
                     <span class="success-icon" aria-hidden="true">
-                        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"></polyline></svg>
+                        <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"></path><polyline points="22 4 12 14.01 9 11.01"></polyline></svg>
                     </span>
-                    <h3>شكرًا لمساهمتك في نشر الخير</h3>
-                    <p>تم استلام مشاركتك بنجاح، وستُنشر في مجتمع الأذكار بعد مراجعتها والتحقق من مصادرها بإذن الله.</p>
+                    <h3 class="success-title">وصلتنا مشاركتك، شكرًا لمساهمتك في نشر الخير</h3>
+                    <p class="success-desc">ستتم مراجعتها والتحقق منها قبل اتخاذ قرار نشرها.</p>
+
+                    <!-- Preview of Submitted Contribution -->
+                    <div class="submission-preview-card" id="submission-preview-card" aria-label="معاينة المشاركة المرسلة">
+                        <div class="submission-preview-card__header">
+                            <span class="submission-preview-card__type" id="preview-content-type">نوع المشاركة</span>
+                            <span class="submission-preview-card__status-badge">قيد المراجعة</span>
+                        </div>
+                        <blockquote class="submission-preview-card__text" id="preview-content-text"></blockquote>
+                        <p class="submission-preview-card__note">
+                            هذه المشاركة محفوظة في سجل التدقيق، ولن تظهر للعموم في مجتمع الأذكار إلا بعد اعتمادها والتأكد من صحتها.
+                        </p>
+                    </div>
+
                     <div class="success-message__actions">
-                        <a href="/community.html" class="btn btn-primary">تصفح المجتمع</a>
-                        <button id="reset-form" type="button" class="btn btn-secondary">إرسال مشاركة أخرى</button>
+                        <a href="/community.html" class="btn btn-secondary">تصفح مجتمع الأذكار</a>
+                        <button id="reset-form" type="button" class="btn btn-primary">إرسال مشاركة أخرى</button>
                     </div>
                 </div>
 
