@@ -97,6 +97,14 @@ function defaultResponder({ url, method }) {
         return json({ approved: 11 });
     }
 
+    if (table === 'rpc/refresh_community_stats') {
+        return json({
+            total_approved: 11,
+            total_post_count: 42,
+            average_post_count: 3,
+        });
+    }
+
     return json({});
 }
 
@@ -111,11 +119,12 @@ globalThis.fetch = async (input, init = {}) => {
     return respond(request);
 };
 
-const { handler } = await import('../server/functions/community-submissions.js');
+const { handler, __resetStatsReconcilerForTests } = await import('../server/functions/community-submissions.js');
 
 function reset(responder = defaultResponder) {
     requests = [];
     respond = responder;
+    __resetStatsReconcilerForTests();
 }
 
 async function call(query = {}, headers = {}) {
@@ -194,6 +203,113 @@ test('community submissions reads through the publishable key and returns the fu
     }
 });
 
+test('stale cached statistics are reconciled against the live visible count', async () => {
+    reset((request) => {
+        if (request.url.pathname === '/rest/v1/community_stats') {
+            return json([{
+                total_approved: 7,
+                total_post_count: 20,
+                average_post_count: 2,
+                updated_at: '2026-05-22T20:14:24.559175+00:00',
+            }]);
+        }
+        if (request.url.pathname === '/rest/v1/rpc/refresh_community_stats') {
+            return json({
+                total_approved: 11,
+                total_post_count: 42,
+                average_post_count: 3,
+            });
+        }
+        return defaultResponder(request);
+    });
+
+    const { response, body } = await call({ page: '1', limit: '11' });
+
+    assert.equal(response.statusCode, 200);
+    assert.equal(body.stats.totalApproved, 11);
+    assert.equal(body.stats.totalPostCount, 42);
+    assert.equal(body.stats.averagePostCount, 3);
+    assert.equal(body.stats.refreshed, true);
+
+    const refreshRequest = requests.find((request) =>
+        request.url.pathname === '/rest/v1/rpc/refresh_community_stats');
+    assert.ok(refreshRequest, 'expected the service-role stats refresh RPC');
+    assert.equal(refreshRequest.headers.get('apikey'), SECRET_KEY);
+    assert.equal(refreshRequest.headers.get('authorization'), 'Bearer ' + SECRET_KEY);
+});
+
+test('matching cached statistics do not trigger a refresh', async () => {
+    reset();
+
+    const { body } = await call({ page: '1', limit: '11' });
+
+    assert.equal(body.stats.totalApproved, 11);
+    assert.equal(body.stats.refreshed, false);
+    assert.equal(
+        requests.filter((request) => request.url.pathname === '/rest/v1/rpc/refresh_community_stats').length,
+        0,
+    );
+});
+
+test('a failed statistics refresh keeps the page working with the live count', async () => {
+    const logged = [];
+    const originalError = console.error;
+    console.error = (...args) => { logged.push(args.map(String).join(' ')); };
+
+    try {
+        reset((request) => {
+            if (request.url.pathname === '/rest/v1/community_stats') {
+                return json([{
+                    total_approved: 7,
+                    total_post_count: 20,
+                    average_post_count: 2,
+                    updated_at: '2026-05-22T20:14:24.559175+00:00',
+                }]);
+            }
+            if (request.url.pathname === '/rest/v1/rpc/refresh_community_stats') {
+                return json({ message: 'statement timeout' }, { status: 500 });
+            }
+            return defaultResponder(request);
+        });
+
+        const { response, body } = await call({ page: '1', limit: '11' });
+
+        assert.equal(response.statusCode, 200);
+        assert.equal(body.success, true);
+        assert.equal(body.stats.totalApproved, 11); // live count, never stale
+        assert.equal(body.stats.totalPostCount, 20); // cached shares
+        assert.equal(body.stats.averagePostCount, 2);
+        assert.equal(body.stats.refreshed, false);
+        assert.ok(logged.some((line) => line.includes('Community stats refresh failed')));
+        assert.doesNotMatch(response.body, /statement timeout|sb_secret_|sb_publishable_/);
+    } finally {
+        console.error = originalError;
+    }
+});
+
+test('a missing statistics row is rebuilt through the refresh RPC', async () => {
+    reset((request) => {
+        if (request.url.pathname === '/rest/v1/community_stats') {
+            return json([]);
+        }
+        if (request.url.pathname === '/rest/v1/rpc/refresh_community_stats') {
+            return json({
+                total_approved: 11,
+                total_post_count: 42,
+                average_post_count: 3,
+            });
+        }
+        return defaultResponder(request);
+    });
+
+    const { body } = await call({ page: '1', limit: '11' });
+
+    assert.equal(body.stats.source, 'fallback');
+    assert.equal(body.stats.refreshed, true);
+    assert.equal(body.stats.totalApproved, 11);
+    assert.equal(body.stats.totalPostCount, 42);
+});
+
 test('community submissions selects the exact public columns and applies visibility, order, and range', async () => {
     reset();
 
@@ -246,6 +362,14 @@ test('an empty visible set is a successful empty page, not an error', async () =
         if (url.pathname === '/rest/v1/submissions' && method === 'GET') {
             return json([]);
         }
+        if (url.pathname === '/rest/v1/community_stats') {
+            return json([{
+                total_approved: 0,
+                total_post_count: 0,
+                average_post_count: 0,
+                updated_at: '2026-11-22T00:00:00.000Z',
+            }]);
+        }
         if (url.pathname === '/rest/v1/rpc/get_submission_stats') {
             return json({ approved: 0 });
         }
@@ -259,6 +383,7 @@ test('an empty visible set is a successful empty page, not an error', async () =
     assert.deepEqual(body.submissions, []);
     assert.equal(body.featured, null);
     assert.deepEqual(body.pagination, { page: 1, pageSize: 11, total: 0, totalPages: 1 });
+    assert.equal(body.stats.totalApproved, 0);
 });
 
 test('a data-query failure returns a generic 500 and never leaks internals or secrets', async () => {
