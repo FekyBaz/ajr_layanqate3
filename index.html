@@ -143,7 +143,7 @@
 
             <div class="hero__actions">
                 <a href="#form" class="btn btn-primary hero__cta">
-                    شارك بذكر أو دعاء
+                    شارك الآن
                 </a>
                 <a href="/community.html" class="btn btn-secondary hero__cta">
                     تصفح مشاركات المجتمع
@@ -182,8 +182,22 @@
 
         <section id="form" class="form-section" aria-labelledby="form-section-title">
             <div class="site-container">
-                <h2 id="form-section-title" class="section-title">شارك بذكر أو دعاء</h2>
-                <p class="form-section__intro">شارك ما تيسر من آية، حديث، ذكر، أو دعاء مأثور، لتُنشر بعد مراجعتها وتدقيقها.</p>
+                <div class="form-section__header">
+                    <p class="form-section__prompt">لديك شيء نافع تحب أن تشاركه؟ ساهم معنا في نشره.</p>
+                    <h2 id="form-section-title" class="section-title">كن سببًا في نشر الخير</h2>
+                    <p class="form-section__intro">
+                        شارك آيةً من القرآن الكريم، أو حديثًا صحيحًا، أو ذكرًا، أو دعاءً مأثورًا؛ لعلّ أحدًا ينتفع بما شاركت، وتكون سببًا في وصول الخير إليه.
+                    </p>
+                </div>
+
+                <div class="form-trust-banner">
+                    <span class="form-trust-banner__icon" aria-hidden="true">
+                        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"></path></svg>
+                    </span>
+                    <p class="form-trust-banner__text">
+                        نراجع المشاركات ونتحقق من مصادرها قبل نشرها، حرصًا على أن يكون ما ننشره نافعًا وموثوقًا.
+                    </p>
+                </div>
 
                 <form id="submission-form" class="submission-form" novalidate>
                     <div class="form-group">
@@ -193,9 +207,9 @@
                             <option value="">اختر نوع المحتوى</option>
                             <option value="dhikr">ذكر</option>
                             <option value="dua">دعاء</option>
-                            <option value="ayah">آية</option>
-                            <option value="hadith">حديث</option>
-                            <option value="benefit">فائدة</option>
+                            <option value="ayah">آية من القرآن الكريم</option>
+                            <option value="hadith">حديث نبوي شريف</option>
+                            <option value="benefit">فائدة أو موعظة</option>
                         </select>
                         <span id="content-type-error" class="form-error" role="alert" aria-live="polite"></span>
                     </div>
@@ -204,9 +218,11 @@
                         <label for="content" class="form-label">نص المشاركة <span class="required">*</span></label>
                         <textarea id="content" class="form-textarea" rows="8" required
                             aria-describedby="content-hint content-error"
-                            placeholder="اكتب الآية، الحديث، الذكر، أو الدعاء هنا بالتشكيل إن تيسر..."> </textarea>
-                        <p id="content-hint" class="form-hint">نصوص القرآن والأحاديث يُرجى التثبت من صحتها ودقتها — <span id="char-count"
-                                class="form-hint__counter">0</span>/1000</p>
+                            placeholder="اكتب نص الآية أو الحديث أو الذكر أو الدعاء هنا... يُستحسن ذكر السورة ورقم الآية أو راوي ومخرج الحديث لتيسير التحقق."></textarea>
+                        <div id="content-hint" class="form-hint">
+                            <span>يُرجى التثبت من صحة النص وذكر المصدر (مثل: اسم السورة ورقمها، راوي الحديث) للتحقق منه بدقة — </span>
+                            <span class="form-hint__counter-wrap"><span id="char-count" class="form-hint__counter">0</span>/1000</span>
+                        </div>
                         <span id="content-error" class="form-error" role="alert" aria-live="polite"></span>
                     </div>
 
@@ -220,22 +236,37 @@
                     </div>
 
                     <button id="submit-btn" type="submit" class="btn btn-primary btn--submit">
-                        <span class="btn__text">إرسال للمراجعة</span>
+                        <span class="btn__text">شارك الآن</span>
                         <span class="btn__loading" aria-live="polite">جارِ الإرسال…</span>
                     </button>
                 </form>
 
-                <div id="success-message" class="success-message" hidden>
+                <div id="success-message" class="success-message" role="status" aria-live="polite" hidden>
                     <span class="success-icon" aria-hidden="true">
-                        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"></polyline></svg>
+                        <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"></path><polyline points="22 4 12 14.01 9 11.01"></polyline></svg>
                     </span>
-                    <h3>تم استلام مشاركتك</h3>
-                    <p>ستظهر في مجتمع الأذكار بعد المراجعة والتدقيق بإذن الله</p>
-                    <a href="/community.html" class="success-message__link">تصفح المجتمع</a>
-                    <button id="reset-form" type="button" class="btn btn-secondary">إرسال مشاركة أخرى</button>
+                    <h3 class="success-title" tabindex="-1">وصلتنا مشاركتك، شكرًا لمساهمتك في نشر الخير</h3>
+                    <p class="success-desc">ستتم مراجعتها والتحقق منها قبل اتخاذ قرار نشرها.</p>
+
+                    <!-- Preview of Submitted Contribution -->
+                    <div class="submission-preview-card" id="submission-preview-card" aria-label="معاينة المشاركة المرسلة">
+                        <div class="submission-preview-card__header">
+                            <span class="submission-preview-card__type" id="preview-content-type">نوع المشاركة</span>
+                            <span class="submission-preview-card__status-badge">قيد المراجعة</span>
+                        </div>
+                        <blockquote class="submission-preview-card__text" id="preview-content-text"></blockquote>
+                        <p class="submission-preview-card__note">
+                            هذه المشاركة محفوظة في سجل التدقيق، ولن تظهر للعموم في مجتمع الأذكار إلا بعد اعتمادها والتأكد من صحتها.
+                        </p>
+                    </div>
+
+                    <div class="success-message__actions">
+                        <a href="/community.html" class="btn btn-secondary">تصفح مجتمع الأذكار</a>
+                        <button id="reset-form" type="button" class="btn btn-primary">إرسال مشاركة أخرى</button>
+                    </div>
                 </div>
 
-                <p id="submit-transition" class="submit-transition" role="status" aria-live="polite" hidden>لحظات يسيرة… جارٍ حفظ المشاركة</p>
+                <p id="submit-transition" class="submit-transition" role="status" aria-live="polite" hidden>لحظات يسيرة… جارٍ إرسال المشاركة للمراجعة</p>
             </div>
         </section>
 

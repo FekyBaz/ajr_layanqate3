@@ -74,10 +74,10 @@
     // ═══════════════════════════════════════════════════════════════════════
     const ERRORS = {
         contentTypeRequired: 'يرجى اختيار نوع المحتوى قبل الإرسال',
-        contentRequired: 'يرجى كتابة ذكر قبل الإرسال',
+        contentRequired: 'يرجى كتابة نص المشاركة قبل الإرسال',
         contentTooShort: `أضف قليلًا من التفصيل (على الأقل ${MIN_CONTENT_LENGTH} أحرف)`,
         contentTooLong: `النص طويل قليلًا، حاول الاختصار بلطف (حتى ${MAX_CONTENT_LENGTH} حرف)`,
-        consentRequired: 'يرجى تأكيد التعهد قبل الإرسال',
+        consentRequired: 'يرجى الإقرار بصحة المشاركة قبل الإرسال',
         rateLimited: 'لقد تجاوزت الحد المسموح من المشاركات. يرجى المحاولة لاحقًا.',
         networkError: 'تعذر الاتصال بالخادم. يرجى التحقق من اتصالك بالإنترنت.',
         submissionFailed: 'حدث خطأ أثناء الإرسال. يرجى المحاولة مرة أخرى.'
@@ -348,13 +348,13 @@
             submitTransition.hidden = false;
         }
 
-        // Prepare data for API - use backend field names
-        const apiData = {
-            message: sanitizeInput(content.value),
-            content_type: contentType.value,
-        };
-
         try {
+            // Prepare data for API - use backend field names
+            const apiData = {
+                message: sanitizeInput(content.value),
+                content_type: contentType.value,
+            };
+
             // Submit to backend API
             const result = await submitToAPI(apiData);
 
@@ -365,9 +365,31 @@
                 }
                 // Update client-side rate limiting
                 updateRateLimit();
-                sessionStorage.setItem('ajr_submission_pending_review', '1');
-                await new Promise(resolve => setTimeout(resolve, 500));
-                window.location.href = '/community.html?submitted=1';
+
+                // Populate preview data before hiding the form
+                const previewText = document.getElementById('preview-content-text');
+                const previewType = document.getElementById('preview-content-type');
+                const selectedOption = contentType.options[contentType.selectedIndex];
+                const typeLabel = selectedOption ? selectedOption.text.trim() : 'مشاركة';
+
+                if (previewText) {
+                    previewText.textContent = apiData.message;
+                }
+                if (previewType) {
+                    previewType.textContent = typeLabel;
+                }
+
+                // Hide form and show in-place success confirmation without redirecting
+                form.hidden = true;
+                if (successMessage) {
+                    successMessage.hidden = false;
+                    successMessage.classList.add('is-visible');
+                    successMessage.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+                    const successTitle = successMessage.querySelector('.success-title');
+                    if (successTitle) {
+                        successTitle.focus();
+                    }
+                }
             } else {
                 // Track failed submission
                 if (window.AjrAnalytics) {
@@ -411,13 +433,17 @@
     function resetForm() {
         form.reset();
         form.hidden = false;
-        successMessage.hidden = true;
+        if (successMessage) {
+            successMessage.hidden = true;
+            successMessage.classList.remove('is-visible');
+        }
         clearAllErrors();
         updateCharCount();
         if (submitTransition) {
             submitTransition.hidden = true;
         }
         contentType.focus();
+        form.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
     }
 
     // ═══════════════════════════════════════════════════════════════════════
