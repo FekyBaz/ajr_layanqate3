@@ -121,6 +121,36 @@ test('the same observed live count is not reconciled twice when the RPC differs 
     assert.equal(third.refreshed, true);
 });
 
+test('TTL triggers reconciliation even when estimated count keeps returning the locked-out total', async () => {
+    let refreshes = 0;
+    let now = 0;
+    // RPC returns 94, but pagination estimated count always returns 95.
+    const reconciler = createStatsReconciler({
+        readCached: async () => ({ ...CACHED, totalApproved: 94 }),
+        refresh: async () => { refreshes += 1; return FRESH; },
+        logger: silentLogger(),
+        now: () => now,
+    });
+
+    // Initial reconciliation for liveTotal: 95
+    await reconciler.getSnapshot({ liveTotal: 95 });
+    assert.equal(refreshes, 1);
+
+    // Within TTL and after cooldown, drift lockout prevents redundant refresh for same 95
+    now = STATS_REFRESH_COOLDOWN_MS + 10;
+    const second = await reconciler.getSnapshot({ liveTotal: 95 });
+    assert.equal(refreshes, 1);
+    assert.equal(second.refreshed, false);
+    assert.equal(second.stats.totalApproved, 94);
+
+    // After TTL expires, TTL triggers reconciliation even though liveTotal is still 95
+    now = STATS_REFRESH_TTL_MS + 1;
+    const third = await reconciler.getSnapshot({ liveTotal: 95 });
+    assert.equal(refreshes, 2, 'TTL must override drift lockout');
+    assert.equal(third.refreshed, true);
+    assert.equal(third.stats.totalPostCount, 235);
+});
+
 test('the TTL refreshes a matching cache to update shares and average', async () => {
     let refreshes = 0;
     let now = 0;
@@ -158,6 +188,7 @@ test('a failed refresh falls back to the cache and the live count', async () => 
     assert.equal(snapshot.refreshed, false);
     assert.equal(snapshot.stats.totalApproved, 94); // live count, never stale
     assert.equal(snapshot.stats.totalPostCount, 219); // cached shares
+    assert.equal(snapshot.stats.updatedAt, CACHED.updatedAt, 'updatedAt must remain the original cache timestamp, not bumped on failure');
     assert.ok(logger.messages.some((line) => line.includes('Community stats refresh failed')));
 });
 
